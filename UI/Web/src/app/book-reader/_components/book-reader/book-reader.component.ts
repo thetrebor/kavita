@@ -647,6 +647,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
+
       this.libraryService.getLibraryType(this.libraryId).pipe(take(1)).subscribe(type => {
         this.libraryType = type;
         this.cdRef.markForCheck();

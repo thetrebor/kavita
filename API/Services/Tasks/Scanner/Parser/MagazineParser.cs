@@ -4,6 +4,7 @@ using API.Data.Metadata;
 using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
+#nullable enable
 
 public class MagazineParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
@@ -17,7 +18,7 @@ public class MagazineParser(IDirectoryService directoryService) : DefaultParser(
             Volumes = Parser.LooseLeafVolume,
             Chapters = Parser.DefaultChapter,
             ComicInfo = comicInfo,
-            Format = MangaFormat.Image,
+            Format = Parser.ParseFormat(filePath),
             Filename = Path.GetFileName(filePath),
             FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
@@ -71,7 +72,7 @@ public class MagazineParser(IDirectoryService directoryService) : DefaultParser(
     }
 
     /// <summary>
-    /// Only applicable for Image files and Image library type
+    /// Only applicable for PDF Files and Magazine library type
     /// </summary>
     /// <param name="filePath"></param>
     /// <param name="type"></param>
