@@ -42,6 +42,7 @@ public class MagazineParser(IDirectoryService directoryService) : DefaultParser(
             {
                 ret.Series = Parser.CleanTitle(folders[^1]);
             }
+
             var hasGeoCode = !string.IsNullOrEmpty(Parser.ParseGeoCode(ret.Series));
             foreach (var folder in folders[..^1])
             {

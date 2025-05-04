@@ -34,10 +34,10 @@ public class MagazineParserTests
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseMagazineChapter(filename));
     }
 
-    // [Theory]
-    // [InlineData("AIR International Vol. 14 No. 3 (ISSN 1011-3250)", "1011-3250")]
-    // public void ParseGTINTest(string filename, string expected)
-    // {
-    //     Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseGTIN(filename));
-    // }
+    [Theory]
+    [InlineData("AIR International Vol. 14 No. 3 (ISSN 1011-3250)", "1011-3250")]
+    public void ParseGTINTest(string filename, string expected)
+    {
+        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseGTIN(filename));
+    }
 }

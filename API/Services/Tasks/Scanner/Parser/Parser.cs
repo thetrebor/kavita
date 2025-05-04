@@ -958,6 +958,36 @@ public static partial class Parser
     }
 
 
+    // /// <summary>
+    // /// Tries to parse a GTIN/ISBN out of a string
+    // /// </summary>
+    // /// <param name="value"></param>
+    // /// <returns></returns>
+    // public static string? ParseGTIN(string? value)
+    // {
+    //     if (string.IsNullOrEmpty(value)) return value;
+    //     const string pattern = @"\b(?:\(|\[|\{)([A-Z]{2})(?:\)|\]|\})\b|^([A-Z]{2})$";
+    //
+    //     // Match the pattern in the input string
+    //     var match = Regex.Match(value, pattern, RegexOptions.IgnoreCase);
+    //
+    //     if (match.Success)
+    //     {
+    //         // Extract the GeoCode from the first capturing group if it exists,
+    //         // otherwise, extract the GeoCode from the second capturing group
+    //         var extractedCode = match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value;
+    //
+    //         // Validate the extracted GeoCode against the list of valid GeoCodes
+    //         if (GeoCodes.Contains(extractedCode))
+    //         {
+    //             return extractedCode;
+    //         }
+    //     }
+    //
+    //     return null;
+    // }
+
+
     private static string FormatValue(string value, bool hasPart)
     {
         if (!value.Contains('-'))
