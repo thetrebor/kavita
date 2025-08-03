@@ -83,15 +83,17 @@ namespace API.Services.ImageServices.NetVips
         /// <returns>An <see cref="IImage"/> thumbnail.</returns>
         public static IImage CreateThumbnail(Stream stream, int width, int height)
         {
-            using NetVipsImage image = new NetVipsImage(stream);
-            var scalingSize = NetVipsImage.GetSizeForDimensions(image, width, height);
-            var scalingCrop = NetVipsImage.GetCropForDimensions(image, width, height);
-            using var thumbnail2 = Image.ThumbnailStream(stream, width, height: height,
+            using (NetVipsImage image = new NetVipsImage(stream))
+            {
+                var scalingSize = NetVipsImage.GetSizeForDimensions(image, width, height);
+                var scalingCrop = NetVipsImage.GetCropForDimensions(image, width, height);
+                using var thumbnail2 = Image.ThumbnailStream(stream, width, height: height,
                 size: scalingSize,
                 crop: scalingCrop);
-            NetVipsImage g = new NetVipsImage();
-            g._image = thumbnail2;
-            return g;
+                NetVipsImage g = new NetVipsImage();
+                g._image = thumbnail2;
+                return g;
+            }
         }
 
         /// <summary>

@@ -52,11 +52,11 @@ public static partial class Parser
     /// <summary>
     /// Regex to Match Non Universally supported Images extensions.
     /// </summary>
-    public static string NonUniversalFileImageExtensions = @"^(\." + string.Join(@"|\.", NonUniversalFileImageExtensionArray) + ")";
+    public static string NonUniversalFileImageExtensions = @"(\." + string.Join(@"|\.", NonUniversalFileImageExtensionArray) + ")";
     /// <summary>
     /// Regex to Match All our supported Images extensions.
     /// </summary>
-    public static string ImageFileExtensions = @"^(\." + string.Join(@"|\.", UniversalFileImageExtensionArray.Union(NonUniversalFileImageExtensionArray)) + ")"; // Don't forget to update CoverChooser
+    public static string ImageFileExtensions = @"(\." + string.Join(@"|\.", UniversalFileImageExtensionArray.Union(NonUniversalFileImageExtensionArray)) + ")"; // Don't forget to update CoverChooser
 
 
 
