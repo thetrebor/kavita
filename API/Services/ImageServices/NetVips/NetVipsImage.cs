@@ -219,6 +219,8 @@ namespace API.Services.ImageServices.NetVips
         public Task SaveAsync(string filename, EncodeFormat format, CancellationToken token = default)
         {
             // NetVips is synchronous — execute synchronously and return completed task
+            if (token.IsCancellationRequested)
+                return Task.FromCanceled(token);
             Save(filename, format);
             return Task.CompletedTask;
         }
@@ -226,6 +228,8 @@ namespace API.Services.ImageServices.NetVips
         /// <inheritdoc/>
         public Task SaveAsync(Stream stream, EncodeFormat format, CancellationToken token = default)
         {
+            if (token.IsCancellationRequested)
+                return Task.FromCanceled(token);
             Save(stream, format);
             return Task.CompletedTask;
         }
