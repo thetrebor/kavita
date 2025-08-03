@@ -1,8 +1,9 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using API.Constants;
 using API.Data;
 using API.Helpers;
 using API.Services;
+using API.Services.ImageServices;
 using API.Services.Plus;
 using API.Services.Store;
 using API.Services.Tasks;
@@ -72,6 +73,12 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IEventHub, EventHub>();
         services.AddScoped<IPresenceTracker, PresenceTracker>();
         services.AddScoped<IImageService, ImageService>();
+
+#if ImageMagick
+        services.AddScoped<IImageFactory, API.Services.ImageServices.ImageMagick.ImageMagickImageFactory>();
+#else
+        services.AddScoped<IImageFactory, API.Services.ImageServices.NetVips.NetVipsImageFactory>();
+#endif
         services.AddScoped<ICoverDbService, CoverDbService>();
 
         services.AddScoped<ILocalizationService, LocalizationService>();

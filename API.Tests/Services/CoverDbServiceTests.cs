@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -6,6 +6,7 @@ using API.Constants;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.ImageServices;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using EasyCaching.Core;
@@ -22,6 +23,7 @@ public class CoverDbServiceTests : AbstractDbTest
     private readonly DirectoryService _directoryService;
     private readonly IEasyCachingProviderFactory _cacheFactory = Substitute.For<IEasyCachingProviderFactory>();
     private readonly ICoverDbService _coverDbService;
+    private readonly IImageService _imageService;
 
     private static readonly string FaviconPath = Path.Join(Directory.GetCurrentDirectory(),
         "../../../Services/Test Data/CoverDbService/Favicons");
@@ -34,10 +36,16 @@ public class CoverDbServiceTests : AbstractDbTest
     public CoverDbServiceTests()
     {
         _directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
-        var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService);
+#if ImageMagick
+        IImageFactory imageFactory = new API.Services.ImageServices.ImageMagick.ImageMagickImageFactory();
+#else
+        IImageFactory imageFactory = new API.Services.ImageServices.NetVips.NetVipsImageFactory();
+#endif
+
+        _imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService, imageFactory);
 
         _coverDbService = new CoverDbService(Substitute.For<ILogger<CoverDbService>>(), _directoryService, _cacheFactory,
-            Substitute.For<IHostEnvironment>(), imageService, UnitOfWork, Substitute.For<IEventHub>());
+            Substitute.For<IHostEnvironment>(), _imageService, UnitOfWork, Substitute.For<IEventHub>());
     }
 
     protected override Task ResetDb()
@@ -89,7 +97,7 @@ public class CoverDbServiceTests : AbstractDbTest
 
         // Load and compare similarity
 
-        var similarity = expectedFaviconPath.CalculateSimilarity(actualFaviconPath); // Assuming you have this extension
+        var similarity = _imageService.ImageFactory.CalculateSimilarity(expectedFaviconPath, actualFaviconPath); // Assuming you have this extension
         Assert.True(similarity > 0.9f, $"Image similarity too low: {similarity}");
     }
 

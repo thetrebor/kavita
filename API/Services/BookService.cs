@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -14,6 +14,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 using API.Helpers;
+using API.Services.ImageServices;
 using Docnet.Core;
 using Docnet.Core.Converters;
 using Docnet.Core.Models;
@@ -24,8 +25,6 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using Nager.ArticleNumber;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
 using VersOne.Epub.Options;
 using VersOne.Epub.Schema;
@@ -1373,16 +1372,16 @@ public class BookService : IBookService
     /// <param name="docReader"></param>
     /// <param name="pageNumber"></param>
     /// <param name="stream"></param>
-    private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
+    private void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
     {
         using var pageReader = docReader.GetPageReader(pageNumber);
         var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
         var width = pageReader.GetPageWidth();
         var height = pageReader.GetPageHeight();
-        var image = Image.LoadPixelData<Bgra32>(rawBytes, width, height);
+        var image = _imageService.ImageFactory.CreateFromBGRAByteArray(rawBytes, width, height);
 
         stream.Seek(0, SeekOrigin.Begin);
-        image.SaveAsPng(stream);
+        image.Save(stream, EncodeFormat.PNG);
         stream.Seek(0, SeekOrigin.Begin);
     }
 

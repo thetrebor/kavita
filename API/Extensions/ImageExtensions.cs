@@ -1,11 +1,9 @@
-﻿using System;
+using API.Entities.Enums;
+using API.Services.ImageServices;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using Image = SixLabors.ImageSharp.Image;
 
 namespace API.Extensions;
 
@@ -33,24 +31,28 @@ public static class ImageExtensions
     /// <param name="imagePath1">Path to first image</param>
     /// <param name="imagePath2">Path to the second image</param>
     /// <returns>Similarity score between 0-1, where 1 is identical</returns>
-    public static float CalculateSimilarity(this string imagePath1, string imagePath2)
+    public static float CalculateSimilarity(this IImageFactory imageFactory, string imagePath1, string imagePath2)
     {
         if (!File.Exists(imagePath1) || !File.Exists(imagePath2))
         {
             throw new FileNotFoundException("One or both image files do not exist");
         }
-
-        // Load both images as Rgba32 (consistent with the rest of the code)
-        using var img1 = Image.Load<Rgba32>(imagePath1);
-        using var img2 = Image.Load<Rgba32>(imagePath2);
+        using var im1 = imageFactory.Create(imagePath1);
+        using var im2 = imageFactory.Create(imagePath2);
+        var res1 = im1.Width * im1.Height;
+        var res2 = im2.Width * im2.Height;
+        var resolutionDiff = Math.Abs(res1 - res2) / (float)Math.Max(res1, res2);
+        if (im1.Width != im2.Width || im1.Height != im2.Height)
+        {
+            im2.Resize(im1.Width, im1.Height);
+        }
 
         // Calculate resolution difference factor
-        var res1 = img1.Width * img1.Height;
-        var res2 = img2.Width * img2.Height;
-        var resolutionDiff = Math.Abs(res1 - res2) / (float) Math.Max(res1, res2);
 
+        var img1 = im1.GetRGBAImageData();
+        var img2 = im2.GetRGBAImageData();
         // Calculate mean squared error for pixel differences
-        var mse = img1.GetMeanSquaredError(img2);
+        var mse = img1.GetMeanSquaredError(img2, res1);
 
         // Normalize MSE (65025 = 255², which is the max possible squared difference per channel)
         var normalizedMse = 1f - Math.Min(1f, mse / 65025f);
@@ -65,29 +67,18 @@ public static class ImageExtensions
     /// <param name="img1"></param>
     /// <param name="img2"></param>
     /// <returns></returns>
-    public static float GetMeanSquaredError(this Image<Rgba32> img1, Image<Rgba32> img2)
+    public static float GetMeanSquaredError(this float[] img1, float[] img2, int pixelCount)
     {
-        if (img1.Width != img2.Width || img1.Height != img2.Height)
-        {
-            img2.Mutate(x => x.Resize(img1.Width, img1.Height));
-        }
-
         double totalDiff = 0;
-        for (var y = 0; y < img1.Height; y++)
+        for (int x = 0; x < img1.Length; x += 4)
         {
-            for (var x = 0; x < img1.Width; x++)
-            {
-                var pixel1 = img1[x, y];
-                var pixel2 = img2[x, y];
-
-                var diff = Math.Pow(pixel1.R - pixel2.R, 2) +
-                           Math.Pow(pixel1.G - pixel2.G, 2) +
-                           Math.Pow(pixel1.B - pixel2.B, 2);
-                totalDiff += diff;
-            }
+            var r = img1[x] - img2[x];
+            var g = img1[x + 1] - img2[x + 1];
+            var b = img1[x + 2] - img2[x + 2];
+            totalDiff += (r * r) + (g * g) + (b * b);
         }
 
-        return (float) (totalDiff / (img1.Width * img1.Height));
+        return (float)(totalDiff / pixelCount);
     }
 
     /// <summary>
@@ -98,7 +89,7 @@ public static class ImageExtensions
     /// <param name="imagePath2">Path to the second image</param>
     /// <param name="preferColor">Whether to prefer color images over grayscale (default: true)</param>
     /// <returns>The path of the better image</returns>
-    public static string GetBetterImage(this string imagePath1, string imagePath2, bool preferColor = true)
+    public static string GetBetterImage(this IImageFactory imageFactory, string imagePath1, string imagePath2, bool preferColor = true)
     {
         if (!File.Exists(imagePath1) || !File.Exists(imagePath2))
         {
@@ -106,12 +97,12 @@ public static class ImageExtensions
         }
 
         // Quick metadata check to get width/height without loading full pixel data
-        var info1 = Image.Identify(imagePath1);
-        var info2 = Image.Identify(imagePath2);
+        var info1 = imageFactory.GetDimensions(imagePath1);
+        var info2 = imageFactory.GetDimensions(imagePath2);
 
         // Calculate resolution factor
-        double resolutionFactor1 = info1.Width * info1.Height;
-        double resolutionFactor2 = info2.Width * info2.Height;
+        double resolutionFactor1 = info1.Value.Width * info1.Value.Height;
+        double resolutionFactor2 = info2.Value.Width * info2.Value.Height;
 
         // If one image is significantly higher resolution (3x or more), just pick it
         // This avoids fully loading both images when the choice is obvious
@@ -124,13 +115,13 @@ public static class ImageExtensions
 
         // NOTE: We HAVE to use these scope blocks and load image here otherwise memory-mapped section exception will occur
         ImageQualityMetrics metrics1;
-        using (var img1 = Image.Load<Rgba32>(imagePath1))
+        using (var img1 = imageFactory.Create(imagePath1))
         {
             metrics1 = GetImageQualityMetrics(img1);
         }
 
         ImageQualityMetrics metrics2;
-        using (var img2 = Image.Load<Rgba32>(imagePath2))
+        using (var img2 = imageFactory.Create(imagePath2))
         {
             metrics2 = GetImageQualityMetrics(img2);
         }
@@ -179,45 +170,42 @@ public static class ImageExtensions
     /// <summary>
     /// Gets quality metrics for an image
     /// </summary>
-    private static ImageQualityMetrics GetImageQualityMetrics(Image<Rgba32> image)
+    private static ImageQualityMetrics GetImageQualityMetrics(IImage image)
     {
         // Create a smaller version if the image is large to speed up analysis
-        Image<Rgba32> workingImage;
+        float[] workingImage;
         if (image.Width > 512 || image.Height > 512)
         {
-            workingImage = image.Clone(ctx => ctx.Resize(
-                new ResizeOptions {
-                    Size = new Size(512),
-                    Mode = ResizeMode.Max
-                }));
+            image.Resize(512, 512);
+            workingImage = image.GetRGBAImageData();
         }
         else
         {
-            workingImage = image.Clone();
+            workingImage = image.GetRGBAImageData();
         }
 
         var metrics = new ImageQualityMetrics
         {
-            Width = image.Width,
-            Height = image.Height
+            Width = (int)image.Width,
+            Height = (int)image.Height
         };
 
         // Color analysis (is the image color or grayscale?)
-        var colorInfo = AnalyzeColorfulness(workingImage);
+        var colorInfo = AnalyzeColorfulness(workingImage, (int)image.Width, (int)image.Height);
         metrics.IsColor = colorInfo.IsColor;
         metrics.Colorfulness = colorInfo.Colorfulness;
 
         // Contrast analysis
-        metrics.Contrast = CalculateContrast(workingImage);
+        metrics.Contrast = CalculateContrast(workingImage, (int)image.Width, (int)image.Height);
 
         // Sharpness estimation
-        metrics.Sharpness = EstimateSharpness(workingImage);
+        metrics.Sharpness = EstimateSharpness(workingImage, (int)image.Width, (int)image.Height);
 
         // Noise estimation
-        metrics.NoiseLevel = EstimateNoiseLevel(workingImage);
+        metrics.NoiseLevel = EstimateNoiseLevel(workingImage, (int)image.Width, (int)image.Height);
 
         // Clean up
-        workingImage.Dispose();
+        image.Dispose();
 
         return metrics;
     }
@@ -225,64 +213,63 @@ public static class ImageExtensions
     /// <summary>
     /// Analyzes colorfulness of an image
     /// </summary>
-    private static (bool IsColor, double Colorfulness) AnalyzeColorfulness(Image<Rgba32> image)
+    private static (bool IsColor, double Colorfulness) AnalyzeColorfulness(float[] rgbaData, int width, int height)
     {
-        // For performance, sample a subset of pixels
-        var sampleSize = Math.Min(1000, image.Width * image.Height);
-        var stepSize = Math.Max(1, (image.Width * image.Height) / sampleSize);
+        int totalPixels = width * height;
 
-        var colorCount = 0;
-        List<(int R, int G, int B)> samples = [];
+        if (rgbaData.Length != totalPixels * 4)
+            throw new ArgumentException("Invalid RGBA buffer length or dimensions.");
 
-        // Sample pixels
-        for (var i = 0; i < image.Width * image.Height; i += stepSize)
+        int sampleSize = Math.Min(1000, totalPixels);
+        int stepSize = Math.Max(1, totalPixels / sampleSize);
+
+        int colorCount = 0;
+        List<(double R, double G, double B)> samples = [];
+
+        for (int i = 0; i < totalPixels; i += stepSize)
         {
-            var x = i % image.Width;
-            var y = i / image.Width;
+            int index = i * 4;
 
-            var pixel = image[x, y];
+            double r = rgbaData[index];
+            double g = rgbaData[index + 1];
+            double b = rgbaData[index + 2];
 
-            // Check if RGB channels differ by a threshold
-            // High difference indicates color, low difference indicates grayscale
-            var rMinusG = Math.Abs(pixel.R - pixel.G);
-            var rMinusB = Math.Abs(pixel.R - pixel.B);
-            var gMinusB = Math.Abs(pixel.G - pixel.B);
+            double r255 = r * 255;
+            double g255 = g * 255;
+            double b255 = b * 255;
 
-            if (rMinusG > 15 || rMinusB > 15 || gMinusB > 15)
+            // Count pixel as "color" if RGB channel differences are significant
+            if (Math.Abs(r255 - g255) > 15 ||
+                Math.Abs(r255 - b255) > 15 ||
+                Math.Abs(g255 - b255) > 15)
             {
                 colorCount++;
             }
 
-            samples.Add((pixel.R, pixel.G, pixel.B));
+            samples.Add((r255, g255, b255));
         }
 
-        // Calculate colorfulness metric based on Hasler and Süsstrunk's approach
-        // This measures the spread and intensity of colors
-        if (samples.Count <= 0) return (false, 0);
+        if (samples.Count == 0)
+            return (false, 0);
 
-        // Calculate rg and yb opponent channels
+        // Opponent channels: rg and yb
         var rg = samples.Select(p => p.R - p.G).ToList();
         var yb = samples.Select(p => 0.5 * (p.R + p.G) - p.B).ToList();
 
-        // Calculate standard deviation and mean of opponent channels
-        var rgStdDev = CalculateStdDev(rg);
-        var ybStdDev = CalculateStdDev(yb);
-        var rgMean = rg.Average();
-        var ybMean = yb.Average();
+        double rgStd = CalculateStdDev(rg);
+        double ybStd = CalculateStdDev(yb);
+        double rgMean = rg.Average();
+        double ybMean = yb.Average();
 
-        // Combine into colorfulness metric
-        var stdRoot = Math.Sqrt(rgStdDev * rgStdDev + ybStdDev * ybStdDev);
-        var meanRoot = Math.Sqrt(rgMean * rgMean + ybMean * ybMean);
+        double stdRoot = Math.Sqrt(rgStd * rgStd + ybStd * ybStd);
+        double meanRoot = Math.Sqrt(rgMean * rgMean + ybMean * ybMean);
 
-        var colorfulness = stdRoot + 0.3 * meanRoot;
-
-        // Normalize to 0-1 range (typical colorfulness is 0-100)
+        double colorfulness = stdRoot + 0.3 * meanRoot;
         colorfulness = Math.Min(1.0, colorfulness / 100.0);
 
-        var isColor = (double)colorCount / samples.Count > 0.05;
+        bool isColor = (double)colorCount / samples.Count > 0.05;
 
         return (isColor, colorfulness);
-
     }
 
     /// <summary>
@@ -308,71 +295,80 @@ public static class ImageExtensions
     /// <summary>
     /// Calculates contrast of an image
     /// </summary>
-    private static double CalculateContrast(Image<Rgba32> image)
+    private static double CalculateContrast(float[] rgbaData, int width, int height)
     {
-        // For performance, sample a subset of pixels
-        var sampleSize = Math.Min(1000, image.Width * image.Height);
-        var stepSize = Math.Max(1, (image.Width * image.Height) / sampleSize);
+        int totalPixels = width * height;
 
-        List<int> luminanceValues = new();
+        if (rgbaData.Length != totalPixels * 4)
+            throw new ArgumentException("Invalid image dimensions or RGBA buffer length.");
 
-        // Sample pixels and calculate luminance
-        for (var i = 0; i < image.Width * image.Height; i += stepSize)
+        int sampleSize = Math.Min(1000, totalPixels);
+        int stepSize = Math.Max(1, totalPixels / sampleSize);
+
+        List<double> luminanceValues = new();
+
+        for (int i = 0; i < totalPixels; i += stepSize)
         {
-            var x = i % image.Width;
-            var y = i / image.Width;
+            int index = i * 4;
+            float r = rgbaData[index];
+            float g = rgbaData[index + 1];
+            float b = rgbaData[index + 2];
 
-            var pixel = image[x, y];
-
-            // Calculate luminance
-            var luminance = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
+            // Calculate luminance in 0.0–1.0 space
+            double luminance = 0.299 * r + 0.587 * g + 0.114 * b;
             luminanceValues.Add(luminance);
         }
 
         if (luminanceValues.Count < 2)
             return 0;
 
-        // Use RMS contrast (root-mean-square of pixel intensity)
-        var mean = luminanceValues.Average();
-        var sumOfSquaresOfDifferences = luminanceValues.Sum(l => Math.Pow(l - mean, 2));
-        var rmsContrast = Math.Sqrt(sumOfSquaresOfDifferences / luminanceValues.Count) / mean;
+        double mean = luminanceValues.Average();
+        double sumSq = luminanceValues.Sum(l => Math.Pow(l - mean, 2));
+        double rmsContrast = Math.Sqrt(sumSq / luminanceValues.Count) / mean;
 
-        // Normalize to 0-1 range
+        // Clamp to [0.0, 1.0]
         return Math.Min(1.0, rmsContrast);
     }
 
     /// <summary>
     /// Estimates sharpness using simple Laplacian-based method
     /// </summary>
-    private static double EstimateSharpness(Image<Rgba32> image)
+    private static double EstimateSharpness(float[] rgbaData, int width, int height)
     {
-        // For simplicity, convert to grayscale
-        var grayImage = new int[image.Width, image.Height];
+        if (rgbaData.Length != width * height * 4)
+            throw new ArgumentException("Invalid image dimensions or data length.");
 
-        // Convert to grayscale
-        for (var y = 0; y < image.Height; y++)
+        float[,] gray = new float[width, height];
+
+        // Convert RGBA to grayscale
+        for (int y = 0; y < height; y++)
         {
-            for (var x = 0; x < image.Width; x++)
+            for (int x = 0; x < width; x++)
             {
-                var pixel = image[x, y];
-                grayImage[x, y] = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
+                int index = (y * width + x) * 4;
+                float r = rgbaData[index];
+                float g = rgbaData[index + 1];
+                float b = rgbaData[index + 2];
+                // float a = rgbaData[index + 3]; // unused
+
+                gray[x, y] = 0.299f * r + 0.587f * g + 0.114f * b;
             }
         }
 
-        // Apply Laplacian filter (3x3)
-        // The Laplacian measures local variations - higher values indicate edges/details
+        // Apply Laplacian filter
         double laplacianSum = 0;
-        var validPixels = 0;
+        int validPixels = 0;
 
-        // Laplacian kernel: [0, 1, 0, 1, -4, 1, 0, 1, 0]
-        for (var y = 1; y < image.Height - 1; y++)
+        for (int y = 1; y < height - 1; y++)
         {
-            for (var x = 1; x < image.Width - 1; x++)
+            for (int x = 1; x < width - 1; x++)
             {
-                var laplacian =
-                    grayImage[x, y - 1] +
-                    grayImage[x - 1, y] - 4 * grayImage[x, y] + grayImage[x + 1, y] +
-                    grayImage[x, y + 1];
+                float laplacian =
+                    gray[x, y - 1] +
+                    gray[x - 1, y] -
+                    4 * gray[x, y] +
+                    gray[x + 1, y] +
+                    gray[x, y + 1];
 
                 laplacianSum += Math.Abs(laplacian);
                 validPixels++;
@@ -382,56 +378,116 @@ public static class ImageExtensions
         if (validPixels == 0)
             return 0;
 
-        // Calculate variance of Laplacian
-        var laplacianVariance = laplacianSum / validPixels;
+        double laplacianVariance = laplacianSum / validPixels;
 
-        // Normalize to 0-1 range (typical values range from 0-1000)
+        // Normalize to range [0, 1]
         return Math.Min(1.0, laplacianVariance / 1000.0);
     }
 
     /// <summary>
     /// Estimates noise level using simple block-based variance method
     /// </summary>
-    private static double EstimateNoiseLevel(Image<Rgba32> image)
+    private static double EstimateNoiseLevel(float[] rgbaData, int width, int height)
     {
         // Block size for noise estimation
+
         const int blockSize = 8;
         List<double> blockVariances = new();
-
         // Calculate variance in small blocks throughout the image
-        for (var y = 0; y < image.Height - blockSize; y += blockSize)
-        {
-            for (var x = 0; x < image.Width - blockSize; x += blockSize)
-            {
-                List<int> blockValues = new();
 
-                // Sample block
-                for (var by = 0; by < blockSize; by++)
+        if (rgbaData.Length != width * height * 4)
+            throw new ArgumentException("Invalid dimensions or RGBA buffer length.");
+
+        for (int y = 0; y <= height - blockSize; y += blockSize)
+        {
+            for (int x = 0; x <= width - blockSize; x += blockSize)
+            {
+                List<double> blockValues = new();
+
+                for (int by = 0; by < blockSize; by++)
                 {
-                    for (var bx = 0; bx < blockSize; bx++)
+                    for (int bx = 0; bx < blockSize; bx++)
                     {
-                        var pixel = image[x + bx, y + by];
-                        var value = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
-                        blockValues.Add(value);
+                        int px = x + bx;
+                        int py = y + by;
+                        int index = (py * width + px) * 4;
+
+                        float r = rgbaData[index];
+                        float g = rgbaData[index + 1];
+                        float b = rgbaData[index + 2];
+
+                        // Convert to grayscale [0, 1]
+                        double gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                        blockValues.Add(gray);
                     }
                 }
-
                 // Calculate variance of this block
-                var blockMean = blockValues.Average();
-                var blockVariance = blockValues.Sum(v => Math.Pow(v - blockMean, 2)) / blockValues.Count;
-                blockVariances.Add(blockVariance);
+
+                double mean = blockValues.Average();
+                double variance = blockValues.Sum(v => Math.Pow(v - mean, 2)) / blockValues.Count;
+                blockVariances.Add(variance);
             }
         }
 
         if (blockVariances.Count == 0)
             return 0;
 
-        // Sort block variances and take lowest 10% (likely uniform areas where noise is most visible)
         blockVariances.Sort();
-        var smoothBlocksCount = Math.Max(1, blockVariances.Count / 10);
-        var averageNoiseVariance = blockVariances.Take(smoothBlocksCount).Average();
+        int smoothCount = Math.Max(1, blockVariances.Count / 10);
+        double avgNoise = blockVariances.Take(smoothCount).Average();
 
-        // Normalize to 0-1 range (typical noise variances are 0-100)
-        return Math.Min(1.0, averageNoiseVariance / 100.0);
+        // Normalize (heuristically for 0–1 range)
+        return Math.Min(1.0, avgNoise / 0.02); // 0.02 is empirical for 0–1 grayscale
     }
+
+    public static uint DefaultQuality(this EncodeFormat encodeFormat)
+    {
+        return encodeFormat switch
+        {
+            EncodeFormat.PNG => 100, // (Maximum Deflate Compression) (In case of PNG, png is always lossless, Quality indicates the compression level)
+            EncodeFormat.WEBP => 100,
+            EncodeFormat.AVIF => 100,
+            EncodeFormat.JPEG => 99, // (Best Compression speed, with almost no visual quality loss)
+            _ => throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null)
+        };
+    }
+
+    /// <summary>
+    /// Tries to determine if there is a better mode for resizing
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="targetWidth"></param>
+    /// <param name="targetHeight"></param>
+    /// <returns></returns>
+    public static bool WillScaleWell(this IImage sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
+    {
+        // Calculate the aspect ratios
+        var sourceAspectRatio = (double)sourceImage.Width / sourceImage.Height;
+        var targetAspectRatio = (double)targetWidth / targetHeight;
+
+        // Compare aspect ratios
+        if (Math.Abs(sourceAspectRatio - targetAspectRatio) > tolerance)
+        {
+            return false; // Aspect ratios differ significantly
+        }
+
+        // Calculate scaling factors
+        var widthScaleFactor = (double)targetWidth / sourceImage.Width;
+        var heightScaleFactor = (double)targetHeight / sourceImage.Height;
+
+        // Check resolution quality (example thresholds)
+        if (widthScaleFactor > 2.0 || heightScaleFactor > 2.0)
+        {
+            return false; // Scaling factor too large
+        }
+
+        return true; // Image will scale well
+    }
+
+    public static bool IsLikelyWideImage(this int width, int height)
+    {
+        var aspectRatio = (double)width / height;
+        return aspectRatio > 1.25;
+    }
+
 }

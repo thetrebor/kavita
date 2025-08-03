@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +10,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Person;
 using API.Extensions;
+using API.Services.ImageServices;
 using API.SignalR;
 using EasyCaching.Core;
 using Flurl;
@@ -18,7 +19,6 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 
 namespace API.Services.Tasks.Metadata;
@@ -171,10 +171,9 @@ public class CoverDbService : ICoverDbService
                 .GetStreamAsync();
 
             // Create the destination file path
-            using var image = Image.PngloadStream(faviconStream);
+            using var image = _imageService.ImageFactory.Create(faviconStream);
             var filename = ImageService.GetWebLinkFormat(baseUrl, encodeFormat);
-
-            image.WriteToFile(Path.Combine(_directoryService.FaviconDirectory, filename));
+            await image.SaveAsync(Path.Combine(_directoryService.FaviconDirectory, filename),encodeFormat);
             _logger.LogDebug("Favicon for {Domain} downloaded and saved successfully", domain);
 
             return filename;
@@ -296,27 +295,14 @@ public class CoverDbService : ICoverDbService
             .AllowHttpStatus("2xx,304")
             .GetStreamAsync();
 
-        using var image = Image.NewFromStream(imageStream);
+        using var image = _imageService.ImageFactory.Create(imageStream);
         try
         {
-            image.WriteToFile(targetFile);
+            await image.SaveAsync(targetDirectory, encodeFormat);
         }
         catch (Exception ex)
         {
-            switch (encodeFormat)
-            {
-                case EncodeFormat.PNG:
-                    image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                case EncodeFormat.WEBP:
-                    image.Webpsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                case EncodeFormat.AVIF:
-                    image.Heifsave(Path.Combine(_directoryService.FaviconDirectory, filename));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
-            }
+            _logger.LogError($"Unable to save image {filename}");
         }
 
         return filename;
@@ -491,7 +477,7 @@ public class CoverDbService : ICoverDbService
                 if (checkNoImagePlaceholder)
                 {
                     var placeholderPath = Path.Combine(_directoryService.AssetsDirectory, "anilist-no-image-placeholder.jpg");
-                    var similarity = placeholderPath.CalculateSimilarity(tempFullPath);
+                    var similarity = _imageService.ImageFactory.CalculateSimilarity(placeholderPath, tempFullPath);
                     if (similarity >= 0.9f)
                     {
                         _logger.LogInformation("Skipped setting placeholder image for person {PersonId} due to high similarity ({Similarity})", person.Id, similarity);
@@ -505,7 +491,7 @@ public class CoverDbService : ICoverDbService
                     if (!string.IsNullOrEmpty(person.CoverImage))
                     {
                         var existingPath = Path.Combine(_directoryService.CoverImageDirectory, person.CoverImage);
-                        var betterImage = existingPath.GetBetterImage(tempFullPath)!;
+                        var betterImage = _imageService.ImageFactory.GetBetterImage(existingPath,tempFullPath)!;
 
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
                         if (choseNewImage)
@@ -583,7 +569,7 @@ public class CoverDbService : ICoverDbService
                     try
                     {
                         var existingPath = Path.Combine(_directoryService.CoverImageDirectory, series.CoverImage);
-                        var betterImage = existingPath.GetBetterImage(tempFullPath)!;
+                        var betterImage =_imageService.ImageFactory.GetBetterImage(existingPath, tempFullPath)!;
 
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
                         if (choseNewImage)
@@ -660,7 +646,7 @@ public class CoverDbService : ICoverDbService
                     try
                     {
                         var existingPath = Path.Combine(_directoryService.CoverImageDirectory, chapter.CoverImage);
-                        var betterImage = existingPath.GetBetterImage(tempFullPath)!;
+                        var betterImage = _imageService.ImageFactory.GetBetterImage(existingPath,tempFullPath)!;
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
 
                         if (choseNewImage)

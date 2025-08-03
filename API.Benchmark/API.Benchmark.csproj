@@ -3,6 +3,8 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <OutputType>Exe</OutputType>
+        <UseImageMagick>false</UseImageMagick>
+        <DefineConstants Condition="'$(UseImageMagick)' == 'true'">ImageMagick;$(DefineConstants)</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

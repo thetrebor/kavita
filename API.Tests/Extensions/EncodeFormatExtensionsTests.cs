@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using API.Entities.Enums;
@@ -17,7 +17,8 @@ public class EncodeFormatExtensionsTests
         {
             { EncodeFormat.PNG, ".png" },
             { EncodeFormat.WEBP, ".webp" },
-            { EncodeFormat.AVIF, ".avif" }
+            { EncodeFormat.AVIF, ".avif" },
+            { EncodeFormat.JPEG, ".jpg" }
         };
 
         // Act & Assert

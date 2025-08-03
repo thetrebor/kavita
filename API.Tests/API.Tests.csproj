@@ -3,6 +3,8 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <IsPackable>false</IsPackable>
+      <UseImageMagick>false</UseImageMagick>
+      <DefineConstants Condition="'$(UseImageMagick)' == 'true'">ImageMagick;$(DefineConstants)</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

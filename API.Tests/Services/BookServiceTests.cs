@@ -1,7 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Abstractions;
 using API.Entities.Enums;
 using API.Services;
+using API.Services.ImageServices;
 using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -16,9 +17,15 @@ public class BookServiceTests
 
     public BookServiceTests()
     {
+#if ImageMagick
+        IImageFactory imageFactory = new API.Services.ImageServices.ImageMagick.ImageMagickImageFactory();
+#else
+        IImageFactory imageFactory = new API.Services.ImageServices.NetVips.NetVipsImageFactory();
+#endif
+
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         _bookService = new BookService(_logger, directoryService,
-            new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService)
+            new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, imageFactory)
             , Substitute.For<IMediaErrorService>());
     }
 

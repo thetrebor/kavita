@@ -1,19 +1,19 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Extensions;
+using API.Services.ImageServices;
+using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
-using NetVips;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Processors.Quantization;
-using Image = NetVips.Image;
 
 namespace API.Services;
 #nullable enable
@@ -62,6 +62,29 @@ public interface IImageService
     Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
     Task<bool> IsImage(string filePath);
     void UpdateColorScape(IHasCoverImage entity);
+    /// <summary>
+    /// Replaces the file format of an image with the specified supported image formats by the browser, if needed, otherwise original file will be served.
+    /// </summary>
+    /// <param name="filename">The name of the image file.</param>
+    /// <param name="supportedImageFormats">The list of supported image formats by the browser.</param>
+    /// <param name="format">The encoding format to convert the image. Default is JPG</param>
+    /// <returns>The file name with extension of the replaced image file.</returns>
+    string ReplaceImageFileFormat(string filename, List<string> supportedImageFormats = null, EncodeFormat format = EncodeFormat.JPEG);
+
+    /// <summary>
+    /// Creates a merged image from a list of cover images and saves it to the specified destination.
+    /// </summary>
+    /// <param name="coverImages">The list of cover images.</param>
+    /// <param name="size">The size of the merged image.</param>
+    /// <param name="dest">The destination path to save the merged image.</param>
+    /// <param name="format">The encoding format to convert and save the merged image. Default is PNG.</param>
+    void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest, EncodeFormat format = EncodeFormat.PNG);
+
+    /// <summary>
+    /// The image factory used to create and manipulate images.
+    /// </summary>
+    IImageFactory ImageFactory { get; }
+
 }
 
 public class ImageService : IImageService
@@ -69,6 +92,7 @@ public class ImageService : IImageService
     public const string Name = "ImageService";
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
+    private readonly IImageFactory _imageFactory;
 
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"series\d+";
@@ -93,12 +117,34 @@ public class ImageService : IImageService
     public const int LibraryThumbnailWidth = 32;
 
 
-    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
+    /// <summary>
+    /// Semaphore to limit concurrent image format conversions to 4.
+    /// Some formats, such as JXL, are heavily threaded internally. 
+    /// Combined with the UI requesting many images at once, this can exhaust
+    /// system thread limits, especially in constrained environments like Docker.
+    /// </summary>
+    private static readonly SemaphoreSlim _imageConversionSemaphore = new SemaphoreSlim(4, 4);
+
+
+    private static NamedMonitor _lock = new NamedMonitor();
+     /// <summary>
+    /// Represents a named monitor that provides thread-safe access to objects based on their names.
+    /// </summary>
+    class NamedMonitor
+    {
+        readonly ConcurrentDictionary<string, object> _dictionary = new ConcurrentDictionary<string, object>();
+
+        public object this[string name] => _dictionary.GetOrAdd(name, _ => new object());
+    }
+
+
+    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IImageFactory imageFactory)
     {
         _logger = logger;
         _directoryService = directoryService;
+        _imageFactory = imageFactory;
     }
-
+    public IImageFactory ImageFactory => _imageFactory;
     public void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount = 1)
     {
         if (string.IsNullOrEmpty(fileFilePath)) return;
@@ -114,77 +160,7 @@ public class ImageService : IImageService
         }
     }
 
-    /// <summary>
-    /// Tries to determine if there is a better mode for resizing
-    /// </summary>
-    /// <param name="image"></param>
-    /// <param name="targetWidth"></param>
-    /// <param name="targetHeight"></param>
-    /// <returns></returns>
-    public static Enums.Size GetSizeForDimensions(Image image, int targetWidth, int targetHeight)
-    {
-        try
-        {
-            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
-            {
-                return Enums.Size.Force;
-            }
-        }
-        catch (Exception)
-        {
-            /* Swallow */
-        }
 
-        return Enums.Size.Both;
-    }
-
-    public static Enums.Interesting? GetCropForDimensions(Image image, int targetWidth, int targetHeight)
-    {
-        try
-        {
-            if (WillScaleWell(image, targetWidth, targetHeight) || IsLikelyWideImage(image.Width, image.Height))
-            {
-                return null;
-            }
-        } catch (Exception)
-        {
-            /* Swallow */
-            return null;
-        }
-
-        return Enums.Interesting.Attention;
-    }
-
-    public static bool WillScaleWell(Image sourceImage, int targetWidth, int targetHeight, double tolerance = 0.1)
-    {
-        // Calculate the aspect ratios
-        var sourceAspectRatio = (double) sourceImage.Width / sourceImage.Height;
-        var targetAspectRatio = (double) targetWidth / targetHeight;
-
-        // Compare aspect ratios
-        if (Math.Abs(sourceAspectRatio - targetAspectRatio) > tolerance)
-        {
-            return false; // Aspect ratios differ significantly
-        }
-
-        // Calculate scaling factors
-        var widthScaleFactor = (double) targetWidth / sourceImage.Width;
-        var heightScaleFactor = (double) targetHeight / sourceImage.Height;
-
-        // Check resolution quality (example thresholds)
-        if (widthScaleFactor > 2.0 || heightScaleFactor > 2.0)
-        {
-            return false; // Scaling factor too large
-        }
-
-        return true; // Image will scale well
-    }
-
-    private static bool IsLikelyWideImage(int width, int height)
-    {
-        var aspectRatio = (double) width / height;
-        return aspectRatio > 1.25;
-    }
 
     public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
     {
@@ -193,14 +169,11 @@ public class ImageService : IImageService
         try
         {
             var (width, height) = size.GetDimensions();
-            using var sourceImage = Image.NewFromFile(path, false, Enums.Access.SequentialUnbuffered);
 
-            using var thumbnail = Image.Thumbnail(path, width, height: height,
-                size: GetSizeForDimensions(sourceImage, width, height),
-                crop: GetCropForDimensions(sourceImage, width, height));
+            using var thumbnail = _imageFactory.Create(path).Thumbnail(width, height);
             var filename = fileName + encodeFormat.GetExtension();
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
-            return filename;
+            thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat);
+
         }
         catch (Exception ex)
         {
@@ -223,15 +196,7 @@ public class ImageService : IImageService
     {
         var (targetWidth, targetHeight) = size.GetDimensions();
         if (stream.CanSeek) stream.Position = 0;
-        using var sourceImage = Image.NewFromStream(stream);
-
-        var scalingSize = GetSizeForDimensions(sourceImage, targetWidth, targetHeight);
-        var scalingCrop = GetCropForDimensions(sourceImage, targetWidth, targetHeight);
-
-        using var thumbnail = sourceImage.ThumbnailImage(targetWidth, targetHeight,
-            size: scalingSize,
-            crop: scalingCrop);
-
+        using var thumbnail = _imageFactory.Create(stream).Thumbnail(targetWidth, targetHeight);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
 
@@ -242,20 +207,17 @@ public class ImageService : IImageService
 
         try
         {
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
-
+            thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat);
             return filename;
         }
-        catch (VipsException)
+        catch (Exception)
         {
             // NetVips Issue: https://github.com/kleisauke/net-vips/issues/234
             // Saving pdf covers from a stream can fail, so revert to old code
 
             if (stream.CanSeek) stream.Position = 0;
-            using var thumbnail2 = Image.ThumbnailStream(stream, targetWidth, height: targetHeight,
-                size: scalingSize,
-                crop: scalingCrop);
-            thumbnail2.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+            using var thumbnail2 = _imageFactory.CreateThumbnail(stream, targetWidth, targetHeight);
+            thumbnail2.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat);
 
             return filename;
         }
@@ -264,30 +226,25 @@ public class ImageService : IImageService
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
         var (width, height) = size.GetDimensions();
-        using var sourceImage = Image.NewFromFile(sourceFile, false, Enums.Access.SequentialUnbuffered);
-
-        using var thumbnail = Image.Thumbnail(sourceFile, width, height: height,
-            size: GetSizeForDimensions(sourceImage, width, height),
-            crop: GetCropForDimensions(sourceImage, width, height));
+        using var thumbnail = _imageFactory.Create(sourceFile).Thumbnail(width, height);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
         {
             _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         } catch (Exception) {/* Swallow exception */}
-        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat);
         return filename;
     }
 
-    public Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat)
+    public async Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat)
     {
         var file = _directoryService.FileSystem.FileInfo.New(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + encodeFormat.GetExtension());
-
-        using var sourceImage = Image.NewFromFile(filePath, false, Enums.Access.SequentialUnbuffered);
-        sourceImage.WriteToFile(outputFile);
-        return Task.FromResult(outputFile);
+        using var sourceImage = _imageFactory.Create(filePath);
+        await sourceImage.SaveAsync(outputFile, encodeFormat).ConfigureAwait(false);
+        return outputFile;
     }
 
     /// <summary>
@@ -295,43 +252,26 @@ public class ImageService : IImageService
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public async Task<bool> IsImage(string filePath)
+    public Task<bool> IsImage(string filePath)
     {
         try
         {
-            var info = await SixLabors.ImageSharp.Image.IdentifyAsync(filePath);
-            if (info == null) return false;
-
-            return true;
+            return Task.FromResult(_imageFactory.GetDimensions(filePath) != null);
         }
         catch (Exception)
         {
             /* Swallow Exception */
         }
 
-        return false;
+        return Task.FromResult(false);
     }
 
 
 
-    private static (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
+    private (Vector3?, Vector3?) GetPrimarySecondaryColors(string imagePath)
     {
-        using var image = Image.NewFromFile(imagePath);
-        // Resize the image to speed up processing
-        var resizedImage = image.Resize(0.1);
+        var rgbPixels = _imageFactory.GetRgbPixelsPercentage(imagePath, 10);
 
-        var processedImage = PreProcessImage(resizedImage);
-
-
-        // Convert image to RGB array
-        var pixels = processedImage.WriteToMemory().ToArray();
-
-        // Convert to list of Vector3 (RGB)
-        var rgbPixels = new List<Vector3>();
-        for (var i = 0; i < pixels.Length - 2; i += 3)
-        {
-            rgbPixels.Add(new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]));
-        }
 
         // Perform k-means clustering
         var clusters = KMeansClustering(rgbPixels, 4);
@@ -353,59 +293,7 @@ public class ImageService : IImageService
         return (null, null);
     }
 
-    private static (Vector3?, Vector3?) GetPrimaryColorSharp(string imagePath)
-    {
-        using var image = SixLabors.ImageSharp.Image.Load<Rgb24>(imagePath);
-
-        image.Mutate(
-            x => x
-                // Scale the image down preserving the aspect ratio. This will speed up quantization.
-                // We use nearest neighbor as it will be the fastest approach.
-                .Resize(new ResizeOptions() { Sampler = KnownResamplers.NearestNeighbor, Size = new SixLabors.ImageSharp.Size(100, 0) })
-
-                // Reduce the color palette to 1 color without dithering.
-                .Quantize(new OctreeQuantizer(new QuantizerOptions { MaxColors = 4 })));
-
-        Rgb24 dominantColor = image[0, 0];
-
-        // This will give you a dominant color in HEX format i.e #5E35B1FF
-        return (new Vector3(dominantColor.R, dominantColor.G, dominantColor.B), new Vector3(dominantColor.R, dominantColor.G, dominantColor.B));
-    }
-
-    private static Image PreProcessImage(Image image)
-    {
-        return image;
-        // Create a mask for white and black pixels
-        var whiteMask = image.Colourspace(Enums.Interpretation.Lab)[0] > (WhiteThreshold * 100);
-        var blackMask = image.Colourspace(Enums.Interpretation.Lab)[0] < (BlackThreshold * 100);
-
-        // Create a replacement color (e.g., medium gray)
-        var replacementColor = new[] { 240.0, 240.0, 240.0 };
-
-        // Apply the masks to replace white and black pixels
-        var processedImage = image.Copy();
-        processedImage = processedImage.Ifthenelse(whiteMask, replacementColor);
-        //processedImage = processedImage.Ifthenelse(blackMask, replacementColor);
-
-        return processedImage;
-    }
-
-    private static Dictionary<Vector3, int> GenerateColorHistogram(Image image)
-    {
-        var pixels = image.WriteToMemory().ToArray();
-        var histogram = new Dictionary<Vector3, int>();
-
-        for (var i = 0; i < pixels.Length; i += 3)
-        {
-            var color = new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]);
-            if (!histogram.TryAdd(color, 1))
-            {
-                histogram[color]++;
-            }
-        }
-
-        return histogram;
-    }
+   
 
     private static bool IsColorCloseToWhiteOrBlack(Vector3 color)
     {
@@ -561,7 +449,7 @@ public class ImageService : IImageService
     /// <remarks>This may use a second most common color or a complementary color. It's up to implemenation to choose what's best</remarks>
     /// <param name="sourceFile"></param>
     /// <returns></returns>
-    public static ColorScape CalculateColorScape(string sourceFile)
+    public ColorScape CalculateColorScape(string sourceFile)
     {
         if (!File.Exists(sourceFile)) return new ColorScape() {Primary = null, Secondary = null};
 
@@ -573,6 +461,62 @@ public class ImageService : IImageService
             Secondary = colors.Item2 == null ? null : RgbToHex(colors.Item2.Value)
         };
     }
+    private bool CheckDirectSupport(string filename, List<string> supportedImageFormats)
+    {
+        if (supportedImageFormats == null) return false;
+
+        string ext = Path.GetExtension(filename).ToLowerInvariant().Substring(1);
+        return supportedImageFormats.Contains(ext);
+    }
+
+
+    /// <inheritdoc/>
+    public string ReplaceImageFileFormat(string filename, List<string> supportedImageFormats = null, EncodeFormat format = EncodeFormat.JPEG)
+    {
+        if (CheckDirectSupport(filename, supportedImageFormats)) return filename;
+
+        Match m = Regex.Match(Path.GetExtension(filename), Parser.NonUniversalFileImageExtensions, RegexOptions.IgnoreCase, Parser.RegexTimeout);
+        if (!m.Success) return filename;
+
+        string destination = Path.ChangeExtension(filename, format.GetExtension().Substring(1));
+
+        // Lock per destination to prevent duplicate work when the web UI triggers
+        // multiple requests for the same image simultaneously. If another thread
+        // is already processing the image, we wait for completion before checking
+        // if the destination file exists.
+        lock (_lock[destination])
+        {
+            if (File.Exists(destination))
+            {
+                // Destination already exist, the conversion was already made.
+                return destination;
+            }
+            // Wait for semaphore to limit concurrent image conversions 
+            _imageConversionSemaphore.Wait();
+            try
+            {
+                // Double-check the file doesn't exist after acquiring semaphore
+                if (File.Exists(destination))
+                {
+                    return destination;
+                }
+                using var sourceImage = _imageFactory.Create(filename);
+                sourceImage.Save(destination, format);
+                try
+                {
+                    File.Delete(filename);
+                }
+                catch (Exception) { /* Swallow Exception */ }
+            }
+            finally
+            {
+                _imageConversionSemaphore.Release();
+            }
+
+        }
+        return destination;
+    }
+
 
 
 
@@ -583,10 +527,9 @@ public class ImageService : IImageService
         try
         {
             targetDirectory ??= _directoryService.CoverImageDirectory;
-            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);
+            using var thumbnail = _imageFactory.CreateFromBase64(encodedImage, thumbnailWidth);
             fileName += encodeFormat.GetExtension();
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(targetDirectory, fileName));
-
+            thumbnail.Save(_directoryService.FileSystem.Path.Join(targetDirectory, fileName), encodeFormat);
             return fileName;
         }
         catch (Exception e)
@@ -691,7 +634,7 @@ public class ImageService : IImageService
     }
 
 
-    public static void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest)
+    public void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest, EncodeFormat format = EncodeFormat.PNG)
     {
         var (width, height) = size.GetDimensions();
         int rows, cols;
@@ -713,7 +656,7 @@ public class ImageService : IImageService
         }
 
 
-        var image = Image.Black(width, height);
+        var image = _imageFactory.Create(width, height);
 
         var thumbnailWidth = image.Width / cols;
         var thumbnailHeight = image.Height / rows;
@@ -721,8 +664,8 @@ public class ImageService : IImageService
         for (var i = 0; i < coverImages.Count; i++)
         {
             if (!File.Exists(coverImages[i])) continue;
-            var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
-            tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+            var tile = _imageFactory.Create(coverImages[i]);
+            tile = tile.Thumbnail(thumbnailWidth, height: thumbnailHeight);
 
             var row = i / cols;
             var col = i % cols;
@@ -735,11 +678,10 @@ public class ImageService : IImageService
                 x = (image.Width - thumbnailWidth) / 2;
                 y = thumbnailHeight;
             }
-
-            image = image.Insert(tile, x, y);
+            image.Composite(tile, (int)x, (int)y);
         }
 
-        image.WriteToFile(dest);
+        image.Save(dest, format);
     }
 
     public void UpdateColorScape(IHasCoverImage entity)

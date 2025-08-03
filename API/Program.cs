@@ -21,7 +21,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NetVips;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.AspNetCore.SignalR.Extensions;
@@ -256,7 +255,8 @@ public class Program
     /// <remarks>https://github.com/kleisauke/net-vips/issues/6#issuecomment-394379299</remarks>
     private static void InitNetVips()
     {
-        Cache.MaxFiles = 0;
-
+#if !ImageMagick
+        NetVips.Cache.MaxFiles = 0;
+#endif
     }
 }
