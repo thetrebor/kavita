@@ -173,7 +173,7 @@ public class ImageService : IImageService
             using var thumbnail = _imageFactory.Create(path).Thumbnail(width, height);
             var filename = fileName + encodeFormat.GetExtension();
             thumbnail.Save(_directoryService.FileSystem.Path.Join(outputDirectory, filename), encodeFormat);
-
+            return filename;
         }
         catch (Exception ex)
         {
