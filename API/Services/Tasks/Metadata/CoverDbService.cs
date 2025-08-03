@@ -298,7 +298,7 @@ public class CoverDbService : ICoverDbService
         using var image = _imageService.ImageFactory.Create(imageStream);
         try
         {
-            await image.SaveAsync(targetDirectory, encodeFormat);
+            await image.SaveAsync(targetFile, encodeFormat);
         }
         catch (Exception ex)
         {
