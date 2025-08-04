@@ -36,6 +36,7 @@ import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.compone
 import {ReaderService} from "../../_services/reader.service";
 import {QueryContext} from "../../_models/metadata/v2/query-context";
 import {LicenseService} from "../../_services/license.service";
+import { NoDataComponent } from '../../shared/no-data/no-data.component';
 
 enum StreamId {
   OnDeck,
@@ -51,7 +52,7 @@ enum StreamId {
     styleUrls: ['./dashboard.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, SeriesCardComponent,
-        CardItemComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent]
+        CardItemComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent, NoDataComponent]
 })
 export class DashboardComponent implements OnInit {
 

@@ -44,6 +44,8 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 import {MetadataService} from "../_services/metadata.service";
+import { NoDataComponent } from '../shared/no-data/no-data.component';
+import { ThemeService } from 'src/app/_services/theme.service';
 
 @Component({
     selector: 'app-library-detail',
@@ -51,7 +53,7 @@ import {MetadataService} from "../_services/metadata.service";
     styleUrls: ['./library-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [SideNavCompanionBarComponent, CardActionablesComponent,
-        CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, DecimalPipe, TranslocoDirective, LoadingComponent]
+        CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, DecimalPipe, TranslocoDirective, LoadingComponent, NoDataComponent]
 })
 export class LibraryDetailComponent implements OnInit {
 
@@ -70,6 +72,7 @@ export class LibraryDetailComponent implements OnInit {
   public readonly navService = inject(NavService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly metadataService = inject(MetadataService);
+  protected readonly themeService = inject(ThemeService);
 
   libraryId!: number;
   libraryName = '';
@@ -91,6 +94,11 @@ export class LibraryDetailComponent implements OnInit {
     {title: 'recommended-tab', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
+
+  get isDarkTheme(): boolean {
+    return this.themeService.isDarkTheme();
+  }
+
 
   loadPageSource = new ReplaySubject(1);
   loadPage$ = this.loadPageSource.asObservable();
