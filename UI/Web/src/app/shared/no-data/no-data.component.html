@@ -1,143 +1,37 @@
 <ng-container *transloco="let t">
   <div [class]="containerClasses" [ngStyle]="containerStyles">
     
-    <!-- Icon-only variant -->
-    <div *ngIf="iconOnly" class="icon-only-content">
-      <div class="large-icon">{{ effectiveIcon }}</div>
-      <h3 class="no-data-title">{{ effectiveTitle }}</h3>
-      <p class="no-data-subtitle">{{ effectiveSubtitle }}</p>
+    <!-- Main illustration container -->
+    <div class="illustration-container">
+      
+      <!-- Central empty library visualization -->
+      <div class="empty-library-visual">
+        
+        <!-- Library shelf -->
+        <div class="library-shelf">
+          <div class="shelf-interior">
+            <div class="empty-books-placeholder">
+              <div class="book-spine"></div>
+              <div class="book-spine"></div>
+              <div class="book-spine"></div>
+              <div class="book-spine"></div>
+              <div class="book-spine"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
-    <!-- Full illustration variant -->
-    <ng-container *ngIf="!iconOnly">
-      <!-- Modern illustration (conditional) -->
-      <div *ngIf="shouldShowBookshelf" class="library-illustration" [class]="'illustration-' + effectiveBookshelfSize">
-        
-        <!-- Option 1: Digital Library Grid -->
-        <div class="modern-library digital-grid" *ngIf="modernStyle === 'digital'">
-          <div class="grid-container">
-            <div class="grid-item" *ngFor="let item of digitalItems; let i = index" [style.animation-delay]="i * 0.1 + 's'">
-              <div class="item-icon">{{ item.icon }}</div>
-              <div class="item-lines">
-                <div class="line short"></div>
-                <div class="line medium"></div>
-                <div class="line long"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Option 2: Cloud Storage -->
-        <div class="modern-library cloud-storage" *ngIf="modernStyle === 'cloud'">
-          <div class="cloud-main">
-            <div class="cloud-shape">☁️</div>
-            <div class="upload-indicator">
-              <div class="upload-arrow">↗</div>
-              <div class="data-points">
-                <div class="point" *ngFor="let point of cloudPoints"></div>
-              </div>
-            </div>
-          </div>
-          <div class="cloud-devices">
-            <div class="device">📱</div>
-            <div class="device">💻</div>
-            <div class="device">🖥️</div>
-          </div>
-        </div>
-
-        <!-- Option 3: Card Stack -->
-        <div class="modern-library card-stack" *ngIf="modernStyle === 'cards'">
-          <div class="stack-container">
-            <div class="card-item card-1">
-              <div class="card-header"></div>
-              <div class="card-content">
-                <div class="content-line"></div>
-                <div class="content-line short"></div>
-                <div class="content-line medium"></div>
-              </div>
-            </div>
-            <div class="card-item card-2">
-              <div class="card-header"></div>
-              <div class="card-content">
-                <div class="content-line"></div>
-                <div class="content-line medium"></div>
-              </div>
-            </div>
-            <div class="card-item card-3">
-              <div class="card-header"></div>
-              <div class="card-content">
-                <div class="content-line short"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Option 4: Minimalist Lines -->
-        <div class="modern-library minimal-lines" *ngIf="modernStyle === 'minimal'">
-          <div class="lines-container">
-            <div class="line-group">
-              <div class="line-item line-1"></div>
-              <div class="line-item line-2"></div>
-              <div class="line-item line-3"></div>
-            </div>
-            <div class="line-group">
-              <div class="line-item line-4"></div>
-              <div class="line-item line-5"></div>
-            </div>
-            <div class="line-group">
-              <div class="line-item line-6"></div>
-              <div class="line-item line-7"></div>
-              <div class="line-item line-8"></div>
-            </div>
-          </div>
-          <div class="center-icon">📄</div>
-        </div>
-
-        <!-- Default: Bookshelf (fallback) -->
-        <div class="bookshelf" *ngIf="!modernStyle || modernStyle === 'bookshelf'">
-          <!-- Top shelf -->
-          <div class="shelf shelf-1"></div>
-          <div class="book book-1"></div>
-          <div class="book book-2"></div>
-          <div class="book book-3"></div>
-          <div class="book book-4"></div>
-          <div class="book book-5"></div>
-          <div class="book book-6"></div>
-          
-          <!-- Middle shelf -->
-          <div class="shelf shelf-2"></div>
-          <div class="book book-7"></div>
-          <div class="book book-8"></div>
-          <div class="book book-9"></div>
-          <div class="book book-10"></div>
-          <div class="book book-11"></div>
-          
-          <!-- Bottom shelf -->
-          <div class="shelf shelf-3"></div>
-          <div class="book book-12"></div>
-          <div class="book book-13"></div>
-          <div class="book book-14"></div>
-          <div class="book book-15"></div>
-          <div class="book book-16"></div>
-          <div class="book book-17"></div>
-        </div>
+    <!-- Text content -->
+    <div class="content-text">
+      <h2 class="main-title">{{ effectiveTitle }}</h2>
+      <p class="subtitle">{{ effectiveSubtitle }}</p>
+      <div class="action-hint">
+        <span class="hint-text">{{ effectiveMessage }}</span>
       </div>
+    </div>
 
-      <!-- Alternative icon display when illustration is hidden -->
-      <div *ngIf="!shouldShowBookshelf" class="simple-icon">
-        <div class="icon">{{ effectiveIcon }}</div>
-      </div>
-
-      <!-- Text content -->
-      <div class="no-data-text">
-        <h3 class="no-data-title">{{ effectiveTitle }}</h3>
-        <p class="no-data-subtitle">{{ effectiveSubtitle }}</p>
-        <p class="suggestion-text">
-          <span *ngIf="showEmojis">{{ effectiveIcon }}</span>
-          {{ effectiveMessage }}
-          <span *ngIf="showEmojis && variant === 'default'">✨</span>
-        </p>
-      </div>
-    </ng-container>
   </div>
 </ng-container>

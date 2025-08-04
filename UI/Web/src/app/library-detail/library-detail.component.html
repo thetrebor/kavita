@@ -30,12 +30,12 @@
                            [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
         </ng-template>
 
-<ng-template #noData>
-<app-no-data 
-  variant="empty-library"
-  [isDarkTheme]="isDarkTheme">
-</app-no-data>
-</ng-template>
+      <ng-template #noData>
+        <app-no-data 
+          variant="empty-library"
+          [isDarkTheme]="isDarkTheme">
+        </app-no-data>
+      </ng-template>
       </app-card-detail-layout>
     }
 
