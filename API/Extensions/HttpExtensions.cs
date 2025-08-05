@@ -85,28 +85,26 @@ public static class HttpExtensions
         split = acceptHeader.Split(',');
 
 
-
         // Browser add specific image mime types, when the image type is not a global standard, browser specify the specific image type in the accept header.
         // Let's reuse that to identify the additional image types supported by the browser.
         foreach (var v in split)
         {
-            if (v.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
+            if (!v.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
+                continue;
+            var mimeImagePart = v.Substring(6).ToLowerInvariant();
+            if (mimeImagePart.StartsWith("*"))
+                continue;
+            if (Parser.NonUniversalSupportedMimeMappings.ContainsKey(mimeImagePart))
             {
-                var mimeImagePart = v.Substring(6).ToLowerInvariant();
-                if (mimeImagePart.StartsWith("*"))
-                    continue;
-                if (Parser.NonUniversalSupportedMimeMappings.ContainsKey(mimeImagePart))
-                {
-                    Parser.NonUniversalSupportedMimeMappings[mimeImagePart].ForEach(x => AddExtension(supportedExtensions, x));
-                }
-                else if (mimeImagePart == "svg+xml")
-                {
-                    AddExtension(supportedExtensions, "svg");
-                }
-                else
-                {
-                    AddExtension(supportedExtensions, mimeImagePart);
-                }
+                Parser.NonUniversalSupportedMimeMappings[mimeImagePart].ForEach(x => AddExtension(supportedExtensions, x));
+            }
+            else if (mimeImagePart == "svg+xml")
+            {
+                AddExtension(supportedExtensions, "svg");
+            }
+            else
+            {
+                AddExtension(supportedExtensions, mimeImagePart);
             }
         }
 
