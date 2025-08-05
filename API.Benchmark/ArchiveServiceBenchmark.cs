@@ -82,7 +82,7 @@ public class ArchiveServiceBenchmark
         int originalWidth = image.Width;
         int originalHeight = image.Height;
         int targetWidth = 320;
-        int targetHeight = (int)Math.Round((double)originalHeight * targetWidth / originalWidth);
+        int targetHeight = (int) Math.Round((double)originalHeight * targetWidth / originalWidth);
         image.Resize(targetWidth, targetHeight);
     }
 
