@@ -132,7 +132,6 @@ public class ReaderController : BaseApiController
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message, e);
             _cacheService.CleanupChapters([chapterId]);
             throw;
         }
