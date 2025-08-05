@@ -111,8 +111,8 @@ public class CacheService : ICacheService
                 dimensions.Add(new FileDimensionDto()
                 {
                     PageNumber = i,
-                    Height = (int)info.Value.Height,
-                    Width = (int)info.Value.Width,
+                    Height = info.Value.Height,
+                    Width = info.Value.Width,
                     IsWide = info.Value.Width > info.Value.Height,
                     FileName = file.Replace(cachePath, string.Empty)
                 });

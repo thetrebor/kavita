@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using API.Services;
 
 namespace API.Extensions;
 
@@ -31,14 +32,14 @@ public static class ImageExtensions
     /// <param name="imagePath1">Path to first image</param>
     /// <param name="imagePath2">Path to the second image</param>
     /// <returns>Similarity score between 0-1, where 1 is identical</returns>
-    public static float CalculateSimilarity(this IImageFactory imageFactory, string imagePath1, string imagePath2)
+    public static float CalculateSimilarity(this IImageService imageService, string imagePath1, string imagePath2)
     {
         if (!File.Exists(imagePath1) || !File.Exists(imagePath2))
         {
             throw new FileNotFoundException("One or both image files do not exist");
         }
-        using var im1 = imageFactory.Create(imagePath1);
-        using var im2 = imageFactory.Create(imagePath2);
+        using var im1 = imageService.ImageFactory.Create(imagePath1);
+        using var im2 = imageService.ImageFactory.Create(imagePath2);
         var res1 = im1.Width * im1.Height;
         var res2 = im2.Width * im2.Height;
         var resolutionDiff = Math.Abs(res1 - res2) / (float)Math.Max(res1, res2);
@@ -89,7 +90,7 @@ public static class ImageExtensions
     /// <param name="imagePath2">Path to the second image</param>
     /// <param name="preferColor">Whether to prefer color images over grayscale (default: true)</param>
     /// <returns>The path of the better image</returns>
-    public static string GetBetterImage(this IImageFactory imageFactory, string imagePath1, string imagePath2, bool preferColor = true)
+    public static string GetBetterImage(this IImageService imageService, string imagePath1, string imagePath2, bool preferColor = true)
     {
         if (!File.Exists(imagePath1) || !File.Exists(imagePath2))
         {
@@ -97,8 +98,8 @@ public static class ImageExtensions
         }
 
         // Quick metadata check to get width/height without loading full pixel data
-        var info1 = imageFactory.GetDimensions(imagePath1);
-        var info2 = imageFactory.GetDimensions(imagePath2);
+        var info1 = imageService.ImageFactory.GetDimensions(imagePath1);
+        var info2 = imageService.ImageFactory.GetDimensions(imagePath2);
 
         // Calculate resolution factor
         double resolutionFactor1 = info1.Value.Width * info1.Value.Height;
@@ -115,13 +116,13 @@ public static class ImageExtensions
 
         // NOTE: We HAVE to use these scope blocks and load image here otherwise memory-mapped section exception will occur
         ImageQualityMetrics metrics1;
-        using (var img1 = imageFactory.Create(imagePath1))
+        using (var img1 = imageService.ImageFactory.Create(imagePath1))
         {
             metrics1 = GetImageQualityMetrics(img1);
         }
 
         ImageQualityMetrics metrics2;
-        using (var img2 = imageFactory.Create(imagePath2))
+        using (var img2 = imageService.ImageFactory.Create(imagePath2))
         {
             metrics2 = GetImageQualityMetrics(img2);
         }
@@ -186,23 +187,23 @@ public static class ImageExtensions
 
         var metrics = new ImageQualityMetrics
         {
-            Width = (int)image.Width,
-            Height = (int)image.Height
+            Width = image.Width,
+            Height = image.Height
         };
 
         // Color analysis (is the image color or grayscale?)
-        var colorInfo = AnalyzeColorfulness(workingImage, (int)image.Width, (int)image.Height);
+        var colorInfo = AnalyzeColorfulness(workingImage, image.Width, image.Height);
         metrics.IsColor = colorInfo.IsColor;
         metrics.Colorfulness = colorInfo.Colorfulness;
 
         // Contrast analysis
-        metrics.Contrast = CalculateContrast(workingImage, (int)image.Width, (int)image.Height);
+        metrics.Contrast = CalculateContrast(workingImage, image.Width, image.Height);
 
         // Sharpness estimation
-        metrics.Sharpness = EstimateSharpness(workingImage, (int)image.Width, (int)image.Height);
+        metrics.Sharpness = EstimateSharpness(workingImage, image.Width, image.Height);
 
         // Noise estimation
-        metrics.NoiseLevel = EstimateNoiseLevel(workingImage, (int)image.Width, (int)image.Height);
+        metrics.NoiseLevel = EstimateNoiseLevel(workingImage, image.Width, image.Height);
 
         // Clean up
         image.Dispose();

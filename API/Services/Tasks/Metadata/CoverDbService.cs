@@ -477,7 +477,7 @@ public class CoverDbService : ICoverDbService
                 if (checkNoImagePlaceholder)
                 {
                     var placeholderPath = Path.Combine(_directoryService.AssetsDirectory, "anilist-no-image-placeholder.jpg");
-                    var similarity = _imageService.ImageFactory.CalculateSimilarity(placeholderPath, tempFullPath);
+                    var similarity = _imageService.CalculateSimilarity(placeholderPath, tempFullPath);
                     if (similarity >= 0.9f)
                     {
                         _logger.LogInformation("Skipped setting placeholder image for person {PersonId} due to high similarity ({Similarity})", person.Id, similarity);
@@ -491,7 +491,7 @@ public class CoverDbService : ICoverDbService
                     if (!string.IsNullOrEmpty(person.CoverImage))
                     {
                         var existingPath = Path.Combine(_directoryService.CoverImageDirectory, person.CoverImage);
-                        var betterImage = _imageService.ImageFactory.GetBetterImage(existingPath,tempFullPath)!;
+                        var betterImage = _imageService.GetBetterImage(existingPath, tempFullPath)!;
 
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
                         if (choseNewImage)
@@ -569,7 +569,7 @@ public class CoverDbService : ICoverDbService
                     try
                     {
                         var existingPath = Path.Combine(_directoryService.CoverImageDirectory, series.CoverImage);
-                        var betterImage =_imageService.ImageFactory.GetBetterImage(existingPath, tempFullPath)!;
+                        var betterImage =_imageService.GetBetterImage(existingPath, tempFullPath)!;
 
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
                         if (choseNewImage)
@@ -646,7 +646,7 @@ public class CoverDbService : ICoverDbService
                     try
                     {
                         var existingPath = Path.Combine(_directoryService.CoverImageDirectory, chapter.CoverImage);
-                        var betterImage = _imageService.ImageFactory.GetBetterImage(existingPath,tempFullPath)!;
+                        var betterImage = _imageService.GetBetterImage(existingPath,tempFullPath)!;
                         var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
 
                         if (choseNewImage)

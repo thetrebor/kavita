@@ -54,8 +54,9 @@ public class NetVipsImageFactory : IImageFactory
             NetVipsImage image = new NetVipsImage(filename);
             return (image.Width, image.Height);
         }
-        catch (Exception)
+        catch
         {
+            // Ignore errors and return null
         }
         return null;
     }
@@ -67,10 +68,12 @@ public class NetVipsImageFactory : IImageFactory
         using var res = im.Resize(percent / 100f);
         float[] pixels = NetVipsImage.GetRGBAFloatImageDataFromImage(res);
         if (pixels == null)
-            return new List<Vector3>();
+            return [];
         var rgbPixels = new List<Vector3>();
         for (uint x = 0; x < pixels.Length; x += 4)
+        {
             rgbPixels.Add(new Vector3(pixels[x], pixels[x + 1], pixels[x + 2]));
+        }
         return rgbPixels;
     }
 }

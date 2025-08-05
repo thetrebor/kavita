@@ -50,8 +50,9 @@ namespace API.Services.ImageServices.NetVips
             const int bands = 4; // BGRA
 
             if (bgraByteArray.Length != width * height * bands)
+            {
                 throw new ArgumentException("Input byte array size doesn't match BGRA dimensions.");
-
+            }
             // Load raw BGRA image
             var image = Image.NewFromMemory(bgraByteArray, width, height, bands, Enums.BandFormat.Uchar);
 
@@ -87,11 +88,11 @@ namespace API.Services.ImageServices.NetVips
             {
                 var scalingSize = NetVipsImage.GetSizeForDimensions(image, width, height);
                 var scalingCrop = NetVipsImage.GetCropForDimensions(image, width, height);
-                using var thumbnail2 = Image.ThumbnailStream(stream, width, height: height,
-                size: scalingSize,
-                crop: scalingCrop);
                 NetVipsImage g = new NetVipsImage();
-                g._image = thumbnail2;
+                g._image = Image.ThumbnailStream(stream, width, height: height,
+                    size: scalingSize,
+                    crop: scalingCrop
+                    );
                 return g;
             }
         }
@@ -164,7 +165,8 @@ namespace API.Services.ImageServices.NetVips
             NetVipsImage im = new NetVipsImage();
             im._image = _image.ThumbnailImage(width, height: height,
                 size: GetSizeForDimensions(this, width, height),
-                crop: GetCropForDimensions(this, width, height));
+                crop: GetCropForDimensions(this, width, height)
+                );
             return im;
         }
 
@@ -173,7 +175,9 @@ namespace API.Services.ImageServices.NetVips
         {
             NetVipsImage im = overlay as NetVipsImage;
             if (im == null)
+            {
                 throw new ArgumentNullException(nameof(overlay));
+            }
             _image = _image.Insert(im._image, x, y);
         }
 

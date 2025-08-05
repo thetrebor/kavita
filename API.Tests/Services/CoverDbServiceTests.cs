@@ -97,7 +97,7 @@ public class CoverDbServiceTests : AbstractDbTest
 
         // Load and compare similarity
 
-        var similarity = _imageService.ImageFactory.CalculateSimilarity(expectedFaviconPath, actualFaviconPath); // Assuming you have this extension
+        var similarity = _imageService.CalculateSimilarity(expectedFaviconPath, actualFaviconPath); // Assuming you have this extension
         Assert.True(similarity > 0.9f, $"Image similarity too low: {similarity}");
     }
 

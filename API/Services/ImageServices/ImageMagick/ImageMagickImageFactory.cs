@@ -62,8 +62,9 @@ public class ImageMagickImageFactory : IImageFactory
             MagickImageInfo info = new MagickImageInfo(filename);
             return ((int)info.Width, (int)info.Height);
         }
-        catch (Exception e)
+        catch
         {
+            // Ignore errors and return null
         }
         return null;
     }
@@ -84,7 +85,9 @@ public class ImageMagickImageFactory : IImageFactory
         // Convert to list of Vector3 (RGB)
 
         for (uint x = 0; x < pixels.Length; x += 4)
+        {
             rgbPixels.Add(new Vector3(pixels[x], pixels[x + 1], pixels[x + 2]));
+        }
         return rgbPixels;
     }
 }

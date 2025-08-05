@@ -61,7 +61,9 @@ public static class HttpExtensions
         if (string.IsNullOrEmpty(extension))
             return;
         if (!extensions.Contains(extension))
+        {
             extensions.Add(extension);
+        }
     }
 
     /// <summary>
@@ -71,15 +73,18 @@ public static class HttpExtensions
     /// <returns>A list of supported image types extensions by the Browser.</returns>
     public static List<string> SupportedImageTypesFromRequest(this HttpRequest request)
     {
+        // Add default extensions supported by all browsers.
+        List<string> supportedExtensions = Parser.UniversalFileImageExtensionArray.ToList();
+        //Early eject if the browser or api do not provide an Accept header.
+        if (!request.Headers.ContainsKey("Accept"))
+            return supportedExtensions;
+
         var acceptHeader = request.Headers["Accept"].ToString();
-        var split = acceptHeader.Split(';');
+        var split = acceptHeader.Split(';'); //remove any parameters like "q=0.8"
         acceptHeader = split[0];
         split = acceptHeader.Split(',');
 
-        List<string> supportedExtensions = new List<string>();
 
-        // Add default extensions supported by all browsers.
-        supportedExtensions.AddRange(Parser.UniversalFileImageExtensionArray);
 
         // Browser add specific image mime types, when the image type is not a global standard, browser specify the specific image type in the accept header.
         // Let's reuse that to identify the additional image types supported by the browser.
@@ -88,7 +93,8 @@ public static class HttpExtensions
             if (v.StartsWith("image/", StringComparison.InvariantCultureIgnoreCase))
             {
                 var mimeImagePart = v.Substring(6).ToLowerInvariant();
-                if (mimeImagePart.StartsWith("*")) continue;
+                if (mimeImagePart.StartsWith("*"))
+                    continue;
                 if (Parser.NonUniversalSupportedMimeMappings.ContainsKey(mimeImagePart))
                 {
                     Parser.NonUniversalSupportedMimeMappings[mimeImagePart].ForEach(x => AddExtension(supportedExtensions, x));
