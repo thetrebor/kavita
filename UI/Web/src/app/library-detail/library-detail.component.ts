@@ -353,4 +353,11 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.id}_${item.name}_${item.localizedName}_${item.pagesRead}`;
+
+  handleNoDataActionClick(): void {
+    // Get the current library and open the edit modal
+    this.libraryService.getLibrary(this.libraryId).subscribe(library => {
+      this.actionService.editLibrary(library);
+    });
+  }
 }

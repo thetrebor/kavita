@@ -1,35 +1,340 @@
 <ng-container *transloco="let t">
   <div [class]="containerClasses" [ngStyle]="containerStyles">
     
-    <!-- Main illustration container -->
-    <div class="illustration-container">
+    <!-- Background decorative elements -->
+    <div class="background-elements">
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+      </div>
+    </div>
+
+    <!-- Main content container -->
+    <div class="content-wrapper">
       
-      <!-- Central empty library visualization -->
-      <div class="empty-library-visual">
-        
-        <!-- Library shelf -->
-        <div class="library-shelf">
-          <div class="shelf-interior">
-            <div class="empty-books-placeholder">
-              <div class="book-spine"></div>
-              <div class="book-spine"></div>
-              <div class="book-spine"></div>
-              <div class="book-spine"></div>
-              <div class="book-spine"></div>
+      <!-- Icon/Illustration section -->
+      <div class="icon-section">
+        <div class="icon-container">
+          <i [class]="iconClasses"></i>
+          
+          <!-- Background elements for empty-library variant -->
+          <div class="background-elements" *ngIf="effectiveConfig.variant === 'empty-library' && getCurrentBackgroundTheme !== 'none'">
+            <!-- Fantasy background elements -->
+            <div class="fantasy-background" *ngIf="getCurrentBackgroundTheme === 'fantasy'">
+              <div class="magical-orb orb-1"></div>
+              <div class="magical-orb orb-2"></div>
+              <div class="magical-orb orb-3"></div>
+              <div class="magical-orb orb-4"></div>
+              <div class="magical-orb orb-5"></div>
+              <div class="floating-rune rune-1">✧</div>
+              <div class="floating-rune rune-2">✦</div>
+              <div class="floating-rune rune-3">✩</div>
+              <div class="floating-rune rune-4">✧</div>
+              <div class="floating-rune rune-5">✦</div>
+              <div class="magical-dust dust-1"></div>
+              <div class="magical-dust dust-2"></div>
+              <div class="magical-dust dust-3"></div>
+              <div class="magical-dust dust-4"></div>
+              <div class="magical-dust dust-5"></div>
+            </div>
+
+            <!-- Sci-Fi background elements -->
+            <div class="scifi-background" *ngIf="getCurrentBackgroundTheme === 'scifi'">
+              <div class="energy-field field-1"></div>
+              <div class="energy-field field-2"></div>
+              <div class="energy-field field-3"></div>
+              <div class="energy-field field-4"></div>
+              <div class="energy-field field-5"></div>
+              <div class="floating-circuit circuit-1">⚡</div>
+              <div class="floating-circuit circuit-2">⚙</div>
+              <div class="floating-circuit circuit-3">⚙</div>
+              <div class="floating-circuit circuit-4">⚡</div>
+              <div class="floating-circuit circuit-5">⚙</div>
+              <div class="data-particle particle-1"></div>
+              <div class="data-particle particle-2"></div>
+              <div class="data-particle particle-3"></div>
+              <div class="data-particle particle-4"></div>
+              <div class="data-particle particle-5"></div>
+            </div>
+
+            <!-- Comic Book background elements -->
+            <div class="comic-background" *ngIf="getCurrentBackgroundTheme === 'comic-book'">
+              <div class="speech-bubble bubble-1">"</div>
+              <div class="speech-bubble bubble-2">"</div>
+              <div class="speech-bubble bubble-3">"</div>
+              <div class="speech-bubble bubble-4">"</div>
+              <div class="speech-bubble bubble-5">"</div>
+              <div class="comic-star star-1">★</div>
+              <div class="comic-star star-2">★</div>
+              <div class="comic-star star-3">★</div>
+              <div class="comic-star star-4">★</div>
+              <div class="comic-star star-5">★</div>
+              <div class="pow-effect pow-1">!</div>
+              <div class="pow-effect pow-2">!</div>
+              <div class="pow-effect pow-3">!</div>
+              <div class="comic-dot dot-1"></div>
+              <div class="comic-dot dot-2"></div>
+              <div class="comic-dot dot-3"></div>
+              <div class="comic-dot dot-4"></div>
+              <div class="comic-dot dot-5"></div>
+            </div>
+
+            <!-- Manga background elements -->
+            <div class="manga-background" *ngIf="getCurrentBackgroundTheme === 'manga'">
+              <div class="cherry-blossom blossom-1">❀</div>
+              <div class="cherry-blossom blossom-2">❀</div>
+              <div class="cherry-blossom blossom-3">❀</div>
+              <div class="cherry-blossom blossom-4">❀</div>
+              <div class="cherry-blossom blossom-5">❀</div>
+              <div class="manga-panel panel-1"></div>
+              <div class="manga-panel panel-2"></div>
+              <div class="manga-panel panel-3"></div>
+              <div class="manga-panel panel-4"></div>
+              <div class="manga-panel panel-5"></div>
+              <div class="manga-speech-bubble manga-bubble-1">"</div>
+              <div class="manga-speech-bubble manga-bubble-2">"</div>
+              <div class="manga-speech-bubble manga-bubble-3">"</div>
+              <div class="manga-star manga-star-1">★</div>
+              <div class="manga-star manga-star-2">★</div>
+              <div class="manga-star manga-star-3">★</div>
+              <div class="manga-line line-1"></div>
+              <div class="manga-line line-2"></div>
+              <div class="manga-line line-3"></div>
+              <div class="manga-line line-4"></div>
+              <div class="manga-line line-5"></div>
+            </div>
+
+            <!-- Thriller background elements -->
+            <div class="thriller-background" *ngIf="getCurrentBackgroundTheme === 'thriller'">
+              <div class="shadow-figure shadow-1"></div>
+              <div class="shadow-figure shadow-2"></div>
+              <div class="shadow-figure shadow-3"></div>
+              <div class="shadow-figure shadow-4"></div>
+              <div class="shadow-figure shadow-5"></div>
+              <div class="fog-cloud fog-1"></div>
+              <div class="fog-cloud fog-2"></div>
+              <div class="fog-cloud fog-3"></div>
+              <div class="fog-cloud fog-4"></div>
+              <div class="fog-cloud fog-5"></div>
+              <div class="lightning-bolt bolt-1">⚡</div>
+              <div class="lightning-bolt bolt-2">⚡</div>
+              <div class="lightning-bolt bolt-3">⚡</div>
+              <div class="mysterious-eye eye-1">●</div>
+              <div class="mysterious-eye eye-2">●</div>
+              <div class="mysterious-eye eye-3">●</div>
+              <div class="dark-whisper whisper-1">~</div>
+              <div class="dark-whisper whisper-2">~</div>
+              <div class="dark-whisper whisper-3">~</div>
+              <div class="thriller-line line-1"></div>
+              <div class="thriller-line line-2"></div>
+              <div class="thriller-line line-3"></div>
+              <div class="thriller-line line-4"></div>
+              <div class="thriller-line line-5"></div>
+            </div>
+
+            <!-- Mystery background elements -->
+            <div class="mystery-background" *ngIf="getCurrentBackgroundTheme === 'mystery'">
+              <div class="magnifying-glass glass-1">🔍</div>
+              <div class="magnifying-glass glass-2">🔍</div>
+              <div class="magnifying-glass glass-3">🔍</div>
+              <div class="footprint footprint-1">⌃</div>
+              <div class="footprint footprint-2">⌃</div>
+              <div class="footprint footprint-3">⌃</div>
+              <div class="question-mark mark-1">?</div>
+              <div class="question-mark mark-2">?</div>
+              <div class="question-mark mark-3">?</div>
+              <div class="mystery-clue clue-1">✏</div>
+              <div class="mystery-clue clue-2">✏</div>
+              <div class="mystery-clue clue-3">✏</div>
+              <div class="detective-hat hat-1">⌃</div>
+              <div class="detective-hat hat-2">⌃</div>
+              <div class="mystery-smoke smoke-1">~</div>
+              <div class="mystery-smoke smoke-2">~</div>
+              <div class="mystery-smoke smoke-3">~</div>
+              <div class="mystery-line line-1"></div>
+              <div class="mystery-line line-2"></div>
+              <div class="mystery-line line-3"></div>
+              <div class="mystery-line line-4"></div>
+              <div class="mystery-line line-5"></div>
+            </div>
+
+            <!-- Romance background elements -->
+            <div class="romance-background" *ngIf="getCurrentBackgroundTheme === 'romance'">
+              <div class="rose rose-1">❀</div>
+              <div class="rose rose-2">❀</div>
+              <div class="rose rose-3">❀</div>
+              <div class="rose rose-4">❀</div>
+              <div class="rose rose-5">❀</div>
+              <div class="heart heart-1">♥</div>
+              <div class="heart heart-2">♥</div>
+              <div class="heart heart-3">♥</div>
+              <div class="heart heart-4">♥</div>
+              <div class="heart heart-5">♥</div>
+              <div class="cupid-arrow arrow-1">→</div>
+              <div class="cupid-arrow arrow-2">→</div>
+              <div class="cupid-arrow arrow-3">→</div>
+              <div class="romance-star star-1">★</div>
+              <div class="romance-star star-2">★</div>
+              <div class="romance-star star-3">★</div>
+              <div class="romance-star star-4">★</div>
+              <div class="romance-star star-5">★</div>
+              <div class="romance-sparkle sparkle-1">✧</div>
+              <div class="romance-sparkle sparkle-2">✧</div>
+              <div class="romance-sparkle sparkle-3">✧</div>
+              <div class="romance-sparkle sparkle-4">✧</div>
+              <div class="romance-sparkle sparkle-5">✧</div>
+              <div class="romance-line line-1"></div>
+              <div class="romance-line line-2"></div>
+              <div class="romance-line line-3"></div>
+              <div class="romance-line line-4"></div>
+              <div class="romance-line line-5"></div>
+            </div>
+
+            <!-- Adventure background elements -->
+            <div class="adventure-background" *ngIf="getCurrentBackgroundTheme === 'adventure'">
+              <div class="compass compass-1">⌖</div>
+              <div class="compass compass-2">⌖</div>
+              <div class="compass compass-3">⌖</div>
+              <div class="map-icon map-1">□</div>
+              <div class="map-icon map-2">□</div>
+              <div class="map-icon map-3">□</div>
+              <div class="treasure-chest chest-1">◆</div>
+              <div class="treasure-chest chest-2">◆</div>
+              <div class="treasure-chest chest-3">◆</div>
+              <div class="mountain-icon mountain-1">▲</div>
+              <div class="mountain-icon mountain-2">▲</div>
+              <div class="mountain-icon mountain-3">▲</div>
+              <div class="adventure-star star-1">★</div>
+              <div class="adventure-star star-2">★</div>
+              <div class="adventure-star star-3">★</div>
+              <div class="adventure-star star-4">★</div>
+              <div class="adventure-star star-5">★</div>
+              <div class="adventure-sparkle sparkle-1">✧</div>
+              <div class="adventure-sparkle sparkle-2">✧</div>
+              <div class="adventure-sparkle sparkle-3">✧</div>
+              <div class="adventure-sparkle sparkle-4">✧</div>
+              <div class="adventure-sparkle sparkle-5">✧</div>
+              <div class="adventure-line line-1"></div>
+              <div class="adventure-line line-2"></div>
+              <div class="adventure-line line-3"></div>
+              <div class="adventure-line line-4"></div>
+              <div class="adventure-line line-5"></div>
+            </div>
+
+            <!-- Horror background elements -->
+            <div class="horror-background" *ngIf="getCurrentBackgroundTheme === 'horror'">
+              <div class="ghost ghost-1">~</div>
+              <div class="ghost ghost-2">~</div>
+              <div class="ghost ghost-3">~</div>
+              <div class="skull skull-1">●</div>
+              <div class="skull skull-2">●</div>
+              <div class="skull skull-3">●</div>
+              <div class="spider spider-1">×</div>
+              <div class="spider spider-2">×</div>
+              <div class="spider spider-3">×</div>
+              <div class="bat bat-1">⌃</div>
+              <div class="bat bat-2">⌃</div>
+              <div class="bat bat-3">⌃</div>
+              <div class="horror-star star-1">★</div>
+              <div class="horror-star star-2">★</div>
+              <div class="horror-star star-3">★</div>
+              <div class="horror-star star-4">★</div>
+              <div class="horror-star star-5">★</div>
+              <div class="horror-sparkle sparkle-1">✧</div>
+              <div class="horror-sparkle sparkle-2">✧</div>
+              <div class="horror-sparkle sparkle-3">✧</div>
+              <div class="horror-sparkle sparkle-4">✧</div>
+              <div class="horror-sparkle sparkle-5">✧</div>
+              <div class="horror-line line-1"></div>
+              <div class="horror-line line-2"></div>
+              <div class="horror-line line-3"></div>
+              <div class="horror-line line-4"></div>
+              <div class="horror-line line-5"></div>
             </div>
           </div>
-        </div>
+          
+          <!-- Animated elements based on variant -->
+          <div class="variant-specific-elements">
+            
+            <!-- Empty Library Animation -->
+            <div class="library-animation" *ngIf="effectiveConfig.variant === 'empty-library'">
+              <div class="bookshelf" #bookshelf>
+                <div class="shelf shelf-1">
+                  <div class="book-placeholder book-1"></div>
+                  <div class="book-placeholder book-2"></div>
+                  <div class="book-placeholder book-3"></div>
+                </div>
+              </div>
+            </div>
 
+            <!-- Search Animation -->
+            <div class="search-animation" *ngIf="effectiveConfig.variant === 'search-no-results'">
+              <div class="search-magnifier">
+                <div class="magnifier-glass"></div>
+                <div class="magnifier-handle"></div>
+              </div>
+              <div class="search-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+            </div>
+
+            <!-- Loading Animation -->
+            <div class="loading-animation" *ngIf="effectiveConfig.variant === 'loading'">
+              <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+              </div>
+            </div>
+
+            <!-- Achievement Animation -->
+            <div class="achievement-animation" *ngIf="effectiveConfig.variant === 'achievement'">
+              <div class="confetti-container">
+                <div class="confetti-piece" *ngFor="let i of [1,2,3,4,5,6,7,8]"></div>
+              </div>
+            </div>
+
+            <!-- Error Animation -->
+            <div class="error-animation" *ngIf="effectiveConfig.variant === 'error'">
+              <div class="error-waves">
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Text content section -->
+      <div class="text-section">
+        <h2 class="title" *ngIf="shouldShowTitle">{{ effectiveTitle }}</h2>
+        <p class="subtitle" *ngIf="shouldShowSubtitle">{{ effectiveSubtitle }}</p>
+        <p class="message" *ngIf="shouldShowMessage">{{ effectiveMessage }}</p>
+      </div>
+
+      <!-- Action button section -->
+      <div class="action-section" *ngIf="effectiveConfig.showActionButton">
+        <button 
+          class="btn btn-outline-primary action-button"
+          (click)="onActionButtonClick()">
+          <i *ngIf="effectiveActionButtonIcon" [class]="effectiveActionButtonIcon"></i>
+          {{ effectiveActionButtonText }}
+        </button>
       </div>
 
     </div>
 
-    <!-- Text content -->
-    <div class="content-text">
-      <h2 class="main-title">{{ effectiveTitle }}</h2>
-      <p class="subtitle">{{ effectiveSubtitle }}</p>
-      <div class="action-hint">
-        <span class="hint-text">{{ effectiveMessage }}</span>
+    <!-- Interactive elements -->
+    <div class="interactive-elements">
+      <div class="particle-field">
+        <div class="particle" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]"></div>
       </div>
     </div>
 

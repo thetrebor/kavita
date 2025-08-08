@@ -33,7 +33,15 @@
       <ng-template #noData>
         <app-no-data 
           variant="empty-library"
-          [isDarkTheme]="isDarkTheme">
+          size="medium"
+          animationType="pulse"
+          backgroundTheme="random"
+          [showActionButton]="true"
+          [title]="'Your Library is Empty'"
+          [subtitle]=""
+          [message]="'Start your collection by adding your books, manga, or comics. Configure your library settings to get started.'"
+          [actionButtonText]="'Configure Library'"
+          (actionButtonClick)="handleNoDataActionClick()">
         </app-no-data>
       </ng-template>
       </app-card-detail-layout>
