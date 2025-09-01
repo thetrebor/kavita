@@ -1,15 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, DestroyRef, inject,
-  OnInit
-} from '@angular/core';
-import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../shared/confirm.service";
-import { LoadingComponent } from '../../shared/loading/loading.component';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import {LoadingComponent} from '../../shared/loading/loading.component';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
@@ -34,7 +29,6 @@ import {LicenseService} from "../../_services/license.service";
 export class LicenseComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly accountService = inject(AccountService);
@@ -182,7 +176,6 @@ export class LicenseComponent implements OnInit {
       this.isViewMode = true;
       this.licenseInfo = null;
       this.hasLicense = false;
-      //this.hasValidLicense = false;
       this.cdRef.markForCheck();
     });
   }

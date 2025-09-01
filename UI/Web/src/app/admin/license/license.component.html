@@ -7,6 +7,8 @@
   <div>
     <p>{{t('kavita+-desc-part-1')}} <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}}</p>
 
+    <p>{{t('kavita+-warning')}}</p>
+
     <form [formGroup]="formGroup">
       <div class="mt-2">
         <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode" [showEdit]="hasLicense" [fixedExtras]="true">
@@ -103,7 +105,7 @@
               } @else {
                 <a class="btn btn-outline-primary btn-sm me-1"
                    [ngbTooltip]="t('invalid-license-tooltip')"
-                   href="mailto:kavitareader@gmail.com?subject=Kavita+Subscription+Renewal&body=Description%3A%0D%0A%0D%0ALicense%20Key%3A%0D%0A%0D%0AYour%20Email%3A"
+                   href="mailto:kavitareader@gmail.com?subject=Kavita%20Subscription%20Renewal&body=Description%3A%0D%0A%0D%0ALicense%20Key%3A%0D%0A%0D%0AYour%20Email%3A"
                 >{{t('renew')}}</a>
               }
             } @else {
@@ -182,8 +184,14 @@
         <h3>{{t('actions-title')}}</h3>
 
         <div class="mt-2 mb-2">
+          <app-setting-button [subtitle]="t('cancel-tooltip')">
+            <a class="btn btn-danger btn-sm mt-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('cancel-label')}}</a>
+          </app-setting-button>
+        </div>
+
+        <div class="mt-2 mb-2">
           <app-setting-button [subtitle]="t('delete-tooltip')">
-            <button type="button" class="flex-fill btn btn-danger mt-1" aria-describedby="license-key-header" (click)="deleteLicense()">
+            <button type="button" class="flex-fill btn btn-danger btn-sm mt-1" aria-describedby="license-key-header" (click)="deleteLicense()">
               {{t('activate-delete')}}
             </button>
           </app-setting-button>
