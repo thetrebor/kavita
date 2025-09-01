@@ -121,8 +121,17 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         // Find all Series that are eligible and limit
         var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25);
-        if (ids.Count == 0) return;
-        ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, true);
+        if (ids.Count == 0)
+        {
+            ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, true);
+        }
+
+        if (ids.Count == 0)
+        {
+            _logger.LogInformation("[Kavita+ Data Refresh] No series need matching or refreshing (stale data)");
+            return;
+        }
+
 
         _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+: {Ids}", ids.Count, string.Join(',', ids));
         var count = 0;
