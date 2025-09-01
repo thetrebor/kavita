@@ -146,7 +146,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 count++;
                 successfulMatches.Add(seriesId);
             }
-            await Task.Delay(6000); // Currently AL is degraded and has 30 requests/min, give a little padding since this is a background request
+            await Task.Delay(10000); // Currently AL is degraded and has 30 requests/min, give a little padding since this is a background request
         }
         _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} / {Total} series data from Kavita+: {Ids}", count, ids.Count, string.Join(',', successfulMatches));
     }
