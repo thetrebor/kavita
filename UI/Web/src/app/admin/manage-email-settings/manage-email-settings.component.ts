@@ -11,13 +11,14 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
+import {PreferenceHeaderActionsDirective} from "../../user-settings/_directives/preference-header-actions.directive";
 
 @Component({
     selector: 'app-manage-email-settings',
     templateUrl: './manage-email-settings.component.html',
     styleUrls: ['./manage-email-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
+  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective, PreferenceHeaderActionsDirective]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
@@ -25,6 +26,7 @@ export class ManageEmailSettingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});

@@ -20,7 +20,7 @@ import {ThemeManagerComponent} from "../../../user-settings/theme-manager/theme-
 import {TranslocoDirective} from "@jsverse/transloco";
 import {UserStatsComponent} from "../../../statistics/_components/user-stats/user-stats.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
-import {AsyncPipe} from "@angular/common";
+import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
 import {AccountService} from "../../../_services/account.service";
 import {WikiLink} from "../../../_models/wiki";
 import {LicenseComponent} from "../../../admin/license/license.component";
@@ -60,6 +60,7 @@ import {
 } from "../../../admin/manage-public-metadata-settings/manage-public-metadata-settings.component";
 import {ImportMappingsComponent} from "../../../admin/import-mappings/import-mappings.component";
 import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect/manage-open-idconnect.component";
+import {PreferenceHeaderService} from "../../../_services/preference-header.service";
 
 @Component({
     selector: 'app-settings',
@@ -99,7 +100,8 @@ import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect
     ManageReadingProfilesComponent,
     ManageOpenIDConnectComponent,
     ManagePublicMetadataSettingsComponent,
-    ImportMappingsComponent
+    ImportMappingsComponent,
+    NgTemplateOutlet
   ],
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',
@@ -113,6 +115,7 @@ export class SettingsComponent {
   private readonly router = inject(Router);
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
+  protected readonly prefHeaderService = inject(PreferenceHeaderService);
 
   protected readonly SettingsTabId = SettingsTabId;
   protected readonly WikiLink = WikiLink;

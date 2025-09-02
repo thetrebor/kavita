@@ -2,7 +2,19 @@
   <ng-container *transloco="let t; prefix:'settings'">
     <app-side-nav-companion-bar>
       <h2 class="container-fluid" title>
-        {{fragment | settingFragment}}
+        <div class="row g-0">
+          <div class="col-8">
+            {{fragment | settingFragment}}
+          </div>
+
+          <div class="col-4">
+            <ng-container #titleActions>
+              @if (prefHeaderService.currentTemplate(); as template) {
+                <ng-container *ngTemplateOutlet="template"></ng-container>
+              }
+            </ng-container>
+          </div>
+        </div>
       </h2>
     </app-side-nav-companion-bar>
     <div class="container-fluid row col-me-4 pb-3">
@@ -172,7 +184,7 @@
         @defer (when fragment === SettingsTabId.Preferences; prefetch on idle) {
           @if (fragment === SettingsTabId.Preferences) {
             <div class="col-xxl-6 col-12">
-              <app-manga-user-preferences></app-manga-user-preferences>
+              <app-manage-user-preferences></app-manage-user-preferences>
             </div>
           }
         }

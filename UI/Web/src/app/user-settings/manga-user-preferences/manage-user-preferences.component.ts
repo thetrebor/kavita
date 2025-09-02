@@ -19,7 +19,7 @@ import {LicenseService} from "../../_services/license.service";
 import {HighlightBarComponent} from "../../book-reader/_components/_annotations/highlight-bar/highlight-bar.component";
 
 @Component({
-  selector: 'app-manga-user-preferences',
+  selector: 'app-manage-user-preferences',
   imports: [
     TranslocoDirective,
     ReactiveFormsModule,
@@ -44,7 +44,6 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly localizationService = inject(LocalizationService);
   protected readonly licenseService = inject(LicenseService);
-
 
   fontFamilies: Array<string> = [];
   locales: Array<KavitaLocale> = [];
