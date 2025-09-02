@@ -48,7 +48,6 @@ public interface IScannerService
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
     Task ScanFolder(string folder, string originalPath);
-    Task AnalyzeFiles();
 
 }
 
@@ -70,6 +69,49 @@ public enum ScanCancelReason
     /// The underlying folder is missing
     /// </summary>
     FolderMissing = 3
+}
+
+public sealed record ScannerOptions
+{
+    /// <summary>
+    /// Allow File Metadata to be read and applied to transform ParserInfo
+    /// </summary>
+    public bool EnableMetadata { get; set; } = true;
+    /// <summary>
+    /// Scan folder by folder (library scan) or just a single folder
+    /// </summary>
+    public required bool ScanFolders { get; set; }
+
+    /// <summary>
+    /// When true, will ignore any optimizations to avoid scanning
+    /// </summary>
+    public bool ForceScan { get; set; } = false;
+    /// <summary>
+    /// Folder paths to scan. Must always be at least populated with one.
+    /// </summary>
+    /// <remarks>This assumes that <see cref="ScannserService.CheckMounts"/> has been ran</remarks>
+    public required List<string> FolderPaths { get; set; }
+    /// <summary>
+    /// This is for logging only
+    /// </summary>
+    public string LibraryName { get; set; }
+    /// <summary>
+    /// Used to handle some parsing mechanisms
+    /// </summary>
+    public LibraryType LibraryType { get; set; }
+    /// <summary>
+    /// Root path for falling back. For Library, should be LibraryRoot
+    /// </summary>
+    public required string RootPath { get; set; }
+
+    public int LibraryId { get; set; }
+    /// <summary>
+    /// Library types that the scanner should scan against
+    /// </summary>
+    public List<FileTypeGroup> ScanTypes { get; set; }
+
+
+    public string FileExtensions => string.Join("|", ScanTypes.Select(l => l.GetRegex()));
 }
 
 /**
@@ -103,35 +145,6 @@ public class ScannerService : IScannerService
         _readingItemService = readingItemService;
         _processSeries = processSeries;
         _wordCountAnalyzerService = wordCountAnalyzerService;
-    }
-
-    /// <summary>
-    /// This is only used for v0.7 to get files analyzed
-    /// </summary>
-    public async Task AnalyzeFiles()
-    {
-        _logger.LogInformation("Starting Analyze Files task");
-        var missingExtensions = await _unitOfWork.MangaFileRepository.GetAllWithMissingExtension();
-        if (missingExtensions.Count == 0)
-        {
-            _logger.LogInformation("Nothing to do");
-            return;
-        }
-
-        var sw = Stopwatch.StartNew();
-
-        foreach (var file in missingExtensions)
-        {
-            var fileInfo = _directoryService.FileSystem.FileInfo.New(file.FilePath);
-            if (!fileInfo.Exists)continue;
-            file.Extension = fileInfo.Extension.ToLowerInvariant();
-            file.Bytes = fileInfo.Length;
-            _unitOfWork.MangaFileRepository.Update(file);
-        }
-
-        await _unitOfWork.CommitAsync();
-
-        _logger.LogInformation("Completed Analyze Files task in {ElapsedTime}", sw.Elapsed);
     }
 
     /// <summary>
@@ -696,6 +709,21 @@ public class ScannerService : IScannerService
         }
 
         library.UpdateLastScanned(time);
+    }
+
+    private async Task<Tuple<long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(ScannerOptions options)
+    {
+        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
+        var scanWatch = Stopwatch.StartNew();
+
+        var processedSeries = await scanner.ScanLibrariesForSeries(library, options.FolderPaths,
+            options.ScanFolders, await _unitOfWork.SeriesRepository.GetFolderPathMap(options.LibraryId), options.ForceScan);
+
+        var scanElapsedTime = scanWatch.ElapsedMilliseconds;
+
+        var parsedSeries = TrackFoundSeriesAndFiles(processedSeries);
+
+        return Tuple.Create(scanElapsedTime, parsedSeries);
     }
 
     private async Task<Tuple<long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(Library library, IList<string> dirs,

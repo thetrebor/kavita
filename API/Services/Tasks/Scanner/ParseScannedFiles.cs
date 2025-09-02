@@ -150,6 +150,29 @@ public class ParseScannedFiles
         return await ScanSingleDirectory(folderPath, seriesPaths, library, forceCheck, result, fileExtensions, matcher);
     }
 
+    public async Task<IList<ScanResult>> ScanFiles(string folderPath, ScannerOptions options, IDictionary<string, IList<SeriesModified>> seriesPaths)
+    {
+        var fileExtensions = string.Join("|", library.LibraryFileTypes.Select(l => l.FileTypeGroup.GetRegex()));
+
+        // If there are no library file types, skip scanning entirely
+        if (string.IsNullOrWhiteSpace(fileExtensions))
+        {
+            return ArraySegment<ScanResult>.Empty;
+        }
+
+        var matcher = BuildMatcher(library);
+
+        var result = new List<ScanResult>();
+
+        // Not to self: this whole thing can be parallelized because we don't deal with any DB or global state
+        if (scanDirectoryByDirectory)
+        {
+            return await ScanDirectories(folderPath, seriesPaths, library, forceCheck, matcher, result, fileExtensions);
+        }
+
+        return await ScanSingleDirectory(folderPath, seriesPaths, library, forceCheck, result, fileExtensions, matcher);
+    }
+
     private async Task<IList<ScanResult>> ScanDirectories(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths,
         Library library, bool forceCheck, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
     {
@@ -536,6 +559,32 @@ public class ParseScannedFiles
         return processedScannedSeries.ToList();
     }
 
+    public async Task<IList<ScannedSeriesResult>> ScanLibrariesForSeries(ScannerOptions options, IDictionary<string, IList<SeriesModified>> seriesPaths)
+    {
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.FileScanProgressEvent("File Scan Starting", options.LibraryName, ProgressEventType.Started));
+
+        _logger.LogDebug("[ScannerService] Library {LibraryName} Step 1.A: Process {FolderCount} folders", options.LibraryName, options.FolderPaths.Count);
+        var processedScannedSeries = new ConcurrentBag<ScannedSeriesResult>();
+
+        foreach (var folder in options.FolderPaths)
+        {
+            try
+            {
+                await ScanAndParseFolder(folder, library, options.ScanFolders, seriesPaths, processedScannedSeries, options.ForceScan);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "[ScannerService] The directory '{FolderPath}' does not exist", folder);
+            }
+        }
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.FileScanProgressEvent("File Scan Done", options.LibraryName, ProgressEventType.Ended));
+
+        return processedScannedSeries.ToList();
+    }
+
     /// <summary>
     /// Helper method to scan and parse a folder
     /// </summary>
@@ -570,6 +619,33 @@ public class ParseScannedFiles
 
         // Now transform and add to processedScannedSeries AFTER everything is processed
         _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.F: Generate Sort Order for Series and Finalize", library.Name);
+        GenerateProcessedScannedSeries(scannedSeries, scanResults, processedScannedSeries);
+    }
+
+    private async Task ScanAndParseFolder(string folderPath, ScannerOptions options, IDictionary<string, IList<SeriesModified>> seriesPaths,
+        ConcurrentBag<ScannedSeriesResult> processedScannedSeries)
+    {
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.B: Scan files in {Folder}", options.LibraryName, folderPath);
+        var scanResults = await ScanFiles(folderPath, options.ScanFolders, seriesPaths, library, options.ForceScan);
+
+        // Aggregate the scanned series across all scanResults
+        var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.C: Process files in {Folder}", options.LibraryName, folderPath);
+        foreach (var scanResult in scanResults)
+        {
+            await ParseFiles(scanResult, seriesPaths, library);
+        }
+
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.D: Merge any localized series with series {Folder}", options.LibraryName, folderPath);
+        scanResults = MergeLocalizedSeriesAcrossScanResults(scanResults);
+
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.E: Group all parsed data into logical Series", options.LibraryName);
+        TrackSeriesAcrossScanResults(scanResults, scannedSeries);
+
+
+        // Now transform and add to processedScannedSeries AFTER everything is processed
+        _logger.LogDebug("\t[ScannerService] Library {LibraryName} Step 1.F: Generate Sort Order for Series and Finalize", options.LibraryName);
         GenerateProcessedScannedSeries(scannedSeries, scanResults, processedScannedSeries);
     }
 

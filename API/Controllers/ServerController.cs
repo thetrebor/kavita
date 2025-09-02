@@ -113,22 +113,6 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
-    /// <summary>
-    /// This is a one time task that needs to be ran for v0.7 statistics to work
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost("analyze-files")]
-    public async Task<ActionResult> AnalyzeFiles()
-    {
-        _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", User.GetUsername());
-        if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
-                Array.Empty<object>(), TaskScheduler.DefaultQueue, true))
-            return Ok(await _localizationService.Translate(User.GetUserId(), "job-already-running"));
-
-        BackgroundJob.Enqueue(() => _scannerService.AnalyzeFiles());
-        return Ok();
-    }
-
 
     /// <summary>
     /// Returns non-sensitive information about the current system
