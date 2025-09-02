@@ -101,7 +101,7 @@
           <ng-template #titleActions>
             @if (hasLicense()) {
               @if (licenseInfo()?.isActive) {
-                <a class="btn btn-outline-primary btn-sm me-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
+                <a class="btn btn-outline-primary btn-sm me-1" [href]="manageLink()" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
               } @else {
                 <a class="btn btn-outline-primary btn-sm me-1"
                    [ngbTooltip]="t('invalid-license-tooltip')"
@@ -186,7 +186,7 @@
 
         <div class="mt-2 mb-2">
           <app-setting-button [subtitle]="t('cancel-tooltip')">
-            <a class="btn btn-danger btn-sm mt-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('cancel-label')}}</a>
+            <a class="btn btn-danger btn-sm mt-1" [href]="manageLink()" target="_blank" rel="noreferrer nofollow">{{t('cancel-label')}}</a>
           </app-setting-button>
         </div>
 
@@ -200,7 +200,7 @@
 
         <div class="mt-2 mb-2">
           <app-setting-button [subtitle]="t('manage-tooltip')">
-            <a class="btn btn-primary btn-sm mt-1" [href]="manageLink" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
+            <a class="btn btn-primary btn-sm mt-1" [href]="manageLink()" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
           </app-setting-button>
         </div>
       </div>

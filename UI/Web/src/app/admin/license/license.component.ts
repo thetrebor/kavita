@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, model, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, model, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
@@ -35,7 +35,6 @@ export class LicenseComponent implements OnInit {
   protected readonly licenseService = inject(LicenseService);
   protected readonly WikiLink = WikiLink;
   protected readonly buyLink = environment.buyLink;
-  protected readonly manageLink = environment.manageLink;
 
   formGroup: FormGroup = new FormGroup({
     'licenseKey': new FormControl('', [Validators.required]),
@@ -48,6 +47,16 @@ export class LicenseComponent implements OnInit {
   hasLicense = model<boolean>(false);
   licenseInfo = model<LicenseInfo | null>(null);
   showEmail = model<boolean>(false);
+
+  /**
+   * Either the normal manageLink or with a prefilled email to ease the user
+   */
+  readonly manageLink = computed(() => {
+    const email = this.licenseInfo()?.registeredEmail;
+    if (!email) return environment.manageLink;
+
+    return environment.manageLink + '?prefilled_email=' + encodeURIComponent(email);
+  })
 
 
 
