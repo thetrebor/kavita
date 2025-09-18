@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {
   bookLayoutModes,
@@ -19,7 +19,7 @@ import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {User} from "../../_models/user";
 import {AccountService} from "../../_services/account.service";
-import {debounceTime, distinctUntilChanged, take, tap} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, map, take, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {BookService} from "../../book-reader/_services/book.service";
@@ -40,15 +40,19 @@ import {ScalingOptionPipe} from "../../_pipes/scaling-option.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
-import {ColorPickerDirective} from "ngx-color-picker";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {filter} from "rxjs";
+import {catchError, filter, of, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../shared/confirm.service";
 import {WikiLink} from "../../_models/wiki";
 import {BreakpointPipe} from "../../_pipes/breakpoint.pipe";
+import {
+  SettingColorPickerComponent
+} from "../../settings/_components/setting-colour-picker/setting-color-picker.component";
+import {ColorscapeService} from "../../_services/colorscape.service";
+import {Color} from "@iplab/ngx-color-picker";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -79,7 +83,6 @@ enum TabId {
     TitleCasePipe,
     WritingStylePipe,
     NgStyle,
-    ColorPickerDirective,
     NgbNav,
     NgbNavItem,
     NgbNavLinkBase,
@@ -88,6 +91,7 @@ enum TabId {
     LoadingComponent,
     NgbTooltip,
     BreakpointPipe,
+    SettingColorPickerComponent,
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
@@ -95,7 +99,19 @@ enum TabId {
 })
 export class ManageReadingProfilesComponent implements OnInit {
 
+  private readonly readingProfileService = inject(ReadingProfileService);
+  protected readonly colorscapeService = inject(ColorscapeService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly accountService = inject(AccountService);
+  private readonly bookService = inject(BookService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly transLoco = inject(TranslocoService);
+
   virtualScrollerBreakPoint = 20;
+
+  savingProfile = signal(false);
 
   fontFamilies: Array<string> = [];
   readingProfiles: ReadingProfile[] = [];
@@ -111,16 +127,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     return d;
   });
 
-  constructor(
-    private readingProfileService: ReadingProfileService,
-    private cdRef: ChangeDetectorRef,
-    private accountService: AccountService,
-    private bookService: BookService,
-    private destroyRef: DestroyRef,
-    private toastr: ToastrService,
-    private confirmService: ConfirmService,
-    private transLoco: TranslocoService,
-  ) {
+  constructor() {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
   }
@@ -219,41 +226,49 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged(),
+      filter(_ => !this.savingProfile()),
       filter(_ => this.readingProfileForm!.valid),
       takeUntilDestroyed(this.destroyRef),
-      tap(_ => this.autoSave()),
+      tap(_ => this.savingProfile.set(true)),
+      switchMap(_ => this.autoSave()),
+      tap(() => this.savingProfile.set(false))
     ).subscribe();
   }
 
   private autoSave() {
     if (this.selectedProfile!.id == 0) {
-      this.readingProfileService.createProfile(this.packData()).subscribe({
-        next: createdProfile => {
+      return this.readingProfileService.createProfile(this.packData()).pipe(
+        tap(createdProfile => {
           this.selectedProfile = createdProfile;
           this.readingProfiles.push(createdProfile);
           this.cdRef.markForCheck();
-        },
-        error: err => {
+        }),
+        catchError(err => {
           console.log(err);
           this.toastr.error(err.message);
-        }
-      })
-    } else {
-      const profile = this.packData();
-      this.readingProfileService.updateProfile(profile).subscribe({
-        next: newProfile => {
-          this.readingProfiles = this.readingProfiles.map(p => {
-            if (p.id !== profile.id) return p;
-            return newProfile;
-          });
-          this.cdRef.markForCheck();
-        },
-        error: err => {
-          console.log(err);
-          this.toastr.error(err.message);
-        }
-      })
+
+          return of(null);
+        })
+      );
     }
+
+    const profile = this.packData();
+    return this.readingProfileService.updateProfile(profile).pipe(
+      tap(newProfile => {
+        this.readingProfiles = this.readingProfiles.map(p => {
+          if (p.id !== profile.id) return p;
+
+          return newProfile;
+        });
+        this.cdRef.markForCheck();
+      }),
+      catchError(err => {
+        console.log(err);
+        this.toastr.error(err.message);
+
+        return of(null);
+      })
+    );
   }
 
   private packData(): ReadingProfile {
@@ -277,13 +292,13 @@ export class ManageReadingProfilesComponent implements OnInit {
     return data;
   }
 
-  handleBackgroundColorChange(color: string) {
+  handleBackgroundColorChange(color: Color) {
     if (!this.readingProfileForm || !this.selectedProfile) return;
 
     this.readingProfileForm.markAsDirty();
     this.readingProfileForm.markAsTouched();
-    this.selectedProfile.backgroundColor = color;
-    this.readingProfileForm.get('backgroundColor')?.setValue(color);
+    this.selectedProfile.backgroundColor = color.toHexString();
+    this.readingProfileForm.get('backgroundColor')?.setValue(color.toHexString());
     this.cdRef.markForCheck();
   }
 

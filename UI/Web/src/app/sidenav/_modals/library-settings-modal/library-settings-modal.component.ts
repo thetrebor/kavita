@@ -141,7 +141,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   get IsKavitaPlusEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-    return allKavitaPlusScrobbleEligibleTypes.includes(libType);
+    return allKavitaPlusMetadataApplicableTypes.includes(libType);
   }
 
   get IsMetadataDownloadEligible() {
@@ -401,7 +401,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   applyCoverImage(coverUrl: string) {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe();
   }
 
   updateCoverImageIndex(selectedIndex: number) {
@@ -410,7 +410,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   resetCoverImage() {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, '', false).subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, '', false).subscribe();
   }
 
   openDirectoryPicker() {
@@ -462,9 +462,6 @@ export class LibrarySettingsModalComponent implements OnInit {
         break;
       case Action.GenerateColorScape:
         await this.actionService.refreshLibraryMetadata(this.library!, undefined, false);
-        break;
-      case (Action.AnalyzeFiles):
-        await this.actionService.analyzeFiles(this.library!);
         break;
       case Action.Delete:
         await this.actionService.deleteLibrary(this.library!, () => {

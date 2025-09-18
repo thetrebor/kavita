@@ -14,11 +14,11 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  Renderer2, Signal,
+  Renderer2, signal, Signal,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject} from 'rxjs';
+import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {ReaderService} from '../../../_services/reader.service';
@@ -37,6 +37,19 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
  */
 const SPACER_SCROLL_INTO_PX = 200;
+/**
+ * Default debounce time from scroll and scrollend event listeners
+ */
+const DEFAULT_SCROLL_DEBOUNCE = 20;
+/**
+ * Safari does not support the scrollEnd event, we can use scroll event with higher debounce time to emulate it
+ */
+const EMULATE_SCROLL_END_DEBOUNCE = 100;
+/**
+ * Time which must have passed before auto chapter changes can occur.
+ * See: https://github.com/Kareadita/Kavita/issues/3970
+ */
+const INITIAL_LOAD_GRACE_PERIOD = 1000;
 
 /**
  * Bitwise enums for configuring how much debug information we want
@@ -171,6 +184,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     */
    initFinished: boolean = false;
   /**
+   * True until INITIAL_LOAD_GRACE_PERIOD ms have passed since the component was created
+   */
+  isInitialLoad = true;
+  /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
   debugMode: DEBUG_MODES = DEBUG_MODES.None;
@@ -220,17 +237,34 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    * gets promoted to fullscreen.
    */
   initScrollHandler() {
-    //console.log('Setting up Scroll handler on ', this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body);
-    fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scroll')
-    .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
-    .subscribe((event) => this.handleScrollEvent(event));
+    const element = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
 
-    fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scrollend')
-    .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
-    .subscribe((event) => this.handleScrollEndEvent(event));
+    fromEvent(element, 'scroll')
+      .pipe(
+        debounceTime(DEFAULT_SCROLL_DEBOUNCE),
+        takeUntilDestroyed(this.destroyRef),
+        tap((event) => this.handleScrollEvent(event))
+      )
+      .subscribe();
+
+    const isScrollEndSupported = 'onscrollend' in document;
+    const scrollEndEvent = isScrollEndSupported ? 'scrollend' : 'scroll';
+    const scrollEndDebounce = isScrollEndSupported ? DEFAULT_SCROLL_DEBOUNCE : EMULATE_SCROLL_END_DEBOUNCE;
+
+    fromEvent(element, scrollEndEvent)
+      .pipe(
+        debounceTime(scrollEndDebounce),
+        takeUntilDestroyed(this.destroyRef),
+        tap((event) => this.handleScrollEndEvent(event))
+      )
+      .subscribe();
   }
 
   ngOnInit(): void {
+    setTimeout(() => {
+      this.isInitialLoad = false;
+    }, INITIAL_LOAD_GRACE_PERIOD);
+
     this.initScrollHandler();
 
     this.recalculateImageWidth();
@@ -409,7 +443,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   checkIfShouldTriggerContinuousReader() {
-    if (this.isScrolling) return;
+    if (this.isScrolling || this.isInitialLoad) return;
 
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
       const totalHeight = this.getTotalHeight();
@@ -629,6 +663,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    * Move to the next chapter and set the page
    */
   moveToNextChapter() {
+    if (!this.allImagesLoaded) return;
+
     this.setPageNum(this.totalPages);
     this.loadNextChapter.emit();
   }
