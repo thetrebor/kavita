@@ -1,8 +1,7 @@
-﻿
-using System;
+﻿using System;
 using API.Entities.Interfaces;
 
-namespace API.Entities;
+namespace API.Entities.Progress;
 
 /// <summary>
 /// Represents the progress a single user has on a given Chapter.
@@ -46,6 +45,10 @@ public class AppUserProgress : IEntityDate
     /// Last date this was updated
     /// </summary>
     public DateTime LastModified { get; set; }
+    /// <summary>
+    /// Total times the underlying Chapter has been fully read
+    /// </summary>
+    public int TotalReads { get; set; } = 0;
 
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }

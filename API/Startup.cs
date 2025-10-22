@@ -218,9 +218,11 @@ public class Startup
         {
             options.Queues = new[] {TaskScheduler.ScanQueue, TaskScheduler.DefaultQueue};
         });
+
         // Add IHostedService for startup tasks
         // Any services that should be bootstrapped go here
         services.AddHostedService<StartupTasksHostedService>();
+        services.AddHostedService<ReadingSessionInitializer>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

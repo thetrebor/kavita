@@ -13,6 +13,7 @@ using API.DTOs.Progress;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Progress;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;

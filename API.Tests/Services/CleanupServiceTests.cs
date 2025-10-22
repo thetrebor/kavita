@@ -9,6 +9,7 @@ using API.Data.Repositories;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Progress;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;

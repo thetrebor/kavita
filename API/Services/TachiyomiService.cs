@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using API.Comparators;
 using API.Entities;
+using API.Entities.Progress;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;

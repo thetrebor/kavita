@@ -94,6 +94,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<OpdsActionFilterAttribute>();
         services.AddScoped<OpdsActiveUserMiddlewareAttribute>();
 
+        services.AddSingleton<IReadingSessionService, ReadingSessionService>();
+
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
 
@@ -117,6 +119,7 @@ public static class ApplicationServiceExtensions
             options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 75 MB
             options.CompactionPercentage = 0.1; // LRU compaction (10%)
         });
+
         services.AddSingleton<ITicketStore, CustomTicketStore>();
 
         services.AddSwaggerGen(g =>

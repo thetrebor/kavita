@@ -8,6 +8,7 @@ using API.DTOs;
 using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Progress;
 using API.Extensions.QueryExtensions;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;

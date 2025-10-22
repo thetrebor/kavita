@@ -179,6 +179,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                         var pageCounter = 1;
                         try
                         {
+                            // TODO: Replace with BookService method, we will loose progress but these tasks are usually fast
                             using var book = await EpubReader.OpenBookAsync(filePath, BookService.LenientBookReaderOptions);
 
                             var totalPages = book.Content.Html.Local;

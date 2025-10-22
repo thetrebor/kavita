@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
@@ -12,6 +13,7 @@ using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
 using API.Entities.Person;
+using API.Entities.Progress;
 using API.Entities.Scrobble;
 using API.Extensions;
 using Microsoft.AspNetCore.Identity;
@@ -83,6 +85,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserReadingProfile> AppUserReadingProfiles { get; set; } = null!;
     public DbSet<AppUserAnnotation> AppUserAnnotation { get; set; } = null!;
     public DbSet<EpubFont> EpubFont { get; set; } = null!;
+    public DbSet<AppUserReadingSession> AppUserReadingSession { get; set; } = null!;
+    //public DbSet<AppUserReadingHistory> AppUserReadingHistory { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -308,6 +312,16 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion(new HashSet<int>())
             .HasColumnType("TEXT")
             .HasDefaultValue(new HashSet<int>());
+
+        builder.Entity<AppUserReadingSession>()
+            .Property(b => b.IsActive)
+            .HasDefaultValue(true);
+
+        builder.Entity<AppUserReadingSession>()
+            .Property(sm => sm.ActivityData)
+            .HasJsonConversion([])
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new List<ReadingActivityDataDto>());
     }
 
     #nullable enable

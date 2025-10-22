@@ -13,6 +13,7 @@ using API.DTOs.Progress;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Progress;
 using API.Extensions;
 using API.Services.Plus;
 using API.Services.Tasks;
@@ -52,6 +53,7 @@ public class ReaderService : IReaderService
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
     private readonly IScrobblingService _scrobblingService;
+    private readonly IReadingSessionService _readingSessionService;
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
     private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
     private readonly ChapterSortComparerSpecialsLast _chapterSortComparerSpecialsLast = ChapterSortComparerSpecialsLast.Default;
@@ -65,7 +67,7 @@ public class ReaderService : IReaderService
 
 
     public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
-        IDirectoryService directoryService, IScrobblingService scrobblingService)
+        IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -73,6 +75,7 @@ public class ReaderService : IReaderService
         _imageService = imageService;
         _directoryService = directoryService;
         _scrobblingService = scrobblingService;
+        _readingSessionService = readingSessionService;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -215,12 +218,11 @@ public class ReaderService : IReaderService
 
         try
         {
-            userProgress =
-                user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+            userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
         }
         catch (Exception)
         {
-            // There is a very rare chance that user progress will duplicate current row. If that happens delete one with less pages
+            // There is a very rare chance that user progress will duplicate current row. If that happens delete one with fewer pages
             var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
             if (progresses.Count > 1)
             {
@@ -251,8 +253,7 @@ public class ReaderService : IReaderService
 
         try
         {
-            var userProgress =
-                await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
+            var userProgress = await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
             // Don't create an empty progress record if there isn't any progress. This prevents Last Read date from being updated when
             // opening a chapter
@@ -261,10 +262,10 @@ public class ReaderService : IReaderService
             if (userProgress == null)
             {
                 // Create a user object
-                var userWithProgress =
-                    await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+                var userWithProgress = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
                 if (userWithProgress == null) return false;
-                userWithProgress.Progresses ??= new List<AppUserProgress>();
+
+                userWithProgress.Progresses ??= [];
                 userWithProgress.Progresses.Add(new AppUserProgress
                 {
                     PagesRead = progressDto.PageNum,
@@ -291,6 +292,8 @@ public class ReaderService : IReaderService
 
             if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
             {
+                await _readingSessionService.UpdateProgress(userId, progressDto);
+
                 var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
