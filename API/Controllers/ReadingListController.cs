@@ -10,6 +10,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Services.Reading;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

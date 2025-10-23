@@ -11,7 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace API.Services;
+namespace API.Services.Reading;
+#nullable enable
 
 public interface IReadingSessionService
 {
@@ -20,13 +21,13 @@ public interface IReadingSessionService
 
 internal sealed record SessionTimeout<T>
 {
-    public T Value { get; set; }
+    public required T Value { get; set; }
     /// <summary>
     /// Expiration time in Utc
     /// </summary>
     public DateTime Expiration { get; set; }
     public DateTime LastTimerRefresh { get; set; }
-    public Timer TimeoutTimer { get; set; }
+    public Timer? TimeoutTimer { get; set; }
 }
 
 public class ReadingSessionService : IReadingSessionService, IDisposable, IAsyncDisposable
@@ -36,7 +37,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
     private readonly ConcurrentDictionary<string, SessionTimeout<int>> _activeSessions = new();
     private readonly int _defaultTimeoutMinutes;
     private readonly int _timerRefreshDebounceSeconds;
-    private Timer _midnightRolloverTimer;
+    private Timer? _midnightRolloverTimer;
     private bool _disposed;
 
     public ReadingSessionService(IServiceScopeFactory serviceScopeFactory, ILogger<ReadingSessionService> logger,
@@ -148,9 +149,11 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             }
             else
             {
-                return await context.AppUserReadingSession
+                var session = await context.AppUserReadingSession
                     .Where(s => s.Id == sessionTimeout.Value)
                     .FirstOrDefaultAsync();
+
+                if (session != null) return session;
             }
         }
 

@@ -38,9 +38,13 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public ICollection<MangaFileDto> Files { get; init; } = default!;
     /// <summary>
-    /// Calculated at API time. Number of pages read for this Chapter for logged in user.
+    /// Calculated at API time. Number of pages read for this Chapter for logged-in user.
     /// </summary>
     public int PagesRead { get; set; }
+    /// <summary>
+    /// Calcuated at API time. Total number of complete reads.
+    /// </summary>
+    public int TotalReads { get; set; }
     /// <summary>
     /// The last time a chapter was read by current authenticated user
     /// </summary>

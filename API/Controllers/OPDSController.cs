@@ -11,6 +11,7 @@ using API.Exceptions;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
+using API.Services.Reading;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

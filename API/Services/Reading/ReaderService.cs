@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,14 +14,13 @@ using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Extensions;
 using API.Services.Plus;
-using API.Services.Tasks;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
-namespace API.Services;
+namespace API.Services.Reading;
 #nullable enable
 
 public interface IReaderService
@@ -266,7 +263,7 @@ public class ReaderService : IReaderService
                 if (userWithProgress == null) return false;
 
                 userWithProgress.Progresses ??= [];
-                userWithProgress.Progresses.Add(new AppUserProgress
+                userProgress = new AppUserProgress
                 {
                     PagesRead = progressDto.PageNum,
                     VolumeId = progressDto.VolumeId,
@@ -274,7 +271,8 @@ public class ReaderService : IReaderService
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
                     BookScrollId = progressDto.BookScrollId,
-                });
+                };
+                userWithProgress.Progresses.Add(userProgress);
                 _unitOfWork.UserRepository.Update(userWithProgress);
             }
             else
@@ -287,8 +285,13 @@ public class ReaderService : IReaderService
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
+            if (userProgress.PagesRead >= totalPages)
+            {
+                userProgress.TotalReads += 1;
+            }
+
             _logger.LogDebug("Saving Progress on Chapter {ChapterId} from Series {SeriesId} to {PageNum}", progressDto.ChapterId, progressDto.SeriesId, progressDto.PageNum);
-            userProgress?.MarkModified();
+            userProgress.MarkModified();
 
             if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
             {

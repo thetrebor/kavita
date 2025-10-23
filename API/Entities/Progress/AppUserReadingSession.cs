@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using API.DTOs.Progress;
 using API.Entities.Interfaces;
 using API.Services;
+using API.Services.Reading;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities.Progress;
 
 /// <summary>
 /// Represents a reading session for a user. See <see cref="ReadingSessionService"/>
 /// </summary>
+[Index(nameof(IsActive), IsUnique = false)]
 public class AppUserReadingSession : IEntityDate
 {
     public int Id { get; set; }

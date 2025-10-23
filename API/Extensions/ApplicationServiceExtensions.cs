@@ -6,6 +6,7 @@ using API.Helpers;
 using API.Middleware;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Store;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
@@ -93,6 +94,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IOidcService, OidcService>();
         services.AddScoped<OpdsActionFilterAttribute>();
         services.AddScoped<OpdsActiveUserMiddlewareAttribute>();
+
+        services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
 
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
 

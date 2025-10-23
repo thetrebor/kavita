@@ -10,6 +10,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Helpers.Converters;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
@@ -85,6 +86,7 @@ public class TaskScheduler : ITaskScheduler
     public const string KavitaPlusDataRefreshId = "kavita+-data-refresh";
     public const string KavitaPlusStackSyncId = "kavita+-stack-sync";
     public const string KavitaPlusWantToReadSyncId = "kavita+-want-to-read-sync";
+    public const string ReadingHistoryAggregationId = "reading-history-aggregation";
 
     private const int BaseRetryDelay = 60; // 1-minute
 
@@ -214,6 +216,10 @@ public class TaskScheduler : ITaskScheduler
 
         RecurringJob.AddOrUpdate(SyncThemesTaskId, () => SyncThemes(),
             Cron.Daily, RecurringJobOptions);
+
+
+        RecurringJob.AddOrUpdate<IReadingHistoryService>(ReadingHistoryAggregationId, service => service.AggregateYesterdaysActivity(),
+            "5 0 * * *", RecurringJobOptions); // 12:05 AM daily
 
         await ScheduleKavitaPlusTasks();
     }

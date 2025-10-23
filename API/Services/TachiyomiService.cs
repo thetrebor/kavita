@@ -10,6 +10,7 @@ using API.Comparators;
 using API.Entities;
 using API.Entities.Progress;
 using API.Extensions;
+using API.Services.Reading;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using Microsoft.Extensions.Logging;

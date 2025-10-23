@@ -16,6 +16,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Reading;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common;

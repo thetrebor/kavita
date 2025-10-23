@@ -3,6 +3,7 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.Progress;
 using API.Services;
+using API.Services.Reading;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

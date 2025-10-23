@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251022005608_ReadingSessions")]
+    [Migration("20251022235941_ReadingSessions")]
     partial class ReadingSessions
     {
         /// <inheritdoc />
@@ -2197,6 +2197,36 @@ namespace API.Data.Migrations
                     b.ToTable("AppUserProgresses");
                 });
 
+            modelBuilder.Entity("API.Entities.Progress.AppUserReadingHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Data")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"TotalMinutesRead\":0,\"TotalPagesRead\":0,\"TotalWordsRead\":0,\"LongestSessionMinutes\":0}");
+
+                    b.Property<DateTime>("DateUtc")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("DateUtc")
+                        .IsUnique();
+
+                    b.ToTable("AppUserReadingHistory");
+                });
+
             modelBuilder.Entity("API.Entities.Progress.AppUserReadingSession", b =>
                 {
                     b.Property<int>("Id")
@@ -2243,6 +2273,8 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
+
+                    b.HasIndex("IsActive");
 
                     b.ToTable("AppUserReadingSession");
                 });
@@ -3543,6 +3575,17 @@ namespace API.Data.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("API.Entities.Progress.AppUserReadingHistory", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("ReadingHistory")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("API.Entities.Progress.AppUserReadingSession", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -3895,6 +3938,8 @@ namespace API.Data.Migrations
                     b.Navigation("Progresses");
 
                     b.Navigation("Ratings");
+
+                    b.Navigation("ReadingHistory");
 
                     b.Navigation("ReadingLists");
 

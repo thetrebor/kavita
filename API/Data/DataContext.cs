@@ -86,7 +86,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserAnnotation> AppUserAnnotation { get; set; } = null!;
     public DbSet<EpubFont> EpubFont { get; set; } = null!;
     public DbSet<AppUserReadingSession> AppUserReadingSession { get; set; } = null!;
-    //public DbSet<AppUserReadingHistory> AppUserReadingHistory { get; set; } = null!;
+    public DbSet<AppUserReadingHistory> AppUserReadingHistory { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -322,6 +322,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<ReadingActivityDataDto>());
+
+        builder.Entity<AppUserReadingHistory>()
+            .Property(sm => sm.Data)
+            .HasJsonConversion(new DailyReadingDataDto())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new DailyReadingDataDto());
     }
 
     #nullable enable

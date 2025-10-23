@@ -17,6 +17,7 @@ using API.Entities.Progress;
 using API.Extensions;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;

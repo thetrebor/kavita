@@ -22,6 +22,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     public ICollection<AppUserRole> UserRoles { get; set; } = null!;
     public ICollection<AppUserProgress> Progresses { get; set; } = null!;
     public ICollection<AppUserReadingSession> ReadingSessions { get; set; } = null!;
+    public ICollection<AppUserReadingHistory> ReadingHistory { get; set; } = null!;
     public ICollection<AppUserRating> Ratings { get; set; } = null!;
     public ICollection<AppUserChapterRating> ChapterRatings { get; set; } = null!;
     public AppUserPreferences UserPreferences { get; set; } = null!;

@@ -33,6 +33,7 @@ using API.Helpers;
 using API.Helpers.Converters;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
