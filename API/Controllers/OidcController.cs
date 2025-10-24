@@ -1,12 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -14,7 +11,6 @@ namespace API.Controllers;
 [Route("[controller]")]
 public class OidcController: ControllerBase
 {
-
     [AllowAnonymous]
     [HttpGet("login")]
     public IActionResult Login(string returnUrl = "/")

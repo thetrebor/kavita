@@ -81,7 +81,7 @@ public class AccountController : BaseApiController
     [HttpGet("oidc-authenticated")]
     public ActionResult<bool> OidcAuthenticated()
     {
-        return HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName);
+        return Ok(HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName));
     }
 
     /// <summary>

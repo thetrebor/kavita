@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.Misc;
+using API.Services;
 using API.Services.Reading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -137,6 +138,11 @@ public class ClientInfoMiddleware
         if (!context.User?.Identity?.IsAuthenticated ?? true)
         {
             return AuthenticationType.Unknown;
+        }
+
+        if (context.Request.Cookies.ContainsKey(OidcService.CookieName))
+        {
+            return AuthenticationType.OIDC;
         }
 
         // Check for API key claim (adjust based on your auth implementation)
