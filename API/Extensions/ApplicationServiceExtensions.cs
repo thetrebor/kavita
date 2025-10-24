@@ -98,6 +98,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
 
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
+        services.AddSingleton<IClientInfoAccessor, ClientInfoAccessor>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);

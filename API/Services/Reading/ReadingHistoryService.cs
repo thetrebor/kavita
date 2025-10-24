@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs.Misc;
 using API.DTOs.Progress;
 using API.Entities.Progress;
 using Hangfire;
@@ -83,6 +85,13 @@ public class ReadingHistoryService : IReadingHistoryService
             var totalWords = 0;
             var longestSessionMinutes = 0;
 
+            var devicesUsed = sessions
+                .SelectMany(s => s.ActivityData)
+                .Select(a => a.ClientInfo)
+                .Where(c => c != null)
+                .DistinctBy(c => new { c.UserAgent, c.IpAddress, c.ClientType, c.Platform, c.DeviceType })
+                .ToList();
+
             foreach (var session in sessions)
             {
                 if (session.EndTime.HasValue)
@@ -114,7 +123,8 @@ public class ReadingHistoryService : IReadingHistoryService
                 AppUserId = userId,
                 DateUtc = yesterdayUtc,
                 Data = dailyData,
-                CreatedUtc = DateTime.UtcNow
+                CreatedUtc = DateTime.UtcNow,
+                ClientInfoUsed = devicesUsed
             };
 
             _context.AppUserReadingHistory.Add(history);

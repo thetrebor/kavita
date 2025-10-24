@@ -394,8 +394,9 @@ public class Startup
         app.UseResponseCaching();
 
         app.UseAuthentication();
-
         app.UseAuthorization();
+
+        app.UseMiddleware<ClientInfoMiddleware>();
 
         app.UseDefaultFiles();
 

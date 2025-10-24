@@ -1,6 +1,8 @@
 ﻿using System;
+using API.DTOs.Misc;
 
 namespace API.DTOs.Progress;
+#nullable enable
 
 public class ReadingActivityDataDto
 {
@@ -21,4 +23,9 @@ public class ReadingActivityDataDto
     /// Only applicable for Book entries
     /// </summary>
     public int WordsRead { get; set; }
+    /// <summary>
+    /// Client information for this reading activity.
+    /// Tracks device, browser, and authentication details.
+    /// </summary>
+    public ClientInfoDto? ClientInfo { get; set; }
 }

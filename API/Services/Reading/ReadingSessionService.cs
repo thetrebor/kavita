@@ -34,6 +34,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<ReadingSessionService> _logger;
+    private readonly IClientInfoAccessor _clientInfoAccessor;
     private readonly ConcurrentDictionary<string, SessionTimeout<int>> _activeSessions = new();
     private readonly int _defaultTimeoutMinutes;
     private readonly int _timerRefreshDebounceSeconds;
@@ -41,10 +42,12 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
     private bool _disposed;
 
     public ReadingSessionService(IServiceScopeFactory serviceScopeFactory, ILogger<ReadingSessionService> logger,
-        int defaultTimeoutMinutes = 400, int timerRefreshDebounceSeconds = 5)
+        IClientInfoAccessor clientInfoAccessor,
+        int defaultTimeoutMinutes = 30, int timerRefreshDebounceSeconds = 5)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
+        _clientInfoAccessor = clientInfoAccessor;
 
         _defaultTimeoutMinutes = defaultTimeoutMinutes;
         _timerRefreshDebounceSeconds = timerRefreshDebounceSeconds;
@@ -57,6 +60,9 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
     {
         _logger.LogDebug("Creating/Updating Reading Session for {UserId} on {ChapterId}", userId, progressDto.ChapterId);
         var session = await GetOrCreateSession(userId, progressDto);
+
+        // Get client info for this request
+        var clientInfo = _clientInfoAccessor.Current;
 
         // Update session activity data in DB
         using var scope = _serviceScopeFactory.CreateScope();
@@ -71,6 +77,12 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             existingChapterActivity.EndPage = progressDto.PageNum;
             existingChapterActivity.EndTime = DateTime.Now;
             existingChapterActivity.EndTimeUtc = DateTime.UtcNow;
+
+            // Update client info if it changed (e.g., user switched devices)
+            if (clientInfo != null)
+            {
+                existingChapterActivity.ClientInfo = clientInfo;
+            }
 
             var chapterFormat = await context.MangaFile
                 .Where(f => f.ChapterId == progressDto.ChapterId)
@@ -115,7 +127,12 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         else
         {
             // Add new ActivityData for a different chapter in the same session
-            session.ActivityData.Add(NewActivityData(progressDto));
+            var newActivity = NewActivityData(progressDto);
+            if (clientInfo != null)
+            {
+                newActivity.ClientInfo = clientInfo;
+            }
+            session.ActivityData.Add(newActivity);
         }
 
         // Update session timestamps
@@ -205,6 +222,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             EndTime = null,
             PagesRead = 0,
             WordsRead = 0,
+            ClientInfo = null
         };
     }
 
