@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.ManualMigrations;
+using API.DTOs.Internal;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -63,6 +64,7 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        services.Configure<AppSettingsDto>(_config);
         services.AddApplicationServices(_config, _env);
 
         services.AddControllers(options =>
@@ -216,7 +218,7 @@ public class Startup
         // Add the processing server as IHostedService
         services.AddHangfireServer(options =>
         {
-            options.Queues = new[] {TaskScheduler.ScanQueue, TaskScheduler.DefaultQueue};
+            options.Queues = [TaskScheduler.ScanQueue, TaskScheduler.DefaultQueue];
         });
 
         // Add IHostedService for startup tasks

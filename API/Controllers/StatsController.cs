@@ -30,18 +30,16 @@ public class StatsController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILocalizationService _localizationService;
-    private readonly ILicenseService _licenseService;
     private readonly IDirectoryService _directoryService;
 
     public StatsController(IStatisticService statService, IUnitOfWork unitOfWork,
         UserManager<AppUser> userManager, ILocalizationService localizationService,
-        ILicenseService licenseService, IDirectoryService directoryService)
+        IDirectoryService directoryService)
     {
         _statService = statService;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _localizationService = localizationService;
-        _licenseService = licenseService;
         _directoryService = directoryService;
     }
 
