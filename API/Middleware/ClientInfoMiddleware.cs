@@ -15,17 +15,8 @@ namespace API.Middleware;
 /// Middleware that extracts client information from the HTTP request and makes it
 /// available through IClientInfoAccessor for the duration of the request.
 /// </summary>
-public class ClientInfoMiddleware
+public class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ClientInfoMiddleware> _logger;
-
-    public ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -33,7 +24,7 @@ public class ClientInfoMiddleware
             var clientInfo = ExtractClientInfo(context);
             ClientInfoAccessor.SetClientInfo(clientInfo);
 
-            await _next(context);
+            await next(context);
         }
         finally
         {
@@ -100,7 +91,7 @@ public class ClientInfoMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to parse X-Kavita-Client header: {Header}", header);
+            logger.LogWarning(ex, "Failed to parse X-Kavita-Client header: {Header}", header);
         }
 
         // Fallback if parsing fails

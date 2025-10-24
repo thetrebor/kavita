@@ -11,7 +11,6 @@ namespace API.Middleware;
 
 public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
 {
-
     private static readonly JsonSerializerOptions ExceptionJsonSerializeOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

@@ -19,6 +19,11 @@ public class SecurityEventMiddleware(RequestDelegate next)
         .WriteTo.File(Path.Join(Directory.GetCurrentDirectory(), "config/logs/", "security.log"), rollingInterval: RollingInterval.Day)
         .CreateLogger();
 
+    private static readonly JsonSerializerOptions JsonSerializeOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -40,6 +45,7 @@ public class SecurityEventMiddleware(RequestDelegate next)
                 CreatedAt = DateTime.Now,
                 CreatedAtUtc = DateTime.UtcNow,
             };
+
             _logger.Information("Unauthorized User attempting to access API. {@Event}", securityEvent);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
@@ -48,12 +54,7 @@ public class SecurityEventMiddleware(RequestDelegate next)
 
             var response = new ApiException(context.Response.StatusCode, errorMessage, ex.StackTrace);
 
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-
-            var json = JsonSerializer.Serialize(response, options);
+            var json = JsonSerializer.Serialize(response, JsonSerializeOptions);
 
             await context.Response.WriteAsync(json);
         }
