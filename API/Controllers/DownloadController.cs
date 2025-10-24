@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Downloads;
 using API.Entities;
@@ -22,7 +23,7 @@ namespace API.Controllers;
 /// <summary>
 /// All APIs related to downloading entities from the system. Requires Download Role or Admin Role.
 /// </summary>
-[Authorize(Policy="RequireDownloadRole")]
+[Authorize(PolicyGroups.DownloadPolicy)]
 public class DownloadController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -93,7 +94,7 @@ public class DownloadController : BaseApiController
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    [Authorize(Policy="RequireDownloadRole")]
+    [Authorize(PolicyGroups.DownloadPolicy)]
     [HttpGet("volume")]
     public async Task<ActionResult> DownloadVolume(int volumeId)
     {
@@ -223,8 +224,8 @@ public class DownloadController : BaseApiController
         if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmarks-empty"));
 
         // We know that all bookmarks will be for one single seriesId
-        var userId = User.GetUserId()!;
-        var username = User.GetUsername()!;
+        var userId = User.GetUserId();
+        var username = User.GetUsername();
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
 
         var files = await _bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));

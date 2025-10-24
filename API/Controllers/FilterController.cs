@@ -15,12 +15,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
-
 #nullable enable
 
-/// <summary>
-/// This is responsible for Filter caching
-/// </summary>
 public class FilterController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -80,12 +76,22 @@ public class FilterController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// All Smart Filters for the authenticated user
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public ActionResult<IEnumerable<SmartFilterDto>> GetFilters()
     {
         return Ok(_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(User.GetUserId()));
     }
 
+    /// <summary>
+    /// Delete the smart filter for the authenticated user
+    /// </summary>
+    /// <remarks>User must not be in <see cref="PolicyConstants.ReadOnlyRole"/></remarks>
+    /// <param name="filterId"></param>
+    /// <returns></returns>
     [HttpDelete]
     public async Task<ActionResult> DeleteFilter(int filterId)
     {

@@ -53,7 +53,7 @@ public class LicenseController(
     /// Has any license registered with the instance. Does not validate against Kavita+ API
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("has-license")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasLicense()
@@ -67,7 +67,7 @@ public class LicenseController(
     /// </summary>
     /// <param name="forceCheck">Force checking the API and skip the 8 hour cache</param>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("info")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<LicenseInfoDto?>> GetLicenseInfo(bool forceCheck = false)
@@ -86,7 +86,7 @@ public class LicenseController(
     /// Remove the Kavita+ License on the Server
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpDelete]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult> RemoveLicense()
@@ -103,7 +103,7 @@ public class LicenseController(
     }
 
 
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("reset")]
     public async Task<ActionResult> ResetLicense(UpdateLicenseDto dto)
     {
@@ -132,7 +132,7 @@ public class LicenseController(
     /// </summary>
     /// <remarks>Caches the result</remarks>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost]
     public async Task<ActionResult> UpdateLicense(UpdateLicenseDto dto)
     {

@@ -126,9 +126,9 @@ public static class IdentityServiceExtensions
 
 
         services.AddAuthorizationBuilder()
-            .AddPolicy("RequireAdminRole", policy => policy.RequireRole(PolicyConstants.AdminRole))
-            .AddPolicy("RequireDownloadRole", policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole))
-            .AddPolicy("RequireChangePasswordRole", policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
+            .AddPolicy(PolicyGroups.AdminPolicy, policy => policy.RequireRole(PolicyConstants.AdminRole))
+            .AddPolicy(PolicyGroups.DownloadPolicy, policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole))
+            .AddPolicy(PolicyGroups.ChangePasswordPolicy, policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
 
         return services;
     }

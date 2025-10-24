@@ -1071,7 +1071,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("resend-confirmation-email")]
     [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<InviteUserResponse>> ResendConfirmationSendEmail([FromQuery] int userId)

@@ -22,17 +22,15 @@ public class DeviceController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDeviceService _deviceService;
-    private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
     private readonly IMapper _mapper;
 
-    public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService,
-        IEmailService emailService, IEventHub eventHub, ILocalizationService localizationService, IMapper mapper)
+    public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService,IEventHub eventHub,
+        ILocalizationService localizationService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _deviceService = deviceService;
-        _emailService = emailService;
         _eventHub = eventHub;
         _localizationService = localizationService;
         _mapper = mapper;

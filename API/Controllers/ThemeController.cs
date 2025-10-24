@@ -49,7 +49,7 @@ public class ThemeController : BaseApiController
     }
 
 
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("update-default")]
     public async Task<ActionResult> UpdateDefault(UpdateDefaultThemeDto dto)
     {

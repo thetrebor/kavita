@@ -95,7 +95,7 @@ public class PersonController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("update")]
     public async Task<ActionResult<PersonDto>> UpdatePerson(UpdatePersonDto dto)
     {
@@ -218,7 +218,7 @@ public class PersonController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("merge")]
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<PersonDto>> MergePeople(PersonMergeDto dto)
     {
         var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId, PersonIncludes.All);

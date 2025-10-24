@@ -56,7 +56,7 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetUserReadStatistics(userId, new List<int>()));
     }
 
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/stats")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<ServerStatisticsDto>> GetHighLevelStats()
@@ -64,7 +64,7 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetServerStatistics());
     }
 
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/year")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
@@ -72,7 +72,7 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetYearCount());
     }
 
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/publication-status")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<StatCount<PublicationStatus>>>> GetPublicationStatus()
@@ -80,7 +80,7 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetPublicationCount());
     }
 
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/manga-format")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<StatCount<MangaFormat>>>> GetMangaFormat()
@@ -88,7 +88,7 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetMangaFormatCount());
     }
 
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/top/years")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
@@ -101,7 +101,7 @@ public class StatsController : BaseApiController
     /// </summary>
     /// <param name="days"></param>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/top/users")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
@@ -113,7 +113,7 @@ public class StatsController : BaseApiController
     /// A breakdown of different files, their size, and format
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/file-breakdown")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()
@@ -125,7 +125,7 @@ public class StatsController : BaseApiController
     /// Generates a csv of all file paths for a given extension
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/file-extension")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult> DownloadFilesByExtension(string fileExtension)

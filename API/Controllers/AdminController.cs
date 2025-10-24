@@ -24,7 +24,7 @@ public class AdminController : BaseApiController
     }
 
     /// <summary>
-    /// Checks if an admin exists on the system. This is essentially a check to validate if the system has been setup.
+    /// Checks if an admin exists on the system. This is essentially a check to validate if the system has been set up.
     /// </summary>
     /// <returns></returns>
     [AllowAnonymous]
@@ -34,4 +34,6 @@ public class AdminController : BaseApiController
         var users = await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
         return users.Count > 0;
     }
+
+
 }

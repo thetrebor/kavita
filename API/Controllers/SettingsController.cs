@@ -299,7 +299,7 @@ public class SettingsController : BaseApiController
     /// </summary>
     /// <param name="authority"></param>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("is-valid-authority")]
     public async Task<ActionResult<bool>> IsValidAuthority([FromBody] AuthorityValidationDto authority)
     {

@@ -28,7 +28,7 @@ namespace API.Controllers;
 
 #nullable enable
 
-[Authorize(Policy = "RequireAdminRole")]
+[Authorize(PolicyGroups.AdminPolicy)]
 public class ServerController : BaseApiController
 {
     private readonly ILogger<ServerController> _logger;
@@ -249,7 +249,7 @@ public class ServerController : BaseApiController
     /// Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("media-errors")]
     public ActionResult<PagedList<MediaErrorDto>> GetMediaErrors()
     {
@@ -260,7 +260,7 @@ public class ServerController : BaseApiController
     /// Deletes all media errors
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("clear-media-alerts")]
     public async Task<ActionResult> ClearMediaErrors()
     {
@@ -273,7 +273,7 @@ public class ServerController : BaseApiController
     /// Bust Kavita+ Cache
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("bust-kavitaplus-cache")]
     public async Task<ActionResult> BustReviewAndRecCache()
     {
@@ -287,7 +287,7 @@ public class ServerController : BaseApiController
     /// Runs the Sync Themes task
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("sync-themes")]
     public async Task<ActionResult> SyncThemes()
     {
