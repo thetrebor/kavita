@@ -1,5 +1,6 @@
 import {Injectable, signal} from '@angular/core';
 import {VersionService} from "./version.service";
+import {AuthenticationType} from "../_models/progress/reading-session";
 
 export interface ClientInfo {
   browser: string;
@@ -10,6 +11,12 @@ export interface ClientInfo {
   screenHeight: number;
   orientation: string;
   appVersion: string | null;
+
+  // Backend-only properties
+  userAgent: string;
+  ipAddress: string;
+  authType: AuthenticationType;
+  clientType: string; // Web App, OPDS Reader, KOReader, etc
 }
 
 @Injectable({
@@ -17,7 +24,7 @@ export interface ClientInfo {
 })
 export class ClientInfoService {
 
-  private readonly clientInfo = signal<ClientInfo>(this.detectClientInfo());
+  private readonly clientInfo = signal<Partial<ClientInfo>>(this.detectClientInfo());
 
   constructor() {
     // Update orientation and screen size on resize/rotation
@@ -40,14 +47,7 @@ export class ClientInfoService {
     return `web-app/${info.appVersion} (${info.browser}/${info.browserVersion}; ${info.platform}; ${info.deviceType}; ${info.screenWidth}x${info.screenHeight}; ${info.orientation})`;
   }
 
-  /**
-   * Returns full client info object (for display in UI if needed)
-   */
-  getClientInfo(): ClientInfo {
-    return this.clientInfo();
-  }
-
-  private detectClientInfo(): ClientInfo {
+  private detectClientInfo(): Partial<ClientInfo> {
     const ua = navigator.userAgent;
 
     return {

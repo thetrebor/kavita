@@ -405,5 +405,14 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.AppUserId));
 
         CreateMap<OidcConfigDto, OidcPublicConfigDto>();
+
+        CreateMap<AppUserReadingSessionActivityData, ReadingActivityDataDto>();
+        CreateMap<ClientInfoData, ClientInfoDto>();
+
+
+        CreateMap<AppUserReadingSession, ReadingSessionDto>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.AppUserId))
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName))
+            ;
     }
 }

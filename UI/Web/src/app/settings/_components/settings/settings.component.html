@@ -7,8 +7,18 @@
     </app-side-nav-companion-bar>
     <div class="container-fluid row col-me-4 pb-3">
 
-      @if (accountService.currentUser$ | async; as user) {
+      @let user = accountService.currentUserSignal();
+      @if (user) {
         @if (accountService.hasAdminRole(user)) {
+
+          @defer (when fragment === SettingsTabId.General; prefetch on idle) {
+            @if (fragment === SettingsTabId.Activity) {
+              <div class="col-xxl-6 col-12">
+                <app-server-activity />
+              </div>
+            }
+          }
+
           @defer (when fragment === SettingsTabId.General; prefetch on idle) {
             @if (fragment === SettingsTabId.General) {
               <div class="col-xxl-6 col-12">

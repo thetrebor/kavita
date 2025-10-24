@@ -1,0 +1,49 @@
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, model, OnInit} from '@angular/core';
+import {TranslocoDirective} from "@jsverse/transloco";
+import {ActivityCardComponent} from "../../_single-modules/activity-card/activity-card.component";
+import {ActivityService} from "../../_services/activity.service";
+import {ReadingSession} from "../../_models/progress/reading-session";
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {debounceTime, filter, map} from "rxjs/operators";
+import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+
+@Component({
+  selector: 'app-server-activity',
+  imports: [
+    TranslocoDirective,
+    ActivityCardComponent
+  ],
+  templateUrl: './server-activity.component.html',
+  styleUrl: './server-activity.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ServerActivityComponent implements OnInit {
+
+  private readonly activityService = inject(ActivityService);
+  protected readonly messageHub = inject(MessageHubService);
+  protected readonly destroyRef = inject(DestroyRef);
+
+  activeSessions = model<ReadingSession[]>([]);
+
+  constructor() {
+    this.messageHub.messages$.pipe(
+      filter(event => event.event === EVENTS.UserProgressUpdate),
+      map(evt => evt.payload as UserProgressUpdateEvent),
+      debounceTime(100),
+      takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
+        this.loadData();
+    });
+  }
+
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.activityService.getActiveSessions().subscribe(sessions => {
+      this.activeSessions.set(sessions);
+    });
+  }
+
+}

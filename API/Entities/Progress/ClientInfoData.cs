@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace API.DTOs.Misc;
+namespace API.Entities.Progress;
+#nullable enable
 
-
-public class ClientInfoDto
+public class ClientInfoData
 {
     /// <summary>
     /// Raw User-Agent string from request header

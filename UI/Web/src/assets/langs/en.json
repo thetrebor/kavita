@@ -1932,9 +1932,13 @@
     "settings": {
         "account-section-title": "Account",
         "server-section-title": "Server",
+        "insights-section-title": "Insights",
         "info-section-title": "Info",
         "import-section-title": "Import",
         "kavitaplus-section-title": "Kavita+",
+
+        "admin-activity": "Activity",
+
         "admin-general": "General",
         "admin-oidc": "OpenID Connect",
         "admin-users": "Users",
@@ -2695,6 +2699,18 @@
         "people": "People",
         "genres": "{{metadata-fields.genres-title}}"
     },
+
+    "server-activity": {
+
+    },
+
+    "activity-card": {
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "started-label": "Started",
+        "view-label": "View"
+    },
+
 
     "errors": {
         "series-doesnt-exist": "This series no longer exists",

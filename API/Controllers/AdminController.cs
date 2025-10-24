@@ -14,15 +14,8 @@ namespace API.Controllers;
 
 #nullable enable
 
-public class AdminController : BaseApiController
+public class AdminController(UserManager<AppUser> userManager) : BaseApiController
 {
-    private readonly UserManager<AppUser> _userManager;
-
-    public AdminController(UserManager<AppUser> userManager)
-    {
-        _userManager = userManager;
-    }
-
     /// <summary>
     /// Checks if an admin exists on the system. This is essentially a check to validate if the system has been set up.
     /// </summary>
@@ -31,7 +24,7 @@ public class AdminController : BaseApiController
     [HttpGet("exists")]
     public async Task<ActionResult<bool>> AdminExists()
     {
-        var users = await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
+        var users = await userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
         return users.Count > 0;
     }
 

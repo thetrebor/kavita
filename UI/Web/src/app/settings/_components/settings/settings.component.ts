@@ -20,7 +20,6 @@ import {ThemeManagerComponent} from "../../../user-settings/theme-manager/theme-
 import {TranslocoDirective} from "@jsverse/transloco";
 import {UserStatsComponent} from "../../../statistics/_components/user-stats/user-stats.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
-import {AsyncPipe} from "@angular/common";
 import {AccountService} from "../../../_services/account.service";
 import {WikiLink} from "../../../_models/wiki";
 import {LicenseComponent} from "../../../admin/license/license.component";
@@ -61,6 +60,7 @@ import {
 import {ImportMappingsComponent} from "../../../admin/import-mappings/import-mappings.component";
 import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect/manage-open-idconnect.component";
 import {FontManagerComponent} from "../../../user-settings/font-manager/font-manager/font-manager.component";
+import {ServerActivityComponent} from "../../../admin/server-activity/server-activity.component";
 
 @Component({
     selector: 'app-settings',
@@ -76,7 +76,6 @@ import {FontManagerComponent} from "../../../user-settings/font-manager/font-man
     ThemeManagerComponent,
     TranslocoDirective,
     UserStatsComponent,
-    AsyncPipe,
     LicenseComponent,
     ManageEmailSettingsComponent,
     ManageLibraryComponent,
@@ -101,7 +100,8 @@ import {FontManagerComponent} from "../../../user-settings/font-manager/font-man
     ManageOpenIDConnectComponent,
     ManagePublicMetadataSettingsComponent,
     ImportMappingsComponent,
-    FontManagerComponent
+    FontManagerComponent,
+    ServerActivityComponent
   ],
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',

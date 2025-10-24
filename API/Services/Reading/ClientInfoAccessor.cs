@@ -1,5 +1,5 @@
 ﻿using System.Threading;
-using API.DTOs.Misc;
+using API.Entities.Progress;
 
 namespace API.Services.Reading;
 #nullable enable
@@ -15,7 +15,7 @@ public interface IClientInfoAccessor
     /// Gets the client information for the current request.
     /// Returns null if called outside an HTTP request context (e.g., background jobs).
     /// </summary>
-    ClientInfoDto? Current { get; }
+    ClientInfoData? Current { get; }
 }
 
 /// <summary>
@@ -25,15 +25,15 @@ public interface IClientInfoAccessor
 /// </summary>
 public class ClientInfoAccessor : IClientInfoAccessor
 {
-    private static readonly AsyncLocal<ClientInfoDto?> ClientInfo = new();
+    private static readonly AsyncLocal<ClientInfoData?> ClientInfo = new();
 
-    public ClientInfoDto? Current => ClientInfo.Value;
+    public ClientInfoData? Current => ClientInfo.Value;
 
     /// <summary>
     /// Sets the client info for the current async context.
     /// Should only be called by middleware.
     /// </summary>
-    internal static void SetClientInfo(ClientInfoDto? info)
+    internal static void SetClientInfo(ClientInfoData? info)
     {
         ClientInfo.Value = info;
     }

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using API.DTOs.Misc;
+using API.Entities.Progress;
 using API.Services;
 using API.Services.Reading;
 using Microsoft.AspNetCore.Http;
@@ -42,7 +42,7 @@ public class ClientInfoMiddleware
         }
     }
 
-    private ClientInfoDto ExtractClientInfo(HttpContext context)
+    private ClientInfoData ExtractClientInfo(HttpContext context)
     {
         var userAgent = context.Request.Headers.UserAgent.ToString();
         var kavitaClient = context.Request.Headers["X-Kavita-Client"].ToString();
@@ -60,7 +60,7 @@ public class ClientInfoMiddleware
         }
 
         // Fallback to basic UA parsing
-        return new ClientInfoDto
+        return new ClientInfoData
         {
             UserAgent = userAgent,
             IpAddress = ipAddress,
@@ -71,7 +71,7 @@ public class ClientInfoMiddleware
         };
     }
 
-    private ClientInfoDto ParseKavitaClientHeader(string header, string fallbackUa)
+    private ClientInfoData ParseKavitaClientHeader(string header, string fallbackUa)
     {
         try
         {
@@ -81,7 +81,7 @@ public class ClientInfoMiddleware
 
             if (match.Success)
             {
-                return new ClientInfoDto
+                return new ClientInfoData
                 {
                     ClientType = "Web App",
                     AppVersion = match.Groups[1].Value,
@@ -104,7 +104,7 @@ public class ClientInfoMiddleware
         }
 
         // Fallback if parsing fails
-        return new ClientInfoDto
+        return new ClientInfoData
         {
             UserAgent = fallbackUa,
             ClientType = "Web App"

@@ -28,6 +28,7 @@ import {MatchStateOption} from "../../_models/kavitaplus/match-state-option";
 export enum SettingsTabId {
 
   // Admin
+  Activity = 'admin-activity',
   General = 'admin-general',
   OpenIDConnect = 'admin-oidc',
   Email = 'admin-email',
@@ -67,6 +68,7 @@ export enum SettingsTabId {
 export enum SettingSectionId {
   AccountSection = 'account-section-title',
   ServerSection = 'server-section-title',
+  InsightsSection = 'insights-section-title',
   ImportSection = 'import-section-title',
   InfoSection = 'info-section-title',
   KavitaPlusSection = 'kavitaplus-section-title',
@@ -228,6 +230,12 @@ export class PreferenceNavComponent implements AfterViewInit {
           new SideNavItem(SettingsTabId.Font),
           new SideNavItem(SettingsTabId.Devices),
           new SideNavItem(SettingsTabId.UserStats),
+        ]
+      },
+      {
+        title: SettingSectionId.InsightsSection,
+        children: [
+          new SideNavItem(SettingsTabId.Activity, [Role.Admin]),
         ]
       },
       {

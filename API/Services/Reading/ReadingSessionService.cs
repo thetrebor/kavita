@@ -84,17 +84,24 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
                 existingChapterActivity.ClientInfo = clientInfo;
             }
 
+
+            var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+            var chapter = await cacheService.Ensure(progressDto.ChapterId);
+
             var chapterFormat = await context.MangaFile
                 .Where(f => f.ChapterId == progressDto.ChapterId)
                 .Select(f => f.Format)
                 .FirstOrDefaultAsync();
 
+            // Store total pages/words in case it changes in the future
+            existingChapterActivity.TotalPages = chapter?.Pages ?? 0;
+            existingChapterActivity.TotalWords = chapter?.WordCount ?? 0;
+
+
             if (chapterFormat == MangaFormat.Epub && !string.IsNullOrEmpty(progressDto.BookScrollId))
             {
                 var bookService = scope.ServiceProvider.GetRequiredService<IBookService>();
-                var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
 
-                var chapter = await cacheService.Ensure(progressDto.ChapterId);
                 var cachedFilePath = cacheService.GetCachedFile(chapter!);
 
                 // First update - capture starting position
@@ -207,9 +214,9 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         return newSession;
     }
 
-    private static ReadingActivityDataDto NewActivityData(ProgressDto dto)
+    private static AppUserReadingSessionActivityData NewActivityData(ProgressDto dto)
     {
-        return new ReadingActivityDataDto
+        return new AppUserReadingSessionActivityData
         {
             ChapterId = dto.ChapterId,
             VolumeId = dto.VolumeId,

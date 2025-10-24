@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using API.DTOs.Misc;
 using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
@@ -322,7 +321,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(sm => sm.ActivityData)
             .HasJsonConversion([])
             .HasColumnType("TEXT")
-            .HasDefaultValue(new List<ReadingActivityDataDto>());
+            .HasDefaultValue(new List<AppUserReadingSessionActivityData>());
 
         builder.Entity<AppUserReadingHistory>()
             .Property(sm => sm.Data)
@@ -333,7 +332,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(sm => sm.ClientInfoUsed)
             .HasJsonConversion([])
             .HasColumnType("TEXT")
-            .HasDefaultValue(new List<ClientInfoDto>());
+            .HasDefaultValue(new List<ClientInfoData>());
     }
 
     #nullable enable

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
-using API.DTOs.Misc;
 using API.DTOs.Progress;
 using API.Entities.Progress;
 using Hangfire;

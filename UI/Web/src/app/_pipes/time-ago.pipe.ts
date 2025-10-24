@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, NgZone, OnDestroy, Pipe, PipeTransform, inject } from '@angular/core';
+import {ChangeDetectorRef, inject, NgZone, OnDestroy, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from "@jsverse/transloco";
 
 /**
@@ -123,7 +123,7 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
 			return 2;
 		} else if (seconds < hr) { // less than an hour, update every 30 secs
 			return 30;
-		} else if (seconds < day) { // less then a day, update every 5 mins
+		} else if (seconds < day) { // less than a day, update every 5 mins
 			return 300;
 		} else { // update every hour
 			return 3600;

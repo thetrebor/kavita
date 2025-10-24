@@ -122,7 +122,7 @@ public class ServerController : BaseApiController
     {
         _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", User.GetUsername());
         if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
-                Array.Empty<object>(), TaskScheduler.DefaultQueue, true))
+                [], TaskScheduler.DefaultQueue, true))
             return Ok(await _localizationService.Translate(User.GetUserId(), "job-already-running"));
 
         BackgroundJob.Enqueue(() => _scannerService.AnalyzeFiles());
@@ -170,7 +170,7 @@ public class ServerController : BaseApiController
         var files = _backupService.GetLogFiles();
         try
         {
-            var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
+            var zipPath = _archiveService.CreateZipForDownload(files, "logs");
             return PhysicalFile(zipPath, MimeTypeMap.GetMimeType(Path.GetExtension(zipPath)),
                 System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }

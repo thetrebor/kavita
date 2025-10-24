@@ -20,7 +20,7 @@ public class AppUserReadingSession : IEntityDate
     public DateTime? EndTime { get; set; }
     public DateTime? EndTimeUtc { get; set; }
     public bool IsActive { get; set; } = true;
-    public IList<ReadingActivityDataDto> ActivityData { get; set; }
+    public IList<AppUserReadingSessionActivityData> ActivityData { get; set; }
     public DateTime Created { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModified { get; set; }
