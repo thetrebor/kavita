@@ -447,7 +447,7 @@ public class UploadController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("reset-chapter-lock")]
-    [Obsolete("Use LockCover in UploadFileDto")]
+    [Obsolete("Use LockCover in UploadFileDto, will be removed in v0.9.0")]
     public async Task<ActionResult> ResetChapterLock(UploadFileDto uploadFileDto)
     {
         try

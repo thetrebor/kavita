@@ -433,22 +433,23 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
         if (user == null) return Unauthorized();
-        user.Progresses ??= new List<AppUserProgress>();
+        user.Progresses ??= [];
 
         var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
         foreach (var chapterId in dto.ChapterIds)
         {
             chapterIds.Add(chapterId);
         }
+
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
         await _readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters.ToList());
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
+
         BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
         BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(dto.SeriesId, user.Id));
+
         return Ok();
-
-
     }
 
     /// <summary>
@@ -574,7 +575,7 @@ public class ReaderController : BaseApiController
             return BadRequest(await _localizationService.Translate(userId, "generic-read-progress"));
         }
 
-        return Ok(true);
+        return Ok();
     }
 
     /// <summary>
@@ -776,6 +777,7 @@ public class ReaderController : BaseApiController
 
 
             BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
+
             return Ok();
         }
         catch (KavitaException ex)
@@ -799,11 +801,18 @@ public class ReaderController : BaseApiController
         if (user.Bookmarks == null || user.Bookmarks.Count == 0) return Ok();
 
         if (!await _accountService.HasBookmarkPermission(user))
+        {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-permission"));
+        }
 
         if (!await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
+        {
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));
+        }
+
+
         BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
+
         return Ok();
     }
 
@@ -821,7 +830,7 @@ public class ReaderController : BaseApiController
     [HttpGet("next-chapter")]
     public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
     {
-        return await _readerService.GetNextChapterIdAsync(seriesId, volumeId, currentChapterId, User.GetUserId());
+        return Ok(await _readerService.GetNextChapterIdAsync(seriesId, volumeId, currentChapterId, User.GetUserId()));
     }
 
 
@@ -839,7 +848,7 @@ public class ReaderController : BaseApiController
     [HttpGet("prev-chapter")]
     public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
     {
-        return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, User.GetUserId());
+        return Ok(await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, User.GetUserId()));
     }
 
     /// <summary>
@@ -854,6 +863,7 @@ public class ReaderController : BaseApiController
     {
         var userId = User.GetUserId();
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-doesnt-exist"));
 
         // Get all sum of all chapters with progress that is complete then subtract from series. Multiply by modifiers
         var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId);
@@ -869,7 +879,8 @@ public class ReaderController : BaseApiController
 
         var progressPageCount = progress.Sum(p => p.PagesRead);
         var pagesLeft = series.Pages - progressPageCount;
-        return _readerService.GetTimeEstimate(0, pagesLeft, false);
+
+        return Ok(_readerService.GetTimeEstimate(0, pagesLeft, false));
     }
 
 
@@ -909,7 +920,8 @@ public class ReaderController : BaseApiController
         }
 
         var pagesLeft = chapter.Pages - chapter.PagesRead;
-        return _readerService.GetTimeEstimate(0, pagesLeft, false);
+
+        return Ok(_readerService.GetTimeEstimate(0, pagesLeft, false));
     }
 
 
@@ -986,6 +998,7 @@ public class ReaderController : BaseApiController
             AppUserId = userId
         });
         await _unitOfWork.CommitAsync();
+
         return Ok();
     }
 

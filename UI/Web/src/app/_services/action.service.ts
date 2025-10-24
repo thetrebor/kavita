@@ -286,7 +286,7 @@ export class ActionService {
    * @param callback Optional callback to perform actions after API completes
    */
   markChapterAsRead(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
+    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(() => {
       chapter.pagesRead = chapter.pages;
       this.toastr.success(translate('toasts.mark-read'));
       if (callback) {
@@ -303,7 +303,7 @@ export class ActionService {
    * @param callback Optional callback to perform actions after API completes
    */
   markChapterAsUnread(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
+    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(() => {
       chapter.pagesRead = 0;
       this.toastr.success(translate('toasts.mark-unread'));
       if (callback) {

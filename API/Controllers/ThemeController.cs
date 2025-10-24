@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs.Theme;
-using API.Entities;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
@@ -15,7 +13,6 @@ using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace API.Controllers;
 

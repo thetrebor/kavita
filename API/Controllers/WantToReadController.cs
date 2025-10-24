@@ -38,14 +38,14 @@ public class WantToReadController : BaseApiController
     }
 
     /// <summary>
-    /// Return all Series that are in the current logged in user's Want to Read list, filtered (deprecated, use v2)
+    /// Return all Series that are in the current logged-in user's Want to Read list, filtered (deprecated, use v2)
     /// </summary>
-    /// <remarks>This will be removed in v0.8.x</remarks>
+    /// <remarks>This will be removed in v0.9.0</remarks>
     /// <param name="userParams"></param>
     /// <param name="filterDto"></param>
     /// <returns></returns>
     [HttpPost]
-    [Obsolete("use v2 instead")]
+    [Obsolete("use v2 instead. This will be removed in v0.9.0")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams? userParams, FilterDto filterDto)
     {
         userParams ??= new UserParams();

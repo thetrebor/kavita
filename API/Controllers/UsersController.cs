@@ -111,7 +111,7 @@ public class UsersController : BaseApiController
         if (user == null) return Unauthorized();
         if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
-        var existingPreferences = user!.UserPreferences;
+        var existingPreferences = user.UserPreferences;
 
         existingPreferences.GlobalPageLayoutMode = preferencesDto.GlobalPageLayoutMode;
         existingPreferences.BlurUnreadSummaries = preferencesDto.BlurUnreadSummaries;
