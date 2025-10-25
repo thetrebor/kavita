@@ -24,7 +24,10 @@ export interface ClientInfo {
 })
 export class ClientInfoService {
 
+  private static readonly DEVICE_ID_KEY = 'kavita-device-id';
+
   private readonly clientInfo = signal<Partial<ClientInfo>>(this.detectClientInfo());
+  private readonly deviceId = signal<string>(this.getOrCreateDeviceId());
 
   constructor() {
     // Update orientation and screen size on resize/rotation
@@ -35,6 +38,44 @@ export class ClientInfoService {
         screenHeight: window.innerHeight,
         orientation: this.getOrientation()
       }));
+    });
+  }
+
+  /**
+   * Gets the persistent device ID for this browser.
+   * Generated once and stored in localStorage.
+   */
+  getDeviceId(): string {
+    return this.deviceId();
+  }
+
+  /**
+   * Clears the device ID (useful for testing or manual device re-registration)
+   */
+  clearDeviceId(): void {
+    localStorage.removeItem(ClientInfoService.DEVICE_ID_KEY);
+    this.deviceId.set(this.generateDeviceId());
+  }
+
+  private getOrCreateDeviceId(): string {
+    // Try to get existing device ID from localStorage
+    let deviceId = localStorage.getItem(ClientInfoService.DEVICE_ID_KEY);
+
+    if (!deviceId) {
+      // Generate new UUID v4
+      deviceId = this.generateDeviceId();
+      localStorage.setItem(ClientInfoService.DEVICE_ID_KEY, deviceId);
+    }
+
+    return deviceId;
+  }
+
+  private generateDeviceId(): string {
+    // Generate UUID v4 (RFC 4122 compliant)
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
     });
   }
 

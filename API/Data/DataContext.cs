@@ -87,6 +87,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<EpubFont> EpubFont { get; set; } = null!;
     public DbSet<AppUserReadingSession> AppUserReadingSession { get; set; } = null!;
     public DbSet<AppUserReadingHistory> AppUserReadingHistory { get; set; } = null!;
+    public DbSet<ClientDevice> ClientDevice { get; set; } = null!;
+    public DbSet<ClientDeviceHistory> ClientDeviceHistory { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -333,6 +335,18 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<ClientInfoData>());
+
+        builder.Entity<ClientDevice>()
+            .Property(sm => sm.CurrentClientInfo)
+            .HasJsonConversion(new ClientInfoData())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new ClientInfoData());
+
+        builder.Entity<ClientDeviceHistory>()
+            .Property(sm => sm.ClientInfo)
+            .HasJsonConversion(new ClientInfoData())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new ClientInfoData());
     }
 
     #nullable enable

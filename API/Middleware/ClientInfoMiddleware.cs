@@ -22,7 +22,10 @@ public class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddle
         try
         {
             var clientInfo = ExtractClientInfo(context);
+            var clientDeviceId = context.Request.Headers["X-Device-Id"].ToString();
+
             ClientInfoAccessor.SetClientInfo(clientInfo);
+            ClientInfoAccessor.SetClientDeviceId(clientDeviceId);
 
             await next(context);
         }

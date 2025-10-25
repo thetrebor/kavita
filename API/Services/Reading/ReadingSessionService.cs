@@ -7,6 +7,7 @@ using API.Data;
 using API.DTOs.Progress;
 using API.Entities.Enums;
 using API.Entities.Progress;
+using API.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -61,11 +62,17 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         _logger.LogDebug("Creating/Updating Reading Session for {UserId} on {ChapterId}", userId, progressDto.ChapterId);
         var session = await GetOrCreateSession(userId, progressDto);
 
-        // Get client info for this request
+        using var scope = _serviceScopeFactory.CreateScope();
+
+        // Identify/register device
+        var deviceService = scope.ServiceProvider.GetRequiredService<IClientDeviceService>();
         var clientInfo = _clientInfoAccessor.Current;
+        var clientDeviceId = _clientInfoAccessor.CurrentDeviceId; // New
+
+        var device = await deviceService.IdentifyOrRegisterDeviceAsync(
+            userId, clientInfo, clientDeviceId);
 
         // Update session activity data in DB
-        using var scope = _serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
 
         // If Chapter doesn't exist already, add
@@ -138,6 +145,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             if (clientInfo != null)
             {
                 newActivity.ClientInfo = clientInfo;
+                newActivity.DeviceId = device.Id;
             }
             session.ActivityData.Add(newActivity);
         }
@@ -302,6 +310,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
 
         using var scope = _serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+        var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
 
         // Mark session as inactive in DB
         await context.AppUserReadingSession
@@ -312,6 +321,9 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
                 .SetProperty(x => x.EndTimeUtc, DateTime.UtcNow)
                 .SetProperty(x => x.LastModified, DateTime.Now)
                 .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow));
+
+        // Trigger a SessionClose Event so Activity Feed can update
+        await eventHub.SendMessageAsync(MessageFactory.SessionClose, MessageFactory.SessionCloseEvent(sessionId));
     }
 
     private void ScheduleMidnightRollover()
@@ -348,6 +360,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+            var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
 
             var sessionIds = sessionsToClose.Select(kvp => kvp.Value.Value).ToList();
 
@@ -360,6 +373,12 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
                     .SetProperty(x => x.EndTimeUtc, endOfYesterdayUtc)
                     .SetProperty(x => x.LastModified, DateTime.Now)
                     .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow));
+
+            foreach (var sessionId in sessionIds)
+            {
+                // Trigger a SessionClose Event so Activity Feed can update
+                await eventHub.SendMessageAsync(MessageFactory.SessionClose, MessageFactory.SessionCloseEvent(sessionId));
+            }
 
             // Clear cache and dispose all timers
             foreach (var kvp in sessionsToClose)

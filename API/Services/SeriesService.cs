@@ -570,7 +570,7 @@ public class SeriesService : ISeriesService
         }
 
         // Don't show chapter -100000 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
-        IEnumerable<ChapterDto> retChapters = bookTreatment ? Array.Empty<ChapterDto>() : chapters.Where(ShouldIncludeChapter);
+        IEnumerable<ChapterDto> retChapters = bookTreatment ? [] : chapters.Where(ShouldIncludeChapter);
 
         var storylineChapters = volumes
             .WhereLooseLeaf()

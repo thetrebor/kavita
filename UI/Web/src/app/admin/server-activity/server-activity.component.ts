@@ -4,8 +4,7 @@ import {ActivityCardComponent} from "../../_single-modules/activity-card/activit
 import {ActivityService} from "../../_services/activity.service";
 import {ReadingSession} from "../../_models/progress/reading-session";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
-import {debounceTime, filter, map} from "rxjs/operators";
-import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
+import {debounceTime, filter} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
@@ -28,8 +27,7 @@ export class ServerActivityComponent implements OnInit {
 
   constructor() {
     this.messageHub.messages$.pipe(
-      filter(event => event.event === EVENTS.UserProgressUpdate),
-      map(evt => evt.payload as UserProgressUpdateEvent),
+      filter(event => event.event === EVENTS.UserProgressUpdate || event.event === EVENTS.SessionClose),
       debounceTime(100),
       takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
         this.loadData();
@@ -42,7 +40,7 @@ export class ServerActivityComponent implements OnInit {
 
   loadData() {
     this.activityService.getActiveSessions().subscribe(sessions => {
-      this.activeSessions.set(sessions);
+      this.activeSessions.set([...sessions]);
     });
   }
 

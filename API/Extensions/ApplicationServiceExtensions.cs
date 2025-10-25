@@ -96,6 +96,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<OpdsActiveUserMiddlewareAttribute>();
 
         services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
+        services.AddScoped<IClientDeviceService, ClientDeviceService>();
 
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
         services.AddSingleton<IClientInfoAccessor, ClientInfoAccessor>();

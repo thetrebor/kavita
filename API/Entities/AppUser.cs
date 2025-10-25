@@ -27,6 +27,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     public ICollection<AppUserChapterRating> ChapterRatings { get; set; } = null!;
     public AppUserPreferences UserPreferences { get; set; } = null!;
     public ICollection<AppUserReadingProfile> ReadingProfiles { get; set; } = null!;
+    public ICollection<ClientDevice> ClientDevices { get; set; } = null!;
     /// <summary>
     /// Bookmarks associated with this User
     /// </summary>

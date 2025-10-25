@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ReadingSessions : Migration
+    public partial class ReadingSessionsAndDevices : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,6 +27,7 @@ namespace API.Data.Migrations
                     DateUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Data = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "{\"TotalMinutesRead\":0,\"TotalPagesRead\":0,\"TotalWordsRead\":0,\"LongestSessionMinutes\":0}"),
+                    ClientInfoUsed = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "[]"),
                     AppUserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -69,6 +70,53 @@ namespace API.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ClientDevice",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ClientDeviceId = table.Column<string>(type: "TEXT", nullable: true),
+                    DeviceFingerprint = table.Column<string>(type: "TEXT", nullable: true),
+                    FriendlyName = table.Column<string>(type: "TEXT", nullable: true),
+                    CurrentClientInfo = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":\"Unknown\",\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":null,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}"),
+                    FirstSeenUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    LastSeenUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClientDevice", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClientDevice_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClientDeviceHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DeviceId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ClientInfo = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":\"Unknown\",\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":null,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}"),
+                    CapturedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClientDeviceHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClientDeviceHistory_ClientDevice_DeviceId",
+                        column: x => x.DeviceId,
+                        principalTable: "ClientDevice",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AppUserReadingHistory_AppUserId",
                 table: "AppUserReadingHistory",
@@ -89,6 +137,16 @@ namespace API.Data.Migrations
                 name: "IX_AppUserReadingSession_IsActive",
                 table: "AppUserReadingSession",
                 column: "IsActive");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClientDevice_AppUserId",
+                table: "ClientDevice",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClientDeviceHistory_DeviceId",
+                table: "ClientDeviceHistory",
+                column: "DeviceId");
         }
 
         /// <inheritdoc />
@@ -99,6 +157,12 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppUserReadingSession");
+
+            migrationBuilder.DropTable(
+                name: "ClientDeviceHistory");
+
+            migrationBuilder.DropTable(
+                name: "ClientDevice");
 
             migrationBuilder.DropColumn(
                 name: "TotalReads",
