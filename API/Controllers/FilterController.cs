@@ -41,9 +41,9 @@ public class FilterController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult> CreateOrUpdateSmartFilter(FilterV2Dto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.SmartFilters);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters);
         if (user == null) return Unauthorized();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name must be set");
         if (Seed.DefaultStreams.Any(s => s.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -83,7 +83,7 @@ public class FilterController : BaseApiController
     [HttpGet]
     public ActionResult<IEnumerable<SmartFilterDto>> GetFilters()
     {
-        return Ok(_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(User.GetUserId()));
+        return Ok(_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(UserId));
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public class FilterController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult> DeleteFilter(int filterId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         var filter = await _unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
         if (filter == null) return Ok();
@@ -144,7 +144,7 @@ public class FilterController : BaseApiController
     {
         try
         {
-            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(),
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId,
                 AppUserIncludes.SmartFilters);
             if (user == null) return Unauthorized();
 
@@ -181,7 +181,7 @@ public class FilterController : BaseApiController
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when renaming smart filter: {FilterId}", filterId);
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+            return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
         }
 
     }

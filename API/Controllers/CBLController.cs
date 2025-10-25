@@ -41,7 +41,7 @@ public class CblController : BaseApiController
     [SwaggerIgnore]
     public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl(IFormFile cbl, [FromQuery] bool useComicVineMatching = false)
     {
-        var userId = User.GetUserId();
+        var userId = UserId;
         try
         {
             var cblReadingList = await SaveAndLoadCblFile(cbl);
@@ -94,11 +94,11 @@ public class CblController : BaseApiController
     [SwaggerIgnore]
     public async Task<ActionResult<CblImportSummaryDto>> ImportCbl(IFormFile cbl, [FromQuery] bool dryRun = false, [FromQuery] bool useComicVineMatching = false)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         try
         {
-            var userId = User.GetUserId();
+            var userId = UserId;
             var cblReadingList = await SaveAndLoadCblFile(cbl);
             var importSummary = await _readingListService.CreateReadingListFromCbl(userId, cblReadingList, dryRun, useComicVineMatching);
             importSummary.FileName = cbl.FileName;

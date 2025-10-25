@@ -40,7 +40,7 @@ public class ReviewController : BaseApiController
     [HttpPost("series")]
     public async Task<ActionResult<UserReviewDto>> UpdateSeriesReview(UpdateUserReviewDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings);
         if (user == null) return Unauthorized();
 
         var ratingBuilder = new RatingBuilder(await _unitOfWork.UserRepository.GetUserRatingAsync(dto.SeriesId, user.Id));
@@ -73,7 +73,7 @@ public class ReviewController : BaseApiController
     [HttpPost("chapter")]
     public async Task<ActionResult<UserReviewDto>> UpdateChapterReview(UpdateUserReviewDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ChapterRatings);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ChapterRatings);
         if (user == null) return Unauthorized();
 
         if (dto.ChapterId == null) return BadRequest();
@@ -108,7 +108,7 @@ public class ReviewController : BaseApiController
     [HttpDelete("series")]
     public async Task<ActionResult> DeleteSeriesReview([FromQuery] int seriesId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings);
         if (user == null) return Unauthorized();
 
         user.Ratings = user.Ratings.Where(r => r.SeriesId != seriesId).ToList();
@@ -127,7 +127,7 @@ public class ReviewController : BaseApiController
     [HttpDelete("chapter")]
     public async Task<ActionResult> DeleteChapterReview([FromQuery] int chapterId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ChapterRatings);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ChapterRatings);
         if (user == null) return Unauthorized();
 
         user.ChapterRatings = user.ChapterRatings.Where(r => r.ChapterId != chapterId).ToList();

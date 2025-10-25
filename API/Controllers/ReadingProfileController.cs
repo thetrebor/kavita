@@ -27,7 +27,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("all")]
     public async Task<ActionResult<IList<UserReadingProfileDto>>> GetAllReadingProfiles()
     {
-        return Ok(await unitOfWork.AppUserReadingProfileRepository.GetProfilesDtoForUser(User.GetUserId(), true));
+        return Ok(await unitOfWork.AppUserReadingProfileRepository.GetProfilesDtoForUser(UserId, true));
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("{seriesId:int}")]
     public async Task<ActionResult<UserReadingProfileDto>> GetProfileForSeries(int seriesId, [FromQuery] bool skipImplicit)
     {
-        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(User.GetUserId(), seriesId, skipImplicit));
+        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(UserId, seriesId, skipImplicit));
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("library")]
     public async Task<ActionResult<UserReadingProfileDto?>> GetProfileForLibrary(int libraryId)
     {
-        return Ok(await readingProfileService.GetReadingProfileDtoForLibrary(User.GetUserId(), libraryId));
+        return Ok(await readingProfileService.GetReadingProfileDtoForLibrary(UserId, libraryId));
     }
 
     /// <summary>
@@ -62,7 +62,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("create")]
     public async Task<ActionResult<UserReadingProfileDto>> CreateReadingProfile([FromBody] UserReadingProfileDto dto)
     {
-        return Ok(await readingProfileService.CreateReadingProfile(User.GetUserId(), dto));
+        return Ok(await readingProfileService.CreateReadingProfile(UserId, dto));
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("promote")]
     public async Task<ActionResult<UserReadingProfileDto>> PromoteImplicitReadingProfile([FromQuery] int profileId)
     {
-        return Ok(await readingProfileService.PromoteImplicitProfile(User.GetUserId(), profileId));
+        return Ok(await readingProfileService.PromoteImplicitProfile(UserId, profileId));
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("series")]
     public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
     {
-        var updatedProfile = await readingProfileService.UpdateImplicitReadingProfile(User.GetUserId(), seriesId, dto);
+        var updatedProfile = await readingProfileService.UpdateImplicitReadingProfile(UserId, seriesId, dto);
         return Ok(updatedProfile);
     }
 
@@ -99,7 +99,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("update-parent")]
     public async Task<ActionResult<UserReadingProfileDto>> UpdateParentProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
     {
-        var newParentProfile = await readingProfileService.UpdateParent(User.GetUserId(), seriesId, dto);
+        var newParentProfile = await readingProfileService.UpdateParent(UserId, seriesId, dto);
         return Ok(newParentProfile);
     }
 
@@ -114,7 +114,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost]
     public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfile(UserReadingProfileDto dto)
     {
-        return Ok(await readingProfileService.UpdateReadingProfile(User.GetUserId(), dto));
+        return Ok(await readingProfileService.UpdateReadingProfile(UserId, dto));
     }
 
     /// <summary>
@@ -127,7 +127,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpDelete]
     public async Task<IActionResult> DeleteReadingProfile([FromQuery] int profileId)
     {
-        await readingProfileService.DeleteReadingProfile(User.GetUserId(), profileId);
+        await readingProfileService.DeleteReadingProfile(UserId, profileId);
         return Ok();
     }
 
@@ -140,7 +140,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("series/{seriesId:int}")]
     public async Task<IActionResult> AddProfileToSeries(int seriesId, [FromQuery] int profileId)
     {
-        await readingProfileService.AddProfileToSeries(User.GetUserId(), profileId, seriesId);
+        await readingProfileService.AddProfileToSeries(UserId, profileId, seriesId);
         return Ok();
     }
 
@@ -152,7 +152,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpDelete("series/{seriesId:int}")]
     public async Task<IActionResult> ClearSeriesProfile(int seriesId)
     {
-        await readingProfileService.ClearSeriesProfile(User.GetUserId(), seriesId);
+        await readingProfileService.ClearSeriesProfile(UserId, seriesId);
         return Ok();
     }
 
@@ -165,7 +165,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("library/{libraryId:int}")]
     public async Task<IActionResult> AddProfileToLibrary(int libraryId, [FromQuery] int profileId)
     {
-        await readingProfileService.AddProfileToLibrary(User.GetUserId(), profileId, libraryId);
+        await readingProfileService.AddProfileToLibrary(UserId, profileId, libraryId);
         return Ok();
     }
 
@@ -178,7 +178,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpDelete("library/{libraryId:int}")]
     public async Task<IActionResult> ClearLibraryProfile(int libraryId)
     {
-        await readingProfileService.ClearLibraryProfile(User.GetUserId(), libraryId);
+        await readingProfileService.ClearLibraryProfile(UserId, libraryId);
         return Ok();
     }
 
@@ -191,7 +191,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("bulk")]
     public async Task<IActionResult> BulkAddReadingProfile([FromQuery] int profileId, [FromBody] IList<int> seriesIds)
     {
-        await readingProfileService.BulkAddProfileToSeries(User.GetUserId(), profileId, seriesIds);
+        await readingProfileService.BulkAddProfileToSeries(UserId, profileId, seriesIds);
         return Ok();
     }
 

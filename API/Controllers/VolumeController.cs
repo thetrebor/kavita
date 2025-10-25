@@ -32,7 +32,7 @@ public class VolumeController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
-        return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, User.GetUserId()));
+        return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId));
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -42,7 +42,7 @@ public class VolumeController : BaseApiController
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId,
             VolumeIncludes.Chapters | VolumeIncludes.People | VolumeIncludes.Tags);
         if (volume == null)
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+            return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));
 
         _unitOfWork.VolumeRepository.Remove(volume);
 
@@ -62,7 +62,7 @@ public class VolumeController : BaseApiController
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesById(volumesIds);
         if (volumes.Count != volumesIds.Length)
         {
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+            return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));
         }
 
         _unitOfWork.VolumeRepository.Remove(volumes);

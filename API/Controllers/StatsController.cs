@@ -47,9 +47,9 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user!.Id != userId && !await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
-            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "stats-permission-denied"));
+            return Unauthorized(await _localizationService.Translate(UserId, "stats-permission-denied"));
 
         return Ok(await _statService.GetUserReadStatistics(userId, new List<int>()));
     }
@@ -158,7 +158,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin && userId != user!.Id) return BadRequest();
 
@@ -171,7 +171,7 @@ public class StatsController : BaseApiController
     {
         if (userId == 0)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
             var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             if (!isAdmin) return BadRequest();
         }
@@ -185,7 +185,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin && userId != user!.Id) return BadRequest();
 
@@ -202,7 +202,7 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
         return Ok(_statService.GetPagesReadCountByYear(userId));
     }
 
@@ -216,7 +216,7 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int userId = 0)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
         return Ok(_statService.GetWordsReadCountByYear(userId));
     }
 

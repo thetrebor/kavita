@@ -37,7 +37,7 @@ public class RatingController : BaseApiController
     [HttpPost("series")]
     public async Task<ActionResult> UpdateSeriesRating(UpdateRatingDto updateRating)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
         if (user == null) throw new UnauthorizedAccessException();
 
         if (await _ratingService.UpdateSeriesRating(user, updateRating))
@@ -45,7 +45,7 @@ public class RatingController : BaseApiController
             return Ok();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class RatingController : BaseApiController
     [HttpPost("chapter")]
     public async Task<ActionResult> UpdateChapterRating(UpdateRatingDto updateRating)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
         if (user == null) throw new UnauthorizedAccessException();
 
         if (await _ratingService.UpdateChapterRating(user, updateRating))
@@ -65,7 +65,7 @@ public class RatingController : BaseApiController
             return Ok();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -79,7 +79,7 @@ public class RatingController : BaseApiController
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId, User.GetUserId()),
+            AverageScore = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId, UserId),
             FavoriteCount = 0,
         });
     }
@@ -95,7 +95,7 @@ public class RatingController : BaseApiController
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = await _unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, User.GetUserId()),
+            AverageScore = await _unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, UserId),
             FavoriteCount = 0,
         });
     }

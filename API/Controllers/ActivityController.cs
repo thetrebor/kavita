@@ -5,6 +5,7 @@ using API.Data;
 using API.DTOs.Progress;
 using API.Extensions;
 using API.Services;
+using API.Services.Store;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,7 +33,7 @@ public class ActivityController(IUnitOfWork unitOfWork, IClientDeviceService cli
     [HttpGet("devices")]
     public async Task<ActionResult<List<ClientDeviceDto>>> GetMyClientDevices(bool includeInactive = false)
     {
-        return Ok(await clientDeviceService.GetUserDeviceDtosAsync(User.GetUserId(),  includeInactive));
+        return Ok(await clientDeviceService.GetUserDeviceDtosAsync(UserId,  includeInactive));
     }
 
     /// <summary>

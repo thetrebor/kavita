@@ -56,7 +56,7 @@ public class ThemeController : BaseApiController
         }
         catch (KavitaException)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "theme-doesnt-exist"));
+            return BadRequest(await _localizationService.Translate(UserId, "theme-doesnt-exist"));
         }
 
         return Ok();
@@ -100,7 +100,7 @@ public class ThemeController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> DeleteTheme(int themeId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         await _themeService.DeleteTheme(themeId);
 
         return Ok();
@@ -125,14 +125,14 @@ public class ThemeController : BaseApiController
     [HttpPost("upload-theme")]
     public async Task<ActionResult<SiteThemeDto>> DownloadTheme(IFormFile formFile)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         if (!formFile.FileName.EndsWith(".css")) return BadRequest("Invalid file");
         if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
         var tempFile = await UploadToTemp(formFile);
 
-        // Set summary as "Uploaded by User.GetUsername() on DATE"
-        var theme = await _themeService.CreateThemeFromFile(tempFile, User.GetUsername());
+        // Set summary as "Uploaded by Username! on DATE"
+        var theme = await _themeService.CreateThemeFromFile(tempFile, Username!);
         return Ok(_mapper.Map<SiteThemeDto>(theme));
     }
 

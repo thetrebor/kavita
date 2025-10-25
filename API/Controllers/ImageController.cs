@@ -336,11 +336,11 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
-        if (filename.Contains("..")) return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-filename"));
+        if (filename.Contains("..")) return BadRequest(await _localizationService.Translate(UserId, "invalid-filename"));
 
         var path = Path.Join(_directoryService.TempDirectory, filename);
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "file-doesnt-exist"));
+            return BadRequest(await _localizationService.Translate(UserId, "file-doesnt-exist"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
         return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));

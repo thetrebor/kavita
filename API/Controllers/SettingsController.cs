@@ -82,7 +82,7 @@ public class SettingsController : BaseApiController
     [HttpPost("reset")]
     public async Task<ActionResult<ServerSettingDto>> ResetSettings()
     {
-        _logger.LogInformation("{UserName} is resetting Server Settings", User.GetUsername());
+        _logger.LogInformation("{UserName} is resetting Server Settings", Username!);
 
         return await UpdateSettings(_mapper.Map<ServerSettingDto>(Seed.DefaultSettings));
     }
@@ -95,7 +95,7 @@ public class SettingsController : BaseApiController
     [HttpPost("reset-ip-addresses")]
     public async Task<ActionResult<ServerSettingDto>> ResetIpAddressesSettings()
     {
-        _logger.LogInformation("{UserName} is resetting IP Addresses Setting", User.GetUsername());
+        _logger.LogInformation("{UserName} is resetting IP Addresses Setting", Username!);
         var ipAddresses = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.IpAddresses);
         ipAddresses.Value = Configuration.DefaultIpAddresses;
         _unitOfWork.SettingsRepository.Update(ipAddresses);
@@ -116,7 +116,7 @@ public class SettingsController : BaseApiController
     [HttpPost("reset-base-url")]
     public async Task<ActionResult<ServerSettingDto>> ResetBaseUrlSettings()
     {
-        _logger.LogInformation("{UserName} is resetting Base Url Setting", User.GetUsername());
+        _logger.LogInformation("{UserName} is resetting Base Url Setting", Username!);
         var baseUrl = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl);
         baseUrl.Value = Configuration.DefaultBaseUrl;
         _unitOfWork.SettingsRepository.Update(baseUrl);
@@ -151,7 +151,7 @@ public class SettingsController : BaseApiController
     [HttpPost]
     public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
     {
-        _logger.LogInformation("{UserName} is updating Server Settings", User.GetUsername());
+        _logger.LogInformation("{UserName} is updating Server Settings", Username!);
 
         try
         {
@@ -160,12 +160,12 @@ public class SettingsController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await _localizationService.Translate(UserId, ex.Message));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when updating server settings");
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+            return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
         }
     }
 
@@ -221,7 +221,7 @@ public class SettingsController : BaseApiController
     [HttpPost("test-email-url")]
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId);
         if (string.IsNullOrEmpty(user?.Email)) return BadRequest("Your account has no email on record. Cannot email.");
         return Ok(await _emailService.SendTestEmail(user!.Email));
     }

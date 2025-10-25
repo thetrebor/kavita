@@ -74,7 +74,7 @@ public class LibraryController : BaseApiController
     {
         if (await _unitOfWork.LibraryRepository.LibraryExists(dto.Name))
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-name-exists"));
+            return BadRequest(await _localizationService.Translate(UserId, "library-name-exists"));
         }
 
         var library = new LibraryBuilder(dto.Name, dto.Type)
@@ -113,7 +113,7 @@ public class LibraryController : BaseApiController
             admin.Libraries.Add(library);
         }
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-library"));
         _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
 
         // Restart Folder watching if on
@@ -124,7 +124,7 @@ public class LibraryController : BaseApiController
         }
 
         // Assign all the necessary users with this library side nav
-        var userIds = admins.Select(u => u.Id).Append(User.GetUserId()).ToList();
+        var userIds = admins.Select(u => u.Id).Append(UserId).ToList();
         var userNeedingNewLibrary = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams))
             .Where(u => userIds.Contains(u.Id))
             .ToList();
@@ -135,7 +135,7 @@ public class LibraryController : BaseApiController
             _unitOfWork.UserRepository.Update(user);
         }
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-library"));
 
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
@@ -148,7 +148,7 @@ public class LibraryController : BaseApiController
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
         await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
-            MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
+            MessageFactory.SideNavUpdateEvent(UserId), false);
 
         return Ok();
     }
@@ -204,7 +204,7 @@ public class LibraryController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<LibraryDto?>> GetLibrary(int libraryId)
     {
-        var username = User.GetUsername();
+        var username = Username!;
         if (string.IsNullOrEmpty(username)) return Unauthorized();
 
         var cacheKey = CacheKey + username;
@@ -227,7 +227,7 @@ public class LibraryController : BaseApiController
     [HttpGet("libraries")]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
-        var username = User.GetUsername();
+        var username = Username!;
         if (string.IsNullOrEmpty(username)) return Unauthorized();
 
         var cacheKey = CacheKey + username;
@@ -248,8 +248,8 @@ public class LibraryController : BaseApiController
     [HttpGet("jump-bar")]
     public async Task<ActionResult<IEnumerable<JumpKeyDto>>> GetJumpBar(int libraryId)
     {
-        if (!await _unitOfWork.UserRepository.HasAccessToLibrary(libraryId, User.GetUserId()))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-library-access"));
+        if (!await _unitOfWork.UserRepository.HasAccessToLibrary(libraryId, UserId))
+            return BadRequest(await _localizationService.Translate(UserId, "no-library-access"));
 
         return Ok(_unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId));
     }
@@ -264,7 +264,7 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username, AppUserIncludes.SideNavStreams);
-        if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-doesnt-exist"));
+        if (user == null) return BadRequest(await _localizationService.Translate(UserId, "user-doesnt-exist"));
 
         var libraryString = string.Join(',', updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
         _logger.LogInformation("Granting user {UserName} access to: {Libraries}", updateLibraryForUserDto.Username, libraryString);
@@ -306,7 +306,7 @@ public class LibraryController : BaseApiController
         }
 
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-library"));
     }
 
     /// <summary>
@@ -319,7 +319,7 @@ public class LibraryController : BaseApiController
     [HttpPost("scan")]
     public async Task<ActionResult> Scan(int libraryId, bool force = false)
     {
-        if (libraryId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "libraryId"));
+        if (libraryId <= 0) return BadRequest(await _localizationService.Translate(UserId, "greater-0", "libraryId"));
         await _taskScheduler.ScanLibrary(libraryId, force);
         return Ok();
     }
@@ -458,11 +458,11 @@ public class LibraryController : BaseApiController
     [HttpDelete("delete")]
     public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
     {
-        _logger.LogInformation("Library {LibraryId} is being deleted by {UserName}", libraryId, User.GetUsername());
+        _logger.LogInformation("Library {LibraryId} is being deleted by {UserName}", libraryId, Username!);
 
         try
         {
-            return Ok(await DeleteLibrary(libraryId, User.GetUserId()));
+            return Ok(await DeleteLibrary(libraryId, UserId));
         }
         catch (Exception ex)
         {
@@ -480,14 +480,14 @@ public class LibraryController : BaseApiController
     [HttpDelete("delete-multiple")]
     public async Task<ActionResult<bool>> DeleteMultipleLibraries([FromQuery] List<int> libraryIds)
     {
-        var username = User.GetUsername();
+        var username = Username!;
         _logger.LogInformation("Libraries {LibraryIds} are being deleted by {UserName}", libraryIds, username);
 
         foreach (var libraryId in libraryIds)
         {
             try
             {
-                await DeleteLibrary(libraryId, User.GetUserId());
+                await DeleteLibrary(libraryId, UserId);
             }
             catch (Exception ex)
             {
@@ -600,7 +600,7 @@ public class LibraryController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
-        var userId = User.GetUserId();
+        var userId = UserId;
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
         if (library == null) return BadRequest(await _localizationService.Translate(userId, "library-doesnt-exist"));
 

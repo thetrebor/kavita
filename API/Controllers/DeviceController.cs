@@ -45,19 +45,19 @@ public class DeviceController : BaseApiController
     [HttpPost("create")]
     public async Task<ActionResult<DeviceDto>> CreateOrUpdateDevice(CreateDeviceDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
         try
         {
             var device = await _deviceService.Create(dto, user);
             if (device == null)
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-device-create"));
+                return BadRequest(await _localizationService.Translate(UserId, "generic-device-create"));
 
             return Ok(_mapper.Map<DeviceDto>(device));
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await _localizationService.Translate(UserId, ex.Message));
         }
     }
 
@@ -69,11 +69,11 @@ public class DeviceController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult<DeviceDto>> UpdateDevice(UpdateDeviceDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
         var device = await _deviceService.Update(dto, user);
 
-        if (device == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-device-update"));
+        if (device == null) return BadRequest(await _localizationService.Translate(UserId, "generic-device-update"));
 
         return Ok(_mapper.Map<DeviceDto>(device));
     }
@@ -86,18 +86,18 @@ public class DeviceController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult> DeleteDevice(int deviceId)
     {
-        if (deviceId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "device-doesnt-exist"));
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        if (deviceId <= 0) return BadRequest(await _localizationService.Translate(UserId, "device-doesnt-exist"));
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
         if (await _deviceService.Delete(user, deviceId)) return Ok();
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-device-delete"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-device-delete"));
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DeviceDto>>> GetDevices()
     {
-        return Ok(await _unitOfWork.DeviceRepository.GetDevicesForUserAsync(User.GetUserId()));
+        return Ok(await _unitOfWork.DeviceRepository.GetDevicesForUserAsync(UserId));
     }
 
     /// <summary>
@@ -108,7 +108,7 @@ public class DeviceController : BaseApiController
     [HttpPost("send-to")]
     public async Task<ActionResult> SendToDevice(SendToDeviceDto dto)
     {
-        var userId = User.GetUserId();
+        var userId = UserId;
         if (dto.ChapterIds.Any(i => i < 0)) return BadRequest(await _localizationService.Translate(userId, "greater-0", "ChapterIds"));
         if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "DeviceId"));
 
@@ -151,7 +151,7 @@ public class DeviceController : BaseApiController
     [HttpPost("send-series-to")]
     public async Task<ActionResult> SendSeriesToDevice(SendSeriesToDeviceDto dto)
     {
-        var userId = User.GetUserId();
+        var userId = UserId;
         if (dto.SeriesId <= 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "SeriesId"));
         if (dto.DeviceId < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "DeviceId"));
 

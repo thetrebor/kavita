@@ -85,7 +85,7 @@ public class FontController : BaseApiController
     [HttpDelete]
     public async Task<IActionResult> DeleteFont(int fontId, bool force = false)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "denied"));
 
         var forceDelete = User.IsInRole(PolicyConstants.AdminRole) && force;
         var fontInUse = await _fontService.IsFontInUse(fontId);
@@ -116,7 +116,7 @@ public class FontController : BaseApiController
     [HttpPost("upload")]
     public async Task<ActionResult<EpubFontDto>> UploadFont(IFormFile formFile)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "denied"));
 
         if (!_fontFileExtensionRegex.IsMatch(Path.GetExtension(formFile.FileName))) return BadRequest("Invalid file");
 
@@ -131,7 +131,7 @@ public class FontController : BaseApiController
     [HttpPost("upload-by-url")]
     public async Task<ActionResult> UploadFontByUrl([FromQuery]string url)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "denied"));
         // Validate url
         try
         {
@@ -140,7 +140,7 @@ public class FontController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(_localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(_localizationService.Translate(UserId, ex.Message));
         }
     }
 

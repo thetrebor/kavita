@@ -59,7 +59,7 @@ public class UsersController : BaseApiController
 
         if (await _unitOfWork.CommitAsync()) return Ok();
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-user-delete"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-user-delete"));
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<IEnumerable<MemberDto>>> GetMyself()
     {
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
-        return Ok(users.Where(u => u.UserName == User.GetUsername()).DefaultIfEmpty().Select(u => _mapper.Map<MemberDto>(u)).SingleOrDefault());
+        return Ok(users.Where(u => u.UserName == Username!).DefaultIfEmpty().Select(u => _mapper.Map<MemberDto>(u)).SingleOrDefault());
     }
 
 
@@ -86,14 +86,14 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-        if (library == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-doesnt-exist"));
-        return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, User.GetUserId()));
+        if (library == null) return BadRequest(await _localizationService.Translate(UserId, "library-doesnt-exist"));
+        return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, UserId));
     }
 
     [HttpGet("has-library-access")]
     public ActionResult<bool> HasLibraryAccess(int libraryId)
     {
-        var libs = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername());
+        var libs = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(Username!);
         return Ok(libs.Any(x => x.Id == libraryId));
     }
 
@@ -106,10 +106,10 @@ public class UsersController : BaseApiController
     [HttpPost("update-preferences")]
     public async Task<ActionResult<UserPreferencesDto>> UpdatePreferences(UserPreferencesDto preferencesDto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!,
             AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         var existingPreferences = user.UserPreferences;
 
@@ -152,7 +152,7 @@ public class UsersController : BaseApiController
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-user-pref"));
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-user-pref"));
 
         await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
         return Ok(preferencesDto);
@@ -166,7 +166,7 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<UserPreferencesDto>> GetPreferences()
     {
         return _mapper.Map<UserPreferencesDto>(
-            await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername()));
+            await _unitOfWork.UserRepository.GetPreferencesAsync(Username!));
 
     }
 
@@ -190,7 +190,7 @@ public class UsersController : BaseApiController
     [HttpGet("tokens")]
     public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
     {
-        if (!await _licenseService.HasActiveLicense()) return BadRequest(_localizationService.Translate(User.GetUserId(), "kavitaplus-restricted"));
+        if (!await _licenseService.HasActiveLicense()) return BadRequest(_localizationService.Translate(UserId, "kavitaplus-restricted"));
 
         return Ok((await _unitOfWork.UserRepository.GetUserTokenInfo()));
     }

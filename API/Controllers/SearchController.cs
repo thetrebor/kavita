@@ -35,7 +35,7 @@ public class SearchController : BaseApiController
     [HttpGet("series-for-mangafile")]
     public async Task<ActionResult<SeriesDto>> GetSeriesForMangaFile(int mangaFileId)
     {
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, User.GetUserId()));
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, UserId));
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public class SearchController : BaseApiController
     [HttpGet("series-for-chapter")]
     public async Task<ActionResult<SeriesDto>> GetSeriesForChapter(int chapterId)
     {
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapterId, User.GetUserId()));
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapterId, UserId));
     }
 
     /// <summary>
@@ -61,11 +61,11 @@ public class SearchController : BaseApiController
     {
         queryString = Services.Tasks.Scanner.Parser.Parser.CleanQuery(queryString);
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized();
 
         var libraries = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, QueryContext.Search).ToList();
-        if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "libraries-restricted"));
+        if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(UserId, "libraries-restricted"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 

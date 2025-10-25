@@ -69,7 +69,7 @@ public class ServerController : BaseApiController
     [HttpPost("clear-cache")]
     public ActionResult ClearCache()
     {
-        _logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", Username!);
         _cleanupService.CleanupCacheAndTempDirectories();
 
         return Ok();
@@ -82,7 +82,7 @@ public class ServerController : BaseApiController
     [HttpPost("cleanup-want-to-read")]
     public ActionResult CleanupWantToRead()
     {
-        _logger.LogInformation("{UserName} is clearing running want to read cleanup from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is clearing running want to read cleanup from admin dashboard", Username!);
         RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);
 
         return Ok();
@@ -95,7 +95,7 @@ public class ServerController : BaseApiController
     [HttpPost("cleanup")]
     public ActionResult Cleanup()
     {
-        _logger.LogInformation("{UserName} is clearing running general cleanup from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is clearing running general cleanup from admin dashboard", Username!);
         RecurringJob.TriggerJob(TaskScheduler.CleanupTaskId);
 
         return Ok();
@@ -108,7 +108,7 @@ public class ServerController : BaseApiController
     [HttpPost("backup-db")]
     public ActionResult BackupDatabase()
     {
-        _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", Username!);
         RecurringJob.TriggerJob(TaskScheduler.BackupTaskId);
         return Ok();
     }
@@ -120,10 +120,10 @@ public class ServerController : BaseApiController
     [HttpPost("analyze-files")]
     public async Task<ActionResult> AnalyzeFiles()
     {
-        _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", Username!);
         if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
                 [], TaskScheduler.DefaultQueue, true))
-            return Ok(await _localizationService.Translate(User.GetUserId(), "job-already-running"));
+            return Ok(await _localizationService.Translate(UserId, "job-already-running"));
 
         BackgroundJob.Enqueue(() => _scannerService.AnalyzeFiles());
         return Ok();
@@ -152,7 +152,7 @@ public class ServerController : BaseApiController
         var encoding = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
         if (encoding == EncodeFormat.PNG)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "encode-as-warning"));
+            return BadRequest(await _localizationService.Translate(UserId, "encode-as-warning"));
         }
 
         _taskScheduler.CovertAllCoversToEncoding();
@@ -176,7 +176,7 @@ public class ServerController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await _localizationService.Translate(UserId, ex.Message));
         }
     }
 
@@ -221,7 +221,7 @@ public class ServerController : BaseApiController
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog(int count = 0)
     {
         // Strange bug where [Authorize] doesn't work
-        if (User.GetUserId() == 0) return Unauthorized();
+        if (UserId == 0) return Unauthorized();
 
         return Ok(await _versionUpdaterService.GetAllReleases(count));
     }
@@ -237,7 +237,7 @@ public class ServerController : BaseApiController
             new JobDto()
             {
                 Id = dto.Id,
-                Title = await _localizationService.Translate(User.GetUserId(), dto.Id),
+                Title = await _localizationService.Translate(UserId, dto.Id),
                 Cron = dto.Cron,
                 LastExecutionUtc = dto.LastExecution.HasValue ? new DateTime(dto.LastExecution.Value.Ticks, DateTimeKind.Utc) : null
             });
