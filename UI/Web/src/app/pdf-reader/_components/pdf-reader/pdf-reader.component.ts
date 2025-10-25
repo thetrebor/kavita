@@ -7,11 +7,18 @@ import {
   HostListener,
   inject,
   OnDestroy,
-  OnInit, signal,
+  OnInit,
+  signal,
   ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgxExtendedPdfViewerModule, pdfDefaultOptions, PageViewModeType, ProgressBarEvent, ScrollModeType} from 'ngx-extended-pdf-viewer';
+import {
+  NgxExtendedPdfViewerModule,
+  PageViewModeType,
+  pdfDefaultOptions,
+  ProgressBarEvent,
+  ScrollModeType
+} from 'ngx-extended-pdf-viewer';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
@@ -285,7 +292,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
       if (this.currentPage >= this.maxPages) {
         this.currentPage = this.maxPages - 1;
-        this.saveProgress();
+        // Don't save progress on first load to avoid session creation, wait for a page change event
       }
       this.cdRef.markForCheck();
     });
