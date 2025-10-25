@@ -22,6 +22,7 @@ public interface IUserContext
     /// Gets the current authenticated user's username.
     /// Returns null if user is not authenticated.
     /// </summary>
+    /// <remarks>Warning! Username's can contain .. and /, do not use folders or filenames explicitly with the Username</remarks>
     string? GetUsername();
 
     /// <summary>

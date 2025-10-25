@@ -29,5 +29,6 @@ public class BaseApiController : ControllerBase
     /// <summary>
     /// Gets the current authenticated user's username.
     /// </summary>
+    /// <remarks>Warning! Username's can contain .. and /, do not use folders or filenames explicitly with the Username</remarks>
     protected string? Username => UserContext.GetUsername();
 }

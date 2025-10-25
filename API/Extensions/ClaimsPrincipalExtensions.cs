@@ -14,7 +14,7 @@ public static class ClaimsPrincipalExtensions
     private const string EmailVerifiedClaimType = "email_verified";
 
     /// <summary>
-    /// Get's the authenticated user's username
+    /// Gets the authenticated user's username
     /// </summary>
     /// <remarks>Warning! Username's can contain .. and /, do not use folders or filenames explicitly with the Username</remarks>
     /// <param name="user"></param>
