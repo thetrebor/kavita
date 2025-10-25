@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using API.Data;
 using API.Entities.MetadataMatching;
-using API.Entities.Progress;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -13,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20251023205956_SeriesInheritWebLinksFromFirstChapter")]
+    partial class SeriesInheritWebLinksFromFirstChapter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -651,6 +653,56 @@ namespace API.Data.Migrations
                     b.ToTable("AppUserPreferences");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserProgress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BookScrollId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ChapterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PagesRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("VolumeId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("AppUserProgresses");
+                });
+
             modelBuilder.Entity("API.Entities.AppUserRating", b =>
                 {
                     b.Property<int>("Id")
@@ -1161,69 +1213,6 @@ namespace API.Data.Migrations
                     b.HasIndex("VolumeId");
 
                     b.ToTable("Chapter");
-                });
-
-            modelBuilder.Entity("API.Entities.ClientDevice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ClientDeviceId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CurrentClientInfo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":\"Unknown\",\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":null,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}");
-
-                    b.Property<string>("DeviceFingerprint")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("FirstSeenUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FriendlyName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastSeenUtc")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.ToTable("ClientDevice");
-                });
-
-            modelBuilder.Entity("API.Entities.ClientDeviceHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CapturedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ClientInfo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":\"Unknown\",\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":null,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}");
-
-                    b.Property<int>("DeviceId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
-
-                    b.ToTable("ClientDeviceHistory");
                 });
 
             modelBuilder.Entity("API.Entities.CollectionTag", b =>
@@ -2207,146 +2196,6 @@ namespace API.Data.Migrations
                     b.ToTable("SeriesMetadataPeople");
                 });
 
-            modelBuilder.Entity("API.Entities.Progress.AppUserProgress", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("BookScrollId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ChapterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastModified")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastModifiedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("LibraryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PagesRead")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TotalReads")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("VolumeId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("ChapterId");
-
-                    b.HasIndex("SeriesId");
-
-                    b.ToTable("AppUserProgresses");
-                });
-
-            modelBuilder.Entity("API.Entities.Progress.AppUserReadingHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ClientInfoUsed")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("[]");
-
-                    b.Property<DateTime>("CreatedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Data")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"TotalMinutesRead\":0,\"TotalPagesRead\":0,\"TotalWordsRead\":0,\"LongestSessionMinutes\":0}");
-
-                    b.Property<DateTime>("DateUtc")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("DateUtc")
-                        .IsUnique();
-
-                    b.ToTable("AppUserReadingHistory");
-                });
-
-            modelBuilder.Entity("API.Entities.Progress.AppUserReadingSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ActivityData")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("[]");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("EndTimeUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
-
-                    b.Property<DateTime>("LastModified")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastModifiedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("StartTimeUtc")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("IsActive");
-
-                    b.ToTable("AppUserReadingSession");
-                });
-
             modelBuilder.Entity("API.Entities.ReadingList", b =>
                 {
                     b.Property<int>("Id")
@@ -3294,6 +3143,29 @@ namespace API.Data.Migrations
                     b.Navigation("Theme");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserProgress", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("Progresses")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Chapter", null)
+                        .WithMany("UserProgress")
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", null)
+                        .WithMany("Progress")
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("API.Entities.AppUserRating", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -3426,28 +3298,6 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Volume");
-                });
-
-            modelBuilder.Entity("API.Entities.ClientDevice", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("ClientDevices")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-                });
-
-            modelBuilder.Entity("API.Entities.ClientDeviceHistory", b =>
-                {
-                    b.HasOne("API.Entities.ClientDevice", "Device")
-                        .WithMany("History")
-                        .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Device");
                 });
 
             modelBuilder.Entity("API.Entities.Device", b =>
@@ -3640,51 +3490,6 @@ namespace API.Data.Migrations
                     b.Navigation("Person");
 
                     b.Navigation("SeriesMetadata");
-                });
-
-            modelBuilder.Entity("API.Entities.Progress.AppUserProgress", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("Progresses")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Chapter", null)
-                        .WithMany("UserProgress")
-                        .HasForeignKey("ChapterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Series", null)
-                        .WithMany("Progress")
-                        .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-                });
-
-            modelBuilder.Entity("API.Entities.Progress.AppUserReadingHistory", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("ReadingHistory")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-                });
-
-            modelBuilder.Entity("API.Entities.Progress.AppUserReadingSession", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("ReadingSessions")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("API.Entities.ReadingList", b =>
@@ -4017,8 +3822,6 @@ namespace API.Data.Migrations
 
                     b.Navigation("ChapterRatings");
 
-                    b.Navigation("ClientDevices");
-
                     b.Navigation("Collections");
 
                     b.Navigation("DashboardStreams");
@@ -4031,13 +3834,9 @@ namespace API.Data.Migrations
 
                     b.Navigation("Ratings");
 
-                    b.Navigation("ReadingHistory");
-
                     b.Navigation("ReadingLists");
 
                     b.Navigation("ReadingProfiles");
-
-                    b.Navigation("ReadingSessions");
 
                     b.Navigation("ScrobbleHolds");
 
@@ -4068,11 +3867,6 @@ namespace API.Data.Migrations
                     b.Navigation("Ratings");
 
                     b.Navigation("UserProgress");
-                });
-
-            modelBuilder.Entity("API.Entities.ClientDevice", b =>
-                {
-                    b.Navigation("History");
                 });
 
             modelBuilder.Entity("API.Entities.Library", b =>
