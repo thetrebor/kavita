@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using API.Extensions;
 using API.Services;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -15,6 +16,11 @@ public class OidcController: ControllerBase
     [HttpGet("login")]
     public IActionResult Login(string returnUrl = "/")
     {
+        if (returnUrl == "/")
+        {
+            returnUrl = Configuration.BaseUrl;
+        }
+
         var properties = new AuthenticationProperties { RedirectUri = returnUrl };
         return Challenge(properties, IdentityServiceExtensions.OpenIdConnect);
     }
@@ -25,18 +31,18 @@ public class OidcController: ControllerBase
 
         if (!Request.Cookies.ContainsKey(OidcService.CookieName))
         {
-            return Redirect("/");
+            return Redirect(Configuration.BaseUrl);
         }
 
         var res = await Request.HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        if (!res.Succeeded || res.Properties == null || string.IsNullOrEmpty(res.Properties.GetString(OidcService.IdToken)))
+        if (!res.Succeeded || res.Properties == null || string.IsNullOrEmpty(res.Properties.GetTokenValue(OidcService.IdToken)))
         {
             HttpContext.Response.Cookies.Delete(OidcService.CookieName);
-            return Redirect("/");
+            return Redirect(Configuration.BaseUrl);
         }
 
         return SignOut(
-            new AuthenticationProperties { RedirectUri = "/login" },
+            new AuthenticationProperties { RedirectUri = Configuration.BaseUrl+"login" },
             CookieAuthenticationDefaults.AuthenticationScheme,
             IdentityServiceExtensions.OpenIdConnect);
     }

@@ -1045,7 +1045,7 @@ public class OpdsService : IOpdsService
         }
 
         var pageNumber = Math.Max(currentPage, 1);
-        var totalPages = totalItems / pageSize;
+        var totalPages = (int) Math.Ceiling((double) totalItems / pageSize);
 
         if (pageNumber > 1)
         {
