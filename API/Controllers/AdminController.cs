@@ -6,6 +6,7 @@ using API.Data.ManualMigrations;
 using API.DTOs;
 using API.DTOs.Progress;
 using API.Entities;
+using API.Middleware;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,7 @@ public class AdminController(UserManager<AppUser> userManager) : BaseApiControll
     /// </summary>
     /// <returns></returns>
     [AllowAnonymous]
+    [SkipDeviceTracking]
     [HttpGet("exists")]
     public async Task<ActionResult<bool>> AdminExists()
     {

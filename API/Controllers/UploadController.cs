@@ -8,6 +8,7 @@ using API.DTOs.Uploads;
 using API.Entities.Enums;
 using API.Entities.MetadataMatching;
 using API.Extensions;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
@@ -20,9 +21,7 @@ namespace API.Controllers;
 
 #nullable enable
 
-/// <summary>
-///
-/// </summary>
+[SkipDeviceTracking]
 public class UploadController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;

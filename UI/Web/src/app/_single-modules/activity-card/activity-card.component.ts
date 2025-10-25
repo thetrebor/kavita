@@ -5,6 +5,7 @@ import {ImageService} from "../../_services/image.service";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {RouterLink} from "@angular/router";
+import {ImageComponent} from "../../shared/image/image.component";
 
 @Component({
   selector: 'app-activity-card',
@@ -12,7 +13,8 @@ import {RouterLink} from "@angular/router";
     TranslocoDirective,
     TimeAgoPipe,
     DefaultValuePipe,
-    RouterLink
+    RouterLink,
+    ImageComponent
   ],
   templateUrl: './activity-card.component.html',
   styleUrl: './activity-card.component.scss',

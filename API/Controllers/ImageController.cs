@@ -6,6 +6,7 @@ using API.Constants;
 using API.Data;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Metadata;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +21,7 @@ namespace API.Controllers;
 /// Responsible for servicing up images stored in Kavita for entities
 /// </summary>
 [AllowAnonymous]
+[SkipDeviceTracking]
 public class ImageController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;

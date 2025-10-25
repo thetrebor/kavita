@@ -322,7 +322,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     }
 
     /// <summary>
-    /// Registers a brand new device in the database.
+    /// Registers a brand-new device in the database.
     /// </summary>
     private async Task<ClientDevice> RegisterNewDeviceAsync(
         int userId,
@@ -344,7 +344,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             IsActive = true,
             History = new List<ClientDeviceHistory>
             {
-                new ClientDeviceHistory
+                new()
                 {
                     ClientInfo = clientInfo,
                     CapturedAtUtc = DateTime.UtcNow
@@ -400,24 +400,29 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     {
         device.LastSeenUtc = DateTime.UtcNow;
 
-        // Check if ClientInfo has meaningfully changed
         if (HasMeaningfulChanges(device.CurrentClientInfo, newClientInfo))
         {
             device.CurrentClientInfo = newClientInfo;
-
-            // Record in history
             device.History.Add(new ClientDeviceHistory
             {
                 ClientInfo = newClientInfo,
                 CapturedAtUtc = DateTime.UtcNow
             });
-
-            logger.LogDebug(
-                "Recorded ClientInfo change for device {DeviceId}",
-                device.Id);
         }
 
-        await context.SaveChangesAsync();
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Someone else updated the device, that's fine
+            // Their LastSeenUtc is equally valid
+            logger.LogDebug(ex, "Concurrency conflict updating device {DeviceId}, ignoring", device.Id);
+
+            // Detach to prevent tracking issues
+            context.Entry(device).State = EntityState.Detached;
+        }
     }
 
     /// <summary>

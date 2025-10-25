@@ -35,8 +35,8 @@ and modified
 })
 export class TimeAgoPipe implements PipeTransform, OnDestroy {
 	private readonly changeDetectorRef = inject(ChangeDetectorRef);
-	private ngZone = inject(NgZone);
-	private translocoService = inject(TranslocoService);
+	private readonly ngZone = inject(NgZone);
+	private readonly translocoService = inject(TranslocoService);
 
 
 	private timer: number | null = null;

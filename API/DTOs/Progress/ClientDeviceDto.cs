@@ -13,8 +13,11 @@ public sealed record ClientDeviceDto
     /// <summary>
     /// Most recent stable ClientInfoData (excluding IP/timestamp changes)
     /// </summary>
-    public ClientInfoData CurrentClientInfo { get; set; } = new();
+    public ClientInfoDto CurrentClientInfo { get; set; } = new();
 
     public DateTime FirstSeenUtc { get; set; }
     public DateTime LastSeenUtc { get; set; }
+
+    public string OwnerUsername { get; set; }
+    public int OwnerUserId { get; set; }
 }

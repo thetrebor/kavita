@@ -1,3 +1,4 @@
+using API.Middleware;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,6 +6,7 @@ namespace API.Controllers;
 
 #nullable enable
 
+[SkipDeviceTracking]
 [AllowAnonymous]
 public class HealthController : BaseApiController
 {

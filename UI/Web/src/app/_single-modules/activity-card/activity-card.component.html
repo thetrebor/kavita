@@ -6,12 +6,12 @@
     <div class="activity-content">
       <!-- Cover Images -->
       <div class="cover-container">
-        <img [src]="imageService.getSeriesCoverImage(activeData.seriesId)"
-             [alt]="activeData.seriesName"
-             class="series-cover">
-        <img [src]="imageService.getChapterCoverImage(activeData.chapterId)"
-             [alt]="activeData.chapterTitle"
-             class="chapter-cover">
+        <div class="series-cover">
+          <app-image [imageUrl]="imageService.getSeriesCoverImage(activeData.seriesId)" width="100%" height="100%" [objectFit]="'cover'" />
+        </div>
+        <div class="chapter-cover">
+          <app-image [imageUrl]="imageService.getChapterCoverImage(activeData.chapterId)" />
+        </div>
       </div>
 
       <!-- Activity Details -->

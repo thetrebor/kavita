@@ -413,6 +413,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.AppUserId))
             .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName));
 
-        CreateMap<ClientDevice, ClientDeviceDto>();
+        CreateMap<ClientDevice, ClientDeviceDto>()
+            .ForMember(dest => dest.OwnerUserId, opt => opt.MapFrom(src => src.AppUserId))
+            .ForMember(dest => dest.OwnerUsername, opt => opt.MapFrom(src => src.AppUser.UserName));
     }
 }

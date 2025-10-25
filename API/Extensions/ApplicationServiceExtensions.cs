@@ -30,6 +30,9 @@ public static class ApplicationServiceExtensions
     {
         services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
+        services.AddScoped<UserContext>();
+        services.AddScoped<IUserContext>(sp => sp.GetRequiredService<UserContext>());
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IFileService, FileService>();

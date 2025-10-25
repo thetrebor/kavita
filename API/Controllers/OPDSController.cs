@@ -12,6 +12,7 @@ using API.Extensions;
 using API.Middleware;
 using API.Services;
 using API.Services.Reading;
+using API.Services.Store;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,11 +24,11 @@ namespace API.Controllers;
 
 
 [AllowAnonymous]
-[ServiceFilter(typeof(OpdsActionFilterAttribute))]
 [ServiceFilter(typeof(OpdsActiveUserMiddlewareAttribute))]
 public class OpdsController : BaseApiController
 {
     private readonly IOpdsService _opdsService;
+    private readonly IUserContext _userContext;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDownloadService _downloadService;
     private readonly IDirectoryService _directoryService;
@@ -42,7 +43,7 @@ public class OpdsController : BaseApiController
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, IAccountService accountService,
-        ILocalizationService localizationService, IOpdsService opdsService)
+        ILocalizationService localizationService, IOpdsService opdsService, IUserContext userContext)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -52,13 +53,14 @@ public class OpdsController : BaseApiController
         _accountService = accountService;
         _localizationService = localizationService;
         _opdsService = opdsService;
+        _userContext = userContext;
 
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
     }
 
     private int GetUserIdFromContext()
     {
-        return (int) HttpContext.Items[UserId]!;
+        return _userContext.GetUserIdOrThrow();
     }
 
     /// <summary>

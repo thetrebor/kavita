@@ -6,13 +6,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.ManualMigrations;
 using API.DTOs.Internal;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Logging;
@@ -30,11 +28,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -42,7 +38,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API;
@@ -228,13 +223,173 @@ public class Startup
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env,
-        IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider, ICacheService cacheService,
-        IDirectoryService directoryService, IUnitOfWork unitOfWork, IBackupService backupService, IImageService imageService, IVersionUpdaterService versionService)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
+        IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider,
+        IDirectoryService directoryService, IUnitOfWork unitOfWork, IVersionUpdaterService versionService)
     {
 
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-        // Apply Migrations
+
+
+        ExecuteMigrations(serviceProvider, directoryService, unitOfWork, versionService, logger);
+
+        app.UseMiddleware<ExceptionMiddleware>();
+        app.UseMiddleware<SecurityEventMiddleware>();
+
+
+        if (env.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
+            });
+        }
+
+        if (env.IsDevelopment())
+        {
+            app.UseHangfireDashboard();
+        }
+
+        app.UseResponseCompression();
+
+        app.UseForwardedHeaders();
+
+        app.UseRateLimiter();
+
+        var basePath = Configuration.BaseUrl;
+        app.UsePathBase(basePath);
+        if (!env.IsDevelopment())
+        {
+            // We don't update the index.html in local as we don't serve from there
+            UpdateBaseUrlInIndex(basePath);
+
+            // Update DB with what's in config
+            var dataContext = serviceProvider.GetRequiredService<DataContext>();
+            var setting = dataContext.ServerSetting.SingleOrDefault(x => x.Key == ServerSettingKey.BaseUrl);
+            if (setting != null)
+            {
+                setting.Value = basePath;
+            }
+
+            dataContext.SaveChanges();
+        }
+
+        app.UseRouting();
+
+        // Ordering is important. Cors, authentication, authorization
+        if (env.IsDevelopment())
+        {
+            app.UseCors(policy => policy
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials() // For SignalR token query param
+                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000")
+                .WithExposedHeaders("Content-Disposition", "Pagination"));
+        }
+        else
+        {
+            // Allow CORS for Kavita's url
+            app.UseCors(policy => policy
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials() // For SignalR token query param
+                .WithExposedHeaders("Content-Disposition", "Pagination"));
+        }
+
+        app.UseResponseCaching();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        // Must be first after Auth, will set authentication data for the rest of the Controllers/Middleware
+        app.UseMiddleware<UserContextMiddleware>();
+
+        app.UseMiddleware<ClientInfoMiddleware>();
+        app.UseMiddleware<DeviceTrackingMiddleware>(); // This must be after ClientInfo and Authorization
+
+        app.UseDefaultFiles();
+
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            // bcmap files needed for PDF reader localizations (https://github.com/Kareadita/Kavita/issues/2970)
+            // ftl files are needed for PDF zoom options (https://github.com/Kareadita/Kavita/issues/3995)
+            ContentTypeProvider = new FileExtensionContentTypeProvider
+            {
+                Mappings =
+                {
+                    [".bcmap"] = "application/octet-stream",
+                    [".ftl"] = "text/plain"
+                }
+            },
+            HttpsCompression = HttpsCompressionMode.Compress,
+            OnPrepareResponse = ctx =>
+            {
+                ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + TimeSpan.FromHours(24);
+                ctx.Context.Response.Headers[Headers.RobotsTag] = "noindex,nofollow";
+            }
+        });
+
+        app.UseSerilogRequestLogging(opts
+            =>
+        {
+            opts.EnrichDiagnosticContext = LogEnricher.EnrichFromRequest;
+            opts.IncludeQueryInRequestPath = true;
+        });
+
+        if (Configuration.AllowIFraming)
+        {
+            logger.LogCritical("appsetting.json has allow iframing on! This may allow for clickjacking on the server. User beware");
+        }
+
+        app.Use(async (context, next) =>
+        {
+            context.Response.Headers[HeaderNames.Vary] = new[] { "Accept-Encoding" };
+
+            if (!Configuration.AllowIFraming)
+            {
+                // Don't let the site be iframed outside the same origin (clickjacking)
+                context.Response.Headers.XFrameOptions = "SAMEORIGIN";
+
+                // Setup CSP to ensure we load assets only from these origins
+                context.Response.Headers.ContentSecurityPolicy = "frame-ancestors 'none';";
+            }
+
+            await next();
+        });
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+            endpoints.MapHub<MessageHub>("hubs/messages");
+            endpoints.MapHub<LogHub>("hubs/logs");
+            if (env.IsDevelopment())
+            {
+                endpoints.MapHangfireDashboard();
+            }
+            endpoints.MapFallbackToController("Index", "Fallback");
+        });
+
+        applicationLifetime.ApplicationStopping.Register(OnShutdown);
+        applicationLifetime.ApplicationStarted.Register(() =>
+        {
+            try
+            {
+                logger.LogInformation("Kavita - v{Version}", BuildInfo.Version);
+            }
+            catch (Exception)
+            {
+                /* Swallow Exception */
+                Console.WriteLine($"Kavita - v{BuildInfo.Version}");
+            }
+        });
+
+        logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
+    }
+
+    private static void ExecuteMigrations(IServiceProvider serviceProvider, IDirectoryService directoryService,
+        IUnitOfWork unitOfWork, IVersionUpdaterService versionService, ILogger<Program> logger)
+    {
         try
         {
             Task.Run(async () =>
@@ -328,155 +483,6 @@ public class Startup
         {
             logger.LogCritical(ex, "An error occurred during migration");
         }
-
-        app.UseMiddleware<ExceptionMiddleware>();
-        app.UseMiddleware<SecurityEventMiddleware>();
-
-
-        if (env.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
-            });
-        }
-
-        if (env.IsDevelopment())
-        {
-            app.UseHangfireDashboard();
-        }
-
-        app.UseResponseCompression();
-
-        app.UseForwardedHeaders();
-
-        app.UseRateLimiter();
-
-        var basePath = Configuration.BaseUrl;
-        app.UsePathBase(basePath);
-        if (!env.IsDevelopment())
-        {
-            // We don't update the index.html in local as we don't serve from there
-            UpdateBaseUrlInIndex(basePath);
-
-            // Update DB with what's in config
-            var dataContext = serviceProvider.GetRequiredService<DataContext>();
-            var setting = dataContext.ServerSetting.SingleOrDefault(x => x.Key == ServerSettingKey.BaseUrl);
-            if (setting != null)
-            {
-                setting.Value = basePath;
-            }
-
-            dataContext.SaveChanges();
-        }
-
-        app.UseRouting();
-
-        // Ordering is important. Cors, authentication, authorization
-        if (env.IsDevelopment())
-        {
-            app.UseCors(policy => policy
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials() // For SignalR token query param
-                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000")
-                .WithExposedHeaders("Content-Disposition", "Pagination"));
-        }
-        else
-        {
-            // Allow CORS for Kavita's url
-            app.UseCors(policy => policy
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials() // For SignalR token query param
-                .WithExposedHeaders("Content-Disposition", "Pagination"));
-        }
-
-        app.UseResponseCaching();
-
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.UseMiddleware<ClientInfoMiddleware>();
-
-        app.UseDefaultFiles();
-
-        app.UseStaticFiles(new StaticFileOptions
-        {
-            // bcmap files needed for PDF reader localizations (https://github.com/Kareadita/Kavita/issues/2970)
-            // ftl files are needed for PDF zoom options (https://github.com/Kareadita/Kavita/issues/3995)
-            ContentTypeProvider = new FileExtensionContentTypeProvider
-            {
-                Mappings =
-                {
-                    [".bcmap"] = "application/octet-stream",
-                    [".ftl"] = "text/plain"
-                }
-            },
-            HttpsCompression = HttpsCompressionMode.Compress,
-            OnPrepareResponse = ctx =>
-            {
-                ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + TimeSpan.FromHours(24);
-                ctx.Context.Response.Headers[Headers.RobotsTag] = "noindex,nofollow";
-            }
-        });
-
-        app.UseSerilogRequestLogging(opts
-            =>
-        {
-            opts.EnrichDiagnosticContext = LogEnricher.EnrichFromRequest;
-            opts.IncludeQueryInRequestPath = true;
-        });
-
-        if (Configuration.AllowIFraming)
-        {
-            logger.LogCritical("appsetting.json has allow iframing on! This may allow for clickjacking on the server. User beware");
-        }
-
-        app.Use(async (context, next) =>
-        {
-            context.Response.Headers[HeaderNames.Vary] = new[] { "Accept-Encoding" };
-
-            if (!Configuration.AllowIFraming)
-            {
-                // Don't let the site be iframed outside the same origin (clickjacking)
-                context.Response.Headers.XFrameOptions = "SAMEORIGIN";
-
-                // Setup CSP to ensure we load assets only from these origins
-                context.Response.Headers.ContentSecurityPolicy = "frame-ancestors 'none';";
-            }
-
-            await next();
-        });
-
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-            endpoints.MapHub<MessageHub>("hubs/messages");
-            endpoints.MapHub<LogHub>("hubs/logs");
-            if (env.IsDevelopment())
-            {
-                endpoints.MapHangfireDashboard();
-            }
-            endpoints.MapFallbackToController("Index", "Fallback");
-        });
-
-        applicationLifetime.ApplicationStopping.Register(OnShutdown);
-        applicationLifetime.ApplicationStarted.Register(() =>
-        {
-            try
-            {
-                logger.LogInformation("Kavita - v{Version}", BuildInfo.Version);
-            }
-            catch (Exception)
-            {
-                /* Swallow Exception */
-                Console.WriteLine($"Kavita - v{BuildInfo.Version}");
-            }
-        });
-
-        logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
     }
 
     private static void UpdateBaseUrlInIndex(string baseUrl)

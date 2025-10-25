@@ -56,6 +56,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             parsed.IpAddress = ipAddress;
             parsed.AuthType = authType;
             parsed.CapturedAt = DateTime.UtcNow;
+
             return parsed;
         }
 
@@ -186,6 +187,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         return AuthenticationType.JWT;
     }
 
+    // TODO: Move this into a Helper and add unit tests
     private static string DetermineClientType(string userAgent)
     {
         if (string.IsNullOrEmpty(userAgent))

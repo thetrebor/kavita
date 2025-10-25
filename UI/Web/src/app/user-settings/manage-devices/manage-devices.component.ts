@@ -1,13 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, DestroyRef,
-  inject,
-  OnInit
-} from '@angular/core';
-import { Device } from 'src/app/_models/device/device';
-import { DeviceService } from 'src/app/_services/device.service';
-import { DevicePlatformPipe } from '../../_pipes/device-platform.pipe';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, model, OnInit} from '@angular/core';
+import {Device} from 'src/app/_models/device/device';
+import {DeviceService} from 'src/app/_services/device.service';
+import {DevicePlatformPipe} from '../../_pipes/device-platform.pipe';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
@@ -20,13 +14,16 @@ import {shareReplay} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AsyncPipe} from "@angular/common";
+import {ActivityService} from "../../_services/activity.service";
+import {ClientDevice} from "../../_models/client-device";
+import {ClientDeviceCardComponent} from "../../_single-modules/client-device-card/client-device-card.component";
 
 @Component({
     selector: 'app-manage-devices',
     templateUrl: './manage-devices.component.html',
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule]
+  imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule, ClientDeviceCardComponent]
 })
 export class ManageDevicesComponent implements OnInit {
 
@@ -37,17 +34,26 @@ export class ManageDevicesComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly modalService = inject(NgbModal);
   private readonly accountService = inject(AccountService);
+  private readonly activityService = inject(ActivityService);
 
   devices: Array<Device> = [];
   isEditingDevice: boolean = false;
   device: Device | undefined;
   hasEmailSetup = false;
 
+  clientDevices = model<ClientDevice[]>([]);
+
   isReadOnly$ = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef),
     map(c => c && this.accountService.hasReadOnlyRole(c)),
     shareReplay({refCount: true, bufferSize: 1}),
   );
+
+  constructor() {
+    this.activityService.getMyClientDevices().subscribe(devices => {
+      this.clientDevices.set([...devices]);
+    });
+  }
 
   ngOnInit(): void {
     this.settingsService.isEmailSetup().subscribe(res => {

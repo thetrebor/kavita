@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities.Enums;
+using API.Middleware;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -64,6 +65,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     /// <param name="apiKey">Required for authenticating to get result</param>
     /// <returns></returns>
     [AllowAnonymous]
+    [SkipDeviceTracking]
     [HttpGet("version")]
     public async Task<ActionResult<string>> GetVersion([Required] string apiKey)
     {

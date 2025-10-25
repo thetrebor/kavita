@@ -1,0 +1,89 @@
+<ng-container *transloco="let t; prefix: 'client-device-card'">
+  <div class="card client-device-card">
+    <div class="card-body">
+      <!-- Header Section -->
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="flex-grow-1">
+          <h5 class="card-title mb-1">
+            <i [class]="deviceIcon()"></i>
+            <span class="ms-2">{{clientDevice().friendlyName}}</span>
+          </h5>
+          <div class="text-muted small">
+            <span class="badge" [class]="clientTypeBadgeClass()">
+              {{clientDevice().currentClientInfo.clientType}}
+            </span>
+            <span class="ms-2">{{clientDevice().ownerUsername}}</span>
+          </div>
+        </div>
+        <div class="text-end">
+          <span class="badge bg-secondary" [title]="t('auth-type-label')">
+            {{authTypeLabel()}}
+          </span>
+        </div>
+      </div>
+
+      <!-- Device Info Section -->
+      <div class="row g-2 mb-3">
+        <div class="col-sm-6">
+          <div class="info-item">
+            <i class="bi bi-display me-1" aria-hidden="true"></i>
+            <span class="text-muted small">{{ t('browser-label') }}:</span>
+            <span class="ms-1">{{browserInfo()}}</span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="info-item">
+            <i class="bi bi-phone me-1" aria-hidden="true"></i>
+            <span class="text-muted small">{{ t('platform-label') }}:</span>
+            <span class="ms-1">{{clientDevice().currentClientInfo.platform}}</span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="info-item">
+            <i class="bi bi-aspect-ratio me-1" aria-hidden="true"></i>
+            <span class="text-muted small">{{ t('screen-label') }}:</span>
+            <span class="ms-1">{{screenInfo()}}</span>
+          </div>
+        </div>
+        @if (clientDevice().currentClientInfo.appVersion) {
+          <div class="col-sm-6">
+            <div class="info-item">
+              <i class="bi bi-app-indicator me-1" aria-hidden="true"></i>
+              <span class="text-muted small">{{ t('version-label') }}:</span>
+              <span class="ms-1">{{clientDevice().currentClientInfo.appVersion}}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Activity Section -->
+      <div class="border-top pt-3">
+        <div class="row g-2 small text-muted">
+          <div class="col-sm-6">
+            <i class="bi bi-calendar-plus me-1" aria-hidden="true"></i>
+            <span>{{ t('first-seen-label') }}:</span>
+            <span class="ms-1">{{clientDevice().firstSeenUtc | translocoDate}}</span>
+          </div>
+          <div class="col-sm-6">
+            <i class="bi bi-clock-history me-1" aria-hidden="true"></i>
+            <span>{{ t('last-seen-label') }}:</span>
+            <span class="ms-1">{{clientDevice().lastSeenUtc | timeAgo}}</span> <!-- TODO: BUG: UTC and timeAgo don't work well together -->
+            @if (isRecentlyActive()) {
+              <span class="badge bg-success ms-1">{{ t('active') }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- IP Address (collapsed by default) -->
+      @if (showTechnicalDetails()) {
+        <div class="mt-2">
+          <small class="text-muted">
+            <i class="bi bi-hdd-network me-1" aria-hidden="true"></i>
+            {{clientDevice().currentClientInfo.ipAddress}}
+          </small>
+        </div>
+      }
+    </div>
+  </div>
+</ng-container>

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+// TODO: Move all this to a SessionController or something
 public class ActivityController(IUnitOfWork unitOfWork, IClientDeviceService clientDeviceService) : BaseApiController
 {
     /// <summary>
@@ -23,9 +24,25 @@ public class ActivityController(IUnitOfWork unitOfWork, IClientDeviceService cli
         return Ok(await unitOfWork.ReadingSessionRepository.GetAllReadingSessionAsync());
     }
 
+    /// <summary>
+    /// Get my client devices
+    /// </summary>
+    /// <param name="includeInactive"></param>
+    /// <returns></returns>
     [HttpGet("devices")]
-    public async Task<ActionResult<List<ClientDeviceDto>>> GetClientDevices(bool includeInactive = false)
+    public async Task<ActionResult<List<ClientDeviceDto>>> GetMyClientDevices(bool includeInactive = false)
     {
         return Ok(await clientDeviceService.GetUserDeviceDtosAsync(User.GetUserId(),  includeInactive));
+    }
+
+    /// <summary>
+    /// Get All user client devices
+    /// </summary>
+    /// <param name="includeInactive"></param>
+    /// <returns></returns>
+    [HttpGet("all-devices")]
+    public async Task<ActionResult<List<ClientDeviceDto>>> GetAllClientDevices(bool includeInactive = false)
+    {
+        return Ok(await clientDeviceService.GetAllUserDeviceDtos(includeInactive));
     }
 }

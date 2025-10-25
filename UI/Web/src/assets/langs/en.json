@@ -324,9 +324,7 @@
 
     "manage-devices": {
         "title": "Device Manager",
-        "description": "This section is for you to setup devices that cannot connect to Kavita via a web browser and instead have an email address that accepts files.",
-        "devices-title": "Devices",
-        "no-devices": "There are no devices setup yet",
+        "description": "This section is for you to setup devices that cannot connect to Kavita and instead have an email address that accepts files.",
         "platform-label": "Platform",
         "email-label": "Email",
         "name-label": "Name",
@@ -336,7 +334,9 @@
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
-        "warning": "Warning"
+        "warning": "Warning",
+        "client-devices-header": "Client Devices",
+        "sendto-device-header": "Email-based Devices"
     },
 
     "edit-device-modal": {
@@ -353,6 +353,18 @@
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}"
     },
+
+    "client-device-card": {
+        "auth-type-label": "Authentication Type",
+        "browser-label": "Browser",
+        "platform-label": "Platform",
+        "screen-label": "Screen",
+        "version-label": "App Version",
+        "first-seen-label": "First Seen",
+        "last-seen-label": "Last Seen",
+        "active": "Active"
+    },
+
 
     "change-password": {
         "password-label": "{{common.password}}",
