@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Services;
 using API.Services.Reading;
@@ -49,7 +48,7 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
                         context.Items["CurrentDevice"] = device;
 
                         logger.LogTrace(
-                            "Identified device {DeviceId} '{DeviceName}' for user {UserId}",
+                            "Identified device {DeviceId} ({DeviceName}) for user {UserId}",
                             device.Id, device.FriendlyName, userId);
                     }
                 }

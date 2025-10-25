@@ -11,23 +11,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace API.Middleware;
+#nullable enable
 
 /// <summary>
 /// Middleware that resolves user identity from various authentication methods
 /// (JWT, API Key, OIDC) and provides a unified IUserContext for downstream components.
 /// Must run after UseAuthentication() and UseAuthorization().
 /// </summary>
-public class UserContextMiddleware
+public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<UserContextMiddleware> _logger;
-
-    public UserContextMiddleware(RequestDelegate next, ILogger<UserContextMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(
         HttpContext context,
         UserContext userContext,  // Scoped service
@@ -50,7 +42,7 @@ public class UserContextMiddleware
                 // Successfully resolved user
                 userContext.SetUserContext(userId.Value, username!, authType);
 
-                _logger.LogTrace(
+                logger.LogTrace(
                     "Resolved user context: UserId={UserId}, Username={Username}, AuthType={AuthType}",
                     userId, username, authType);
             }
@@ -58,32 +50,33 @@ public class UserContextMiddleware
             {
                 // No user resolved on a protected endpoint - this is a problem
                 // Authorization middleware will handle returning 401/403
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Could not resolve user identity for protected endpoint: {Path}",
                     context.Request.Path);
             }
             else
             {
                 // No user resolved but endpoint allows anonymous - this is fine
-                _logger.LogTrace(
+                logger.LogTrace(
                     "No user identity resolved for anonymous endpoint: {Path}",
                     context.Request.Path);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error resolving user context");
+            logger.LogError(ex, "Error resolving user context");
             // Don't break the pipeline, let authorization handle it
         }
 
-        await _next(context);
+        await next(context);
     }
 
     private async Task<(int? userId, string? username, AuthenticationType authType)> ResolveUserIdentityAsync(
         HttpContext context,
         IUnitOfWork unitOfWork)
     {
-        // Priority 1: Check for API Key (query string or path parameter)
+        // Priority 1: ALWAYS check for API Key first (query string or path parameter)
+        // API keys work even on [AllowAnonymous] endpoints (like OPDS)
         var apiKeyResult = await TryResolveFromApiKeyAsync(context, unitOfWork);
         if (apiKeyResult.userId.HasValue)
         {
@@ -96,6 +89,7 @@ public class UserContextMiddleware
             return ResolveFromClaims(context);
         }
 
+        // No authentication found
         return (null, null, AuthenticationType.Unknown);
     }
 
@@ -105,7 +99,7 @@ public class UserContextMiddleware
     {
         string? apiKey = null;
 
-        // Check query string
+        // Check query string: ?apiKey=xxx
         if (context.Request.Query.TryGetValue("apiKey", out var apiKeyQuery))
         {
             apiKey = apiKeyQuery.ToString();
@@ -128,6 +122,7 @@ public class UserContextMiddleware
             }
         }
 
+        // No API key found - return early
         if (string.IsNullOrEmpty(apiKey))
         {
             return (null, null, AuthenticationType.Unknown);
@@ -140,20 +135,32 @@ public class UserContextMiddleware
             {
                 // Get username for the API key user
                 var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
+                logger.LogDebug(
+                    "Resolved user {UserId} from API key for path {Path}",
+                    userId, context.Request.Path);
+
                 return (userId, user?.UserName, AuthenticationType.ApiKey);
+            }
+            else
+            {
+                // Invalid API key provided
+                logger.LogWarning(
+                    "Invalid API key provided for path {Path}",
+                    context.Request.Path);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to resolve user from API key");
+            logger.LogWarning(ex, "Failed to resolve user from API key");
         }
 
         return (null, null, AuthenticationType.Unknown);
     }
 
-    private (int? userId, string? username, AuthenticationType authType) ResolveFromClaims(HttpContext context)
+    private static (int? userId, string? username, AuthenticationType authType) ResolveFromClaims(HttpContext context)
     {
-        var claims = context.User!;
+        var claims = context.User;
 
         // Check if OIDC authentication
         if (context.Request.Cookies.ContainsKey(OidcService.CookieName))
@@ -171,13 +178,14 @@ public class UserContextMiddleware
         return (jwtUserId, jwtUsername, AuthenticationType.JWT);
     }
 
-    private int? TryGetUserIdFromClaim(ClaimsPrincipal claims, string claimType)
+    private static int? TryGetUserIdFromClaim(ClaimsPrincipal claims, string claimType)
     {
         var claim = claims.FindFirst(claimType);
         if (claim != null && int.TryParse(claim.Value, out var userId))
         {
             return userId;
         }
+
         return null;
     }
 }
