@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using API.Entities.Progress;
 
 namespace API.Entities;
+#nullable enable
 
 public class ClientDevice
 {
@@ -46,5 +47,5 @@ public class ClientDevice
 
     // Navigation properties
     public virtual AppUser AppUser { get; set; } = null!;
-    public ICollection<ClientDeviceHistory> History { get; set; } = new List<ClientDeviceHistory>();
+    public ICollection<ClientDeviceHistory> History { get; set; } = [];
 }

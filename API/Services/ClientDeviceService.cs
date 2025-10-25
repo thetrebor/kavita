@@ -5,8 +5,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Progress;
+using API.Extensions.QueryExtensions;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -17,23 +21,17 @@ public interface IClientDeviceService
 {
     Task<ClientDevice> IdentifyOrRegisterDeviceAsync(int userId, ClientInfoData? clientInfo, string? clientDeviceId);
     Task<IEnumerable<ClientDevice>> GetUserDevicesAsync(int userId, bool includeInactive = false);
+    Task<IEnumerable<ClientDeviceDto>> GetUserDeviceDtosAsync(int userId, bool includeInactive = false);
+    Task<IEnumerable<ClientDeviceDto>> GetAllUserDeviceDtos(bool includeInactive = false);
     Task<bool> RenameDeviceAsync(int userId, int deviceId, string newName);
     Task<bool> RemoveDeviceAsync(int userId, int deviceId);
     Task<bool> LogoutDeviceAsync(int userId, int deviceId);
     Task RecordDeviceActivityAsync(int deviceId, ClientInfoData clientInfo);
 }
 
-public class ClientDeviceService : IClientDeviceService
+public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<ClientDeviceService> logger)
+    : IClientDeviceService
 {
-    private readonly DataContext _context;
-    private readonly ILogger<ClientDeviceService> _logger;
-
-    public ClientDeviceService(DataContext context, ILogger<ClientDeviceService> logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
-
     public async Task<ClientDevice> IdentifyOrRegisterDeviceAsync(
         int userId,
         ClientInfoData? clientInfo,
@@ -42,7 +40,7 @@ public class ClientDeviceService : IClientDeviceService
         // STEP 1: Try exact match on ClientDeviceId (if provided)
         if (!string.IsNullOrEmpty(clientDeviceId))
         {
-            var deviceByClientId = await _context.ClientDevice
+            var deviceByClientId = await context.ClientDevice
                 .Include(d => d.History.OrderByDescending(h => h.CapturedAtUtc).Take(1))
                 .FirstOrDefaultAsync(d =>
                     d.AppUserId == userId &&
@@ -59,7 +57,7 @@ public class ClientDeviceService : IClientDeviceService
         // STEP 2: Try fingerprint matching
         var fingerprint = GenerateDeviceFingerprint(clientInfo);
 
-        var deviceByFingerprint = await _context.ClientDevice
+        var deviceByFingerprint = await context.ClientDevice
             .Include(d => d.History.OrderByDescending(h => h.CapturedAtUtc).Take(1))
             .FirstOrDefaultAsync(d =>
                 d.AppUserId == userId &&
@@ -83,7 +81,7 @@ public class ClientDeviceService : IClientDeviceService
         var fuzzyMatch = await TryFuzzyMatchAsync(userId, clientInfo, fingerprint);
         if (fuzzyMatch != null)
         {
-            _logger.LogInformation(
+            logger.LogInformation(
                 "Fuzzy matched device {DeviceId} for user {UserId}",
                 fuzzyMatch.Id, userId);
 
@@ -102,22 +100,35 @@ public class ClientDeviceService : IClientDeviceService
 
     public async Task<IEnumerable<ClientDevice>> GetUserDevicesAsync(int userId, bool includeInactive = false)
     {
-        var query = _context.ClientDevice
-            .Where(d => d.AppUserId == userId);
-
-        if (!includeInactive)
-        {
-            query = query.Where(d => d.IsActive);
-        }
-
-        return await query
+        return await context.ClientDevice
+            .Where(d => d.AppUserId == userId)
+            .WhereIf(!includeInactive, d => d.IsActive)
             .OrderByDescending(d => d.LastSeenUtc)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<ClientDeviceDto>> GetUserDeviceDtosAsync(int userId, bool includeInactive = false)
+    {
+        return await context.ClientDevice
+            .Where(d => d.AppUserId == userId)
+            .WhereIf(!includeInactive, d => d.IsActive)
+            .OrderByDescending(d => d.LastSeenUtc)
+            .ProjectTo<ClientDeviceDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<ClientDeviceDto>> GetAllUserDeviceDtos(bool includeInactive = false)
+    {
+        return await context.ClientDevice
+            .WhereIf(!includeInactive, d => d.IsActive)
+            .OrderByDescending(d => d.LastSeenUtc)
+            .ProjectTo<ClientDeviceDto>(mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
     public async Task<bool> RenameDeviceAsync(int userId, int deviceId, string newName)
     {
-        var device = await _context.ClientDevice
+        var device = await context.ClientDevice
             .FirstOrDefaultAsync(d => d.Id == deviceId && d.AppUserId == userId);
 
         if (device == null)
@@ -126,9 +137,9 @@ public class ClientDeviceService : IClientDeviceService
         }
 
         device.FriendlyName = newName;
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        _logger.LogInformation("User {UserId} renamed device {DeviceId} to '{Name}'",
+        logger.LogInformation("User {UserId} renamed device {DeviceId} to '{Name}'",
             userId, deviceId, newName);
 
         return true;
@@ -136,7 +147,7 @@ public class ClientDeviceService : IClientDeviceService
 
     public async Task<bool> RemoveDeviceAsync(int userId, int deviceId)
     {
-        var device = await _context.ClientDevice
+        var device = await context.ClientDevice
             .FirstOrDefaultAsync(d => d.Id == deviceId && d.AppUserId == userId);
 
         if (device == null)
@@ -145,9 +156,9 @@ public class ClientDeviceService : IClientDeviceService
         }
 
         device.IsActive = false;
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        _logger.LogInformation("User {UserId} removed device {DeviceId}", userId, deviceId);
+        logger.LogInformation("User {UserId} removed device {DeviceId}", userId, deviceId);
 
         return true;
     }
@@ -156,7 +167,7 @@ public class ClientDeviceService : IClientDeviceService
     {
         // This would integrate with your JWT token management
         // For now, just mark as inactive (user would need to re-authenticate)
-        var device = await _context.ClientDevice
+        var device = await context.ClientDevice
             .FirstOrDefaultAsync(d => d.Id == deviceId && d.AppUserId == userId);
 
         if (device == null)
@@ -168,20 +179,20 @@ public class ClientDeviceService : IClientDeviceService
         // For example, increment a token version number on the user record
         // and validate tokens against this version
 
-        _logger.LogInformation("User {UserId} logged out device {DeviceId}", userId, deviceId);
+        logger.LogInformation("User {UserId} logged out device {DeviceId}", userId, deviceId);
 
         return true;
     }
 
     public async Task RecordDeviceActivityAsync(int deviceId, ClientInfoData clientInfo)
     {
-        var device = await _context.ClientDevice
+        var device = await context.ClientDevice
             .Include(d => d.History)
             .FirstOrDefaultAsync(d => d.Id == deviceId);
 
         if (device == null)
         {
-            _logger.LogWarning("Attempted to record activity for non-existent device {DeviceId}", deviceId);
+            logger.LogWarning("Attempted to record activity for non-existent device {DeviceId}", deviceId);
             return;
         }
 
@@ -235,7 +246,7 @@ public class ClientDeviceService : IClientDeviceService
         string newFingerprint)
     {
         // Get recent devices (seen in last 30 days) with similar characteristics
-        var recentDevices = await _context.ClientDevice
+        var recentDevices = await context.ClientDevice
             .Where(d =>
                 d.AppUserId == userId &&
                 d.IsActive &&
@@ -249,7 +260,7 @@ public class ClientDeviceService : IClientDeviceService
             // If 80%+ similar, consider it a match
             if (similarity >= 0.8)
             {
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Fuzzy match found with {Similarity:P0} similarity for device {DeviceId}",
                     similarity, device.Id);
 
@@ -340,10 +351,10 @@ public class ClientDeviceService : IClientDeviceService
             }
         };
 
-        _context.ClientDevice.Add(newDevice);
-        await _context.SaveChangesAsync();
+        context.ClientDevice.Add(newDevice);
+        await context.SaveChangesAsync();
 
-        _logger.LogInformation(
+        logger.LogInformation(
             "Registered new device {DeviceId} '{Name}' for user {UserId}",
             newDevice.Id, friendlyName, userId);
 
@@ -384,7 +395,7 @@ public class ClientDeviceService : IClientDeviceService
     /// <summary>
     /// Updates device's last seen timestamp and records ClientInfo changes in history.
     /// </summary>
-    private async Task UpdateDeviceActivityAsync(ClientDevice device, ClientInfoData newClientInfo)
+    private async Task UpdateDeviceActivityAsync(ClientDevice device, ClientInfoData? newClientInfo)
     {
         device.LastSeenUtc = DateTime.UtcNow;
 
@@ -400,20 +411,22 @@ public class ClientDeviceService : IClientDeviceService
                 CapturedAtUtc = DateTime.UtcNow
             });
 
-            _logger.LogDebug(
+            logger.LogDebug(
                 "Recorded ClientInfo change for device {DeviceId}",
                 device.Id);
         }
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
     /// <summary>
     /// Determines if ClientInfo has changed in a meaningful way that warrants history recording.
     /// Ignores volatile attributes like IP address, screen dimensions, timestamp.
     /// </summary>
-    private static bool HasMeaningfulChanges(ClientInfoData existing, ClientInfoData current)
+    private static bool HasMeaningfulChanges(ClientInfoData existing, ClientInfoData? current)
     {
+        if (existing != null && current == null) return true;
+
         return existing.ClientType != current.ClientType ||
                existing.Platform != current.Platform ||
                existing.DeviceType != current.DeviceType ||

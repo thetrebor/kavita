@@ -408,11 +408,10 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUserReadingSessionActivityData, ReadingActivityDataDto>();
         CreateMap<ClientInfoData, ClientInfoDto>();
-
-
         CreateMap<AppUserReadingSession, ReadingSessionDto>()
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.AppUserId))
-            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName))
-            ;
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName));
+
+        CreateMap<ClientDevice, ClientDeviceDto>();
     }
 }

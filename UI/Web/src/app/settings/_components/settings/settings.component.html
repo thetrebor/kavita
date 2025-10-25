@@ -11,7 +11,7 @@
       @if (user) {
         @if (accountService.hasAdminRole(user)) {
 
-          @defer (when fragment === SettingsTabId.General; prefetch on idle) {
+          @defer (when fragment === SettingsTabId.Activity; prefetch on idle) {
             @if (fragment === SettingsTabId.Activity) {
               <div class="col-xxl-6 col-12">
                 <app-server-activity />
