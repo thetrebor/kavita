@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Controllers;
 using API.Data;
+using API.Services.Store;
 using API.SignalR.Presence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -13,7 +14,7 @@ namespace API.Middleware;
 /// Middleware that will track any API calls as updating the authenticated (ApiKey) user's LastActive and inform <see cref="PresenceTracker"/>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class OpdsActiveUserMiddlewareAttribute(IUnitOfWork unitOfWork, IPresenceTracker presenceTracker, ILogger<OpdsController> logger) : ActionFilterAttribute
+public class OpdsActiveUserMiddlewareAttribute(IUnitOfWork unitOfWork, IPresenceTracker presenceTracker, ILogger<OpdsController> logger, IUserContext userContext) : ActionFilterAttribute
 {
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -25,14 +26,14 @@ public class OpdsActiveUserMiddlewareAttribute(IUnitOfWork unitOfWork, IPresence
                 return;
             }
 
-            var userId = await unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-            if (userId == 0)
+            var userId = userContext.GetUserId();
+            if (userId is 0)
             {
                 context.Result = new UnauthorizedResult();
                 return;
             }
 
-            await unitOfWork.UserRepository.UpdateUserAsActive(userId);
+            await unitOfWork.UserRepository.UpdateUserAsActive(userId!.Value);
         }
         catch (Exception ex)
         {

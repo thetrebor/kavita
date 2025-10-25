@@ -95,7 +95,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
         services.AddScoped<IOidcService, OidcService>();
-        services.AddScoped<OpdsActionFilterAttribute>();
         services.AddScoped<OpdsActiveUserMiddlewareAttribute>();
 
         services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
