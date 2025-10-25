@@ -15,6 +15,7 @@ using API.Entities.MetadataMatching;
 using API.Entities.Person;
 using API.Entities.Progress;
 using API.Entities.Scrobble;
+using API.Entities.User;
 using API.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

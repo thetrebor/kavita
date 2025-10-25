@@ -7,6 +7,7 @@ using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Progress;
 using API.Entities.Scrobble;
+using API.Entities.User;
 using Microsoft.AspNetCore.Identity;
 
 

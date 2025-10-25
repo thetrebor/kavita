@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Errors;
 using Kavita.Common;
 using Microsoft.AspNetCore.Http;
@@ -32,7 +33,7 @@ public class SecurityEventMiddleware(RequestDelegate next)
         }
         catch (KavitaUnauthenticatedUserException ex)
         {
-            var ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? context.Connection.RemoteIpAddress?.ToString();
+            var ipAddress = context.Request.Headers[Headers.ForwardedFor].FirstOrDefault() ?? context.Connection.RemoteIpAddress?.ToString();
             var requestMethod = context.Request.Method;
             var requestPath = context.Request.Path;
             var userAgent = context.Request.Headers.UserAgent;

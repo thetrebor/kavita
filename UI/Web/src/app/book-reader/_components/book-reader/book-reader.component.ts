@@ -907,7 +907,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.volumeId = chapter.volumeId;
     this.chapters = chapters;
     this.maxPages.set(chapter.pages);
-    //this.pageNum.set(progress.pageNum);
     this.setPageNum(progress.pageNum);
     this.cdRef.markForCheck();
 

@@ -418,7 +418,7 @@ public class Startup
             OnPrepareResponse = ctx =>
             {
                 ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + TimeSpan.FromHours(24);
-                ctx.Context.Response.Headers["X-Robots-Tag"] = "noindex,nofollow";
+                ctx.Context.Response.Headers[Headers.RobotsTag] = "noindex,nofollow";
             }
         });
 
@@ -436,9 +436,7 @@ public class Startup
 
         app.Use(async (context, next) =>
         {
-            context.Response.Headers[HeaderNames.Vary] =
-                new[] { "Accept-Encoding" };
-
+            context.Response.Headers[HeaderNames.Vary] = new[] { "Accept-Encoding" };
 
             if (!Configuration.AllowIFraming)
             {

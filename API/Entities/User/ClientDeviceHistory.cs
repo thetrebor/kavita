@@ -1,5 +1,6 @@
 ﻿using System;
 using API.Entities.Progress;
+using API.Entities.User;
 
 namespace API.Entities;
 

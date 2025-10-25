@@ -8,6 +8,7 @@ using API.Data;
 using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Progress;
+using API.Entities.User;
 using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;

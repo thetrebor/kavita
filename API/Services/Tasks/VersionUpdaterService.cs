@@ -14,6 +14,7 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using MarkdownDeep;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 
 namespace API.Services.Tasks;
 #nullable enable
@@ -181,8 +182,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         try
         {
             return await $"{GithubPullsUrl}{prNumber}"
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
+                .WithHeader(HeaderNames.Accept, "application/json")
+                .WithHeader(HeaderNames.UserAgent, "Kavita")
                 .GetJsonAsync<PullRequestInfo>();
         }
         catch (Exception ex)
@@ -199,8 +200,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             var nightlyReleases = new List<NightlyInfo>();
 
             var commits = await GithubBranchCommitsUrl
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
+                .WithHeader(HeaderNames.Accept, "application/json")
+                .WithHeader(HeaderNames.UserAgent, "Kavita")
                 .GetJsonAsync<IList<CommitInfo>>();
 
             var commitList = commits.ToList();
@@ -519,7 +520,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         {
             // Use the raw GitHub URL format for the csproj file
             var content = await $"https://raw.githubusercontent.com/Kareadita/Kavita/{commitSha}/Kavita.Common/Kavita.Common.csproj"
-                .WithHeader("User-Agent", "Kavita")
+                .WithHeader(HeaderNames.UserAgent, "Kavita")
                 .GetStringAsync();
 
             var versionMatch = Regex.Match(content, @"<AssemblyVersion>([0-9\.]+)</AssemblyVersion>");
@@ -537,8 +538,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     private static async Task<GithubReleaseMetadata> GetGithubRelease()
     {
         var update = await GithubLatestReleasesUrl
-            .WithHeader("Accept", "application/json")
-            .WithHeader("User-Agent", "Kavita")
+            .WithHeader(HeaderNames.Accept, "application/json")
+            .WithHeader(HeaderNames.UserAgent, "Kavita")
             .GetJsonAsync<GithubReleaseMetadata>();
 
         return update;
@@ -547,8 +548,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     private static async Task<IList<GithubReleaseMetadata>> GetGithubReleases()
     {
         var update = await GithubAllReleasesUrl
-            .WithHeader("Accept", "application/json")
-            .WithHeader("User-Agent", "Kavita")
+            .WithHeader(HeaderNames.Accept, "application/json")
+            .WithHeader(HeaderNames.UserAgent, "Kavita")
             .GetJsonAsync<IList<GithubReleaseMetadata>>();
 
         return update;

@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Entities.Progress;
 using API.Services;
 using API.Services.Reading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using MimeKit;
 
 namespace API.Middleware;
 
@@ -15,14 +17,18 @@ namespace API.Middleware;
 /// Middleware that extracts client information from the HTTP request and makes it
 /// available through IClientInfoAccessor for the duration of the request.
 /// </summary>
-public class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddleware> logger)
+public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddleware> logger)
 {
+    /// <summary>
+    /// Web App name (will be localized for UI)
+    /// </summary>
+    private const string WebAppName = "web-app";
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
             var clientInfo = ExtractClientInfo(context);
-            var clientDeviceId = context.Request.Headers["X-Device-Id"].ToString();
+            var clientDeviceId = context.Request.Headers[Headers.DeviceId].ToString();
 
             ClientInfoAccessor.SetClientInfo(clientInfo);
             ClientInfoAccessor.SetClientDeviceId(clientDeviceId);
@@ -39,7 +45,7 @@ public class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddle
     private ClientInfoData ExtractClientInfo(HttpContext context)
     {
         var userAgent = context.Request.Headers.UserAgent.ToString();
-        var kavitaClient = context.Request.Headers["X-Kavita-Client"].ToString();
+        var kavitaClient = context.Request.Headers[Headers.KavitaClient].ToString();
         var ipAddress = GetClientIpAddress(context);
         var authType = DetermineAuthType(context);
 
@@ -70,14 +76,13 @@ public class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddle
         try
         {
             // Parse: "web-app/1.2.3 (Chrome/120.0; Windows; Desktop; 1920x1080; landscape)"
-            var match = Regex.Match(header,
-                @"web-app/([^\s]+) \(([^/]+)/([^;]+); ([^;]+); ([^;]+); (\d+)x(\d+)(?:; ([^\)]+))?\)");
+            var match = UserAgentRegex().Match(header);
 
             if (match.Success)
             {
                 return new ClientInfoData
                 {
-                    ClientType = "Web App",
+                    ClientType = WebAppName,
                     AppVersion = match.Groups[1].Value,
                     Browser = match.Groups[2].Value,
                     BrowserVersion = match.Groups[3].Value,
@@ -101,14 +106,14 @@ public class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddle
         return new ClientInfoData
         {
             UserAgent = fallbackUa,
-            ClientType = "Web App"
+            ClientType = WebAppName
         };
     }
 
     private static string GetClientIpAddress(HttpContext context)
     {
         // Check for X-Forwarded-For header (proxy/load balancer)
-        var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        var forwardedFor = context.Request.Headers[Headers.ForwardedFor].FirstOrDefault();
         if (!string.IsNullOrEmpty(forwardedFor))
         {
             // Take the first IP in the chain
@@ -116,7 +121,7 @@ public class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddle
         }
 
         // Check for X-Real-IP header
-        var realIp = context.Request.Headers["X-Real-IP"].FirstOrDefault();
+        var realIp = context.Request.Headers[Headers.RealIp].FirstOrDefault();
         if (!string.IsNullOrEmpty(realIp))
         {
             return realIp;
@@ -236,5 +241,8 @@ public class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddle
 
         return "Unknown";
     }
+
+    [GeneratedRegex(@"web-app/([^\s]+) \(([^/]+)/([^;]+); ([^;]+); ([^;]+); (\d+)x(\d+)(?:; ([^\)]+))?\)")]
+    private static partial Regex UserAgentRegex();
 }
 

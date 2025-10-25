@@ -1,7 +1,9 @@
 using System;
+using API.Constants;
 using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.Net.Http.Headers;
 
 namespace API.Extensions;
 #nullable enable
@@ -11,25 +13,25 @@ public static class FlurlExtensions
     public static IFlurlRequest WithKavitaPlusHeaders(this string request, string license, string? anilistToken = null)
     {
         return request
-            .WithHeader("Accept", "application/json")
-            .WithHeader("User-Agent", "Kavita")
-            .WithHeader("x-license-key", license)
-            .WithHeader("x-installId", HashUtil.ServerToken())
-            .WithHeader("x-anilist-token", anilistToken ?? string.Empty)
-            .WithHeader("x-kavita-version", BuildInfo.Version)
-            .WithHeader("Content-Type", "application/json")
+            .WithHeader(HeaderNames.Accept, "application/json")
+            .WithHeader(HeaderNames.UserAgent, "Kavita")
+            .WithHeader(Headers.LicenseKey, license)
+            .WithHeader(Headers.InstallId, HashUtil.ServerToken())
+            .WithHeader(Headers.AnilistToken, anilistToken ?? string.Empty)
+            .WithHeader(Headers.KavitaVersion, BuildInfo.Version)
+            .WithHeader(HeaderNames.ContentType, "application/json")
             .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs));
     }
 
     public static IFlurlRequest WithBasicHeaders(this string request, string apiKey)
     {
         return request
-            .WithHeader("Accept", "application/json")
-            .WithHeader("User-Agent", "Kavita")
-            .WithHeader("x-api-key", apiKey)
-            .WithHeader("x-installId", HashUtil.ServerToken())
-            .WithHeader("x-kavita-version", BuildInfo.Version)
-            .WithHeader("Content-Type", "application/json")
+            .WithHeader(HeaderNames.Accept, "application/json")
+            .WithHeader(HeaderNames.UserAgent, "Kavita")
+            .WithHeader(Headers.ApiKey, apiKey)
+            .WithHeader(Headers.InstallId, HashUtil.ServerToken())
+            .WithHeader(Headers.KavitaVersion, BuildInfo.Version)
+            .WithHeader(HeaderNames.ContentType, "application/json")
             .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs));
     }
 }

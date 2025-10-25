@@ -14,6 +14,7 @@ using Flurl.Http;
 using Kavita.Common;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 
 namespace API.Services.Tasks;
 
@@ -242,8 +243,8 @@ public class FontService: IFontService
         try
         {
             content = await url
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
+                .WithHeader(HeaderNames.Accept, "application/json")
+                .WithHeader(HeaderNames.UserAgent, "Kavita")
                 .GetStringAsync();
         } catch (Exception ex)
         {

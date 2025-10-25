@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using API.Entities.Progress;
 
-namespace API.Entities;
+namespace API.Entities.User;
 #nullable enable
 
 public class ClientDevice

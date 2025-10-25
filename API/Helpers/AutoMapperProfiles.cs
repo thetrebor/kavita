@@ -36,6 +36,7 @@ using API.Entities.MetadataMatching;
 using API.Entities.Person;
 using API.Entities.Progress;
 using API.Entities.Scrobble;
+using API.Entities.User;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Converters;
 using API.Services;
