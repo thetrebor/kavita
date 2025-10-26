@@ -126,11 +126,6 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
     }
 
 
-    // TODO: Move this into a Helper and add unit tests
-
-
-
-
     [GeneratedRegex(@"web-app/([^\s]+) \(([^/]+)/([^;]+); ([^;]+); ([^;]+); (\d+)x(\d+)(?:; ([^\)]+))?\)")]
     private static partial Regex UserAgentRegex();
 }
