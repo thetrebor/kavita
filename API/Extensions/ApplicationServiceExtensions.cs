@@ -99,6 +99,8 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
         services.AddScoped<IClientDeviceService, ClientDeviceService>();
+        services.AddScoped<IDeviceTrackingService, DeviceTrackingService>();
+
 
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
         services.AddSingleton<IClientInfoAccessor, ClientInfoAccessor>();
@@ -124,7 +126,7 @@ public static class ApplicationServiceExtensions
         services.AddMemoryCache(options =>
         {
             options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 75 MB
-            options.CompactionPercentage = 0.1; // LRU compaction (10%)
+            options.CompactionPercentage = 0.1; // LRU compaction, Evict 10% when limit reached
         });
         // Needs to be registered after the memory cache, as it depends on it
         services.AddSingleton<ITicketStore, CustomTicketStore>();

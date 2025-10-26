@@ -4,11 +4,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Entities.Progress;
-using API.Services;
 using API.Services.Reading;
+using API.Services.Store;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using MimeKit;
 
 namespace API.Middleware;
 
@@ -23,31 +22,23 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
     /// Web App name (will be localized for UI)
     /// </summary>
     private const string WebAppName = "web-app";
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, IUserContext userContext)
     {
-        try
-        {
-            var clientInfo = ExtractClientInfo(context);
-            var clientDeviceId = context.Request.Headers[Headers.DeviceId].ToString();
+        var clientInfo = ExtractClientInfo(context, userContext);
+        var clientDeviceId = context.Request.Headers[Headers.DeviceId].ToString();
 
-            ClientInfoAccessor.SetClientInfo(clientInfo);
-            ClientInfoAccessor.SetClientDeviceId(clientDeviceId);
+        ClientInfoAccessor.SetClientInfo(clientInfo);
+        ClientInfoAccessor.SetClientDeviceId(clientDeviceId);
 
-            await next(context);
-        }
-        finally
-        {
-            // Clear after request completes
-            ClientInfoAccessor.SetClientInfo(null);
-        }
+        await next(context);
     }
 
-    private ClientInfoData ExtractClientInfo(HttpContext context)
+    private ClientInfoData ExtractClientInfo(HttpContext context, IUserContext userContext)
     {
         var userAgent = context.Request.Headers.UserAgent.ToString();
         var kavitaClient = context.Request.Headers[Headers.KavitaClient].ToString();
         var ipAddress = GetClientIpAddress(context);
-        var authType = DetermineAuthType(context);
+        var authType = userContext.GetAuthenticationType();
 
         // If custom Kavita header exists, parse it for rich info
         if (!string.IsNullOrEmpty(kavitaClient))
@@ -132,60 +123,6 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
     }
 
-    private static AuthenticationType DetermineAuthType(HttpContext context)
-    {
-        // Check if user is authenticated
-        if (!context.User?.Identity?.IsAuthenticated ?? true)
-        {
-            return AuthenticationType.Unknown;
-        }
-
-        if (context.Request.Cookies.ContainsKey(OidcService.CookieName))
-        {
-            return AuthenticationType.OIDC;
-        }
-
-        // Check for API key claim (adjust based on your auth implementation)
-        // Check for API key in query string
-        if (context.Request.Query.TryGetValue("apiKey", out var apiKeyQuery) &&
-            !string.IsNullOrEmpty(apiKeyQuery))
-        {
-            return AuthenticationType.ApiKey;
-        }
-
-        // Check for API key in URL path (e.g., /api/opds/{apiKey}/...)
-        var path = context.Request.Path.Value ?? string.Empty;
-        if (path.Contains("/api/opds/", StringComparison.OrdinalIgnoreCase))
-        {
-            // Path format: /api/opds/{apiKey}/...
-            // Split and check if there's a segment after /api/opds/
-            var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            var opdsIndex = Array.FindIndex(segments, s =>
-                s.Equals("opds", StringComparison.OrdinalIgnoreCase));
-
-            if (opdsIndex >= 0 && opdsIndex + 1 < segments.Length)
-            {
-                // There's a segment after /opds/ which should be the API key
-                return AuthenticationType.ApiKey;
-            }
-        }
-
-
-        // Check authorization header pattern
-        var authHeader = context.Request.Headers.Authorization.ToString();
-        if (!string.IsNullOrEmpty(authHeader))
-        {
-            // If it's a JWT, it will have 3 parts separated by dots
-            var token = authHeader.Replace("Bearer ", string.Empty);
-            if (token.Split('.').Length == 3)
-            {
-                return AuthenticationType.JWT;
-            }
-        }
-
-        // Default to JWT if authenticated but can't determine
-        return AuthenticationType.JWT;
-    }
 
     // TODO: Move this into a Helper and add unit tests
     private static string DetermineClientType(string userAgent)

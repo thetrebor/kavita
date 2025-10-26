@@ -31,6 +31,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -134,6 +135,8 @@ public class Startup
         });
         services.AddCors();
         services.AddIdentityServices(_config, _env);
+
+
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo
@@ -182,21 +185,8 @@ public class Startup
                 }
             });
         });
-        services.AddResponseCompression(options =>
-        {
-            options.Providers.Add<BrotliCompressionProvider>();
-            options.Providers.Add<GzipCompressionProvider>();
-            options.MimeTypes =
-                ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "image/jpeg", "image/jpg", "image/png", "image/avif", "image/gif", "image/webp", "image/tiff" });
-            options.EnableForHttps = true;
-        });
-        services.Configure<BrotliCompressionProviderOptions>(options =>
-        {
-            options.Level = CompressionLevel.Fastest;
-        });
 
-        services.AddResponseCaching();
+        AddCompressionAndCaching(services);
 
         services.AddRateLimiter(options =>
         {
@@ -220,6 +210,35 @@ public class Startup
         // Any services that should be bootstrapped go here
         services.AddHostedService<StartupTasksHostedService>();
         services.AddHostedService<ReadingSessionInitializer>();
+    }
+
+    private static void AddCompressionAndCaching(IServiceCollection services)
+    {
+        services.AddResponseCompression(options =>
+        {
+            options.Providers.Add<BrotliCompressionProvider>();
+            options.Providers.Add<GzipCompressionProvider>();
+            options.MimeTypes =
+                ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "image/jpeg", "image/jpg", "image/png", "image/avif", "image/gif", "image/webp", "image/tiff" });
+            options.EnableForHttps = true;
+        });
+        services.Configure<BrotliCompressionProviderOptions>(options =>
+        {
+            options.Level = CompressionLevel.Fastest;
+        });
+
+        services.AddResponseCaching();
+        services.AddHybridCache(options =>
+        {
+            options.MaximumPayloadBytes = 1024 * 1024; // 1MB max per entry
+            options.MaximumKeyLength = 512;
+            options.DefaultEntryOptions = new HybridCacheEntryOptions
+            {
+                Expiration = TimeSpan.FromMinutes(10),
+                LocalCacheExpiration = TimeSpan.FromMinutes(10)
+            };
+        });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -304,7 +323,6 @@ public class Startup
 
         // Must be first after Auth, will set authentication data for the rest of the Controllers/Middleware
         app.UseMiddleware<UserContextMiddleware>();
-
         app.UseMiddleware<ClientInfoMiddleware>();
         app.UseMiddleware<DeviceTrackingMiddleware>(); // This must be after ClientInfo and Authorization
 
@@ -361,8 +379,14 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapHub<MessageHub>("hubs/messages");
-            endpoints.MapHub<LogHub>("hubs/logs");
+            endpoints.MapHub<MessageHub>("hubs/messages").Add(builder =>
+            {
+                builder.Metadata.Add(new SkipDeviceTrackingAttribute());
+            });
+            endpoints.MapHub<LogHub>("hubs/logs").Add(builder =>
+            {
+                builder.Metadata.Add(new SkipDeviceTrackingAttribute());
+            });
             if (env.IsDevelopment())
             {
                 endpoints.MapHangfireDashboard();

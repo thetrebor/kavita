@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Entities.Progress;
 using API.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -36,19 +37,27 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<ReadingSessionService> _logger;
     private readonly IClientInfoAccessor _clientInfoAccessor;
+    private readonly HybridCache _cache;
     private readonly ConcurrentDictionary<string, SessionTimeout<int>> _activeSessions = new();
     private readonly int _defaultTimeoutMinutes;
     private readonly int _timerRefreshDebounceSeconds;
     private Timer? _midnightRolloverTimer;
     private bool _disposed;
 
+    private static readonly HybridCacheEntryOptions ChapterFormatCacheOptions = new()
+    {
+        Expiration = TimeSpan.FromMinutes(30),
+        LocalCacheExpiration = TimeSpan.FromMinutes(30)
+    };
+
     public ReadingSessionService(IServiceScopeFactory serviceScopeFactory, ILogger<ReadingSessionService> logger,
-        IClientInfoAccessor clientInfoAccessor,
+        IClientInfoAccessor clientInfoAccessor, HybridCache cache,
         int defaultTimeoutMinutes = 30, int timerRefreshDebounceSeconds = 5)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
         _clientInfoAccessor = clientInfoAccessor;
+        _cache = cache;
 
         _defaultTimeoutMinutes = defaultTimeoutMinutes;
         _timerRefreshDebounceSeconds = timerRefreshDebounceSeconds;
@@ -65,12 +74,9 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Identify/register device
-        var deviceService = scope.ServiceProvider.GetRequiredService<IClientDeviceService>();
         var clientInfo = _clientInfoAccessor.Current;
-        var clientDeviceId = _clientInfoAccessor.CurrentDeviceId; // New
+        var deviceId = _clientInfoAccessor.CurrentDeviceId;
 
-        var device = await deviceService.IdentifyOrRegisterDeviceAsync(
-            userId, clientInfo, clientDeviceId);
 
         // Update session activity data in DB
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
@@ -95,10 +101,8 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
             var chapter = await cacheService.Ensure(progressDto.ChapterId);
 
-            var chapterFormat = await context.MangaFile
-                .Where(f => f.ChapterId == progressDto.ChapterId)
-                .Select(f => f.Format)
-                .FirstOrDefaultAsync();
+            // Use cached chapter format to avoid repeated DB queries
+            var chapterFormat = await GetChapterFormatAsync(progressDto.ChapterId, context);
 
             // Store total pages/words in case it changes in the future
             existingChapterActivity.TotalPages = chapter?.Pages ?? 0;
@@ -145,7 +149,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             if (clientInfo != null)
             {
                 newActivity.ClientInfo = clientInfo;
-                newActivity.DeviceId = device.Id;
+                newActivity.DeviceId = deviceId!.Value;
             }
             session.ActivityData.Add(newActivity);
         }
@@ -163,6 +167,57 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         var cacheKey = GenerateCacheKey(userId, progressDto.ChapterId);
         RefreshSessionTimeout(cacheKey, session.Id);
 
+    }
+
+    private async Task<MangaFormat> GetChapterFormatAsync(int chapterId, DataContext context)
+    {
+        var cacheKey = GetChapterFormatCacheKey(chapterId);
+
+        return await _cache.GetOrCreateAsync(
+            cacheKey,
+            (chapterId, context),
+            async (state, cancel) =>
+                await state.context.MangaFile
+                    .Where(f => f.ChapterId == state.chapterId)
+                    .Select(f => f.Format)
+                    .FirstOrDefaultAsync(cancel),
+            ChapterFormatCacheOptions);
+    }
+
+    private async Task ClearChapterFormatCache(int chapterId)
+    {
+        var cacheKey = GetChapterFormatCacheKey(chapterId);
+        await _cache.RemoveAsync(cacheKey);
+    }
+
+    private static string GetChapterFormatCacheKey(int chapterId)
+    {
+        return $"readingsession_chapter_format_{chapterId}";
+    }
+
+    private async Task ClearSessionChapterCaches(int sessionId)
+    {
+        try
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+            var chapterIds = await context.AppUserReadingSession
+                .Where(s => s.Id == sessionId)
+                .SelectMany(s => s.ActivityData)
+                .Select(ad => ad.ChapterId)
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var chapterId in chapterIds)
+            {
+                await ClearChapterFormatCache(chapterId);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to clear chapter format caches for session {SessionId}", sessionId);
+        }
     }
 
     private async Task<AppUserReadingSession> GetOrCreateSession(int userId, ProgressDto dto)
@@ -277,8 +332,6 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
 
     private Timer CreateSessionTimer(string cacheKey, int sessionId)
     {
-        _logger.LogDebug("Creating timer for session {SessionId} with key {CacheKey}, will fire in {Minutes} minutes",
-            sessionId, cacheKey, _defaultTimeoutMinutes);
         return new Timer(
             callback: _ => OnSessionTimeout(cacheKey, sessionId),
             state: null,
@@ -289,7 +342,11 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
 
     private void OnSessionTimeout(string cacheKey, int sessionId)
     {
-        _ = Task.Run(async () => await CloseSession(cacheKey, sessionId))
+        _ = Task.Run(async () =>
+            {
+                await CloseSession(cacheKey, sessionId);
+                await ClearSessionChapterCaches(sessionId);
+            })
             .ContinueWith(t =>
             {
                 if (t.IsFaulted)
@@ -376,6 +433,8 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
 
             foreach (var sessionId in sessionIds)
             {
+                await ClearSessionChapterCaches(sessionId);
+
                 // Trigger a SessionClose Event so Activity Feed can update
                 await eventHub.SendMessageAsync(MessageFactory.SessionClose, MessageFactory.SessionCloseEvent(sessionId));
             }

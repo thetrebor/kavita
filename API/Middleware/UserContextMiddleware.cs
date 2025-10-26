@@ -8,6 +8,7 @@ using API.Services;
 using API.Services.Store;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 
 namespace API.Middleware;
@@ -18,8 +19,15 @@ namespace API.Middleware;
 /// (JWT, API Key, OIDC) and provides a unified IUserContext for downstream components.
 /// Must run after UseAuthentication() and UseAuthorization().
 /// </summary>
-public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMiddleware> logger)
+public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMiddleware> logger, HybridCache cache)
 {
+    private static readonly HybridCacheEntryOptions ApiKeyCacheOptions = new()
+    {
+        Expiration = TimeSpan.FromMinutes(15),
+        LocalCacheExpiration = TimeSpan.FromMinutes(15)
+    };
+
+
     public async Task InvokeAsync(
         HttpContext context,
         UserContext userContext,  // Scoped service
@@ -130,25 +138,28 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
 
         try
         {
-            var userId = await unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-            if (userId > 0)
-            {
-                // Get username for the API key user
-                var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            var cacheKey = $"apikey_{apiKey}";
 
-                logger.LogDebug(
-                    "Resolved user {UserId} from API key for path {Path}",
-                    userId, context.Request.Path);
+            // HybridCache handles stampede protection automatically
+            var result = await cache.GetOrCreateAsync(
+                cacheKey,
+                (apiKey, unitOfWork),
+                async (state, cancel) =>
+                {
+                    var user = await state.unitOfWork.UserRepository.GetUserDtoByApiKeyAsync(state.apiKey);
+                    return (user?.Id, user?.Username);
+                },
+                ApiKeyCacheOptions,
+                cancellationToken: context.RequestAborted);
 
-                return (userId, user?.UserName, AuthenticationType.ApiKey);
-            }
-            else
+            if (result is {Id: not null, Username: not null})
             {
-                // Invalid API key provided
-                logger.LogWarning(
-                    "Invalid API key provided for path {Path}",
-                    context.Request.Path);
+                logger.LogDebug("Resolved user {UserId} from API key for path {Path}", result.Id, context.Request.Path);
+
+                return (result.Id, result.Username, AuthenticationType.ApiKey);
             }
+
+            logger.LogWarning("Invalid API key provided for path {Path}", context.Request.Path);
         }
         catch (Exception ex)
         {

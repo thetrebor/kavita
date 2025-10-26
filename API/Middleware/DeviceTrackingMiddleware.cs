@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using API.Services;
 using API.Services.Reading;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace API.Middleware;
+#nullable enable
 
 /// <summary>
 /// Middleware that identifies and tracks device activity for authenticated requests.
@@ -18,48 +20,50 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
     public async Task InvokeAsync(
         HttpContext context,
         IClientDeviceService clientDeviceService,
+        IDeviceTrackingService deviceTrackingService,
         IClientInfoAccessor clientInfoAccessor,
         IUserContext userContext)
     {
+        var sw = Stopwatch.StartNew();
         try
         {
-            // Only track for authenticated users
-            if (context.User?.Identity?.IsAuthenticated == true)
+            if (context.User?.Identity?.IsAuthenticated != true)
             {
-                // Check if endpoint has [SkipDeviceTracking] attribute
-                var endpoint = context.GetEndpoint();
-                var skipTracking = endpoint?.Metadata.GetMetadata<SkipDeviceTrackingAttribute>() != null;
+                await next(context);
+                return;
+            }
 
-                if (!skipTracking)
-                {
-                    var userId = userContext.GetUserId();
-                    var clientInfo = clientInfoAccessor.Current;
-                    var clientDeviceId = clientInfoAccessor.CurrentDeviceId;
+            var endpoint = context.GetEndpoint();
+            var skipTracking = endpoint?.Metadata.GetMetadata<SkipDeviceTrackingAttribute>() != null;
 
-                    if (userId.HasValue && clientInfo != null)
-                    {
-                        // Identify/register device and store in context for downstream use
-                        var device = await clientDeviceService.IdentifyOrRegisterDeviceAsync(
-                            userId.Value,
-                            clientInfo,
-                            clientDeviceId);
+            if (skipTracking)
+            {
+                await next(context);
+                return;
+            }
 
-                        // Store device in HttpContext.Items for downstream access
-                        context.Items["CurrentDevice"] = device;
+            var userId = userContext.GetUserId();
+            var clientInfo = clientInfoAccessor.Current;
+            var clientDeviceId = clientInfoAccessor.CurrentClientDeviceId; // string from header
 
-                        logger.LogTrace(
-                            "Identified device {DeviceId} ({DeviceName}) for user {UserId}",
-                            device.Id, device.FriendlyName, userId);
-                    }
-                }
+            if (userId.HasValue && clientInfo != null)
+            {
+                var deviceId = await deviceTrackingService.TrackDeviceAsync(
+                    userId.Value,
+                    clientInfo,
+                    clientDeviceId,
+                    context.RequestAborted);
+
+                ClientInfoAccessor.SetDeviceId(deviceId);
+                logger.LogTrace("Device {DeviceId} tracked for user {UserId}", deviceId, userId);
             }
         }
         catch (Exception ex)
         {
-            // Don't break the request pipeline if device tracking fails
             logger.LogError(ex, "Failed to track device activity");
         }
 
+        logger.LogDebug("DeviceTrackingMiddleware took {Time}", sw.ElapsedMilliseconds);
         await next(context);
     }
 }

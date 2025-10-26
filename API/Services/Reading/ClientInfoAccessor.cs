@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using API.Entities.Progress;
+using API.Entities.User;
 
 namespace API.Services.Reading;
 #nullable enable
@@ -16,7 +17,11 @@ public interface IClientInfoAccessor
     /// Returns null if called outside an HTTP request context (e.g., background jobs).
     /// </summary>
     ClientInfoData? Current { get; }
-    string? CurrentDeviceId { get; }
+    string? CurrentClientDeviceId { get; }
+    /// <summary>
+    /// Client Device PK
+    /// </summary>
+    int? CurrentDeviceId { get; }
 }
 
 /// <summary>
@@ -27,10 +32,12 @@ public interface IClientInfoAccessor
 public class ClientInfoAccessor : IClientInfoAccessor
 {
     private static readonly AsyncLocal<ClientInfoData?> ClientInfo = new();
-    private static readonly AsyncLocal<string?> DeviceId = new();
+    private static readonly AsyncLocal<string?> ClientDeviceId = new();
+    private static readonly AsyncLocal<int?> DeviceId = new();
 
     public ClientInfoData? Current => ClientInfo.Value;
-    public string? CurrentDeviceId => DeviceId.Value;
+    public string? CurrentClientDeviceId => ClientDeviceId.Value;
+    public int? CurrentDeviceId => DeviceId.Value;
 
     /// <summary>
     /// Sets the client info for the current async context.
@@ -46,6 +53,15 @@ public class ClientInfoAccessor : IClientInfoAccessor
     /// Should only be called by middleware.
     /// </summary>
     internal static void SetClientDeviceId(string clientDeviceId)
+    {
+        ClientDeviceId.Value = clientDeviceId;
+    }
+
+    /// <summary>
+    /// Sets the <see cref="ClientDevice.Id"/> for the current async context.
+    /// Should only be called by middleware.
+    /// </summary>
+    internal static void SetDeviceId(int clientDeviceId)
     {
         DeviceId.Value = clientDeviceId;
     }

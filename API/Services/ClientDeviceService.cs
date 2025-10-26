@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Progress;
@@ -18,16 +19,20 @@ using Microsoft.Extensions.Logging;
 namespace API.Services;
 #nullable enable
 
+internal static class ClientTypes
+{
+    public const string WebBrowser = "Web Browser";
+}
+
 public interface IClientDeviceService
 {
-    Task<ClientDevice> IdentifyOrRegisterDeviceAsync(int userId, ClientInfoData? clientInfo, string? clientDeviceId);
+    Task<ClientDevice> IdentifyOrRegisterDeviceAsync(int userId, ClientInfoData? clientInfo, string? clientDeviceId, CancellationToken cancellationToken = default);
     Task<IEnumerable<ClientDevice>> GetUserDevicesAsync(int userId, bool includeInactive = false);
     Task<IEnumerable<ClientDeviceDto>> GetUserDeviceDtosAsync(int userId, bool includeInactive = false);
     Task<IEnumerable<ClientDeviceDto>> GetAllUserDeviceDtos(bool includeInactive = false);
     Task<bool> RenameDeviceAsync(int userId, int deviceId, string newName);
     Task<bool> RemoveDeviceAsync(int userId, int deviceId);
     Task<bool> LogoutDeviceAsync(int userId, int deviceId);
-    Task RecordDeviceActivityAsync(int deviceId, ClientInfoData clientInfo);
 }
 
 public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<ClientDeviceService> logger)
@@ -36,7 +41,8 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     public async Task<ClientDevice> IdentifyOrRegisterDeviceAsync(
         int userId,
         ClientInfoData? clientInfo,
-        string? clientDeviceId)
+        string? clientDeviceId,
+        CancellationToken cancellationToken = default)
     {
         // STEP 1: Try exact match on ClientDeviceId (if provided)
         if (!string.IsNullOrEmpty(clientDeviceId))
@@ -46,7 +52,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
                 .FirstOrDefaultAsync(d =>
                     d.AppUserId == userId &&
                     d.ClientDeviceId == clientDeviceId &&
-                    d.IsActive);
+                    d.IsActive, cancellationToken: cancellationToken);
 
             if (deviceByClientId != null)
             {
@@ -63,7 +69,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             .FirstOrDefaultAsync(d =>
                 d.AppUserId == userId &&
                 d.DeviceFingerprint == fingerprint &&
-                d.IsActive);
+                d.IsActive, cancellationToken: cancellationToken);
 
         if (deviceByFingerprint != null)
         {
@@ -185,24 +191,6 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         return true;
     }
 
-    public async Task RecordDeviceActivityAsync(int deviceId, ClientInfoData clientInfo)
-    {
-        var device = await context.ClientDevice
-            .Include(d => d.History)
-            .FirstOrDefaultAsync(d => d.Id == deviceId);
-
-        if (device == null)
-        {
-            logger.LogWarning("Attempted to record activity for non-existent device {DeviceId}", deviceId);
-            return;
-        }
-
-        await UpdateDeviceActivityAsync(device, clientInfo);
-    }
-
-    // ========================================================================
-    // PRIVATE HELPER METHODS
-    // ========================================================================
 
     /// <summary>
     /// Generates a stable fingerprint hash from key ClientInfo attributes.
@@ -213,12 +201,12 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         var components = new List<string>
         {
             clientInfo.ClientType.ToLowerInvariant(),
-            clientInfo.Platform?.ToLowerInvariant() ?? "unknown",
-            clientInfo.DeviceType?.ToLowerInvariant() ?? "unknown"
+            clientInfo.Platform?.ToLowerInvariant() ?? "",
+            clientInfo.DeviceType?.ToLowerInvariant() ?? ""
         };
 
         // For web browsers, include browser + major version only
-        if (clientInfo.ClientType == "Web Browser" && !string.IsNullOrEmpty(clientInfo.Browser))
+        if (clientInfo.ClientType == ClientTypes.WebBrowser && !string.IsNullOrEmpty(clientInfo.Browser))
         {
             components.Add(clientInfo.Browser.ToLowerInvariant());
 
@@ -375,7 +363,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             parts.Add(clientInfo.Browser);
         }
         else if (!string.IsNullOrEmpty(clientInfo.ClientType) &&
-                 clientInfo.ClientType != "Web Browser")
+                 clientInfo.ClientType != ClientTypes.WebBrowser)
         {
             parts.Add(clientInfo.ClientType);
         }
