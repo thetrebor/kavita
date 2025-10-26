@@ -44,7 +44,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
         return (unitOfWork, context, mapper);
     }
 
-    private static DbConnection CreateInMemoryDatabase()
+    private static SqliteConnection CreateInMemoryDatabase()
     {
         var connection = new SqliteConnection("Filename=:memory:");
         connection.Open();

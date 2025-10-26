@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Services;
 #nullable enable
 
-internal static class ClientTypes
+public static class ClientDeviceTypes
 {
     public const string WebBrowser = "Web Browser";
 }
@@ -70,7 +70,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         var fingerprint = GenerateDeviceFingerprint(clientInfo);
 
         var deviceByFingerprint = await context.ClientDevice
-            .Include(d => d.History.OrderByDescending(h => h.CapturedAtUtc).Take(1))
+            .Include(d => d.History.OrderByDescending(h => h.CapturedAtUtc).Take(1)) // Do I really need to include here?
             .FirstOrDefaultAsync(d =>
                 d.AppUserId == userId &&
                 d.DeviceFingerprint == fingerprint &&
@@ -204,12 +204,12 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         var components = new List<string>
         {
             clientInfo.ClientType.ToLowerInvariant(),
-            clientInfo.Platform?.ToLowerInvariant() ?? "",
-            clientInfo.DeviceType?.ToLowerInvariant() ?? ""
+            clientInfo.Platform?.ToLowerInvariant() ?? string.Empty,
+            clientInfo.DeviceType?.ToLowerInvariant() ?? string.Empty
         };
 
         // For web browsers, include browser + major version only
-        if (clientInfo.ClientType == ClientTypes.WebBrowser && !string.IsNullOrEmpty(clientInfo.Browser))
+        if (clientInfo.ClientType == ClientDeviceTypes.WebBrowser && !string.IsNullOrEmpty(clientInfo.Browser))
         {
             components.Add(clientInfo.Browser.ToLowerInvariant());
 
@@ -271,6 +271,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     /// </summary>
     private static double CalculateSimilarity(ClientInfoData existing, ClientInfoData current)
     {
+        // Checks are weighted
         var matchCount = 0;
         var totalChecks = 0;
 
@@ -378,7 +379,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             parts.Add(clientInfo.Browser);
         }
         else if (!string.IsNullOrEmpty(clientInfo.ClientType) &&
-                 clientInfo.ClientType != ClientTypes.WebBrowser)
+                 clientInfo.ClientType != ClientDeviceTypes.WebBrowser)
         {
             parts.Add(clientInfo.ClientType);
         }

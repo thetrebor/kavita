@@ -479,8 +479,11 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_HandlesKavitaHeader_WithInvalidScreenResolution()
     {
+        ClientInfoData? capturedClientInfo = null;
+        var accessor = new ClientInfoAccessor();
         Task Next(HttpContext ctx)
         {
+            capturedClientInfo = accessor.Current;
             return Task.CompletedTask;
         }
 
@@ -493,14 +496,9 @@ public class ClientInfoMiddlewareTests
         // Act
         await middleware.InvokeAsync(context, _userContext);
 
-        // Assert - Should fallback gracefully when regex fails to parse invalid numbers
-        _logger.Received().Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => (o.ToString() ?? string.Empty).Contains("Failed to parse X-Kavita-Client header")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>()
-        );
+        // Client with non-numeric resolution will not match the regex and return default implementation
+        Assert.NotNull(capturedClientInfo);
+        Assert.Equal("Mozilla/5.0 (Windows) Chrome/120.0", capturedClientInfo.UserAgent);
     }
 
     #endregion
