@@ -44,7 +44,7 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
                     state.clientInfo,
                     state.clientDeviceId,
                     cancel);
-                return device.Id; // int, not Guid
+                return device.Id;
             },
             CacheOptions,
             cancellationToken: ct);
