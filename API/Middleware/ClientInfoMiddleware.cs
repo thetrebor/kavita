@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Entities.Progress;
+using API.Helpers;
 using API.Services.Reading;
 using API.Services.Store;
 using Microsoft.AspNetCore.Http;
@@ -57,8 +58,8 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             UserAgent = userAgent,
             IpAddress = ipAddress,
             AuthType = authType,
-            ClientType = DetermineClientType(userAgent),
-            Platform = DetectPlatform(userAgent),
+            ClientType = BrowserHelper.DetermineClientType(userAgent),
+            Platform = BrowserHelper.DetectPlatform(userAgent),
             CapturedAt = DateTime.UtcNow
         };
     }
@@ -102,6 +103,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         };
     }
 
+    // TODO: Turn this into an extension?
     private static string GetClientIpAddress(HttpContext context)
     {
         // Check for X-Forwarded-For header (proxy/load balancer)
@@ -125,61 +127,9 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
 
 
     // TODO: Move this into a Helper and add unit tests
-    private static string DetermineClientType(string userAgent)
-    {
-        if (string.IsNullOrEmpty(userAgent))
-        {
-            return "Unknown";
-        }
 
-        var ua = userAgent.ToLowerInvariant();
 
-        // Known e-reader applications
-        if (ua.Contains("koreader")) return "KOReader";
-        if (ua.Contains("tachiyomi")) return "Tachiyomi";
-        if (ua.Contains("calibre")) return "Calibre";
-        if (ua.Contains("fbreader")) return "FBReader";
-        if (ua.Contains("chunky")) return "Chunky";
-        if (ua.Contains("panels")) return "Panels";
 
-        // Mobile apps (if you have custom UA strings)
-        if (ua.Contains("kavita-mobile")) return "Kavita Mobile";
-
-        // OPDS clients
-        if (ua.Contains("opds")) return "OPDS Client";
-
-        // Web browsers
-        if (ua.Contains("chrome") || ua.Contains("firefox") ||
-            ua.Contains("safari") || ua.Contains("edge"))
-        {
-            return "Web Browser";
-        }
-
-        return "Unknown";
-    }
-
-    private static string DetectPlatform(string userAgent)
-    {
-        if (string.IsNullOrEmpty(userAgent))
-        {
-            return "Unknown";
-        }
-
-        var ua = userAgent.ToLowerInvariant();
-
-        if (ua.Contains("windows") || ua.Contains("win32") || ua.Contains("win64"))
-            return "Windows";
-        if (ua.Contains("macintosh") || ua.Contains("mac os"))
-            return "macOS";
-        if (ua.Contains("linux") && !ua.Contains("android"))
-            return "Linux";
-        if (ua.Contains("iphone") || ua.Contains("ipad") || ua.Contains("ipod"))
-            return "iOS";
-        if (ua.Contains("android"))
-            return "Android";
-
-        return "Unknown";
-    }
 
     [GeneratedRegex(@"web-app/([^\s]+) \(([^/]+)/([^;]+); ([^;]+); ([^;]+); (\d+)x(\d+)(?:; ([^\)]+))?\)")]
     private static partial Regex UserAgentRegex();
