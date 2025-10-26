@@ -18,7 +18,7 @@ namespace API.Tests.Repository;
 public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
-    private TestGenreSet CreateTestGenres()
+    private static TestGenreSet CreateTestGenres()
     {
         return new TestGenreSet
         {

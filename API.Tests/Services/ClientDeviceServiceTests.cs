@@ -615,7 +615,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         await context.SaveChangesAsync();
 
         // Act
-        var devices = await service.GetUserDevicesAsync(user.Id, includeInactive: false);
+        var devices = (await service.GetUserDevicesAsync(user.Id, includeInactive: false)).ToList();
 
         // Assert
         Assert.Single(devices);

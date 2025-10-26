@@ -19,7 +19,7 @@ namespace API.Tests.Repository;
 public class PersonRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
-    private async Task<(AppUser, AppUser, AppUser)> Setup(DataContext context)
+    private static async Task<(AppUser, AppUser, AppUser)> Setup(DataContext context)
     {
         var fullAccess = new AppUserBuilder("amelia", "amelia@example.com").Build();
         var restrictedAccess = new AppUserBuilder("mila", "mila@example.com").Build();

@@ -18,7 +18,7 @@ namespace API.Tests.Repository;
 public class TagRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
-    private TestTagSet CreateTestTags()
+    private static TestTagSet CreateTestTags()
     {
         return new TestTagSet
         {
