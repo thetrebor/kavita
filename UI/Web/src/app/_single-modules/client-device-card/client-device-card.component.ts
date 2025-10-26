@@ -31,10 +31,13 @@ export class ClientDeviceCardComponent {
   });
 
   deviceIcon = computed(() => {
-    const deviceType = this.clientDevice().currentClientInfo.deviceType.toLowerCase();
-    if (deviceType.includes('mobile')) return 'fa-solid fa-mobile-screen';
-    if (deviceType.includes('tablet')) return 'fa-solid fa-tablet-screen-button';
-    if (deviceType.includes('laptop')) return 'fa-solid fa-laptop';
+    if (this.clientDevice().currentClientInfo?.deviceType != null) {
+      const deviceType = this.clientDevice().currentClientInfo.deviceType.toLowerCase();
+      if (deviceType.includes('mobile')) return 'fa-solid fa-mobile-screen';
+      if (deviceType.includes('tablet')) return 'fa-solid fa-tablet-screen-button';
+      if (deviceType.includes('laptop')) return 'fa-solid fa-laptop';
+    }
+
     return 'fa-solid fa-desktop';
   });
 

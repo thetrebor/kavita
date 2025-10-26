@@ -153,11 +153,11 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal("web-app", capturedClientInfo.ClientType);
+        Assert.Equal(ClientDeviceTypeNames.WebApp, capturedClientInfo.ClientType);
         Assert.Equal("1.2.3", capturedClientInfo.AppVersion);
         Assert.Equal("Chrome", capturedClientInfo.Browser);
         Assert.Equal("120.0", capturedClientInfo.BrowserVersion);
-        Assert.Equal("Windows", capturedClientInfo.Platform);
+        Assert.Equal(ClientDevicePlatformNames.Windows, capturedClientInfo.Platform);
         Assert.Equal("Desktop", capturedClientInfo.DeviceType);
         Assert.Equal(1920, capturedClientInfo.ScreenWidth);
         Assert.Equal(1080, capturedClientInfo.ScreenHeight);
@@ -189,11 +189,11 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal("web-app", capturedClientInfo.ClientType);
+        Assert.Equal(ClientDeviceTypeNames.WebApp, capturedClientInfo.ClientType);
         Assert.Equal("2.0.0", capturedClientInfo.AppVersion);
         Assert.Equal("Firefox", capturedClientInfo.Browser);
         Assert.Equal("121.0", capturedClientInfo.BrowserVersion);
-        Assert.Equal("macOS", capturedClientInfo.Platform);
+        Assert.Equal(ClientDevicePlatformNames.MacOs, capturedClientInfo.Platform);
         Assert.Equal("Mobile", capturedClientInfo.DeviceType);
         Assert.Equal(375, capturedClientInfo.ScreenWidth);
         Assert.Equal(667, capturedClientInfo.ScreenHeight);
@@ -226,7 +226,7 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal("web-app", capturedClientInfo.ClientType); // Default from fallback
+        Assert.Equal(ClientDeviceTypeNames.WebApp, capturedClientInfo.ClientType); // Default from fallback
         Assert.Equal("Mozilla/5.0 (Linux; Android 13) Chrome/120.0", capturedClientInfo.UserAgent);
     }
 
@@ -255,8 +255,8 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal("KOReader", capturedClientInfo.ClientType); // Detected from UA
-        Assert.Equal("Android", capturedClientInfo.Platform); // Detected from UA
+        Assert.Equal(ClientDeviceTypeNames.KOReader, capturedClientInfo.ClientType); // Detected from UA
+        Assert.Equal(ClientDevicePlatformNames.Android, capturedClientInfo.Platform); // Detected from UA
         Assert.Equal(AuthenticationType.OIDC, capturedClientInfo.AuthType);
     }
 

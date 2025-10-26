@@ -27,12 +27,6 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
         var sw = Stopwatch.StartNew();
         try
         {
-            if (context.User.Identity?.IsAuthenticated != true)
-            {
-                await next(context);
-                return;
-            }
-
             var endpoint = context.GetEndpoint();
             var skipTracking = endpoint?.Metadata.GetMetadata<SkipDeviceTrackingAttribute>() != null;
 

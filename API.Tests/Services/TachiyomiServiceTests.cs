@@ -27,7 +27,7 @@ public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTe
 {
 
 
-    public (IReaderService, ITachiyomiService) Setup(IUnitOfWork unitOfWork, IMapper mapper)
+    public static (IReaderService, ITachiyomiService) Setup(IUnitOfWork unitOfWork, IMapper mapper)
     {
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),

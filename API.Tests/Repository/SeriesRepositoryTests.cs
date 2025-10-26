@@ -160,9 +160,12 @@ public class SeriesRepositoryTests
     }
 
     [Theory]
-    [InlineData(12345, null, 12345)] // Case 1: Prioritize existing ExternalSeries id
-    [InlineData(0, "https://anilist.co/manga/100664/Ijiranaide-Nagatorosan/", 100664)] // Case 2: Extract from weblink if no external series id
-    [InlineData(0, "", null)] // Case 3: Return null if neither exist
+    // Case 1: Prioritize existing ExternalSeries id
+    [InlineData(12345, null, 12345)]
+    // Case 2: Extract from weblink if no external series id
+    [InlineData(0, "https://anilist.co/manga/100664/Ijiranaide-Nagatorosan/", 100664)]
+    // Case 3: Return null if neither exist
+    [InlineData(0, "", null)]
     public async Task GetPlusSeriesDto_Should_PrioritizeAniListId_Correctly(int externalAniListId, string? webLinks, int? expectedAniListId)
     {
         // Arrange

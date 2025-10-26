@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Progress;
 using API.Entities;
@@ -18,11 +19,6 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 #nullable enable
-
-public static class ClientDeviceTypes
-{
-    public const string WebBrowser = "Web Browser";
-}
 
 public interface IClientDeviceService
 {
@@ -209,7 +205,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         };
 
         // For web browsers, include browser + major version only
-        if (clientInfo.ClientType == ClientDeviceTypes.WebBrowser && !string.IsNullOrEmpty(clientInfo.Browser))
+        if (clientInfo.ClientType == ClientDeviceTypeNames.WebBrowser && !string.IsNullOrEmpty(clientInfo.Browser))
         {
             components.Add(clientInfo.Browser.ToLowerInvariant());
 
@@ -379,7 +375,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             parts.Add(clientInfo.Browser);
         }
         else if (!string.IsNullOrEmpty(clientInfo.ClientType) &&
-                 clientInfo.ClientType != ClientDeviceTypes.WebBrowser)
+                 clientInfo.ClientType != ClientDeviceTypeNames.WebBrowser)
         {
             parts.Add(clientInfo.ClientType);
         }

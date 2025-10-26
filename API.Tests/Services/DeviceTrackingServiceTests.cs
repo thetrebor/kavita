@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Entities.Progress;
@@ -542,8 +543,8 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     {
         return new ClientInfoData
         {
-            ClientType = ClientDeviceTypes.WebBrowser,
-            Platform = "Windows",
+            ClientType = ClientDeviceTypeNames.WebBrowser,
+            Platform = ClientDevicePlatformNames.Windows,
             DeviceType = "Desktop",
             Browser = "Chrome",
             BrowserVersion = "120",
@@ -565,8 +566,8 @@ public class DeviceTrackingServiceTests : AbstractDbTest
             FriendlyName = "Test Device",
             CurrentClientInfo = new ClientInfoData
             {
-                ClientType = ClientDeviceTypes.WebBrowser,
-                Platform = "Windows",
+                ClientType = ClientDeviceTypeNames.WebBrowser,
+                Platform = ClientDevicePlatformNames.Windows,
                 UserAgent = "Test",
                 IpAddress = "127.0.0.1",
                 CapturedAt = DateTime.UtcNow

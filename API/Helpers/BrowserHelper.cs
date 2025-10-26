@@ -1,4 +1,6 @@
-﻿namespace API.Helpers;
+﻿using API.Constants;
+
+namespace API.Helpers;
 
 /// <summary>
 /// Handles all things around Parsing Headers
@@ -9,47 +11,47 @@ public static class BrowserHelper
     {
         if (string.IsNullOrEmpty(userAgent))
         {
-            return "Unknown";
+            return ClientDeviceTypeNames.Unknown;
         }
 
         var ua = userAgent.ToLowerInvariant();
 
-        if (ua.Contains("koreader") || ua.Contains("kobo touch")) return "KOReader";
-        if (ua.Contains("panels")) return "Panels";
+        if (ua.Contains("koreader") || ua.Contains("kobo touch")) return ClientDeviceTypeNames.KOReader;
+        if (ua.Contains("panels")) return ClientDeviceTypeNames.Panels;
 
         // OPDS clients
-        if (ua.Contains("opds")) return "OPDS Client";
+        if (ua.Contains("librera")) return ClientDeviceTypeNames.Librera;
 
         // Web browsers
         if (ua.Contains("chrome") || ua.Contains("firefox") ||
             ua.Contains("safari") || ua.Contains("edge"))
         {
-            return "Web Browser";
+            return ClientDeviceTypeNames.WebBrowser;
         }
 
-        return "Unknown";
+        return ClientDeviceTypeNames.Unknown;
     }
 
     public static string DetectPlatform(string userAgent)
     {
         if (string.IsNullOrEmpty(userAgent))
         {
-            return "Unknown";
+            return ClientDevicePlatformNames.Unknown;
         }
 
         var ua = userAgent.ToLowerInvariant();
 
         if (ua.Contains("windows") || ua.Contains("win32") || ua.Contains("win64"))
-            return "Windows";
-        if (ua.Contains("macintosh") || ua.Contains("mac os"))
-            return "macOS";
+            return ClientDevicePlatformNames.Windows;
+        if (ua.Contains("macintosh"))
+            return ClientDevicePlatformNames.MacOs;
         if (ua.Contains("linux") && !ua.Contains("android"))
-            return "Linux";
-        if (ua.Contains("iphone") || ua.Contains("ipad") || ua.Contains("ipod"))
-            return "iOS";
+            return ClientDevicePlatformNames.Linux;
+        if (ua.Contains("iphone") || ua.Contains("ipad") || ua.Contains("ipod") || ua.Contains("mac os"))
+            return ClientDevicePlatformNames.IOs;
         if (ua.Contains("android"))
-            return "Android";
+            return ClientDevicePlatformNames.Android;
 
-        return "Unknown";
+        return ClientDevicePlatformNames.Unknown;
     }
 }

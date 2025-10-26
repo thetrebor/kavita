@@ -52,6 +52,8 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             return parsed;
         }
 
+        // TODO: I need to handle OPDS Clients differently as it's confusing on the UI
+
         // Fallback to basic UA parsing
         return new ClientInfoData
         {
@@ -75,7 +77,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             {
                 return new ClientInfoData
                 {
-                    ClientType = WebAppName,
+                    ClientType = ClientDeviceTypeNames.WebApp,
                     AppVersion = match.Groups[1].Value,
                     Browser = match.Groups[2].Value,
                     BrowserVersion = match.Groups[3].Value,
@@ -99,7 +101,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         return new ClientInfoData
         {
             UserAgent = fallbackUa,
-            ClientType = WebAppName
+            ClientType = ClientDeviceTypeNames.WebApp
         };
     }
 

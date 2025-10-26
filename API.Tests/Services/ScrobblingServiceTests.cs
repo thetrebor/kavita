@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -13,11 +12,9 @@ using API.Services;
 using API.Services.Plus;
 using API.Services.Reading;
 using API.SignalR;
-using Hangfire.Storage.SQLite.Entities;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 

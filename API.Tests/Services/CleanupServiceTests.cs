@@ -30,7 +30,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
     #region Setup
 
-    private async Task<(ILogger<CleanupService>, IEventHub, IReaderService)> Setup(IUnitOfWork unitOfWork, DataContext context)
+    private Task<(ILogger<CleanupService>, IEventHub, IReaderService)> Setup(IUnitOfWork unitOfWork, DataContext context)
     {
         context.Library.Add(new LibraryBuilder("Manga")
             .WithFolderPath(new FolderPathBuilder(Root + "data/").Build())
@@ -43,7 +43,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>());
 
-        return (logger, messageHub, readerService);
+        return Task.FromResult<(ILogger<CleanupService>, IEventHub, IReaderService)>((logger, messageHub, readerService));
     }
 
     #endregion
