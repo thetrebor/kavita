@@ -26,7 +26,7 @@ internal static class ClientTypes
 
 public interface IClientDeviceService
 {
-    Task<ClientDevice> IdentifyOrRegisterDeviceAsync(int userId, ClientInfoData? clientInfo, string? clientDeviceId, CancellationToken cancellationToken = default);
+    Task<ClientDevice> IdentifyOrRegisterDeviceAsync(int userId, ClientInfoData clientInfo, string? clientDeviceId, CancellationToken cancellationToken = default);
     Task<IEnumerable<ClientDevice>> GetUserDevicesAsync(int userId, bool includeInactive = false);
     Task<IEnumerable<ClientDeviceDto>> GetUserDeviceDtosAsync(int userId, bool includeInactive = false);
     Task<IEnumerable<ClientDeviceDto>> GetAllUserDeviceDtos(bool includeInactive = false);
@@ -38,9 +38,14 @@ public interface IClientDeviceService
 public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<ClientDeviceService> logger)
     : IClientDeviceService
 {
+    /// <summary>
+    /// Look for devices up to 30 days ago for matching
+    /// </summary>
+    private const int DeviceLookupWindowDays = -30;
+
     public async Task<ClientDevice> IdentifyOrRegisterDeviceAsync(
         int userId,
-        ClientInfoData? clientInfo,
+        ClientInfoData clientInfo,
         string? clientDeviceId,
         CancellationToken cancellationToken = default)
     {
@@ -88,9 +93,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         var fuzzyMatch = await TryFuzzyMatchAsync(userId, clientInfo, fingerprint);
         if (fuzzyMatch != null)
         {
-            logger.LogInformation(
-                "Fuzzy matched device {DeviceId} for user {UserId}",
-                fuzzyMatch.Id, userId);
+            logger.LogDebug("Fuzzy matched device {DeviceId} for user {UserId}", fuzzyMatch.Id, userId);
 
             if (!string.IsNullOrEmpty(clientDeviceId))
             {
@@ -239,7 +242,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             .Where(d =>
                 d.AppUserId == userId &&
                 d.IsActive &&
-                d.LastSeenUtc > DateTime.UtcNow.AddDays(-30))
+                d.LastSeenUtc > DateTime.UtcNow.AddDays(DeviceLookupWindowDays))
             .ToListAsync();
 
         foreach (var device in recentDevices)
@@ -272,17 +275,29 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         var totalChecks = 0;
 
         // Core attributes (weighted heavily)
-        if (CompareStrings(existing.ClientType, current.ClientType)) matchCount += 3;
+        if (CompareStrings(existing.ClientType, current.ClientType))
+        {
+            matchCount += 3;
+        }
         totalChecks += 3;
 
-        if (CompareStrings(existing.Platform, current.Platform)) matchCount += 3;
+        if (CompareStrings(existing.Platform, current.Platform))
+        {
+            matchCount += 3;
+        }
         totalChecks += 3;
 
-        if (CompareStrings(existing.DeviceType, current.DeviceType)) matchCount += 2;
+        if (CompareStrings(existing.DeviceType, current.DeviceType))
+        {
+            matchCount += 2;
+        }
         totalChecks += 2;
 
         // Browser info (less critical, versions change)
-        if (CompareStrings(existing.Browser, current.Browser)) matchCount += 2;
+        if (CompareStrings(existing.Browser, current.Browser))
+        {
+            matchCount += 2;
+        }
         totalChecks += 2;
 
         // Browser version - only check major version, allow one version difference
@@ -300,7 +315,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             totalChecks += 1;
         }
 
-        return totalChecks > 0 ? (double)matchCount / totalChecks : 0.0;
+        return (double) matchCount / totalChecks;
     }
 
     private static bool CompareStrings(string? a, string? b)
@@ -417,16 +432,17 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     /// Determines if ClientInfo has changed in a meaningful way that warrants history recording.
     /// Ignores volatile attributes like IP address, screen dimensions, timestamp.
     /// </summary>
-    private static bool HasMeaningfulChanges(ClientInfoData existing, ClientInfoData? current)
+    private static bool HasMeaningfulChanges(ClientInfoData? existing, ClientInfoData? current)
     {
+        if (existing == null && current == null) return false;
         if (existing != null && current == null) return true;
 
-        return existing.ClientType != current.ClientType ||
-               existing.Platform != current.Platform ||
-               existing.DeviceType != current.DeviceType ||
-               existing.Browser != current.Browser ||
-               GetMajorVersion(existing.BrowserVersion) != GetMajorVersion(current.BrowserVersion) ||
-               existing.AppVersion != current.AppVersion;
+        return existing?.ClientType != current?.ClientType ||
+               existing?.Platform != current?.Platform ||
+               existing?.DeviceType != current?.DeviceType ||
+               existing?.Browser != current?.Browser ||
+               GetMajorVersion(existing?.BrowserVersion) != GetMajorVersion(current?.BrowserVersion) ||
+               existing?.AppVersion != current?.AppVersion;
     }
 
     private static string GetMajorVersion(string? version)

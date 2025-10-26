@@ -27,7 +27,7 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
         var sw = Stopwatch.StartNew();
         try
         {
-            if (context.User?.Identity?.IsAuthenticated != true)
+            if (context.User.Identity?.IsAuthenticated != true)
             {
                 await next(context);
                 return;
@@ -44,7 +44,7 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
 
             var userId = userContext.GetUserId();
             var clientInfo = clientInfoAccessor.Current;
-            var clientDeviceId = clientInfoAccessor.CurrentClientDeviceId; // string from header
+            var clientDeviceId = clientInfoAccessor.CurrentClientDeviceId; // string from webapp header
 
             if (userId.HasValue && clientInfo != null)
             {

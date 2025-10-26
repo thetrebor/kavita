@@ -51,23 +51,19 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
                 userContext.SetUserContext(userId.Value, username!, authType);
 
                 logger.LogTrace(
-                    "Resolved user context: UserId={UserId}, Username={Username}, AuthType={AuthType}",
-                    userId, username, authType);
+                    "Resolved user context: UserId={UserId}, AuthType={AuthType}",
+                    userId, authType);
             }
             else if (!allowAnonymous)
             {
                 // No user resolved on a protected endpoint - this is a problem
                 // Authorization middleware will handle returning 401/403
-                logger.LogWarning(
-                    "Could not resolve user identity for protected endpoint: {Path}",
-                    context.Request.Path);
+                logger.LogWarning("Could not resolve user identity for protected endpoint: {Path}", context.Request.Path);
             }
             else
             {
                 // No user resolved but endpoint allows anonymous - this is fine
-                logger.LogTrace(
-                    "No user identity resolved for anonymous endpoint: {Path}",
-                    context.Request.Path);
+                logger.LogTrace("No user identity resolved for anonymous endpoint: {Path}", context.Request.Path);
             }
         }
         catch (Exception ex)
@@ -92,7 +88,7 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
         }
 
         // Priority 2: Check for JWT or OIDC claims
-        if (context.User?.Identity?.IsAuthenticated == true)
+        if (context.User.Identity?.IsAuthenticated == true)
         {
             return ResolveFromClaims(context);
         }
@@ -130,7 +126,6 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
             }
         }
 
-        // No API key found - return early
         if (string.IsNullOrEmpty(apiKey))
         {
             return (null, null, AuthenticationType.Unknown);
@@ -140,7 +135,6 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
         {
             var cacheKey = $"apikey_{apiKey}";
 
-            // HybridCache handles stampede protection automatically
             var result = await cache.GetOrCreateAsync(
                 cacheKey,
                 (apiKey, unitOfWork),
