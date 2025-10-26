@@ -4,7 +4,6 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Dashboard;
 using API.DTOs.SideNav;
-using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 

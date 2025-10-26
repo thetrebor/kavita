@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Progress;
-using API.Services.Reading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;

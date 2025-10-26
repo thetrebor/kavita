@@ -1,5 +1,4 @@
 ﻿using System;
-using API.Entities.Progress;
 
 namespace API.DTOs.Progress;
 

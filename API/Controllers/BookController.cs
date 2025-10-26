@@ -6,7 +6,6 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;

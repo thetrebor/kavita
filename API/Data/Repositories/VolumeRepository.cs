@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -8,10 +7,8 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
-using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;

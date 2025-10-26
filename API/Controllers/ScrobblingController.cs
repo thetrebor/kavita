@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs.Account;
 using API.DTOs.KavitaPlus.Account;
 using API.DTOs.Scrobbling;
 using API.Entities.Scrobble;

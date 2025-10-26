@@ -5,7 +5,6 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata.Browse;
 using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Person;
@@ -19,7 +18,6 @@ using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Nager.ArticleNumber;
 
 namespace API.Controllers;

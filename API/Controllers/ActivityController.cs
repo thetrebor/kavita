@@ -3,9 +3,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs.Progress;
-using API.Extensions;
 using API.Services;
-using API.Services.Store;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

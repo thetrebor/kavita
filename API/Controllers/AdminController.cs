@@ -1,10 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Constants;
-using API.Data;
-using API.Data.ManualMigrations;
-using API.DTOs;
-using API.DTOs.Progress;
 using API.Entities;
 using API.Middleware;
 using Microsoft.AspNetCore.Authorization;

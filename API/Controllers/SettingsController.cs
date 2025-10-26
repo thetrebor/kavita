@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -9,24 +8,17 @@ using API.DTOs;
 using API.DTOs.Email;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.Settings;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
-using API.Logging;
 using API.Services;
-using API.Services.Tasks.Scanner;
 using AutoMapper;
-using Cronos;
-using Hangfire;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers;
 

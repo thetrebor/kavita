@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.Entities.Progress;
 
 namespace API.DTOs.Progress;
 

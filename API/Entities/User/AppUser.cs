@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Progress;

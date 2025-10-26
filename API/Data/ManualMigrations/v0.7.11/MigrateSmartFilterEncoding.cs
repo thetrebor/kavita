@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
-using API.Entities;
 using API.Entities.History;
 using API.Helpers;
 using Kavita.Common.EnvironmentInfo;

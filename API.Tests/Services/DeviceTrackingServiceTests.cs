@@ -2,8 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Constants;
-using API.Data;
-using API.Entities;
 using API.Entities.Progress;
 using API.Entities.User;
 using API.Helpers.Builders;

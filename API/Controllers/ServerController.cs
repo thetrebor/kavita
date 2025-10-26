@@ -10,7 +10,6 @@ using API.DTOs.MediaErrors;
 using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;

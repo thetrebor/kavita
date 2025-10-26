@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -4,7 +4,6 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Search;
-using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 

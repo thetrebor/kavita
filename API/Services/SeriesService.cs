@@ -11,7 +11,6 @@ using API.DTOs.Person;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
 using API.Entities.Person;
@@ -21,7 +20,6 @@ using API.Helpers.Builders;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
-using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 

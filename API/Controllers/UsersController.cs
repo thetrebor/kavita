@@ -6,7 +6,6 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.KavitaPlus.Account;
-using API.Extensions;
 using API.Services;
 using API.Services.Plus;
 using API.SignalR;

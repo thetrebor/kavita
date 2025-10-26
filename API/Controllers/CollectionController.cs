@@ -8,7 +8,6 @@ using API.Data.Repositories;
 using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.Entities;
-using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;

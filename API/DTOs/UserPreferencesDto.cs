@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using API.DTOs.Theme;
 using API.Entities;
-using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
 namespace API.DTOs;

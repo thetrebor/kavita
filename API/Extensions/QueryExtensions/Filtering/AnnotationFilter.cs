@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
-using API.DTOs.Reader;
 using API.Entities;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;

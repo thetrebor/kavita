@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.DTOs.Progress;
 using API.Entities.Interfaces;
-using API.Services;
 using API.Services.Reading;
 using Microsoft.EntityFrameworkCore;
 

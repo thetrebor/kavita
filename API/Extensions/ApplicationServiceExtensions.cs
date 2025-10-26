@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using API.Constants;
-using API.Controllers;
 using API.Data;
 using API.Helpers;
 using API.Middleware;

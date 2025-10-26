@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Device;
-using API.Extensions;
 using API.Services;
 using API.SignalR;
 using AutoMapper;

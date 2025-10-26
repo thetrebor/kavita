@@ -2,7 +2,6 @@
 using API.Data;
 using API.DTOs.Theme;
 using API.Entities.Interfaces;
-using API.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

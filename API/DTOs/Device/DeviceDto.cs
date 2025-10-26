@@ -1,5 +1,4 @@
-﻿using System;
-using API.Entities.Enums.Device;
+﻿using API.Entities.Enums.Device;
 
 namespace API.DTOs.Device;
 

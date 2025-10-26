@@ -19,7 +19,6 @@ using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
-using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;

@@ -8,7 +8,6 @@ using API.Data.Repositories;
 using API.DTOs.Dashboard;
 using API.DTOs.Filtering.v2;
 using API.Entities;
-using API.Extensions;
 using API.Helpers;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;

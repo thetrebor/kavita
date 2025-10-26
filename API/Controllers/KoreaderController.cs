@@ -3,15 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using API.Data;
-using API.Data.Repositories;
 using API.DTOs.Koreader;
-using API.Entities;
 using API.Extensions;
 using API.Services;
 using Kavita.Common;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using static System.Net.WebRequestMethods;
 
 namespace API.Controllers;
 #nullable enable

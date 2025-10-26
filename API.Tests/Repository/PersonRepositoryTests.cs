@@ -10,7 +10,6 @@ using API.Entities.Enums;
 using API.Entities.Person;
 using API.Helpers;
 using API.Helpers.Builders;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -7,7 +6,6 @@ using API.Data.Repositories;
 using API.DTOs.Uploads;
 using API.Entities.Enums;
 using API.Entities.MetadataMatching;
-using API.Extensions;
 using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Metadata;

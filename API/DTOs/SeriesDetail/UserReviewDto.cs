@@ -1,5 +1,4 @@
-﻿using API.Entities;
-using API.Entities.Enums;
+﻿using API.Entities.Enums;
 using API.Services.Plus;
 
 namespace API.DTOs.SeriesDetail;

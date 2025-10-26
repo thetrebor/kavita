@@ -8,7 +8,6 @@ using API.Data;
 using API.DTOs.Downloads;
 using API.Entities;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;

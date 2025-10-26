@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs.ReadingLists.CBL;
-using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

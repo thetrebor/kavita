@@ -6,7 +6,6 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Font;
 using API.Entities.Enums.Font;
-using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner.Parser;

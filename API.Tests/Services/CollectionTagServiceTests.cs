@@ -14,7 +14,6 @@ using API.Services.Plus;
 using API.SignalR;
 using Kavita.Common;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 
