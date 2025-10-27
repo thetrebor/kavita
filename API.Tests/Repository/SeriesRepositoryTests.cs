@@ -63,7 +63,7 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
     [InlineData(0, "", null)]
     public async Task GetPlusSeriesDto_Should_PrioritizeAniListId_Correctly(int externalAniListId, string? webLinks, int? expectedAniListId)
     {
-        // Arrange
+
         var (unitOfWork, _, _) = await CreateDatabase();
         await SetupSeriesData(unitOfWork);
 

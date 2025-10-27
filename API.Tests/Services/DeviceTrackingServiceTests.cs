@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Entities.User;
 using API.Helpers.Builders;
@@ -32,7 +33,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task TrackDeviceAsync_ReturnsDeviceId_FromClientDeviceService()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -81,7 +82,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task TrackDeviceAsync_CachesDeviceId_WithCorrectKey()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -132,7 +133,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task TrackDeviceAsync_UsesUnknownInCacheKey_WhenClientDeviceIdNull()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -181,7 +182,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task TrackDeviceAsync_UsesUnknownInCacheKey_WhenClientDeviceIdEmpty()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -230,7 +231,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task TrackDeviceAsync_StoresReverseMappingInCache()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -278,7 +279,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task TrackDeviceAsync_PropagatesCancellationToken()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -332,7 +333,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task ClearDeviceCacheAsync_RemovesBothCacheEntries()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -360,7 +361,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task ClearDeviceCacheAsync_HandlesNullCacheKey_Gracefully()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -387,7 +388,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task ClearDeviceCacheAsync_HandlesEmptyCacheKey_Gracefully()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -414,7 +415,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task ClearDeviceCacheAsync_LogsDebug_OnSuccess()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -445,7 +446,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task ClearDeviceCacheAsync_LogsWarning_OnException()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -480,7 +481,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task ClearUserDeviceCachesAsync_ClearsAllDeviceCaches_ForUser()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -517,7 +518,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task ClearUserDeviceCachesAsync_HandlesUserWithNoSessions()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
@@ -541,8 +542,8 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     {
         return new ClientInfoData
         {
-            ClientType = ClientDeviceTypeNames.WebBrowser,
-            Platform = ClientDevicePlatformNames.Windows,
+            ClientType = ClientDeviceType.WebBrowser,
+            Platform = ClientDevicePlatform.Windows,
             DeviceType = "Desktop",
             Browser = "Chrome",
             BrowserVersion = "120",
@@ -564,8 +565,8 @@ public class DeviceTrackingServiceTests : AbstractDbTest
             FriendlyName = "Test Device",
             CurrentClientInfo = new ClientInfoData
             {
-                ClientType = ClientDeviceTypeNames.WebBrowser,
-                Platform = ClientDevicePlatformNames.Windows,
+                ClientType = ClientDeviceType.WebBrowser,
+                Platform = ClientDevicePlatform.Windows,
                 UserAgent = "Test",
                 IpAddress = "127.0.0.1",
                 CapturedAt = DateTime.UtcNow

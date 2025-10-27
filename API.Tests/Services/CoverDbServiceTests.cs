@@ -55,7 +55,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (unitOfWork, context, _) = await CreateDatabase();
         var (directoryService, coverDbService) = await Setup(unitOfWork);
 
-        // Arrange
+
         var testUrl = "https://anilist.co/anime/6205/Kmpfer/";
         var encodeFormat = EncodeFormat.WEBP;
         var expectedFaviconPath = Path.Combine(FaviconPath, "anilist.co.webp");
@@ -100,7 +100,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (unitOfWork, context, _) = await CreateDatabase();
         var (directoryService, coverDbService) = await Setup(unitOfWork);
 
-        // Arrange
+
         var testUrl = "https://example.com";
         var encodeFormat = EncodeFormat.WEBP;
 

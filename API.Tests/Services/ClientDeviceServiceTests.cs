@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Entities;
+using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Entities.User;
 using API.Helpers.Builders;
@@ -31,7 +32,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task IdentifyOrRegisterDeviceAsync_RegistersNewDevice_WhenNoExistingMatch()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -39,7 +40,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
 
         // Act
         var device = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, "device-123");
@@ -58,7 +59,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task IdentifyOrRegisterDeviceAsync_MatchesExistingDevice_ByClientDeviceId()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -66,7 +67,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var existingDevice = new ClientDevice
         {
             AppUserId = user.Id,
@@ -96,7 +97,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task IdentifyOrRegisterDeviceAsync_MatchesExistingDevice_ByFingerprint_WhenClientDeviceIdNull()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -104,7 +105,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
 
         // Register first time without client device ID
         var firstDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
@@ -122,7 +123,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task IdentifyOrRegisterDeviceAsync_UpdatesClientDeviceId_WhenFingerprintMatches()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -130,7 +131,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
 
         // First request without ClientDeviceId
         var firstDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
@@ -147,7 +148,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task IdentifyOrRegisterDeviceAsync_UsesFuzzyMatching_ForBrowserVersionUpgrade()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -155,11 +156,11 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var oldClientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var oldClientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var oldDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, oldClientInfo, null);
 
         // Act - Browser upgraded to version 121
-        var newClientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "121");
+        var newClientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "121");
         var newDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, newClientInfo, null);
 
         // Assert - Should fuzzy match to same device
@@ -169,7 +170,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task IdentifyOrRegisterDeviceAsync_CreatesNewDevice_WhenPlatformChanges()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -177,11 +178,11 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var windowsInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var windowsInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var windowsDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, windowsInfo, null);
 
         // Act - Same browser, different platform
-        var macInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "macOS", "Desktop", "Chrome", "120");
+        var macInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.MacOs, "Desktop", "Chrome", "120");
         var macDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, macInfo, null);
 
         // Assert - Should create new device
@@ -191,7 +192,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task IdentifyOrRegisterDeviceAsync_IgnoresInactiveDevices()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -199,7 +200,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var inactiveDevice = new ClientDevice
         {
             AppUserId = user.Id,
@@ -231,7 +232,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GenerateDeviceFingerprint_GeneratesConsistentHash_ForSameInput()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -239,8 +240,8 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo1 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
-        var clientInfo2 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo1 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
+        var clientInfo2 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
 
         // Act
         var device1 = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo1, null);
@@ -254,7 +255,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GenerateDeviceFingerprint_Fallbacks_WhenBrowserChangesOneMajorVersion()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -262,8 +263,8 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var chromeInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
-        var firefoxInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Firefox", "121");
+        var chromeInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
+        var firefoxInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Firefox", "121");
 
         // Act
         var chromeDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, chromeInfo, null);
@@ -276,7 +277,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GenerateDeviceFingerprint_GeneratesDifferentHash_WhenBrowserChangesTwoMajorVersions()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -284,8 +285,8 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var chromeInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
-        var firefoxInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Firefox", "122");
+        var chromeInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
+        var firefoxInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Firefox", "122");
 
         // Act
         var chromeDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, chromeInfo, null);
@@ -297,7 +298,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GenerateDeviceFingerprint_IsCaseInsensitive()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -305,8 +306,8 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo1 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "WINDOWS", "Desktop", "Chrome", "120");
-        var clientInfo2 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "windows", "Desktop", "Chrome", "120");
+        var clientInfo1 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
+        var clientInfo2 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
 
         // Act
         var device1 = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo1, null);
@@ -320,7 +321,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GenerateDeviceFingerprint_UsesMajorVersionOnly_ForFingerprinting()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -328,8 +329,8 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo1 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
-        var clientInfo2 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120.0.6099.109");
+        var clientInfo1 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
+        var clientInfo2 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120.0.6099.109");
 
         // Act
         var device1 = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo1, null);
@@ -343,7 +344,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task IdentifyOrRegisterDeviceAsync_MatchesSameDevice_ForMinorBrowserVersionChanges()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -352,11 +353,11 @@ public class ClientDeviceServiceTests : AbstractDbTest
         await context.SaveChangesAsync();
 
         // First access with Chrome 120.1.25
-        var clientInfo1 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120.1.25");
+        var clientInfo1 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120.1.25");
         var device1 = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo1, null);
 
         // Act - Minor version update: 120.1.25 -> 120.2.0 (same major version)
-        var clientInfo2 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120.2.0");
+        var clientInfo2 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120.2.0");
         var device2 = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo2, null);
 
         // Assert - Should match same device (fuzzy matching allows minor version changes)
@@ -370,7 +371,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task FuzzyMatching_Matches_WithHighSimilarity()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -379,11 +380,11 @@ public class ClientDeviceServiceTests : AbstractDbTest
         await context.SaveChangesAsync();
 
         // Register with Chrome 120
-        var oldInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var oldInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var oldDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, oldInfo, null);
 
         // Act - Browser updated to 121 (within 1 major version tolerance)
-        var newInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "121");
+        var newInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "121");
         var newDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, newInfo, null);
 
         // Assert
@@ -393,7 +394,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task FuzzyMatching_DoesNotMatch_WithLowSimilarity()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -402,11 +403,11 @@ public class ClientDeviceServiceTests : AbstractDbTest
         await context.SaveChangesAsync();
 
         // Register Chrome on Windows Desktop
-        var chromeInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var chromeInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var chromeDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, chromeInfo, null);
 
         // Act - Completely different: Firefox on Linux Mobile
-        var firefoxInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Linux", "Mobile", "Firefox", "121");
+        var firefoxInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Linux, "Mobile", "Firefox", "121");
         var firefoxDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, firefoxInfo, null);
 
         // Assert - Should create new device
@@ -416,7 +417,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task FuzzyMatching_OnlyConsidersRecentDevices_Within30Days()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -424,7 +425,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var oldDevice = new ClientDevice
         {
             AppUserId = user.Id,
@@ -441,7 +442,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         await context.SaveChangesAsync();
 
         // Act - Similar device but with minor version change
-        var newInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "121");
+        var newInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "121");
         var newDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, newInfo, null);
 
         // Assert - Should create new device since old one is outside 30-day window
@@ -455,7 +456,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task UpdateDeviceActivity_UpdatesLastSeenUtc()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -463,7 +464,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var device = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, "device-123");
         var originalLastSeen = device.LastSeenUtc;
 
@@ -479,7 +480,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task UpdateDeviceActivity_AddsHistoryRecord_WhenMeaningfulChanges()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -487,12 +488,12 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var oldInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var oldInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         var device = await service.IdentifyOrRegisterDeviceAsync(user.Id, oldInfo, "device-123");
         var initialHistoryCount = device.History.Count;
 
         // Act - Meaningful change: browser version upgrade
-        var newInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "121");
+        var newInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "121");
         var updatedDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, newInfo, "device-123");
 
         // Assert
@@ -505,7 +506,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task UpdateDeviceActivity_DoesNotAddHistory_ForNonMeaningfulChanges()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -513,13 +514,13 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo1 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo1 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         clientInfo1.IpAddress = "192.168.1.1";
         var device = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo1, "device-123");
         var initialHistoryCount = device.History.Count;
 
         // Act - Non-meaningful change: just IP address
-        var clientInfo2 = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo2 = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
         clientInfo2.IpAddress = "192.168.1.2"; // Only IP changed
         var updatedDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo2, "device-123");
 
@@ -537,7 +538,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GenerateFriendlyName_IncludesBrowserAndPlatform()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -545,7 +546,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo(ClientDeviceTypeNames.WebBrowser, "Windows", "Desktop", "Chrome", "120");
+        var clientInfo = CreateClientInfo(ClientDeviceType.WebBrowser, ClientDevicePlatform.Windows, "Desktop", "Chrome", "120");
 
         // Act
         var device = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
@@ -557,7 +558,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GenerateFriendlyName_UsesClientType_WhenNotWebBrowser()
     {
-        // Arrange
+        // TODO: Remove these tests
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -565,7 +566,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo("KOReader", "Linux", "E-Reader", null, null);
+        var clientInfo = CreateClientInfo(ClientDeviceType.KoReader, ClientDevicePlatform.Linux, "E-Reader", null, null);
 
         // Act
         var device = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
@@ -577,7 +578,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GenerateFriendlyName_HandlesNoPlatform()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -585,7 +586,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        var clientInfo = CreateClientInfo("OPDS Client", null, null, null, null);
+        var clientInfo = CreateClientInfo(ClientDeviceType.OpdsClient, ClientDevicePlatform.Unknown, null, null, null);
 
         // Act
         var device = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
@@ -601,7 +602,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GetUserDevicesAsync_ReturnsOnlyActiveDevices_ByDefault()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -625,7 +626,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task GetUserDevicesAsync_ReturnsAllDevices_WhenIncludeInactiveTrue()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -648,7 +649,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task RenameDeviceAsync_UpdatesDeviceName()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -672,7 +673,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task RenameDeviceAsync_ReturnsFalse_WhenDeviceNotFound()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -690,7 +691,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task RemoveDeviceAsync_MarksDeviceAsInactive()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -714,7 +715,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
     [Fact]
     public async Task RemoveDeviceAsync_ReturnsFalse_WhenDeviceNotFound()
     {
-        // Arrange
+
         var (_, context, mapper) = await CreateDatabase();
         var service = new ClientDeviceService(context, mapper, _logger);
 
@@ -734,8 +735,8 @@ public class ClientDeviceServiceTests : AbstractDbTest
     #region Helper Methods
 
     private static ClientInfoData CreateClientInfo(
-        string clientType,
-        string? platform,
+        ClientDeviceType clientType,
+        ClientDevicePlatform platform,
         string? deviceType,
         string? browser,
         string? browserVersion)
@@ -764,8 +765,8 @@ public class ClientDeviceServiceTests : AbstractDbTest
             FriendlyName = "Test Device",
             CurrentClientInfo = new ClientInfoData
             {
-                ClientType = ClientDeviceTypeNames.WebBrowser,
-                Platform = ClientDevicePlatformNames.Windows,
+                ClientType = ClientDeviceType.WebBrowser,
+                Platform = ClientDevicePlatform.Windows,
                 UserAgent = "Test",
                 IpAddress = "127.0.0.1",
                 CapturedAt = DateTime.UtcNow

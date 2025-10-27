@@ -134,7 +134,7 @@ public class QueryableExtensionsTests
     public void RestrictAgainstAgeRestriction_Person_ShouldRestrictEverythingAboveTeen(bool includeUnknowns,
         int expectedPeopleCount)
     {
-        // Arrange
+
         var items = new List<Person>
         {
             CreatePersonWithSeriesMetadata("Test1", AgeRating.Teen),

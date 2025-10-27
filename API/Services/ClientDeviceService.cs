@@ -9,6 +9,7 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Progress;
 using API.Entities;
+using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Entities.User;
 using API.Extensions.QueryExtensions;
@@ -204,13 +205,13 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     {
         var components = new List<string>
         {
-            clientInfo.ClientType.ToLowerInvariant(),
-            clientInfo.Platform?.ToLowerInvariant() ?? string.Empty,
+            clientInfo.ClientType.ToString(),
+            clientInfo.Platform.ToString(),
             clientInfo.DeviceType?.ToLowerInvariant() ?? string.Empty
         };
 
         // For web browsers, include browser + major version only
-        if (clientInfo.ClientType == ClientDeviceTypeNames.WebBrowser && !string.IsNullOrEmpty(clientInfo.Browser))
+        if (clientInfo.ClientType == ClientDeviceType.WebBrowser && !string.IsNullOrEmpty(clientInfo.Browser))
         {
             components.Add(clientInfo.Browser.ToLowerInvariant());
 
@@ -277,13 +278,13 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         var totalChecks = 0;
 
         // Core attributes (weighted heavily)
-        if (CompareStrings(existing.ClientType, current.ClientType))
+        if (existing.ClientType == current.ClientType)
         {
             matchCount += 3;
         }
         totalChecks += 3;
 
-        if (CompareStrings(existing.Platform, current.Platform))
+        if (existing.Platform == current.Platform)
         {
             matchCount += 3;
         }
@@ -373,29 +374,31 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     /// </summary>
     private static string GenerateFriendlyName(ClientInfoData clientInfo)
     {
-        var parts = new List<string>();
-
-        if (!string.IsNullOrEmpty(clientInfo.Browser))
-        {
-            parts.Add(clientInfo.Browser);
-        }
-        else if (!string.IsNullOrEmpty(clientInfo.ClientType) &&
-                 clientInfo.ClientType != ClientDeviceTypeNames.WebBrowser)
-        {
-            parts.Add(clientInfo.ClientType);
-        }
-        else
-        {
-            parts.Add("Unknown Client");
-        }
-
-        if (!string.IsNullOrEmpty(clientInfo.Platform))
-        {
-            parts.Add("on");
-            parts.Add(clientInfo.Platform);
-        }
-
-        return string.Join(" ", parts);
+        // TODO: Because of localization, it might make sense to just have this empty and derive it when empty,
+        return string.Empty;
+        // var parts = new List<string>();
+        //
+        // if (!string.IsNullOrEmpty(clientInfo.Browser))
+        // {
+        //     parts.Add(clientInfo.Browser);
+        // }
+        // else if (clientInfo.ClientType != ClientDeviceType.Unknown &&
+        //          clientInfo.ClientType != ClientDeviceType.WebBrowser)
+        // {
+        //     parts.Add(clientInfo.ClientType);
+        // }
+        // else
+        // {
+        //     parts.Add("Unknown Client");
+        // }
+        //
+        // if (!string.IsNullOrEmpty(clientInfo.Platform))
+        // {
+        //     parts.Add("on");
+        //     parts.Add(clientInfo.Platform);
+        // }
+        //
+        // return string.Join(" ", parts);
     }
 
     /// <summary>

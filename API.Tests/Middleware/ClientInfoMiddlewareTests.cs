@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Middleware;
 using API.Services.Reading;
@@ -29,7 +30,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task InvokeAsync_SetsClientInfo_AndCallsNextMiddleware()
     {
-        // Arrange
+
         var nextCalled = false;
         Task Next(HttpContext ctx)
         {
@@ -50,7 +51,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task InvokeAsync_SetsClientInfoAccessor_WithExtractedClientInfo()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -78,7 +79,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task InvokeAsync_SetsClientDeviceId_FromHeader()
     {
-        // Arrange
+
         string? capturedUiFingerprint = null;
         var accessor = new ClientInfoAccessor();
 
@@ -102,7 +103,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task InvokeAsync_HandlesEmptyDeviceId()
     {
-        // Arrange
+
         string? capturedUiFingerprint = null;
         var accessor = new ClientInfoAccessor();
 
@@ -130,7 +131,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_ParsesKavitaClientHeader_WhenPresent()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -153,11 +154,11 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal(ClientDeviceTypeNames.WebApp, capturedClientInfo.ClientType);
+        Assert.Equal(ClientDeviceType.WebApp, capturedClientInfo.ClientType);
         Assert.Equal("1.2.3", capturedClientInfo.AppVersion);
         Assert.Equal("Chrome", capturedClientInfo.Browser);
         Assert.Equal("120.0", capturedClientInfo.BrowserVersion);
-        Assert.Equal(ClientDevicePlatformNames.Windows, capturedClientInfo.Platform);
+        Assert.Equal(ClientDevicePlatform.Windows, capturedClientInfo.Platform);
         Assert.Equal("Desktop", capturedClientInfo.DeviceType);
         Assert.Equal(1920, capturedClientInfo.ScreenWidth);
         Assert.Equal(1080, capturedClientInfo.ScreenHeight);
@@ -169,7 +170,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_ParsesKavitaClientHeader_WithoutOrientation()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -189,11 +190,11 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal(ClientDeviceTypeNames.WebApp, capturedClientInfo.ClientType);
+        Assert.Equal(ClientDeviceType.WebApp, capturedClientInfo.ClientType);
         Assert.Equal("2.0.0", capturedClientInfo.AppVersion);
         Assert.Equal("Firefox", capturedClientInfo.Browser);
         Assert.Equal("121.0", capturedClientInfo.BrowserVersion);
-        Assert.Equal(ClientDevicePlatformNames.MacOs, capturedClientInfo.Platform);
+        Assert.Equal(ClientDevicePlatform.MacOs, capturedClientInfo.Platform);
         Assert.Equal("Mobile", capturedClientInfo.DeviceType);
         Assert.Equal(375, capturedClientInfo.ScreenWidth);
         Assert.Equal(667, capturedClientInfo.ScreenHeight);
@@ -203,7 +204,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_FallsBackToUserAgent_WhenKavitaHeaderInvalid()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -226,14 +227,14 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal(ClientDeviceTypeNames.WebApp, capturedClientInfo.ClientType); // Default from fallback
+        Assert.Equal(ClientDeviceType.WebApp, capturedClientInfo.ClientType); // Default from fallback
         Assert.Equal("Mozilla/5.0 (Linux; Android 13) Chrome/120.0", capturedClientInfo.UserAgent);
     }
 
     [Fact]
     public async Task ExtractClientInfo_FallsBackToUserAgent_WhenKavitaHeaderMissing()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -255,8 +256,8 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal(ClientDeviceTypeNames.KOReader, capturedClientInfo.ClientType); // Detected from UA
-        Assert.Equal(ClientDevicePlatformNames.Android, capturedClientInfo.Platform); // Detected from UA
+        Assert.Equal(ClientDeviceType.KoReader, capturedClientInfo.ClientType); // Detected from UA
+        Assert.Equal(ClientDevicePlatform.Android, capturedClientInfo.Platform); // Detected from UA
         Assert.Equal(AuthenticationType.OIDC, capturedClientInfo.AuthType);
     }
 
@@ -267,7 +268,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_ExtractsIPFromXForwardedFor_WhenPresent()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -293,7 +294,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_ExtractsIPFromXRealIP_WhenXForwardedForMissing()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -319,7 +320,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_FallsBackToRemoteIpAddress_WhenNoProxyHeaders()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -344,7 +345,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_ReturnsUnknown_WhenNoIpAddressAvailable()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -369,7 +370,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_TrimsWhitespaceFromXForwardedFor()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -398,7 +399,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_SetsCapturedAtToCurrentUtcTime()
     {
-        // Arrange
+
         var before = DateTime.UtcNow;
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
@@ -428,7 +429,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_HandlesEmptyUserAgent()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
@@ -451,7 +452,7 @@ public class ClientInfoMiddlewareTests
     [Fact]
     public async Task ExtractClientInfo_ParsesKavitaHeader_WithNumericValuesInScreenResolution()
     {
-        // Arrange
+
         ClientInfoData? capturedClientInfo = null;
         var accessor = new ClientInfoAccessor();
 
