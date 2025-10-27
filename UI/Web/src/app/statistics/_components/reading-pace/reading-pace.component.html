@@ -1,0 +1,168 @@
+<div class="reading-pace-container">
+  <div class="reading-pace-header">
+    <h6 class="text-muted mb-1">Reading Pace</h6>
+    <h4 class="mb-0">{{ userName() }} reads a book every {{ paceInDays() }} Days</h4>
+  </div>
+
+  <!-- Hours Row -->
+  <div class="stats-row">
+    <div class="stat-icon">
+      <i class="fas fa-headphones"></i>
+    </div>
+    <div class="stat-item stat-primary">
+      <div class="stat-value">{{ stats().hoursRead.toLocaleString() }}</div>
+      <div class="stat-label">Hours Read</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ hoursPerYear() }}</div>
+      <div class="stat-label">PER YEAR</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ hoursPerMonth() }}</div>
+      <div class="stat-label">PER MONTH</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ hoursPerDay() }}</div>
+      <div class="stat-label">PER DAY</div>
+    </div>
+  </div>
+
+  <!-- Pages/Comics Row -->
+  <div class="stats-row">
+    <div class="stat-icon">
+      <i class="fas fa-book-open"></i>
+    </div>
+    <div class="stat-item stat-primary">
+      <div class="stat-value">{{ stats().pagesRead.toLocaleString() }}</div>
+      <div class="stat-label">Pages Read</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ pagesPerYear() }}</div>
+      <div class="stat-label">PER YEAR</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ pagesPerMonth() }}</div>
+      <div class="stat-label">PER MONTH</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ pagesPerDay() }}</div>
+      <div class="stat-label">PER DAY</div>
+    </div>
+  </div>
+
+  <!-- Words/Books Row -->
+  <div class="stats-row">
+    <div class="stat-icon">
+      <i class="fas fa-book"></i>
+    </div>
+    <div class="stat-item stat-primary">
+      <div class="stat-value">{{ stats().wordsRead.toLocaleString() }}</div>
+      <div class="stat-label">Words Read</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ wordsPerYear() }}</div>
+      <div class="stat-label">PER YEAR</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ wordsPerMonth() }}</div>
+      <div class="stat-label">PER MONTH</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ wordsPerDay() }}</div>
+      <div class="stat-label">PER DAY</div>
+    </div>
+  </div>
+
+  <!-- Comics Row (if applicable) -->
+  @if (stats().comicsRead > 0) {
+    <div class="stats-row">
+      <div class="stat-icon">
+        <i class="fas fa-book-open"></i>
+      </div>
+      <div class="stat-item stat-primary">
+        <div class="stat-value">{{ stats().comicsRead.toLocaleString() }}</div>
+        <div class="stat-label">Comics Read</div>
+      </div>
+      <div class="stat-arrow">
+        <i class="fas fa-arrow-right"></i>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ comicsPerYear() }}</div>
+        <div class="stat-label">PER YEAR</div>
+      </div>
+      <div class="stat-arrow">
+        <i class="fas fa-arrow-right"></i>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ comicsPerMonth() }}</div>
+        <div class="stat-label">PER MONTH</div>
+      </div>
+      <div class="stat-arrow">
+        <i class="fas fa-arrow-right"></i>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ comicsPerDay() }}</div>
+        <div class="stat-label">PER DAY</div>
+      </div>
+    </div>
+  }
+
+  <!-- Books Row -->
+  <div class="stats-row">
+    <div class="stat-icon">
+      <i class="fas fa-book"></i>
+    </div>
+    <div class="stat-item stat-primary">
+      <div class="stat-value">{{ stats().booksRead }}</div>
+      <div class="stat-label">Books Read</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ booksPerYear() }}</div>
+      <div class="stat-label">PER YEAR</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ booksPerMonth() }}</div>
+      <div class="stat-label">PER MONTH</div>
+    </div>
+    <div class="stat-arrow">
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ booksPerDay() }}</div>
+      <div class="stat-label">PER DAY</div>
+    </div>
+  </div>
+</div>

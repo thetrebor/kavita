@@ -42,6 +42,7 @@ export class ClientDeviceCardComponent {
   });
 
   clientTypeBadgeClass = computed(() => {
+    // TODO: this should be either primary for a Kavita-owned device, otherwise info
     const clientType = this.clientDevice().currentClientInfo.clientType.toLowerCase();
     if (clientType.includes('web')) return 'badge bg-primary';
     if (clientType.includes('opds') || clientType.includes('koreader')) return 'badge bg-info';
@@ -50,6 +51,7 @@ export class ClientDeviceCardComponent {
   });
 
   authTypeLabel = computed(() => {
+    // TODO: Make this a pipe
     const authType = this.clientDevice().currentClientInfo.authType;
     switch (authType) {
       case AuthenticationType.ApiKey: return 'API Key';

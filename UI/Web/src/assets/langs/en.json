@@ -2126,7 +2126,8 @@
         "person-aka-status": "Matches an alias",
         "browse-genres": "Browse Genres",
         "browse-tags": "Browse Tags",
-        "all-annotations": "Browse Annotations"
+        "all-annotations": "Browse Annotations",
+        "my-profile": "My Profile"
     },
 
     "promoted-icon": {

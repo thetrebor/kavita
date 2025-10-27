@@ -16,7 +16,7 @@ import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AsyncPipe} from "@angular/common";
 import {ActivityService} from "../../_services/activity.service";
 import {ClientDevice} from "../../_models/client-device";
-import {ClientDeviceCardComponent} from "../../_single-modules/client-device-card/client-device-card.component";
+import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
 
 @Component({
     selector: 'app-manage-devices',

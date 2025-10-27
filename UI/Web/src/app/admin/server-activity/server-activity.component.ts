@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, model, OnInit} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ActivityCardComponent} from "../../_single-modules/activity-card/activity-card.component";
+import {ActivityCardComponent} from "../../_single-module/activity-card/activity-card.component";
 import {ActivityService} from "../../_services/activity.service";
 import {ReadingSession} from "../../_models/progress/reading-session";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";

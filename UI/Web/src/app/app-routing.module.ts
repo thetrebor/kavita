@@ -54,6 +54,10 @@ const routes: Routes = [
         loadChildren: () => import('./_routes/browse-routing.module').then(m => m.routes)
       },
       {
+        path: 'profile',
+        loadChildren: () => import('./_routes/profile-routing.module').then(m => m.routes)
+      },
+      {
         path: 'library',
         runGuardsAndResolvers: 'always',
         canActivate: [AuthGuard, LibraryAccessGuard],
