@@ -79,36 +79,36 @@ public class ClientInfoMiddlewareTests
     public async Task InvokeAsync_SetsClientDeviceId_FromHeader()
     {
         // Arrange
-        string? capturedDeviceId = null;
+        string? capturedUiFingerprint = null;
         var accessor = new ClientInfoAccessor();
 
         Task Next(HttpContext ctx)
         {
-            capturedDeviceId = accessor.CurrentClientDeviceId;
+            capturedUiFingerprint = accessor.CurrentUiFingerprint;
             return Task.CompletedTask;
         }
 
         var middleware = new ClientInfoMiddleware(Next, _logger);
         var context = CreateHttpContext();
-        context.Request.Headers[Headers.DeviceId] = "device-123";
+        context.Request.Headers[Headers.ClientDeviceFingerprint] = "device-123";
 
         // Act
         await middleware.InvokeAsync(context, _userContext);
 
         // Assert
-        Assert.Equal("device-123", capturedDeviceId);
+        Assert.Equal("device-123", capturedUiFingerprint);
     }
 
     [Fact]
     public async Task InvokeAsync_HandlesEmptyDeviceId()
     {
         // Arrange
-        string? capturedDeviceId = null;
+        string? capturedUiFingerprint = null;
         var accessor = new ClientInfoAccessor();
 
         Task Next(HttpContext ctx)
         {
-            capturedDeviceId = accessor.CurrentClientDeviceId;
+            capturedUiFingerprint = accessor.CurrentUiFingerprint;
             return Task.CompletedTask;
         }
 
@@ -120,7 +120,7 @@ public class ClientInfoMiddlewareTests
         await middleware.InvokeAsync(context, _userContext);
 
         // Assert - should not throw
-        Assert.True(string.IsNullOrEmpty(capturedDeviceId));
+        Assert.True(string.IsNullOrEmpty(capturedUiFingerprint));
     }
 
     #endregion

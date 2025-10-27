@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Constants;
 using API.Entities.Progress;
 
 namespace API.Entities.User;
@@ -8,23 +9,22 @@ namespace API.Entities.User;
 public class ClientDevice
 {
     public int Id { get; set; }
-    public int AppUserId { get; set; }
-
     /// <summary>
-    /// Client-provided device identifier (from X-Device-Id header)
+    /// Client-provided device identifier (from <see cref="Headers.ClientDeviceFingerprint"/> header)
     /// Null for clients that don't send it (OPDS readers, etc.)
     /// </summary>
-    public string? ClientDeviceId { get; set; }
+    public string? UiFingerprint { get; set; }
 
     /// <summary>
     /// Server-computed fingerprint for device matching
-    /// Hash of: ClientType + Platform + DeviceType + (Browser+BrowserVersion for web)
+    /// Hash of: ClientType + Platform + DeviceType + (Browser+BrowserVersion for web-app)
     /// </summary>
     public string DeviceFingerprint { get; set; } = string.Empty;
 
     /// <summary>
     /// User-friendly name, defaults to generated name like "Chrome on Windows"
     /// </summary>
+    /// <remarks>Generated on first seen, user can customize after the fact</remarks>
     public string FriendlyName { get; set; } = string.Empty;
 
     /// <summary>
@@ -40,12 +40,8 @@ public class ClientDevice
     /// </summary>
     public bool IsActive { get; set; } = true;
 
-    /// <summary>
-    /// For future: bind reading profile to device
-    /// </summary>
-    //public int? ReadingProfileId { get; set; }
-
     // Navigation properties
+    public int AppUserId { get; set; }
     public virtual AppUser AppUser { get; set; } = null!;
     public ICollection<ClientDeviceHistory> History { get; set; } = [];
 }

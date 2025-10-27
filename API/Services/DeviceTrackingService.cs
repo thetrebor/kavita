@@ -13,7 +13,7 @@ namespace API.Services;
 
 public interface IDeviceTrackingService
 {
-    Task<int> TrackDeviceAsync(int userId, ClientInfoData clientInfo, string? clientDeviceId, CancellationToken ct);
+    Task<int> TrackDeviceAsync(int userId, ClientInfoData clientInfo, string? uiFingerprint, CancellationToken ct);
     Task ClearDeviceCacheAsync(int deviceId);
     Task ClearUserDeviceCachesAsync(int userId);
 }
@@ -28,20 +28,20 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
     };
 
 
-    public async Task<int> TrackDeviceAsync(int userId, ClientInfoData clientInfo, string? clientDeviceId, CancellationToken ct)
+    public async Task<int> TrackDeviceAsync(int userId, ClientInfoData clientInfo, string? uiFingerprint, CancellationToken ct)
     {
-        var deviceIdPart = string.IsNullOrEmpty(clientDeviceId) ? "unknown" : clientDeviceId;
+        var deviceIdPart = string.IsNullOrEmpty(uiFingerprint) ? "unknown" : uiFingerprint;
         var cacheKey = $"device_tracking_{userId}_{deviceIdPart}";
 
         var deviceId = await cache.GetOrCreateAsync(
             cacheKey,
-            (userId, clientInfo, clientDeviceId, clientDeviceService),
+            (userId, clientInfo, uiFingerprint, clientDeviceService),
             async (state, cancel) =>
             {
                 var device = await state.clientDeviceService.IdentifyOrRegisterDeviceAsync(
                     state.userId,
                     state.clientInfo,
-                    state.clientDeviceId,
+                    state.uiFingerprint,
                     cancel);
                 return device.Id;
             },

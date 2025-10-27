@@ -1,5 +1,6 @@
 ﻿using System;
 using API.Constants;
+using API.Entities.Enums;
 
 namespace API.Entities.Progress;
 #nullable enable
@@ -25,7 +26,7 @@ public class ClientInfoData
     /// Parsed client type from User-Agent or custom Kavita header
     /// Examples: Web App, OPDS Reader, KOReader, Tachiyomi, etc.
     /// </summary>
-    public string ClientType { get; set; } = ClientDeviceTypeNames.Unknown;
+    public ClientDeviceType ClientType { get; set; } = ClientDeviceType.Unknown;
 
     /// <summary>
     /// Application version (from web app or mobile app)
@@ -45,7 +46,7 @@ public class ClientInfoData
     /// <summary>
     /// Platform/OS (Windows, macOS, Linux, iOS, Android)
     /// </summary>
-    public string? Platform { get; set; }
+    public ClientDevicePlatform Platform { get; set; } = ClientDevicePlatform.Unknown;
 
     /// <summary>
     /// Device type (Desktop, Mobile, Tablet)

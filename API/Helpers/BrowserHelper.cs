@@ -1,4 +1,5 @@
 ﻿using API.Constants;
+using API.Entities.Enums;
 
 namespace API.Helpers;
 
@@ -7,51 +8,64 @@ namespace API.Helpers;
 /// </summary>
 public static class BrowserHelper
 {
-    public static string DetermineClientType(string userAgent)
+    public static ClientDeviceType DetermineClientType(string userAgent, string? endpoint = null)
     {
         if (string.IsNullOrEmpty(userAgent))
         {
-            return ClientDeviceTypeNames.Unknown;
+            return ClientDeviceType.Unknown;
         }
 
         var ua = userAgent.ToLowerInvariant();
 
-        if (ua.Contains("koreader") || ua.Contains("kobo touch")) return ClientDeviceTypeNames.KOReader;
-        if (ua.Contains("panels")) return ClientDeviceTypeNames.Panels;
-
-        // OPDS clients
-        if (ua.Contains("librera")) return ClientDeviceTypeNames.Librera;
+        // ua contains "web-app" keyword, it's Kavita web app
+        if (ua.Contains("web-app")) return ClientDeviceType.WebApp;
+        if (ua.Contains("koreader") || ua.Contains("kobo touch")) return ClientDeviceType.KoReader;
+        if (ua.Contains("panels")) return ClientDeviceType.Panels;
 
         // Web browsers
         if (ua.Contains("chrome") || ua.Contains("firefox") ||
             ua.Contains("safari") || ua.Contains("edge"))
         {
-            return ClientDeviceTypeNames.WebBrowser;
+            return ClientDeviceType.WebBrowser;
         }
 
-        return ClientDeviceTypeNames.Unknown;
+        var ret = ClientDeviceType.Unknown;
+
+        // OPDS clients
+        if (ua.Contains("librera"))
+        {
+            ret = ClientDeviceType.Librera;
+        }
+
+        // If this is an opds url and it's not a custom server, then return as generic
+        if (!string.IsNullOrEmpty(endpoint) && endpoint.Contains("/opds/") && ret == ClientDeviceType.Unknown)
+        {
+            ret = ClientDeviceType.OpdsClient;
+        }
+
+        return ret;
     }
 
-    public static string DetectPlatform(string userAgent)
+    public static ClientDevicePlatform DetectPlatform(string userAgent)
     {
         if (string.IsNullOrEmpty(userAgent))
         {
-            return ClientDevicePlatformNames.Unknown;
+            return ClientDevicePlatform.Unknown;
         }
 
         var ua = userAgent.ToLowerInvariant();
 
         if (ua.Contains("windows") || ua.Contains("win32") || ua.Contains("win64"))
-            return ClientDevicePlatformNames.Windows;
+            return ClientDevicePlatform.Windows;
         if (ua.Contains("macintosh"))
-            return ClientDevicePlatformNames.MacOs;
+            return ClientDevicePlatform.MacOs;
         if (ua.Contains("linux") && !ua.Contains("android"))
-            return ClientDevicePlatformNames.Linux;
+            return ClientDevicePlatform.Linux;
         if (ua.Contains("iphone") || ua.Contains("ipad") || ua.Contains("ipod") || ua.Contains("mac os"))
-            return ClientDevicePlatformNames.IOs;
+            return ClientDevicePlatform.Ios;
         if (ua.Contains("android"))
-            return ClientDevicePlatformNames.Android;
+            return ClientDevicePlatform.Android;
 
-        return ClientDevicePlatformNames.Unknown;
+        return ClientDevicePlatform.Unknown;
     }
 }

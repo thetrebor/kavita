@@ -17,7 +17,7 @@ public interface IClientInfoAccessor
     /// Returns null if called outside an HTTP request context (e.g., background jobs).
     /// </summary>
     ClientInfoData? Current { get; }
-    string? CurrentClientDeviceId { get; }
+    string? CurrentUiFingerprint { get; }
     /// <summary>
     /// Client Device PK
     /// </summary>
@@ -32,11 +32,11 @@ public interface IClientInfoAccessor
 public class ClientInfoAccessor : IClientInfoAccessor
 {
     private static readonly AsyncLocal<ClientInfoData?> ClientInfo = new();
-    private static readonly AsyncLocal<string?> ClientDeviceId = new();
+    private static readonly AsyncLocal<string?> UiFingerprint = new();
     private static readonly AsyncLocal<int?> DeviceId = new();
 
     public ClientInfoData? Current => ClientInfo.Value;
-    public string? CurrentClientDeviceId => ClientDeviceId.Value;
+    public string? CurrentUiFingerprint => UiFingerprint.Value;
     public int? CurrentDeviceId => DeviceId.Value;
 
     /// <summary>
@@ -49,12 +49,12 @@ public class ClientInfoAccessor : IClientInfoAccessor
     }
 
     /// <summary>
-    /// Sets the client deviceId for the current async context.
+    /// Sets the client fingerprint for the current async context.
     /// Should only be called by middleware.
     /// </summary>
-    internal static void SetClientDeviceId(string clientDeviceId)
+    internal static void SetUiFingerprint(string uiFingerprint)
     {
-        ClientDeviceId.Value = clientDeviceId;
+        UiFingerprint.Value = uiFingerprint;
     }
 
     /// <summary>

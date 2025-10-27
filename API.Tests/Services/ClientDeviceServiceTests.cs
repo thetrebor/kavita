@@ -47,7 +47,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         // Assert
         Assert.NotNull(device);
         Assert.Equal(user.Id, device.AppUserId);
-        Assert.Equal("device-123", device.ClientDeviceId);
+        Assert.Equal("device-123", device.UiFingerprint);
         Assert.NotEmpty(device.DeviceFingerprint);
         Assert.Equal("Chrome on Windows", device.FriendlyName);
         Assert.True(device.IsActive);
@@ -71,7 +71,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         {
             AppUserId = user.Id,
             AppUser = user,
-            ClientDeviceId = "device-123",
+            UiFingerprint = "device-123",
             DeviceFingerprint = "some-fingerprint",
             FriendlyName = "My Device",
             CurrentClientInfo = clientInfo,
@@ -116,7 +116,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         // Assert - Should match by fingerprint alone
         Assert.Equal(firstDevice.Id, secondDevice.Id);
         Assert.Equal(fingerprint, secondDevice.DeviceFingerprint);
-        Assert.Null(secondDevice.ClientDeviceId);
+        Assert.Null(secondDevice.UiFingerprint);
     }
 
     [Fact]
@@ -134,14 +134,14 @@ public class ClientDeviceServiceTests : AbstractDbTest
 
         // First request without ClientDeviceId
         var firstDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
-        Assert.Null(firstDevice.ClientDeviceId);
+        Assert.Null(firstDevice.UiFingerprint);
 
         // Act - Second request with ClientDeviceId
         var secondDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, "device-456");
 
         // Assert
         Assert.Equal(firstDevice.Id, secondDevice.Id);
-        Assert.Equal("device-456", secondDevice.ClientDeviceId);
+        Assert.Equal("device-456", secondDevice.UiFingerprint);
     }
 
     [Fact]
@@ -204,7 +204,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         {
             AppUserId = user.Id,
             AppUser = user,
-            ClientDeviceId = "device-old",
+            UiFingerprint = "device-old",
             DeviceFingerprint = "fingerprint",
             FriendlyName = "Old Device",
             CurrentClientInfo = clientInfo,
@@ -619,7 +619,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
 
         // Assert
         Assert.Single(devices);
-        Assert.Contains(devices, d => d.ClientDeviceId == "active-device");
+        Assert.Contains(devices, d => d.UiFingerprint == "active-device");
     }
 
     [Fact]
@@ -759,7 +759,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         var device = new ClientDevice
         {
             AppUserId = userId,
-            ClientDeviceId = clientDeviceId,
+            UiFingerprint = clientDeviceId,
             DeviceFingerprint = Guid.NewGuid().ToString(),
             FriendlyName = "Test Device",
             CurrentClientInfo = new ClientInfoData

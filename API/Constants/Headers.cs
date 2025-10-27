@@ -2,7 +2,7 @@
 
 public static class Headers
 {
-    public const string DeviceId = "X-Device-Id";
+    public const string ClientDeviceFingerprint = "X-Device-Id";
     public const string KavitaClient = "X-Kavita-Client";
     public const string ForwardedFor = "X-Forwarded-For";
     public const string RealIp = "X-Real-IP";

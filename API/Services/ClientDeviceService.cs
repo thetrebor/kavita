@@ -22,7 +22,7 @@ namespace API.Services;
 
 public interface IClientDeviceService
 {
-    Task<ClientDevice> IdentifyOrRegisterDeviceAsync(int userId, ClientInfoData clientInfo, string? clientDeviceId, CancellationToken cancellationToken = default);
+    Task<ClientDevice> IdentifyOrRegisterDeviceAsync(int userId, ClientInfoData clientInfo, string? uiFingerprint, CancellationToken cancellationToken = default);
     Task<IEnumerable<ClientDevice>> GetUserDevicesAsync(int userId, bool includeInactive = false);
     Task<IEnumerable<ClientDeviceDto>> GetUserDeviceDtosAsync(int userId, bool includeInactive = false);
     Task<IEnumerable<ClientDeviceDto>> GetAllUserDeviceDtos(bool includeInactive = false);
@@ -42,23 +42,18 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     public async Task<ClientDevice> IdentifyOrRegisterDeviceAsync(
         int userId,
         ClientInfoData clientInfo,
-        string? clientDeviceId,
+        string? uiFingerprint,
         CancellationToken cancellationToken = default)
     {
-        // STEP 1: Try exact match on ClientDeviceId (if provided)
-        if (!string.IsNullOrEmpty(clientDeviceId))
+        // STEP 1: Try exact match on UI Fingerprint (if provided)
+        if (!string.IsNullOrEmpty(uiFingerprint))
         {
-            var deviceByClientId = await context.ClientDevice
-                .Include(d => d.History.OrderByDescending(h => h.CapturedAtUtc).Take(1))
-                .FirstOrDefaultAsync(d =>
-                    d.AppUserId == userId &&
-                    d.ClientDeviceId == clientDeviceId &&
-                    d.IsActive, cancellationToken: cancellationToken);
+            var device = await GetClientDeviceByClientFingerprint(userId, uiFingerprint, cancellationToken);
 
-            if (deviceByClientId != null)
+            if (device != null)
             {
-                await UpdateDeviceActivityAsync(deviceByClientId, clientInfo);
-                return deviceByClientId;
+                await UpdateDeviceActivityAsync(device, clientInfo);
+                return device;
             }
         }
 
@@ -75,10 +70,10 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         if (deviceByFingerprint != null)
         {
             // If client now provides DeviceId, update the record
-            if (!string.IsNullOrEmpty(clientDeviceId) &&
-                string.IsNullOrEmpty(deviceByFingerprint.ClientDeviceId))
+            if (!string.IsNullOrEmpty(uiFingerprint) &&
+                string.IsNullOrEmpty(deviceByFingerprint.UiFingerprint))
             {
-                deviceByFingerprint.ClientDeviceId = clientDeviceId;
+                deviceByFingerprint.UiFingerprint = uiFingerprint;
             }
 
             await UpdateDeviceActivityAsync(deviceByFingerprint, clientInfo);
@@ -91,9 +86,9 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         {
             logger.LogDebug("Fuzzy matched device {DeviceId} for user {UserId}", fuzzyMatch.Id, userId);
 
-            if (!string.IsNullOrEmpty(clientDeviceId))
+            if (!string.IsNullOrEmpty(uiFingerprint))
             {
-                fuzzyMatch.ClientDeviceId = clientDeviceId;
+                fuzzyMatch.UiFingerprint = uiFingerprint;
             }
 
             await UpdateDeviceActivityAsync(fuzzyMatch, clientInfo);
@@ -101,7 +96,17 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         }
 
         // STEP 4: Register new device
-        return await RegisterNewDeviceAsync(userId, clientInfo, clientDeviceId, fingerprint);
+        return await RegisterNewDeviceAsync(userId, clientInfo, uiFingerprint, fingerprint);
+    }
+
+    private async Task<ClientDevice?> GetClientDeviceByClientFingerprint(int userId, string uiFingerprint, CancellationToken cancellationToken)
+    {
+        return await context.ClientDevice
+            .Include(d => d.History.OrderByDescending(h => h.CapturedAtUtc).Take(1))
+            .FirstOrDefaultAsync(d =>
+                d.AppUserId == userId &&
+                d.UiFingerprint == uiFingerprint &&
+                d.IsActive, cancellationToken: cancellationToken);
     }
 
     public async Task<IEnumerable<ClientDevice>> GetUserDevicesAsync(int userId, bool includeInactive = false)
@@ -335,7 +340,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         var newDevice = new ClientDevice
         {
             AppUserId = userId,
-            ClientDeviceId = clientDeviceId,
+            UiFingerprint = clientDeviceId,
             DeviceFingerprint = fingerprint,
             FriendlyName = friendlyName,
             CurrentClientInfo = clientInfo,
@@ -402,7 +407,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
 
         if (HasMeaningfulChanges(device.CurrentClientInfo, newClientInfo))
         {
-            device.CurrentClientInfo = newClientInfo;
+            device.CurrentClientInfo = newClientInfo ?? device.CurrentClientInfo;
             device.History.Add(new ClientDeviceHistory
             {
                 ClientInfo = newClientInfo,

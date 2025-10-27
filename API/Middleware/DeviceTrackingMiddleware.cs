@@ -38,14 +38,14 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
 
             var userId = userContext.GetUserId();
             var clientInfo = clientInfoAccessor.Current;
-            var clientDeviceId = clientInfoAccessor.CurrentClientDeviceId; // string from webapp header
+            var clientUiFingerprint = clientInfoAccessor.CurrentUiFingerprint; // string from webapp header
 
             if (userId.HasValue && clientInfo != null)
             {
                 var deviceId = await deviceTrackingService.TrackDeviceAsync(
                     userId.Value,
                     clientInfo,
-                    clientDeviceId,
+                    clientUiFingerprint,
                     context.RequestAborted);
 
                 ClientInfoAccessor.SetDeviceId(deviceId);

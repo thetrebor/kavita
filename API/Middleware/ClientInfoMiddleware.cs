@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Helpers;
 using API.Services.Reading;
@@ -19,17 +20,13 @@ namespace API.Middleware;
 /// </summary>
 public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientInfoMiddleware> logger)
 {
-    /// <summary>
-    /// Web App name (will be localized for UI)
-    /// </summary>
-    private const string WebAppName = "web-app";
     public async Task InvokeAsync(HttpContext context, IUserContext userContext)
     {
         var clientInfo = ExtractClientInfo(context, userContext);
-        var clientDeviceId = context.Request.Headers[Headers.DeviceId].ToString();
+        var clientFingerprint = context.Request.Headers[Headers.ClientDeviceFingerprint].ToString();
 
         ClientInfoAccessor.SetClientInfo(clientInfo);
-        ClientInfoAccessor.SetClientDeviceId(clientDeviceId);
+        ClientInfoAccessor.SetUiFingerprint(clientFingerprint);
 
         await next(context);
     }
@@ -77,11 +74,11 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             {
                 return new ClientInfoData
                 {
-                    ClientType = ClientDeviceTypeNames.WebApp,
+                    ClientType = ClientDeviceType.WebApp,
                     AppVersion = match.Groups[1].Value,
                     Browser = match.Groups[2].Value,
                     BrowserVersion = match.Groups[3].Value,
-                    Platform = match.Groups[4].Value,
+                    Platform = BrowserHelper.DetectPlatform(match.Groups[4].Value), // Use the UA code as it is just contains
                     DeviceType = match.Groups[5].Value,
                     ScreenWidth = int.Parse(match.Groups[6].Value),
                     ScreenHeight = int.Parse(match.Groups[7].Value),
@@ -101,7 +98,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         return new ClientInfoData
         {
             UserAgent = fallbackUa,
-            ClientType = ClientDeviceTypeNames.WebApp
+            ClientType = ClientDeviceType.WebApp
         };
     }
 
@@ -124,7 +121,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         }
 
         // Fallback to direct connection IP
-        return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+        return context.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
     }
 
 

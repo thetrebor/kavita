@@ -559,7 +559,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         {
             Id = deviceId,
             AppUserId = userId,
-            ClientDeviceId = $"device-{deviceId}",
+            UiFingerprint = $"device-{deviceId}",
             DeviceFingerprint = Guid.NewGuid().ToString(),
             FriendlyName = "Test Device",
             CurrentClientInfo = new ClientInfoData
