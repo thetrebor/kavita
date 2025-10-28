@@ -452,4 +452,11 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         if (string.IsNullOrEmpty(version)) return string.Empty;
         return version.Split('.')[0];
     }
+
+    public static string GetCacheKey(int userId, string? uiFingerprint, ClientInfoData clientInfo)
+    {
+        var deviceIdPart = string.IsNullOrEmpty(uiFingerprint) ? clientInfo.Browser : uiFingerprint;
+        return $"device_tracking_{userId}_{deviceIdPart}";
+    }
+
 }

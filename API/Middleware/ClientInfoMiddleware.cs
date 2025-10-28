@@ -50,8 +50,6 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             return parsed;
         }
 
-        // TODO: I need to handle OPDS Clients differently as it's confusing on the UI
-
         // Fallback to basic UA parsing
         return new ClientInfoData
         {

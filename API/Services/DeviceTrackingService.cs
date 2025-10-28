@@ -30,8 +30,7 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
 
     public async Task<int> TrackDeviceAsync(int userId, ClientInfoData clientInfo, string? uiFingerprint, CancellationToken ct)
     {
-        var deviceIdPart = string.IsNullOrEmpty(uiFingerprint) ? "unknown" : uiFingerprint;
-        var cacheKey = $"device_tracking_{userId}_{deviceIdPart}";
+        var cacheKey = ClientDeviceService.GetCacheKey(userId, uiFingerprint, clientInfo);
 
         var deviceId = await cache.GetOrCreateAsync(
             cacheKey,
@@ -49,7 +48,7 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
             cancellationToken: ct);
 
         // Store reverse mapping: deviceId (int) -> cacheKey (string)
-        var mappingKey = $"device_key_mapping_{deviceId}";
+        var mappingKey = GetDeviceCacheKey(deviceId);
         await cache.SetAsync(mappingKey, cacheKey, CacheOptions, cancellationToken: ct);
 
         return deviceId;
@@ -57,7 +56,7 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
 
     public async Task ClearDeviceCacheAsync(int deviceId)
     {
-        var mappingKey = $"device_key_mapping_{deviceId}";
+        var mappingKey = GetDeviceCacheKey(deviceId);
 
         try
         {
@@ -98,5 +97,10 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
             await ClearDeviceCacheAsync(deviceId);
         }
         logger.LogWarning("ClearUserDeviceCachesAsync not fully implemented - requires DB query");
+    }
+
+    private static string GetDeviceCacheKey(int deviceId)
+    {
+        return $"device_key_mapping_{deviceId}";
     }
 }
