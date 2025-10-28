@@ -6,8 +6,8 @@ import {ClientInfo} from "../_services/client-info.service";
 export interface ClientDevice {
   friendlyName: string;
   currentClientInfo: ClientInfo;
-  firstSeenUtc: Date;
-  lastSeenUtc: Date;
+  firstSeenUtc: string;
+  lastSeenUtc: string;
   ownerUsername: string;
   ownerUserId: number;
 }

@@ -90,7 +90,7 @@ export class ClientInfoService {
   }
 
   private generateDeviceId(): string {
-    // Generate UUID v4 (RFC 4122 compliant)
+    // Generate UUID v4
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = Math.random() * 16 | 0;
       const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -113,8 +113,8 @@ export class ClientInfoService {
     return {
       browser: this.detectBrowser(ua),
       browserVersion: this.detectBrowserVersion(ua),
-      platform: this.detectPlatform(ua),
-      deviceType: this.detectDeviceType(ua),
+      platform: ClientDevicePlatform.Unknown,
+      deviceType: this.detectDeviceType(ua), // Not Needed
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
       orientation: this.getOrientation(),
@@ -133,7 +133,7 @@ export class ClientInfoService {
 
   private detectBrowserVersion(ua: string) {
     let match: RegExpMatchArray | null = null;
-
+    // TODO: Move to the backend
     if (ua.includes('Edg/')) {
       match = ua.match(/Edg\/(\d+\.\d+)/);
     } else if (ua.includes('Chrome/')) {

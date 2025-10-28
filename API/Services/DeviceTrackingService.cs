@@ -62,7 +62,7 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
         {
             var cacheKey = await cache.GetOrCreateAsync<string?>(
                 mappingKey,
-                (ct) => ValueTask.FromResult<string?>(null),
+                (_) => ValueTask.FromResult<string?>(null),
                 cancellationToken: CancellationToken.None);
 
             if (!string.IsNullOrEmpty(cacheKey))

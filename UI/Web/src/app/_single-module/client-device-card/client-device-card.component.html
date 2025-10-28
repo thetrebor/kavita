@@ -62,12 +62,12 @@
           <div class="col-sm-6">
             <i class="bi bi-calendar-plus me-1" aria-hidden="true"></i>
             <span>{{ t('first-seen-label') }}:</span>
-            <span class="ms-1">{{clientDevice().firstSeenUtc | translocoDate}}</span>
+            <span class="ms-1">{{clientDevice().firstSeenUtc | utcToLocalTime: 'shortDate' | defaultDate}}</span>
           </div>
           <div class="col-sm-6">
             <i class="bi bi-clock-history me-1" aria-hidden="true"></i>
             <span>{{ t('last-seen-label') }}:</span>
-            <span class="ms-1">{{clientDevice().lastSeenUtc | timeAgo}}</span> <!-- TODO: BUG: UTC and timeAgo don't work well together -->
+            <span class="ms-1">{{clientDevice().lastSeenUtc | utcToLocaleDate | timeAgo}}</span>
             @if (isRecentlyActive()) {
               <span class="badge bg-success ms-1">{{ t('active') }}</span>
             }

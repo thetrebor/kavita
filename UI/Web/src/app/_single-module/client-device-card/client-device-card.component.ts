@@ -1,24 +1,29 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {ClientDevice} from "../../_models/client-device";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {TranslocoDatePipe} from "@jsverse/transloco-locale";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {ClientDeviceType} from "../../_services/client-info.service";
 import {ClientDeviceAuthTypePipe} from "../../_pipes/client-device-authtype.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe";
 import {ClientDeviceTypePipe} from "../../_pipes/client-device-type.pipe";
+import {DateTime, Duration, Interval} from "luxon";
+import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
+import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-client-device-card',
   imports: [
     TranslocoDirective,
-    TranslocoDatePipe,
     TimeAgoPipe,
     ClientDeviceAuthTypePipe,
     DefaultValuePipe,
     ClientDevicePlatformPipe,
-    ClientDeviceTypePipe
+    ClientDeviceTypePipe,
+    UtcToLocaleDatePipe,
+    DefaultDatePipe,
+    UtcToLocalTimePipe
   ],
   templateUrl: './client-device-card.component.html',
   styleUrl: './client-device-card.component.scss',
@@ -59,13 +64,17 @@ export class ClientDeviceCardComponent {
     return 'badge bg-secondary';
   });
 
-
   isRecentlyActive = computed(() => {
-    const lastSeen = new Date(this.clientDevice().lastSeenUtc);
-    const now = new Date();
-    const hoursDiff = (now.getTime() - lastSeen.getTime()) / (1000 * 60 * 60);
-    return hoursDiff < 24; // Active within last 24 hours
+    const lastSeen = DateTime.fromISO(this.clientDevice().lastSeenUtc, { zone: "utc" }); //new Date(this.clientDevice().lastSeenUtc);
+    const now = DateTime.now().toUTC();
+    const twentyFourHours = Duration.fromObject({ hours: 24 });
+
+    const interval = Interval.fromDateTimes(lastSeen, now);
+
+    return interval.toDuration().valueOf() < twentyFourHours.valueOf();
   });
+
+
 
 
 }
