@@ -212,7 +212,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         };
 
         // For web browsers, include browser + major version only
-        if (clientInfo.ClientType == ClientDeviceType.WebBrowser && !string.IsNullOrEmpty(clientInfo.Browser))
+        if (clientInfo.ClientType is ClientDeviceType.WebBrowser or ClientDeviceType.WebApp && !string.IsNullOrEmpty(clientInfo.Browser))
         {
             components.Add(clientInfo.Browser.ToLowerInvariant());
 
