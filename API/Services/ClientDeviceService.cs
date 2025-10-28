@@ -15,6 +15,7 @@ using API.Entities.User;
 using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -372,33 +373,29 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     /// Generates a user-friendly device name from ClientInfo.
     /// Examples: "Chrome on Windows", "Safari on iOS", "KOReader on Android"
     /// </summary>
+    /// <remarks>This first name is NOT localized, users can always change name</remarks>
     private static string GenerateFriendlyName(ClientInfoData clientInfo)
     {
-        // TODO: Because of localization, it might make sense to just have this empty and derive it when empty,
-        return string.Empty;
-        // var parts = new List<string>();
-        //
-        // if (!string.IsNullOrEmpty(clientInfo.Browser))
-        // {
-        //     parts.Add(clientInfo.Browser);
-        // }
-        // else if (clientInfo.ClientType != ClientDeviceType.Unknown &&
-        //          clientInfo.ClientType != ClientDeviceType.WebBrowser)
-        // {
-        //     parts.Add(clientInfo.ClientType);
-        // }
-        // else
-        // {
-        //     parts.Add("Unknown Client");
-        // }
-        //
-        // if (!string.IsNullOrEmpty(clientInfo.Platform))
-        // {
-        //     parts.Add("on");
-        //     parts.Add(clientInfo.Platform);
-        // }
-        //
-        // return string.Join(" ", parts);
+        var parts = new List<string>();
+
+        if (!string.IsNullOrEmpty(clientInfo.Browser))
+        {
+            parts.Add(clientInfo.Browser);
+        }
+        else if (clientInfo.ClientType != ClientDeviceType.Unknown &&
+                 clientInfo.ClientType != ClientDeviceType.WebBrowser)
+        {
+            parts.Add(clientInfo.ClientType.ToDescription());
+        }
+        else
+        {
+            parts.Add("Unknown Client");
+        }
+
+        parts.Add("on");
+        parts.Add(clientInfo.Platform.ToDescription());
+
+        return string.Join(" ", parts);
     }
 
     /// <summary>

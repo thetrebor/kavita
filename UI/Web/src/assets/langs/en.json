@@ -2130,6 +2130,29 @@
         "my-profile": "My Profile"
     },
 
+    "client-device-auth-type-pipe": {
+        "unknown": "Unknown",
+        "oidc": "OIDC",
+        "jwt": "JWT",
+        "api-key": "API Key"
+    },
+
+    "client-device-platform-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+    },
+
+    "client-device-type-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "Web Browser",
+        "web-app": "Web App",
+        "koreader": "KOReader",
+        "panels": "Panels",
+        "librera": "Librera",
+        "opds-client": "OPDS Client"
+    },
+
+
+
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
     },

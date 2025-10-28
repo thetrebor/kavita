@@ -27,7 +27,7 @@ export class ReadingPaceComponent {
     const days = this.stats().daysInRange;
 
     if (booksRead === 0) return '∞';
-    
+
     return (days / booksRead).toFixed(2);
   });
 

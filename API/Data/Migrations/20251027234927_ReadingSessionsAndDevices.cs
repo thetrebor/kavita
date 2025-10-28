@@ -76,14 +76,14 @@ namespace API.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ClientDeviceId = table.Column<string>(type: "TEXT", nullable: true),
-                    DeviceFingerprint = table.Column<string>(type: "TEXT", nullable: true),
-                    FriendlyName = table.Column<string>(type: "TEXT", nullable: true),
-                    CurrentClientInfo = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":\"Unknown\",\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":null,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}"),
+                    UiFingerprint = table.Column<string>(type: "TEXT", nullable: true),
+                    DeviceFingerprint = table.Column<string>(type: "TEXT", nullable: false),
+                    FriendlyName = table.Column<string>(type: "TEXT", nullable: false),
+                    CurrentClientInfo = table.Column<string>(type: "TEXT", nullable: false, defaultValue: "{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":0,\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":0,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}"),
                     FirstSeenUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     LastSeenUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
+                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -103,7 +103,7 @@ namespace API.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     DeviceId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ClientInfo = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":\"Unknown\",\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":null,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}"),
+                    ClientInfo = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":0,\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":0,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}"),
                     CapturedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>

@@ -2,10 +2,29 @@ import {Injectable, signal} from '@angular/core';
 import {VersionService} from "./version.service";
 import {AuthenticationType} from "../_models/progress/reading-session";
 
+export enum ClientDevicePlatform {
+  Unknown = 0,
+  Windows = 1,
+  MacOs = 2,
+  Ios = 3,
+  Linux = 4,
+  Android = 5
+}
+
+export enum ClientDeviceType {
+  Unknown = 0,
+  WebBrowser = 1,
+  WebApp = 2,
+  KoReader = 3,
+  Panels = 4,
+  Librera = 5,
+  OpdsClient = 6
+}
+
 export interface ClientInfo {
   browser: string;
   browserVersion: string;
-  platform: string;
+  platform: ClientDevicePlatform;
   deviceType: string;
   screenWidth: number;
   screenHeight: number;
@@ -16,7 +35,7 @@ export interface ClientInfo {
   userAgent: string;
   ipAddress: string;
   authType: AuthenticationType;
-  clientType: string; // Web App, OPDS Reader, KOReader, etc
+  clientType: ClientDeviceType; // Web App, OPDS Reader, KOReader, etc
 }
 
 @Injectable({
@@ -129,12 +148,12 @@ export class ClientInfoService {
   }
 
   private detectPlatform(ua: string) {
-    if (ua.includes('Win')) return 'Windows';
-    if (ua.includes('Mac')) return 'macOS';
-    if (ua.includes('Linux') && !ua.includes('Android')) return 'Linux';
-    if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
-    if (ua.includes('Android')) return 'Android';
-    return 'Unknown';
+    if (ua.includes('Win')) return ClientDevicePlatform.Windows;
+    if (ua.includes('Mac')) return ClientDevicePlatform.MacOs;
+    if (ua.includes('Linux') && !ua.includes('Android')) return ClientDevicePlatform.Linux;
+    if (ua.includes('iPhone') || ua.includes('iPad')) return ClientDevicePlatform.Ios;
+    if (ua.includes('Android')) return ClientDevicePlatform.Android;
+    return ClientDevicePlatform.Unknown;
   }
 
   private detectDeviceType(ua: string): string {

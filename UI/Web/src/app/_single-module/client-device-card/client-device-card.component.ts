@@ -2,15 +2,23 @@ import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core
 import {ClientDevice} from "../../_models/client-device";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {TranslocoDatePipe} from "@jsverse/transloco-locale";
-import {AuthenticationType} from "../../_models/progress/reading-session";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
+import {ClientDeviceType} from "../../_services/client-info.service";
+import {ClientDeviceAuthTypePipe} from "../../_pipes/client-device-authtype.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe";
+import {ClientDeviceTypePipe} from "../../_pipes/client-device-type.pipe";
 
 @Component({
   selector: 'app-client-device-card',
   imports: [
     TranslocoDirective,
     TranslocoDatePipe,
-    TimeAgoPipe
+    TimeAgoPipe,
+    ClientDeviceAuthTypePipe,
+    DefaultValuePipe,
+    ClientDevicePlatformPipe,
+    ClientDeviceTypePipe
   ],
   templateUrl: './client-device-card.component.html',
   styleUrl: './client-device-card.component.scss',
@@ -22,11 +30,14 @@ export class ClientDeviceCardComponent {
 
   browserInfo = computed(() => {
     const info = this.clientDevice().currentClientInfo;
+    if (!info.browser && !info.browserVersion) return '';
+
     return `${info.browser} ${info.browserVersion}`;
   });
 
   screenInfo = computed(() => {
     const info = this.clientDevice().currentClientInfo;
+    if (!info.screenWidth && !info.screenHeight) return '';
     return `${info.screenWidth}×${info.screenHeight} (${info.orientation})`;
   });
 
@@ -42,24 +53,12 @@ export class ClientDeviceCardComponent {
   });
 
   clientTypeBadgeClass = computed(() => {
-    // TODO: this should be either primary for a Kavita-owned device, otherwise info
-    const clientType = this.clientDevice().currentClientInfo.clientType.toLowerCase();
-    if (clientType.includes('web')) return 'badge bg-primary';
-    if (clientType.includes('opds') || clientType.includes('koreader')) return 'badge bg-info';
-    if (clientType.includes('mihon') || clientType.includes('panels')) return 'badge bg-warning';
+    const clientType = this.clientDevice().currentClientInfo.clientType;
+    if (clientType == ClientDeviceType.WebApp || clientType === ClientDeviceType.WebBrowser) return 'badge bg-primary';
+    if ([ClientDeviceType.OpdsClient, ClientDeviceType.Librera].includes(clientType)) return 'badge bg-info';
     return 'badge bg-secondary';
   });
 
-  authTypeLabel = computed(() => {
-    // TODO: Make this a pipe
-    const authType = this.clientDevice().currentClientInfo.authType;
-    switch (authType) {
-      case AuthenticationType.ApiKey: return 'API Key';
-      case AuthenticationType.OIDC: return 'OAuth';
-      case AuthenticationType.JWT: return 'Web App';
-      default: return 'Unknown';
-    }
-  });
 
   isRecentlyActive = computed(() => {
     const lastSeen = new Date(this.clientDevice().lastSeenUtc);

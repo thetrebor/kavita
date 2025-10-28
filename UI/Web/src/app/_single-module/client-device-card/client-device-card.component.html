@@ -10,14 +10,14 @@
           </h5>
           <div class="text-muted small">
             <span class="badge" [class]="clientTypeBadgeClass()">
-              {{clientDevice().currentClientInfo.clientType}}
+              {{clientDevice().currentClientInfo.clientType | clientDeviceType}}
             </span>
             <span class="ms-2">{{clientDevice().ownerUsername}}</span>
           </div>
         </div>
         <div class="text-end">
           <span class="badge bg-secondary" [title]="t('auth-type-label')">
-            {{authTypeLabel()}}
+            {{clientDevice().currentClientInfo.authType | clientDeviceAuthType}}
           </span>
         </div>
       </div>
@@ -28,21 +28,21 @@
           <div class="info-item">
             <i class="bi bi-display me-1" aria-hidden="true"></i>
             <span class="text-muted small">{{ t('browser-label') }}:</span>
-            <span class="ms-1">{{browserInfo()}}</span>
+            <span class="ms-1">{{browserInfo() | defaultValue}}</span>
           </div>
         </div>
         <div class="col-sm-6">
           <div class="info-item">
             <i class="bi bi-phone me-1" aria-hidden="true"></i>
             <span class="text-muted small">{{ t('platform-label') }}:</span>
-            <span class="ms-1">{{clientDevice().currentClientInfo.platform}}</span>
+            <span class="ms-1">{{clientDevice().currentClientInfo.platform | clientDevicePlatform}}</span>
           </div>
         </div>
         <div class="col-sm-6">
           <div class="info-item">
             <i class="bi bi-aspect-ratio me-1" aria-hidden="true"></i>
             <span class="text-muted small">{{ t('screen-label') }}:</span>
-            <span class="ms-1">{{screenInfo()}}</span>
+            <span class="ms-1">{{screenInfo() | defaultValue}}</span>
           </div>
         </div>
         @if (clientDevice().currentClientInfo.appVersion) {

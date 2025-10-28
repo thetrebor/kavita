@@ -1163,45 +1163,6 @@ namespace API.Data.Migrations
                     b.ToTable("Chapter");
                 });
 
-            modelBuilder.Entity("API.Entities.ClientDevice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ClientDeviceId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CurrentClientInfo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":\"Unknown\",\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":null,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}");
-
-                    b.Property<string>("DeviceFingerprint")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("FirstSeenUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FriendlyName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastSeenUtc")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.ToTable("ClientDevice");
-                });
-
             modelBuilder.Entity("API.Entities.ClientDeviceHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -1214,7 +1175,7 @@ namespace API.Data.Migrations
                     b.Property<string>("ClientInfo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":\"Unknown\",\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":null,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}");
+                        .HasDefaultValue("{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":0,\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":0,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}");
 
                     b.Property<int>("DeviceId")
                         .HasColumnType("INTEGER");
@@ -2842,6 +2803,48 @@ namespace API.Data.Migrations
                     b.ToTable("Tag");
                 });
 
+            modelBuilder.Entity("API.Entities.User.ClientDevice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CurrentClientInfo")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"UserAgent\":\"\",\"IpAddress\":\"\",\"AuthType\":0,\"ClientType\":0,\"AppVersion\":null,\"Browser\":null,\"BrowserVersion\":null,\"Platform\":0,\"DeviceType\":null,\"ScreenWidth\":null,\"ScreenHeight\":null,\"Orientation\":null,\"CapturedAt\":\"0001-01-01T00:00:00\"}");
+
+                    b.Property<string>("DeviceFingerprint")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("FirstSeenUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FriendlyName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastSeenUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UiFingerprint")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("ClientDevice");
+                });
+
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
                     b.Property<int>("Id")
@@ -3428,20 +3431,9 @@ namespace API.Data.Migrations
                     b.Navigation("Volume");
                 });
 
-            modelBuilder.Entity("API.Entities.ClientDevice", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("ClientDevices")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-                });
-
             modelBuilder.Entity("API.Entities.ClientDeviceHistory", b =>
                 {
-                    b.HasOne("API.Entities.ClientDevice", "Device")
+                    b.HasOne("API.Entities.User.ClientDevice", "Device")
                         .WithMany("History")
                         .HasForeignKey("DeviceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3807,6 +3799,17 @@ namespace API.Data.Migrations
                     b.Navigation("Library");
                 });
 
+            modelBuilder.Entity("API.Entities.User.ClientDevice", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("ClientDevices")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
                     b.HasOne("API.Entities.Series", "Series")
@@ -4070,11 +4073,6 @@ namespace API.Data.Migrations
                     b.Navigation("UserProgress");
                 });
 
-            modelBuilder.Entity("API.Entities.ClientDevice", b =>
-                {
-                    b.Navigation("History");
-                });
-
             modelBuilder.Entity("API.Entities.Library", b =>
                 {
                     b.Navigation("Folders");
@@ -4125,6 +4123,11 @@ namespace API.Data.Migrations
                     b.Navigation("Relations");
 
                     b.Navigation("Volumes");
+                });
+
+            modelBuilder.Entity("API.Entities.User.ClientDevice", b =>
+                {
+                    b.Navigation("History");
                 });
 
             modelBuilder.Entity("API.Entities.Volume", b =>

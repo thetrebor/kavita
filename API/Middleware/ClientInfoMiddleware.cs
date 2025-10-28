@@ -39,12 +39,13 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         var authType = userContext.GetAuthenticationType();
 
         // If custom Kavita header exists, parse it for rich info
-        if (!string.IsNullOrEmpty(kavitaClient))
+        if (!string.IsNullOrEmpty(kavitaClient)) // TODO: Thin out the implementation on the UI and drive everything through one flow
         {
             var parsed = ParseKavitaClientHeader(kavitaClient, userAgent);
             parsed.IpAddress = ipAddress;
             parsed.AuthType = authType;
             parsed.CapturedAt = DateTime.UtcNow;
+            parsed.Platform = BrowserHelper.DetectPlatform(userAgent);
 
             return parsed;
         }
@@ -78,7 +79,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
                     AppVersion = match.Groups[1].Value,
                     Browser = match.Groups[2].Value,
                     BrowserVersion = match.Groups[3].Value,
-                    Platform = BrowserHelper.DetectPlatform(match.Groups[4].Value), // Use the UA code as it is just contains
+                    Platform = Enum.Parse<ClientDevicePlatform>(match.Groups[4].Value),
                     DeviceType = match.Groups[5].Value,
                     ScreenWidth = int.Parse(match.Groups[6].Value),
                     ScreenHeight = int.Parse(match.Groups[7].Value),
