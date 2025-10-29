@@ -32,7 +32,6 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
     {
         var cacheKey = ClientDeviceService.GetCacheKey(userId, uiFingerprint, clientInfo);
 
-        // BUG: Cache is not correct when 2 different fingerprints coming from different browsers
         var deviceId = await cache.GetOrCreateAsync(
             cacheKey,
             (userId, clientInfo, uiFingerprint, clientDeviceService),

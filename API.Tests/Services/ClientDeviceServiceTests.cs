@@ -704,7 +704,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         await context.SaveChangesAsync();
 
         // Act
-        var result = await service.RemoveDeviceAsync(user.Id, device.Id);
+        var result = await service.DeleteDeviceAsync(user.Id, device.Id);
 
         // Assert
         Assert.True(result);
@@ -724,7 +724,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         await context.SaveChangesAsync();
 
         // Act
-        var result = await service.RemoveDeviceAsync(user.Id, 999);
+        var result = await service.DeleteDeviceAsync(user.Id, 999);
 
         // Assert
         Assert.False(result);

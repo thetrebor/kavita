@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.DTOs.Device.ClientDevice;
 using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
@@ -15,6 +16,7 @@ using API.Entities.User;
 using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -29,8 +31,8 @@ public interface IClientDeviceService
     Task<IEnumerable<ClientDeviceDto>> GetUserDeviceDtosAsync(int userId, bool includeInactive = false);
     Task<IEnumerable<ClientDeviceDto>> GetAllUserDeviceDtos(bool includeInactive = false);
     Task<bool> RenameDeviceAsync(int userId, int deviceId, string newName);
-    Task<bool> RemoveDeviceAsync(int userId, int deviceId);
-    Task<bool> LogoutDeviceAsync(int userId, int deviceId);
+    Task<bool> DeleteDeviceAsync(int userId, int deviceId);
+    Task UpdateFriendlyNameAsync(int userId, UpdateClientDeviceNameDto dto);
 }
 
 public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<ClientDeviceService> logger)
@@ -158,14 +160,14 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         return true;
     }
 
-    public async Task<bool> RemoveDeviceAsync(int userId, int deviceId)
+    public async Task<bool> DeleteDeviceAsync(int userId, int deviceId)
     {
         var device = await context.ClientDevice
             .FirstOrDefaultAsync(d => d.Id == deviceId && d.AppUserId == userId);
 
         if (device == null)
         {
-            return false;
+            throw new KavitaException("client-device-doesnt-exist");
         }
 
         device.IsActive = false;
@@ -176,25 +178,18 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
         return true;
     }
 
-    public async Task<bool> LogoutDeviceAsync(int userId, int deviceId)
+
+    public async Task UpdateFriendlyNameAsync(int userId, UpdateClientDeviceNameDto dto)
     {
-        // This would integrate with your JWT token management
-        // For now, just mark as inactive (user would need to re-authenticate)
         var device = await context.ClientDevice
-            .FirstOrDefaultAsync(d => d.Id == deviceId && d.AppUserId == userId);
+            .Where(d => d.AppUserId == userId)
+            .FirstOrDefaultAsync() ?? throw new KavitaException("client-device-doesnt-exist");
 
-        if (device == null)
+        if (!string.IsNullOrWhiteSpace(dto.Name))
         {
-            return false;
+            device.FriendlyName = dto.Name;
+            await context.SaveChangesAsync();
         }
-
-        // TODO: Integrate with JWT revocation list or token versioning
-        // For example, increment a token version number on the user record
-        // and validate tokens against this version
-
-        logger.LogInformation("User {UserId} logged out device {DeviceId}", userId, deviceId);
-
-        return true;
     }
 
 

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Device;
+using API.DTOs.Device.EmailDevice;
 using API.Entities;
 using API.Entities.Enums.Device;
 using API.Services;
@@ -36,11 +37,11 @@ public class DeviceServiceDbTests(ITestOutputHelper outputHelper): AbstractDbTes
         context.Users.Add(user);
         await unitOfWork.CommitAsync();
 
-        var device = await deviceService.Create(new CreateDeviceDto()
+        var device = await deviceService.Create(new CreateEmailDeviceDto()
         {
             EmailAddress = "fake@kindle.com",
             Name = "Test Kindle",
-            Platform = DevicePlatform.Kindle
+            Platform = EmailDevicePlatform.Kindle
         }, user);
 
         Assert.NotNull(device);
@@ -61,11 +62,11 @@ public class DeviceServiceDbTests(ITestOutputHelper outputHelper): AbstractDbTes
         context.Users.Add(user);
         await unitOfWork.CommitAsync();
 
-        var device = await deviceService.Create(new CreateDeviceDto()
+        var device = await deviceService.Create(new CreateEmailDeviceDto()
         {
             EmailAddress = "fake@gmail.com",
             Name = "Test Kindle",
-            Platform = DevicePlatform.Kindle
+            Platform = EmailDevicePlatform.Kindle
         }, user);
 
         Assert.NotNull(device);

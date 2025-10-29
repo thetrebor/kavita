@@ -72,16 +72,18 @@
     </ngx-datatable>
   </ng-container>
 
+  <div class="setting-section-break"></div>
+
   <!-- Client Devices -->
   <ng-container>
     <h3 class="my-3">{{t('client-devices-header')}}</h3>
-    <div class="row g-0">
+    <div class="row">
       @for(clientDevice of clientDevices(); track clientDevice) {
-        <div class="col-md-6 col-xs-12">
-          <app-client-device-card [clientDevice]="clientDevice" />
+        <div class="col-md-6 col-xs-12 mb-4">
+          <app-client-device-card [clientDevice]="clientDevice" (deviceDeleted)="loadClientDevices()" (refresh)="loadClientDevices()" />
         </div>
       } @empty {
-        This shouldn't be possible...
+        <app-loading/>
       }
     </div>
 

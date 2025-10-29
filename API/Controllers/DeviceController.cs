@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Device;
+using API.DTOs.Device.ClientDevice;
+using API.DTOs.Device.EmailDevice;
+using API.DTOs.Progress;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
@@ -24,15 +27,17 @@ public class DeviceController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
     private readonly IMapper _mapper;
+    private readonly IClientDeviceService _clientDeviceService;
 
     public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService,IEventHub eventHub,
-        ILocalizationService localizationService, IMapper mapper)
+        ILocalizationService localizationService, IMapper mapper, IClientDeviceService clientDeviceService)
     {
         _unitOfWork = unitOfWork;
         _deviceService = deviceService;
         _eventHub = eventHub;
         _localizationService = localizationService;
         _mapper = mapper;
+        _clientDeviceService = clientDeviceService;
     }
 
 
@@ -42,7 +47,7 @@ public class DeviceController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("create")]
-    public async Task<ActionResult<DeviceDto>> CreateOrUpdateDevice(CreateDeviceDto dto)
+    public async Task<ActionResult<EmailDeviceDto>> CreateOrUpdateDevice(CreateEmailDeviceDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
@@ -52,7 +57,7 @@ public class DeviceController : BaseApiController
             if (device == null)
                 return BadRequest(await _localizationService.Translate(UserId, "generic-device-create"));
 
-            return Ok(_mapper.Map<DeviceDto>(device));
+            return Ok(_mapper.Map<EmailDeviceDto>(device));
         }
         catch (KavitaException ex)
         {
@@ -66,7 +71,7 @@ public class DeviceController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update")]
-    public async Task<ActionResult<DeviceDto>> UpdateDevice(UpdateDeviceDto dto)
+    public async Task<ActionResult<EmailDeviceDto>> UpdateDevice(UpdateEmailDeviceDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
@@ -74,7 +79,7 @@ public class DeviceController : BaseApiController
 
         if (device == null) return BadRequest(await _localizationService.Translate(UserId, "generic-device-update"));
 
-        return Ok(_mapper.Map<DeviceDto>(device));
+        return Ok(_mapper.Map<EmailDeviceDto>(device));
     }
 
     /// <summary>
@@ -94,7 +99,7 @@ public class DeviceController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<DeviceDto>>> GetDevices()
+    public async Task<ActionResult<IEnumerable<EmailDeviceDto>>> GetDevices()
     {
         return Ok(await _unitOfWork.DeviceRepository.GetDevicesForUserAsync(UserId));
     }
@@ -105,7 +110,7 @@ public class DeviceController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("send-to")]
-    public async Task<ActionResult> SendToDevice(SendToDeviceDto dto)
+    public async Task<ActionResult> SendToDevice(SendToEmailDeviceDto dto)
     {
         var userId = UserId;
         if (dto.ChapterIds.Any(i => i < 0)) return BadRequest(await _localizationService.Translate(userId, "greater-0", "ChapterIds"));
@@ -148,7 +153,7 @@ public class DeviceController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("send-series-to")]
-    public async Task<ActionResult> SendSeriesToDevice(SendSeriesToDeviceDto dto)
+    public async Task<ActionResult> SendSeriesToDevice(SendSeriesToEmailDeviceDto dto)
     {
         var userId = UserId;
         if (dto.SeriesId <= 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "SeriesId"));
@@ -185,6 +190,49 @@ public class DeviceController : BaseApiController
 
         return BadRequest(await _localizationService.Translate(userId, "generic-send-to"));
     }
+
+    #region Client Devices
+    /// <summary>
+    /// Get my client devices
+    /// </summary>
+    /// <param name="includeInactive"></param>
+    /// <returns></returns>
+    [HttpGet("client/devices")]
+    public async Task<ActionResult<List<ClientDeviceDto>>> GetMyClientDevices(bool includeInactive = false)
+    {
+        return Ok(await _clientDeviceService.GetUserDeviceDtosAsync(UserId,  includeInactive));
+    }
+
+    /// <summary>
+    /// Get All user client devices
+    /// </summary>
+    /// <param name="includeInactive"></param>
+    /// <returns></returns>
+    [HttpGet("client/all-devices")]
+    public async Task<ActionResult<List<ClientDeviceDto>>> GetAllClientDevices(bool includeInactive = false)
+    {
+        return Ok(await _clientDeviceService.GetAllUserDeviceDtos(includeInactive));
+    }
+
+    /// <summary>
+    /// Removes the client device from DB
+    /// </summary>
+    /// <param name="clientDeviceId"></param>
+    /// <returns></returns>
+    [HttpDelete("client/device")]
+    public async Task<ActionResult<bool>> DeleteClientDevice(int clientDeviceId)
+    {
+        return Ok(await _clientDeviceService.DeleteDeviceAsync(UserId, clientDeviceId));
+    }
+
+    [HttpPost("client/update-name")]
+    public async Task<ActionResult> UpdateClientDeviceName(UpdateClientDeviceNameDto dto)
+    {
+        await _clientDeviceService.UpdateFriendlyNameAsync(UserId, dto);
+        return Ok();
+    }
+
+    #endregion Client Devices
 
 }
 

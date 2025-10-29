@@ -746,7 +746,7 @@ export class ActionService {
   }
 
   sendToDevice(chapterIds: Array<number>, device: Device, callback?: VoidActionCallback) {
-    this.deviceService.sendTo(chapterIds, device.id).subscribe(() => {
+    this.deviceService.sendToEmailDevice(chapterIds, device.id).subscribe(() => {
       this.toastr.success(translate('toasts.file-send-to', {name: device.name}));
       if (callback) {
         callback();
@@ -755,7 +755,7 @@ export class ActionService {
   }
 
   sendSeriesToDevice(seriesId: number, device: Device, callback?: VoidActionCallback) {
-    this.deviceService.sendSeriesTo(seriesId, device.id).subscribe(() => {
+    this.deviceService.sendSeriesToEmailDevice(seriesId, device.id).subscribe(() => {
       this.toastr.success(translate('toasts.file-send-to', {name: device.name}));
       if (callback) {
         callback();

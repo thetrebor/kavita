@@ -14,16 +14,16 @@ import {shareReplay} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AsyncPipe} from "@angular/common";
-import {ActivityService} from "../../_services/activity.service";
 import {ClientDevice} from "../../_models/client-device";
 import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 @Component({
     selector: 'app-manage-devices',
     templateUrl: './manage-devices.component.html',
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule, ClientDeviceCardComponent]
+  imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent]
 })
 export class ManageDevicesComponent implements OnInit {
 
@@ -34,7 +34,6 @@ export class ManageDevicesComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly modalService = inject(NgbModal);
   private readonly accountService = inject(AccountService);
-  private readonly activityService = inject(ActivityService);
 
   devices: Array<Device> = [];
   isEditingDevice: boolean = false;
@@ -43,6 +42,7 @@ export class ManageDevicesComponent implements OnInit {
 
   clientDevices = model<ClientDevice[]>([]);
 
+
   isReadOnly$ = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef),
     map(c => c && this.accountService.hasReadOnlyRole(c)),
@@ -50,9 +50,7 @@ export class ManageDevicesComponent implements OnInit {
   );
 
   constructor() {
-    this.activityService.getMyClientDevices().subscribe(devices => {
-      this.clientDevices.set([...devices]);
-    });
+    this.loadClientDevices();
   }
 
   ngOnInit(): void {
@@ -63,12 +61,17 @@ export class ManageDevicesComponent implements OnInit {
     this.loadDevices();
   }
 
+  loadClientDevices() {
+    this.deviceService.getMyClientDevices().subscribe(devices => {
+      this.clientDevices.set([...devices]);
+    });
+  }
 
   loadDevices() {
     this.isEditingDevice = false;
     this.device = undefined;
     this.cdRef.markForCheck();
-    this.deviceService.getDevices().subscribe(devices => {
+    this.deviceService.getEmailDevices().subscribe(devices => {
       this.devices = devices;
       this.cdRef.markForCheck();
     });
@@ -76,7 +79,7 @@ export class ManageDevicesComponent implements OnInit {
 
   async deleteDevice(device: Device) {
     if (!await this.confirmService.confirm(translate('toasts.delete-device'))) return;
-    this.deviceService.deleteDevice(device.id).subscribe(() => {
+    this.deviceService.deleteEmailDevice(device.id).subscribe(() => {
       const index = this.devices.indexOf(device);
       this.devices.splice(index, 1);
       this.cdRef.markForCheck();
@@ -106,5 +109,5 @@ export class ManageDevicesComponent implements OnInit {
     });
   }
 
-    protected readonly ColumnMode = ColumnMode;
+  protected readonly ColumnMode = ColumnMode;
 }

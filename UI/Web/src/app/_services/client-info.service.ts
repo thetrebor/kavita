@@ -43,10 +43,10 @@ export interface ClientInfo {
 })
 export class ClientInfoService {
 
-  private static readonly DEVICE_ID_KEY = 'kavita-device-id';
+  private static readonly DEVICE_FINGERPRINT_KEY = 'kavita-fingerprint-id';
 
   private readonly clientInfo = signal<Partial<ClientInfo>>(this.detectClientInfo());
-  private readonly deviceId = signal<string>(this.getOrCreateDeviceId());
+  private readonly deviceFingerprint = signal<string>(this.getOrCreateDeviceFingerprint());
 
   constructor() {
     // Update orientation and screen size on resize/rotation
@@ -65,31 +65,31 @@ export class ClientInfoService {
    * Generated once and stored in localStorage.
    */
   getDeviceId(): string {
-    return this.deviceId();
+    return this.deviceFingerprint();
   }
 
   /**
-   * Clears the device ID (useful for testing or manual device re-registration)
+   * Clears the device fingerprint
    */
-  clearDeviceId(): void {
-    localStorage.removeItem(ClientInfoService.DEVICE_ID_KEY);
-    this.deviceId.set(this.generateDeviceId());
+  clearDeviceFingerprint(): void {
+    localStorage.removeItem(ClientInfoService.DEVICE_FINGERPRINT_KEY);
+    this.deviceFingerprint.set(this.generateDeviceFingerprint());
   }
 
-  private getOrCreateDeviceId(): string {
+  private getOrCreateDeviceFingerprint(): string {
     // Try to get existing device ID from localStorage
-    let deviceId = localStorage.getItem(ClientInfoService.DEVICE_ID_KEY);
+    let deviceId = localStorage.getItem(ClientInfoService.DEVICE_FINGERPRINT_KEY);
 
     if (!deviceId) {
       // Generate new UUID v4
-      deviceId = this.generateDeviceId();
-      localStorage.setItem(ClientInfoService.DEVICE_ID_KEY, deviceId);
+      deviceId = this.generateDeviceFingerprint();
+      localStorage.setItem(ClientInfoService.DEVICE_FINGERPRINT_KEY, deviceId);
     }
 
     return deviceId;
   }
 
-  private generateDeviceId(): string {
+  private generateDeviceFingerprint(): string {
     // Generate UUID v4
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = Math.random() * 16 | 0;
@@ -145,15 +145,6 @@ export class ClientInfoService {
     }
 
     return match ? match[1] : 'Unknown';
-  }
-
-  private detectPlatform(ua: string) {
-    if (ua.includes('Win')) return ClientDevicePlatform.Windows;
-    if (ua.includes('Mac')) return ClientDevicePlatform.MacOs;
-    if (ua.includes('Linux') && !ua.includes('Android')) return ClientDevicePlatform.Linux;
-    if (ua.includes('iPhone') || ua.includes('iPad')) return ClientDevicePlatform.Ios;
-    if (ua.includes('Android')) return ClientDevicePlatform.Android;
-    return ClientDevicePlatform.Unknown;
   }
 
   private detectDeviceType(ua: string): string {

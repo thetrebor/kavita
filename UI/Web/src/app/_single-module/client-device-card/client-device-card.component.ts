@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, HostListener, inject, input, model, output} from '@angular/core';
 import {ClientDevice} from "../../_models/client-device";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
@@ -11,6 +11,12 @@ import {DateTime, Duration, Interval} from "luxon";
 import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {CardActionablesComponent} from "../card-actionables/card-actionables.component";
+import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
+import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
+import {DeviceService} from "../../_services/device.service";
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {DOCUMENT} from "@angular/common";
 
 @Component({
   selector: 'app-client-device-card',
@@ -23,21 +29,62 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
     ClientDeviceTypePipe,
     UtcToLocaleDatePipe,
     DefaultDatePipe,
-    UtcToLocalTimePipe
+    UtcToLocalTimePipe,
+    CardActionablesComponent,
+    SentenceCasePipe,
+    ReactiveFormsModule
   ],
   templateUrl: './client-device-card.component.html',
   styleUrl: './client-device-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientDeviceCardComponent {
+
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly deviceService = inject(DeviceService);
+  private readonly document = inject(DOCUMENT);
+
   clientDevice = input.required<ClientDevice>();
   showTechnicalDetails = input<boolean>(false);
+
+  actions = model<ActionItem<ClientDevice>[]>([]);
+  isEditMode = model<boolean>(false);
+
+  /**
+   * Device is deleted
+   */
+  deviceDeleted = output<number>();
+  /**
+   * Name is updated
+   */
+  refresh = output<number>();
+
+  deviceForm = new FormGroup({
+    name: new FormControl('', [Validators.required]),
+  });
 
   browserInfo = computed(() => {
     const info = this.clientDevice().currentClientInfo;
     if (!info.browser && !info.browserVersion) return '';
 
     return `${info.browser} ${info.browserVersion}`;
+  });
+
+  browserIcon = computed(() => {
+    const browser = this.clientDevice().currentClientInfo.browser;
+    if (!browser) return 'fa-brands fa-chrome';
+    switch (browser) {
+      case 'Chrome':
+        return 'fa-brands fa-chrome';
+      case 'Firefox':
+        return 'fa-brands fa-firefox';
+      case 'Safari':
+        return 'fa-brands fa-safari';
+      case 'Edge':
+        return 'fa-brands fa-edge';
+      default:
+        return 'fa-brands fa-chrome';
+    }
   });
 
   screenInfo = computed(() => {
@@ -65,7 +112,7 @@ export class ClientDeviceCardComponent {
   });
 
   isRecentlyActive = computed(() => {
-    const lastSeen = DateTime.fromISO(this.clientDevice().lastSeenUtc, { zone: "utc" }); //new Date(this.clientDevice().lastSeenUtc);
+    const lastSeen = DateTime.fromISO(this.clientDevice().lastSeenUtc, { zone: "utc" });
     const now = DateTime.now().toUTC();
     const twentyFourHours = Duration.fromObject({ hours: 24 });
 
@@ -74,6 +121,58 @@ export class ClientDeviceCardComponent {
     return interval.toDuration().valueOf() < twentyFourHours.valueOf();
   });
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.isEditMode()) return;
+
+    const control = this.deviceForm.get('name');
+    if (control?.invalid) return;
+
+    const inputElem = this.document.querySelector(`#client-device-${this.clientDevice().id}`);
+    const clickedInside = inputElem?.contains(event.target as Node);
+
+    if (!clickedInside) {
+      this.isEditMode.set(false);
+    }
+  }
+
+
+  constructor() {
+    this.actions.set(this.actionFactoryService.getClientDeviceActions(this.handleActionCallback.bind(this)));
+  }
+
+  handleActionCallback(action: ActionItem<ClientDevice>, entity: ClientDevice) {
+    switch (action.action) {
+      case Action.Delete:
+        this.deleteDevice();
+        break;
+      case Action.Edit:
+        this.toggleEdit();
+        break;
+    }
+  }
+
+  saveName() {
+    const newName = this.deviceForm.get('name')?.value ?? ''
+    if (newName.length === 0) return;
+    this.deviceService.updateClientDeviceName(this.clientDevice().id, newName).subscribe(() => {
+      this.refresh.emit(this.clientDevice().id);
+    });
+  }
+
+  deleteDevice() {
+    const id = this.clientDevice().id;
+    this.deviceService.deleteClientDevice(id).subscribe(successful => {
+      if (successful) {
+        this.deviceDeleted.emit(id);
+      }
+    });
+  }
+
+  toggleEdit() {
+    this.deviceForm.get('name')!.setValue(this.clientDevice().friendlyName);
+    this.isEditMode.update(x => !x);
+  }
 
 
 

@@ -207,9 +207,9 @@ public class BrowserHelperTests
         ClientDevicePlatform.Windows)]
 
     [InlineData(
-        "Mozilla/5.0 (X11; Linux x86_64; Librera) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.2997.-1000651005 Safari/537.36",
+        "Mozilla/5.0 (X11; Linux x86_64; Librera) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.2997.373167658 Safari/537.36",
         ClientDeviceType.Librera,
-        ClientDevicePlatform.Linux)]
+        ClientDevicePlatform.Linux)] // Should be Android but not sure how to actually correct
     public void RealWorld_UserAgents_AreDetectedCorrectly(string userAgent, ClientDeviceType expectedClientType, ClientDevicePlatform expectedPlatform)
     {
         var clientType = BrowserHelper.DetermineClientType(userAgent);

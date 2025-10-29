@@ -4,6 +4,7 @@ namespace API.DTOs.Progress;
 
 public sealed record ClientDeviceDto
 {
+    public int Id { get; set; }
     /// <summary>
     /// User-friendly name, defaults to generated name like "Chrome on Windows"
     /// </summary>

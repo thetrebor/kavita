@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using API.Entities.Enums.Device;
 
-namespace API.DTOs.Device;
+namespace API.DTOs.Device.EmailDevice;
 
-public sealed record UpdateDeviceDto
+public sealed record UpdateEmailDeviceDto
 {
     [Required]
     public int Id { get; set; }
@@ -13,7 +13,7 @@ public sealed record UpdateDeviceDto
     /// Platform of the device. If not know, defaults to "Custom"
     /// </summary>
     [Required]
-    public DevicePlatform Platform { get; set; }
+    public EmailDevicePlatform Platform { get; set; }
     [Required]
     public string EmailAddress { get; set; } = default!;
 }

@@ -37,27 +37,30 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         var kavitaClient = context.Request.Headers[Headers.KavitaClient].ToString();
         var ipAddress = GetClientIpAddress(context);
         var authType = userContext.GetAuthenticationType();
+        var platform = BrowserHelper.DetectPlatform(userAgent);
 
         // If custom Kavita header exists, parse it for rich info
-        if (!string.IsNullOrEmpty(kavitaClient)) // TODO: Thin out the implementation on the UI and drive everything through one flow
+        if (!string.IsNullOrEmpty(kavitaClient))
         {
             var parsed = ParseKavitaClientHeader(kavitaClient, userAgent);
             parsed.IpAddress = ipAddress;
             parsed.AuthType = authType;
             parsed.CapturedAt = DateTime.UtcNow;
-            parsed.Platform = BrowserHelper.DetectPlatform(userAgent);
+            parsed.Platform = platform;
 
             return parsed;
         }
 
         // Fallback to basic UA parsing
+        var clientType = BrowserHelper.DetermineClientType(userAgent);
         return new ClientInfoData
         {
             UserAgent = userAgent,
             IpAddress = ipAddress,
             AuthType = authType,
-            ClientType = BrowserHelper.DetermineClientType(userAgent),
-            Platform = BrowserHelper.DetectPlatform(userAgent),
+            ClientType = clientType,
+            Platform = platform,
+            DeviceType = BrowserHelper.CoaxDeviceType(clientType, platform),
             CapturedAt = DateTime.UtcNow
         };
     }

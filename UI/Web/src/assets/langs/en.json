@@ -363,7 +363,8 @@
         "version-label": "App Version",
         "first-seen-label": "First Seen",
         "last-seen-label": "Last Seen",
-        "active": "Active"
+        "active": "Active",
+        "save": "{{common.save}}"
     },
 
 
@@ -3236,7 +3237,8 @@
         "merge": "Merge",
         "export": "Export",
         "like": "Like",
-        "unlike": "Remove likes"
+        "unlike": "Remove likes",
+        "edit-device-name": "Edit Name"
     },
 
     "preferences": {

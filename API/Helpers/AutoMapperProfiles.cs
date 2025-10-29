@@ -8,6 +8,7 @@ using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Device;
+using API.DTOs.Device.EmailDevice;
 using API.DTOs.Email;
 using API.DTOs.Font;
 using API.DTOs.KavitaPlus.Manage;
@@ -330,7 +331,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
             .ConvertUsing<ServerSettingConverter>();
 
-        CreateMap<Device, DeviceDto>();
+        CreateMap<Device, EmailDeviceDto>();
         CreateMap<AppUserTableOfContent, PersonalToCDto>();
 
 

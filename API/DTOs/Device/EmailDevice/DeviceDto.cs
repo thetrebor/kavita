@@ -1,11 +1,11 @@
 ﻿using API.Entities.Enums.Device;
 
-namespace API.DTOs.Device;
+namespace API.DTOs.Device.EmailDevice;
 
 /// <summary>
 /// A Device is an entity that can receive data from Kavita (kindle)
 /// </summary>
-public sealed record DeviceDto
+public sealed record EmailDeviceDto
 {
     /// <summary>
     /// The device Id
@@ -24,5 +24,5 @@ public sealed record DeviceDto
     /// <summary>
     /// Platform (ie) Windows 10
     /// </summary>
-    public DevicePlatform Platform { get; set; }
+    public EmailDevicePlatform Platform { get; set; }
 }
