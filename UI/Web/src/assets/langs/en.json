@@ -325,11 +325,11 @@
 
     "manage-devices": {
         "title": "Device Manager",
-        "description": "This section is for you to setup devices that cannot connect to Kavita and instead have an email address that accepts files.",
+        "description": "This section is for you to setup email devices that cannot connect to Kavita and instead have an email address that accepts files.",
         "platform-label": "Platform",
         "email-label": "Email",
         "name-label": "Name",
-        "email-setup-alert": "Want to send files to your devices? Have your admin setup Email settings first!",
+        "email-setup-alert": "Want to send files to your email? Have your admin setup Email settings first!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
@@ -341,7 +341,7 @@
     },
 
     "edit-device-modal": {
-        "title": "Edit Device",
+        "title": "Edit Email Device",
         "device-name-label": "{{manage-devices.name-label}}",
         "platform-label": "{{manage-devices.platform-label}}",
 
