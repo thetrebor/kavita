@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs.Statistics;
+using API.DTOs.Stats.V3;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using CsvHelper;
@@ -216,5 +218,21 @@ public class StatsController : BaseApiController
         if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
         return Ok(_statService.GetWordsReadCountByYear(userId));
     }
+
+    #region Device Insights
+
+    /// <summary>
+    /// Returns client type breakdown for the current month
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("device/client-type")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<DeviceClientBreakdownDto>> GetClientTypeBreakdown()
+    {
+        return Ok(await _statService.GetClientTypeBreakdown(DateTime.UtcNow.StartOfMonth()));
+    }
+
+    #endregion
 
 }

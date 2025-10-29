@@ -18,6 +18,7 @@ import {throttleTime} from "rxjs/operators";
 import {DEBOUNCE_TIME} from "../shared/_services/download.service";
 import {download} from "../shared/_models/download";
 import {Saver, SAVER} from "../_providers/saver.provider";
+import {ClientDeviceBreakdown} from "../statistics/_models/client-device-breakdown";
 
 export enum DayOfWeek
 {
@@ -98,7 +99,7 @@ export class StatisticsService {
     return this.httpClient.get<StatCount<PublicationStatus>[]>(this.baseUrl + 'stats/server/count/publication-status').pipe(
       map(spreads => spreads.map(spread => {
       return {name: this.publicationStatusPipe.transform(spread.value), value: spread.count};
-      })));
+    })));
   }
 
   getMangaFormat() {
@@ -106,6 +107,11 @@ export class StatisticsService {
       map(spreads => spreads.map(spread => {
       return {name: this.mangaFormatPipe.transform(spread.value), value: spread.count};
       })));
+  }
+
+
+  getClientDeviceBreakdown() {
+    return this.httpClient.get<ClientDeviceBreakdown>(this.baseUrl + 'stats/device/client-type');
   }
 
   getTotalSize() {

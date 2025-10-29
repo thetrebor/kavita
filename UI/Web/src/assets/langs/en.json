@@ -340,6 +340,10 @@
         "sendto-device-header": "Email-based Devices"
     },
 
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}"
+    },
+
     "edit-device-modal": {
         "title": "Edit Email Device",
         "device-name-label": "{{manage-devices.name-label}}",
@@ -1954,6 +1958,7 @@
         "kavitaplus-section-title": "Kavita+",
 
         "admin-activity": "Activity",
+        "admin-device": "Devices",
 
         "admin-general": "General",
         "admin-oidc": "OpenID Connect",

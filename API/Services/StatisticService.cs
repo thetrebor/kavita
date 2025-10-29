@@ -6,6 +6,7 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.Statistics;
 using API.DTOs.Stats;
+using API.DTOs.Stats.V3;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions.QueryExtensions;
@@ -34,6 +35,7 @@ public interface IStatisticService
     Task UpdateServerStatistics();
     Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
+    Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
 }
 
 /// <summary>
@@ -560,6 +562,30 @@ public class StatisticService : IStatisticService
             .OrderBy(f => f.FilePath);
 
         return await query.ToListAsync();
+    }
+
+    public async Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc)
+    {
+        var devices = await _context.ClientDevice
+            .Where(d => d.IsActive && d.FirstSeenUtc >= fromDateUtc)
+            .Select(d => d.CurrentClientInfo.ClientType)
+            .ToListAsync();
+
+        var grouped = devices
+            .GroupBy(clientType => clientType)
+            .Select(g => new StatCount<ClientDeviceType>
+            {
+                Value = g.Key,
+                Count = g.Count()
+            })
+            .OrderByDescending(s => s.Count)
+            .ToList();
+
+        return new DeviceClientBreakdownDto
+        {
+            Records = grouped,
+            TotalCount = devices.Count
+        };
     }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)

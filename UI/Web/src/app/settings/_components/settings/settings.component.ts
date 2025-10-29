@@ -61,6 +61,7 @@ import {ImportMappingsComponent} from "../../../admin/import-mappings/import-map
 import {ManageOpenIDConnectComponent} from "../../../admin/manage-open-idconnect/manage-open-idconnect.component";
 import {FontManagerComponent} from "../../../user-settings/font-manager/font-manager/font-manager.component";
 import {ServerActivityComponent} from "../../../admin/server-activity/server-activity.component";
+import {ServerDevicesComponent} from "../../../admin/server-devices/server-devices.component";
 
 @Component({
     selector: 'app-settings',
@@ -101,7 +102,8 @@ import {ServerActivityComponent} from "../../../admin/server-activity/server-act
     ManagePublicMetadataSettingsComponent,
     ImportMappingsComponent,
     FontManagerComponent,
-    ServerActivityComponent
+    ServerActivityComponent,
+    ServerDevicesComponent
   ],
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',

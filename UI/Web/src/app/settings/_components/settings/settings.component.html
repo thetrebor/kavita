@@ -19,6 +19,14 @@
             }
           }
 
+          @defer (when fragment === SettingsTabId.AdminDevices; prefetch on idle) {
+            @if (fragment === SettingsTabId.AdminDevices) {
+              <div class="col-xxl-6 col-12">
+                <app-server-devices />
+              </div>
+            }
+          }
+
           @defer (when fragment === SettingsTabId.General; prefetch on idle) {
             @if (fragment === SettingsTabId.General) {
               <div class="col-xxl-6 col-12">

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Device;
@@ -11,6 +12,7 @@ using API.Services;
 using API.SignalR;
 using AutoMapper;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -209,10 +211,12 @@ public class DeviceController : BaseApiController
     /// <param name="includeInactive"></param>
     /// <returns></returns>
     [HttpGet("client/all-devices")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<List<ClientDeviceDto>>> GetAllClientDevices(bool includeInactive = false)
     {
         return Ok(await _clientDeviceService.GetAllUserDeviceDtos(includeInactive));
     }
+
 
     /// <summary>
     /// Removes the client device from DB
@@ -225,12 +229,19 @@ public class DeviceController : BaseApiController
         return Ok(await _clientDeviceService.DeleteDeviceAsync(UserId, clientDeviceId));
     }
 
+    /// <summary>
+    /// Update the friendly name of the Device
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("client/update-name")]
     public async Task<ActionResult> UpdateClientDeviceName(UpdateClientDeviceNameDto dto)
     {
         await _clientDeviceService.UpdateFriendlyNameAsync(UserId, dto);
         return Ok();
     }
+
+
 
     #endregion Client Devices
 

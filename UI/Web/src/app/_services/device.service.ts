@@ -70,6 +70,10 @@ export class DeviceService {
     return this.httpClient.get<Array<ClientDevice>>(this.baseUrl + 'device/client/devices');
   }
 
+  getAllDevices() {
+    return this.httpClient.get<Array<ClientDevice>>(this.baseUrl + 'device/client/all-devices');
+  }
+
   deleteClientDevice(deviceId: number) {
     return this.httpClient.delete(this.baseUrl + 'device/client/device?clientDeviceId=' + deviceId, TextResonse).pipe(map(res => res + '' === 'true'));
   }

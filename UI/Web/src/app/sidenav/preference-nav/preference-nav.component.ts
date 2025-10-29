@@ -41,6 +41,7 @@ export enum SettingsTabId {
   MediaIssues = 'admin-media-issues',
   EmailHistory = 'admin-email-history',
   ManageMetadata = 'admin-public-metadata',
+  AdminDevices = 'admin-device',
 
   // Kavita+
   KavitaPlusLicense = 'admin-kavitaplus',
@@ -236,6 +237,7 @@ export class PreferenceNavComponent implements AfterViewInit {
         title: SettingSectionId.InsightsSection,
         children: [
           new SideNavItem(SettingsTabId.Activity, [Role.Admin]),
+          new SideNavItem(SettingsTabId.AdminDevices, [Role.Admin]),
         ]
       },
       {
