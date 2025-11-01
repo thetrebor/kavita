@@ -9,6 +9,7 @@ using API.Helpers;
 using API.Services.Reading;
 using API.Services.Store;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
 namespace API.Middleware;
@@ -51,9 +52,8 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             return parsed;
         }
 
-
         // Fallback to basic UA parsing
-        var clientType = BrowserHelper.DetermineClientType(userAgent, context.GetEndpoint()?.DisplayName);
+        var clientType = BrowserHelper.DetermineClientType(userAgent, context.Request.Path.Value);
         return new ClientInfoData
         {
             UserAgent = userAgent,
