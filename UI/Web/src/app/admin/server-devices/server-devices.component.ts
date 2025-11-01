@@ -28,6 +28,7 @@ export class ServerDevicesComponent {
 
   clientDevices = model<ClientDevice[]>([]);
   clientDeviceTypeBreakdown = model<PieDataItem[]>([]);
+  mobileVsDesktop = model<PieDataItem[]>([]);
 
   constructor() {
     this.deviceService.getAllDevices().subscribe(devices => {
@@ -43,7 +44,17 @@ export class ServerDevicesComponent {
           extra: { clientType: record.value }
         }))
       );
-    })
+    });
+
+    this.statsService.getClientDeviceTypeCounts().subscribe(data => {
+      this.mobileVsDesktop.set(
+        data.map(record => ({
+          name: record.value,
+          value: record.count,
+          extra: { clientType: record.value }
+        }))
+      );
+    });
   }
 
 

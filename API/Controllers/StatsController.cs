@@ -235,14 +235,10 @@ public class StatsController : BaseApiController
     }
 
 
-    [HttpGet("device/peak-connections")]
-    [ResponseCache(CacheProfileName = "Statistics")]
-    [Authorize(PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<DeviceClientBreakdownDto>> GetDevicePeakConnections()
-    {
-        return Ok(await _statService.GetDevicePeakConnections(DateTime.UtcNow.StartOfMonth()));
-    }
-
+    /// <summary>
+    /// Desktop vs Mobile spread over last month
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("device/device-type")]
     [ResponseCache(CacheProfileName = "Statistics")]
     [Authorize(PolicyGroups.AdminPolicy)]

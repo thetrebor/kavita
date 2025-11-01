@@ -114,6 +114,10 @@ export class StatisticsService {
     return this.httpClient.get<ClientDeviceBreakdown>(this.baseUrl + 'stats/device/client-type');
   }
 
+  getClientDeviceTypeCounts() {
+    return this.httpClient.get<StatCount<string>[]>(this.baseUrl + 'stats/device/device-type');
+  }
+
   getTotalSize() {
     return this.httpClient.get<number>(this.baseUrl + 'stats/server/file-size', TextResonse);
   }
