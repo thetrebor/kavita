@@ -51,8 +51,9 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             return parsed;
         }
 
+
         // Fallback to basic UA parsing
-        var clientType = BrowserHelper.DetermineClientType(userAgent);
+        var clientType = BrowserHelper.DetermineClientType(userAgent, context.GetEndpoint()?.DisplayName);
         return new ClientInfoData
         {
             UserAgent = userAgent,

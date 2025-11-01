@@ -9,9 +9,21 @@
   -->
 
   <!--Client Type Breakdown - Percentage distribution (Web App vs OPDS vs KOReader, etc.)-->
-  <h4>Client Devices this Month</h4>
-  <ngx-charts-advanced-pie-chart [results]="clientDeviceTypeBreakdown()" />
-
+  <div class="row">
+    <div class="col-auto" style="height: 400px">
+      <h4>Client Devices this Month</h4>
+      <ngx-charts-advanced-pie-chart [results]="clientDeviceTypeBreakdown()" />
+    </div>
+    <div class="col-auto" style="height: 400px">
+      <h4>Client Devices this Month</h4>
+      <ngx-charts-advanced-pie-chart [results]="clientDeviceTypeBreakdown()" />
+    </div>
+    <div class="col-auto" style="height: 400px">
+      <h4>Client Devices this Month</h4>
+      <ngx-charts-advanced-pie-chart [results]="clientDeviceTypeBreakdown()" />
+    </div>
+  </div>
+  
 
   <div class="setting-section-break"></div>
 

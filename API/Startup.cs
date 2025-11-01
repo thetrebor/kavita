@@ -379,14 +379,8 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapHub<MessageHub>("hubs/messages").Add(builder =>
-            {
-                builder.Metadata.Add(new SkipDeviceTrackingAttribute());
-            });
-            endpoints.MapHub<LogHub>("hubs/logs").Add(builder =>
-            {
-                builder.Metadata.Add(new SkipDeviceTrackingAttribute());
-            });
+            endpoints.MapHub<MessageHub>("hubs/messages");
+            endpoints.MapHub<LogHub>("hubs/logs");
             if (env.IsDevelopment())
             {
                 endpoints.MapHangfireDashboard();
