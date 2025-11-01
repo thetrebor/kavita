@@ -24,6 +24,11 @@
                 {{clientDevice().currentClientInfo.authType | clientDeviceAuthType}}
               </span>
               <span class="ms-2">{{clientDevice().ownerUsername}}</span>
+              <!--TODO: I'm not happy with how ip address renders out-->
+<!--              <span class="ms-1">-->
+<!--                <i class="fa-solid fa-network-wired" aria-hidden="true"></i>-->
+<!--                {{ ipAddress() | defaultValue }}-->
+<!--              </span>-->
             </div>
           </div>
           <div class="text-end">
@@ -77,22 +82,9 @@
               <i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
               <span>{{ t('last-seen-label') }}:</span>
               <span class="ms-1">{{clientDevice().lastSeenUtc | utcToLocaleDate | timeAgo | sentenceCase}}</span>
-              @if (isRecentlyActive()) {
-                <span class="badge bg-success ms-1">{{ t('active') }}</span>
-              }
             </div>
           </div>
         </div>
-
-        <!-- IP Address (collapsed by default) -->
-        @if (showTechnicalDetails()) {
-          <div class="mt-2">
-            <small class="text-muted">
-              <i class="fa-solid fa-networked-wired me-1" aria-hidden="true"></i>
-              {{clientDevice().currentClientInfo.ipAddress}}
-            </small>
-          </div>
-        }
       </div>
     </div>
   </form>

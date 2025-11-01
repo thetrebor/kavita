@@ -2,7 +2,7 @@
 using API.DTOs.Statistics;
 using API.Entities.Enums;
 
-namespace API.DTOs.Stats.V3;
+namespace API.DTOs.Stats.V3.ClientDevice;
 
 public sealed record DeviceClientBreakdownDto
 {

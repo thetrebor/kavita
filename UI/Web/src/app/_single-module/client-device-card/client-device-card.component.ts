@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, HostListener, inject, input, model, output} from '@angular/core';
 import {ClientDevice} from "../../_models/client-device";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {ClientDeviceType} from "../../_services/client-info.service";
 import {ClientDeviceAuthTypePipe} from "../../_pipes/client-device-authtype.pipe";
@@ -48,7 +48,6 @@ export class ClientDeviceCardComponent {
   private readonly accountService = inject(AccountService);
 
   clientDevice = input.required<ClientDevice>();
-  showTechnicalDetails = input<boolean>(false);
 
   actions = model<ActionItem<ClientDevice>[]>([]);
   isEditMode = model<boolean>(false);
@@ -65,6 +64,13 @@ export class ClientDeviceCardComponent {
   deviceForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
   });
+
+  ipAddress = computed(() => {
+    const address = this.clientDevice().currentClientInfo.ipAddress;
+    if (!address) return null;
+    if (address === '::1' || address === '::ffff:127.0.0.1') return translate('client-device-card.local');
+    return address;
+  })
 
   browserInfo = computed(() => {
     const info = this.clientDevice().currentClientInfo;

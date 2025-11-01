@@ -8,6 +8,7 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Statistics;
 using API.DTOs.Stats.V3;
+using API.DTOs.Stats.V3.ClientDevice;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -231,6 +232,24 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<DeviceClientBreakdownDto>> GetClientTypeBreakdown()
     {
         return Ok(await _statService.GetClientTypeBreakdown(DateTime.UtcNow.StartOfMonth()));
+    }
+
+
+    [HttpGet("device/peak-connections")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<DeviceClientBreakdownDto>> GetDevicePeakConnections()
+    {
+        return Ok(await _statService.GetDevicePeakConnections(DateTime.UtcNow.StartOfMonth()));
+    }
+
+    [HttpGet("device/device-type")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<StatCount<string>>> GetDeviceTypeCounts()
+    {
+        // Mobile vs Desktop Ratio - Overall usage pattern
+        return Ok(await _statService.GetDeviceTypeCounts(DateTime.UtcNow.StartOfMonth()));
     }
 
     #endregion

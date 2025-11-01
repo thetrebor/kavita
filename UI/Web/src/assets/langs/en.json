@@ -375,7 +375,8 @@
         "first-seen-label": "First Seen",
         "last-seen-label": "Last Seen",
         "active": "Active",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "local": "Local"
     },
 
 

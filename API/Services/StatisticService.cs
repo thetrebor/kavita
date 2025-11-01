@@ -7,6 +7,7 @@ using API.DTOs;
 using API.DTOs.Statistics;
 using API.DTOs.Stats;
 using API.DTOs.Stats.V3;
+using API.DTOs.Stats.V3.ClientDevice;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions.QueryExtensions;
@@ -36,6 +37,8 @@ public interface IStatisticService
     Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
+    Task<DevicePeakConnectionsDto> GetDevicePeakConnections(DateTime fromDateUtc);
+    Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
 }
 
 /// <summary>
@@ -585,6 +588,63 @@ public class StatisticService : IStatisticService
         {
             Records = grouped,
             TotalCount = devices.Count
+        };
+    }
+
+    public async Task<DevicePeakConnectionsDto> GetDevicePeakConnections(DateTime fromDateUtc)
+    {
+        var connections = await _context.ClientDeviceHistory
+            .Where(h => h.CapturedAtUtc >= fromDateUtc)
+            .Select(h => h.CapturedAtUtc)
+            .ToListAsync();
+
+        var hourlyConnections = connections
+            .GroupBy(dt => dt.Hour)
+            .Select(g => new StatCount<int>
+            {
+                Value = g.Key, // Hour (0-23)
+                Count = g.Count()
+            })
+            .OrderByDescending(s => s.Count)
+            .ToList();
+
+        return new DevicePeakConnectionsDto
+        {
+            Records = hourlyConnections,
+            PeakHour = hourlyConnections.FirstOrDefault()?.Value ?? 0,
+            TotalConnections = connections.Count
+        };
+    }
+
+    public async Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc)
+    {
+        var devices = await _context.ClientDevice
+            .Where(d => d.IsActive && d.FirstSeenUtc >= fromDateUtc)
+            .Select(d => d.CurrentClientInfo.DeviceType)
+            .ToListAsync();
+
+        var grouped = devices
+            .Where(deviceType => !string.IsNullOrEmpty(deviceType))
+            .GroupBy(deviceType => deviceType!.ToLowerInvariant()) // Normalize casing
+            .Select(g => new StatCount<string>
+            {
+                Value = CapitalizeDeviceType(g.Key),
+                Count = g.Count()
+            })
+            .OrderByDescending(s => s.Count)
+            .ToList();
+
+        return grouped;
+    }
+
+    private static string CapitalizeDeviceType(string deviceType)
+    {
+        return deviceType switch
+        {
+            "mobile" => "Mobile",
+            "desktop" => "Desktop",
+            "tablet" => "Tablet",
+            _ => System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(deviceType)
         };
     }
 
