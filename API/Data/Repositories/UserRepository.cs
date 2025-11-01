@@ -13,6 +13,7 @@ using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.DTOs.SideNav;
 using API.Entities;
+using API.Entities.User;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;

@@ -2,6 +2,7 @@
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.User;
 using Kavita.Common;
 
 namespace API.Helpers.Builders;

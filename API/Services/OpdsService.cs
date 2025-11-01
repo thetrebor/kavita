@@ -17,6 +17,7 @@ using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.UserPreferences;
 using API.Exceptions;
 using API.Helpers;
 using API.Services.Reading;
@@ -598,15 +599,15 @@ public class OpdsService : IOpdsService
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
         var anyProgress = await _unitOfWork.ReadingListRepository.AnyUserReadingProgressAsync(readingListId, userId);
-        if (anyProgress)
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        if (user!.UserPreferences.OpdsPreferences.IncludeContinueFrom && anyProgress)
         {
             var firstReadReadingListItem = await _unitOfWork.ReadingListRepository.GetContinueReadingPoint(readingListId, userId);
             if (firstReadReadingListItem != null && request.PageNumber == FirstPageNumber)
             {
-                await AddContinueReadingPoint(firstReadReadingListItem, feed, request);
+                await AddContinueReadingPoint(firstReadReadingListItem, feed, request, user.UserPreferences.OpdsPreferences);
             }
         }
-
 
 
         foreach (var item in items)
@@ -618,7 +619,7 @@ public class OpdsService : IOpdsService
             {
                 var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(item.SeriesId, userId);
                 feed.Entries.Add(await CreateChapterWithFile(item.SeriesId, item.VolumeId, item.ChapterId,
-                    chapterDto.Files.First(), series!, chapterDto, request));
+                    chapterDto.Files.First(), series!, chapterDto, request, user.UserPreferences.OpdsPreferences));
             }
             else
             {
@@ -647,10 +648,11 @@ public class OpdsService : IOpdsService
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
         var anyUserProgress = await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
-        if (anyUserProgress)
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        if (user!.UserPreferences.OpdsPreferences.IncludeContinueFrom && anyUserProgress)
         {
             var chapterDto = await _readerService.GetContinuePoint(seriesId, userId);
-            await AddContinueReadingPoint(seriesId, chapterDto, feed, request);
+            await AddContinueReadingPoint(seriesId, chapterDto, feed, request, user.UserPreferences.OpdsPreferences);
         }
 
 
@@ -673,7 +675,7 @@ public class OpdsService : IOpdsService
                     if (!fileDict.TryAdd(mangaFile.Id, 0)) continue;
 
                     feed.Entries.Add(await CreateChapterWithFile(seriesId, volume.Id, chapterId, _mapper.Map<MangaFileDto>(mangaFile), series,
-                        chapterDto, request));
+                        chapterDto, request, user.UserPreferences.OpdsPreferences));
                 }
             }
         }
@@ -693,7 +695,7 @@ public class OpdsService : IOpdsService
                 // If a chapter has multiple files that are within one chapter, this dict prevents duplicate key exception
                 if (!fileDict.TryAdd(mangaFile.Id, 0)) continue;
                 feed.Entries.Add(await CreateChapterWithFile(seriesId, chapter.VolumeId, chapter.Id, _mapper.Map<MangaFileDto>(mangaFile), series,
-                    chapterDto, request));
+                    chapterDto, request, user.UserPreferences.OpdsPreferences));
             }
         }
 
@@ -707,7 +709,7 @@ public class OpdsService : IOpdsService
                 if (!fileDict.TryAdd(mangaFile.Id, 0)) continue;
 
                 feed.Entries.Add(await CreateChapterWithFile(seriesId, special.VolumeId, special.Id, _mapper.Map<MangaFileDto>(mangaFile), series,
-                    chapterDto, request));
+                    chapterDto, request, user.UserPreferences.OpdsPreferences));
             }
         }
 
@@ -741,17 +743,18 @@ public class OpdsService : IOpdsService
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
         var firstChapterWithProgress = chapterDtos.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.Pages) ??
                                        chapterDtos.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.Pages);
-        if (firstChapterWithProgress != null && request.PageNumber == FirstPageNumber)
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        if (user!.UserPreferences.OpdsPreferences.IncludeContinueFrom && firstChapterWithProgress != null && request.PageNumber == FirstPageNumber)
         {
             var chapterDto = await _readerService.GetContinuePoint(seriesId, userId);
-            await AddContinueReadingPoint(seriesId, chapterDto, feed, request);
+            await AddContinueReadingPoint(seriesId, chapterDto, feed, request, user.UserPreferences.OpdsPreferences);
         }
 
         foreach (var chapterDto in chapterDtos)
         {
             foreach (var mangaFile in chapterDto.Files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterDto.Id, mangaFile, series, chapterDto!, request));
+                feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterDto.Id, mangaFile, series, chapterDto, request, user.UserPreferences.OpdsPreferences));
             }
         }
 
@@ -786,9 +789,10 @@ public class OpdsService : IOpdsService
             $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{_seriesService.FormatChapterName(userId, libraryType)}-{chapterId}-files");
 
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         foreach (var mangaFile in chapter.Files)
         {
-            feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, request));
+            feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, request, user!.UserPreferences.OpdsPreferences));
         }
 
         return feed;
@@ -1148,17 +1152,20 @@ public class OpdsService : IOpdsService
     }
 
     private async Task<FeedEntry> CreateContinueReadingFromFile(int seriesId, int volumeId, int chapterId,
-        MangaFileDto mangaFile, SeriesDto series, ChapterDto chapter, IOpdsRequest request)
+        MangaFileDto mangaFile, SeriesDto series, ChapterDto chapter, IOpdsRequest request, AppUserOpdsPreferences pref)
     {
-        var entry = await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, request);
+        var entry = await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, request, pref);
 
-        entry.Title = await _localizationService.Translate(request.UserId, "opds-continue-reading-title", entry.Title);
+        if (pref.EmbedProgressIndicator)
+        {
+            entry.Title = await _localizationService.Translate(request.UserId, "opds-continue-reading-title", entry.Title);
+        }
 
         return entry;
     }
 
     private async Task<FeedEntry> CreateChapterWithFile(int seriesId, int volumeId, int chapterId,
-        MangaFileDto mangaFile, SeriesDto series, ChapterDto chapter, IOpdsRequest request)
+        MangaFileDto mangaFile, SeriesDto series, ChapterDto chapter, IOpdsRequest request, AppUserOpdsPreferences pref)
     {
         var fileSize =
             mangaFile.Bytes > 0 ? DirectoryService.GetHumanReadableBytes(mangaFile.Bytes) :
@@ -1230,7 +1237,10 @@ public class OpdsService : IOpdsService
         }
 
         // Patch in reading status on the item (as OPDS is seriously lacking)
-        entry.Title = $"{GetReadingProgressIcon(chapter.PagesRead, chapter.Pages)} {entry.Title}";
+        if (pref.EmbedProgressIndicator)
+        {
+            entry.Title = $"{GetReadingProgressIcon(chapter.PagesRead, chapter.Pages)} {entry.Title}";
+        }
 
         return entry;
     }
@@ -1285,24 +1295,24 @@ public class OpdsService : IOpdsService
         };
     }
 
-    private async Task AddContinueReadingPoint(int seriesId, ChapterDto chapterDto, Feed feed, IOpdsRequest request)
+    private async Task AddContinueReadingPoint(int seriesId, ChapterDto chapterDto, Feed feed, IOpdsRequest request, AppUserOpdsPreferences pref)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, request.UserId);
         if (chapterDto is {Files.Count: 1})
         {
             feed.Entries.Add(await CreateContinueReadingFromFile(seriesId, chapterDto.VolumeId, chapterDto.Id,
-                chapterDto.Files.First(), series!, chapterDto, request));
+                chapterDto.Files.First(), series!, chapterDto, request, pref));
         }
     }
 
-    private async Task AddContinueReadingPoint(ReadingListItemDto firstReadReadingListItem, Feed feed, IOpdsRequest request)
+    private async Task AddContinueReadingPoint(ReadingListItemDto firstReadReadingListItem, Feed feed, IOpdsRequest request, AppUserOpdsPreferences pref)
     {
         var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(firstReadReadingListItem.ChapterId, request.UserId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(firstReadReadingListItem.SeriesId, request.UserId);
         if (chapterDto is {Files.Count: 1})
         {
             feed.Entries.Add(await CreateContinueReadingFromFile(firstReadReadingListItem.SeriesId, firstReadReadingListItem.VolumeId,
-                firstReadReadingListItem.ChapterId, chapterDto.Files.First(), series!, chapterDto, request));
+                firstReadReadingListItem.ChapterId, chapterDto.Files.First(), series!, chapterDto, request, pref));
         }
     }
 }

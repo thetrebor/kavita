@@ -4,6 +4,7 @@ using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Person;
+using API.Entities.User;
 
 namespace API.Extensions.QueryExtensions;
 #nullable enable

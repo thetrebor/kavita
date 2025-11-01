@@ -120,6 +120,7 @@ public class UsersController : BaseApiController
         existingPreferences.ColorScapeEnabled = preferencesDto.ColorScapeEnabled;
         existingPreferences.BookReaderHighlightSlots = preferencesDto.BookReaderHighlightSlots;
         existingPreferences.DataSaver = preferencesDto.DataSaver;
+        existingPreferences.CustomKeyBinds = preferencesDto.CustomKeyBinds;
 
         var allLibs = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id))
             .Select(l => l.Id).ToList();
@@ -127,6 +128,8 @@ public class UsersController : BaseApiController
         preferencesDto.SocialPreferences.SocialLibraries = preferencesDto.SocialPreferences.SocialLibraries
             .Where(l => allLibs.Contains(l)).ToList();
         existingPreferences.SocialPreferences = preferencesDto.SocialPreferences;
+
+        existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;
 
         if (await _licenseService.HasActiveLicense())
         {

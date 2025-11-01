@@ -43,6 +43,8 @@ import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {KeyBindService} from "../../../_services/key-bind.service";
+import {KeyBindTarget} from "../../../_models/preferences/preferences";
 
 @Component({
   selector: 'app-pdf-reader',
@@ -68,6 +70,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
   public readonly document = inject(DOCUMENT);
+  private readonly keyBindService = inject(KeyBindService);
 
   protected readonly ScrollModeType = ScrollModeType;
   protected readonly Breakpoint = Breakpoint;
@@ -137,13 +140,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
-  }
 
-  @HostListener('window:keyup', ['$event'])
-  handleKeyPress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.ESC_KEY) {
-      this.closeReader();
-    }
+      this.keyBindService.registerListener(
+        this.destroyRef,
+        () => this.closeReader(),
+        [KeyBindTarget.Escape],
+      );
   }
 
   @HostListener('window:resize', ['$event'])

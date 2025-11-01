@@ -12,6 +12,7 @@ using API.DTOs.Email;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.User;
 using API.Errors;
 using API.Extensions;
 using API.Helpers.Builders;
