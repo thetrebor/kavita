@@ -7,7 +7,9 @@ import {translate} from "@jsverse/transloco";
 })
 export class ClientDevicePlatformPipe implements PipeTransform {
 
-  transform(value: ClientDevicePlatform) {
+  transform(value: ClientDevicePlatform | undefined | null) {
+    if (value === null || value === undefined) return translate('client-device-platform-pipe.unknown');
+
     switch (value) {
       case ClientDevicePlatform.Unknown:
         return translate('client-device-platform-pipe.unknown');
