@@ -17,6 +17,8 @@ import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DeviceService} from "../../_services/device.service";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {DOCUMENT} from "@angular/common";
+import {AccountService} from "../../_services/account.service";
+import {User} from "../../_models/user";
 
 @Component({
   selector: 'app-client-device-card',
@@ -43,6 +45,7 @@ export class ClientDeviceCardComponent {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly deviceService = inject(DeviceService);
   private readonly document = inject(DOCUMENT);
+  private readonly accountService = inject(AccountService);
 
   clientDevice = input.required<ClientDevice>();
   showTechnicalDetails = input<boolean>(false);
@@ -138,8 +141,18 @@ export class ClientDeviceCardComponent {
 
 
   constructor() {
-    this.actions.set(this.actionFactoryService.getClientDeviceActions(this.handleActionCallback.bind(this)));
+    const user = this.accountService.currentUserSignal();
+    if (user && !this.accountService.hasReadOnlyRole(user)) {
+      this.actions.set(this.actionFactoryService.getClientDeviceActions(this.handleActionCallback.bind(this), this.shouldRenderAction.bind(this)));
+    }
   }
+
+
+  shouldRenderAction(action: ActionItem<ClientDevice>, entity: ClientDevice, user: User) {
+    const loggedInUser = this.accountService.currentUserSignal();
+    return entity.ownerUserId === loggedInUser?.id; // Only a user can manipulate their own devices
+  }
+
 
   handleActionCallback(action: ActionItem<ClientDevice>, entity: ClientDevice) {
     switch (action.action) {
