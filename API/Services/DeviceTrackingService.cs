@@ -87,7 +87,7 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
             .Select(s => s.ActivityData)
             .ToListAsync();
         var allDeviceIds = allActivityData
-            .SelectMany(s => s.Select(s2 => s2.DeviceId))
+            .SelectMany(s => s.SelectMany(s2 => s2.DeviceIds))
             .Distinct()
             .ToList();
 
@@ -96,7 +96,6 @@ public class DeviceTrackingService(HybridCache cache, DataContext context, ILogg
             // TODO: Optimize this code
             await ClearDeviceCacheAsync(deviceId);
         }
-        logger.LogWarning("ClearUserDeviceCachesAsync not fully implemented - requires DB query");
     }
 
     private static string GetDeviceCacheKey(int deviceId)

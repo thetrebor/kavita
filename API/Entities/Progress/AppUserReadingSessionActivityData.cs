@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace API.Entities.Progress;
 #nullable enable
@@ -37,5 +38,5 @@ public class AppUserReadingSessionActivityData
     /// Tracks device, browser, and authentication details.
     /// </summary>
     public ClientInfoData? ClientInfo { get; set; }
-    public int DeviceId { get; set; }
+    public IList<int> DeviceIds { get; set; }
 }

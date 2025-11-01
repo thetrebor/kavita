@@ -69,14 +69,13 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
     public async Task UpdateProgress(int userId, ProgressDto progressDto)
     {
         _logger.LogDebug("Creating/Updating Reading Session for {UserId} on {ChapterId}", userId, progressDto.ChapterId);
-        var session = await GetOrCreateSession(userId, progressDto);
 
-        using var scope = _serviceScopeFactory.CreateScope();
-
-        // Identify/register device
         var clientInfo = _clientInfoAccessor.Current;
         var deviceId = _clientInfoAccessor.CurrentDeviceId;
 
+        var session = await GetOrCreateSession(userId, progressDto);
+
+        using var scope = _serviceScopeFactory.CreateScope();
 
         // Update session activity data in DB
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
@@ -90,6 +89,13 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             existingChapterActivity.EndPage = progressDto.PageNum;
             existingChapterActivity.EndTime = DateTime.Now;
             existingChapterActivity.EndTimeUtc = DateTime.UtcNow;
+            if (deviceId.HasValue)
+            {
+                existingChapterActivity.DeviceIds.Add(deviceId.Value);
+            }
+
+            existingChapterActivity.DeviceIds = existingChapterActivity.DeviceIds.Distinct().ToList();
+
 
             // Update client info if it changed (e.g., user switched devices)
             if (clientInfo != null)
@@ -149,7 +155,9 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             if (clientInfo != null)
             {
                 newActivity.ClientInfo = clientInfo;
-                newActivity.DeviceId = deviceId!.Value;
+                newActivity.DeviceIds.Add(deviceId!.Value);
+
+                newActivity.DeviceIds = newActivity.DeviceIds.Distinct().ToList();
             }
             session.ActivityData.Add(newActivity);
         }
@@ -292,7 +300,8 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             EndTime = null,
             PagesRead = 0,
             WordsRead = 0,
-            ClientInfo = null
+            ClientInfo = null,
+            DeviceIds = []
         };
     }
 
