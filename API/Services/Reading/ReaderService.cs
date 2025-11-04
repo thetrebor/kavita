@@ -295,7 +295,7 @@ public class ReaderService : IReaderService
 
             if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
             {
-                await _readingSessionService.UpdateProgress(userId, progressDto);
+                BackgroundJob.Enqueue(() => _readingSessionService.UpdateProgress(userId, progressDto));
 
                 var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,

@@ -1,0 +1,167 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using API.Entities;
+using API.Entities.Enums;
+using API.Entities.History;
+using API.Entities.Progress;
+using Kavita.Common.EnvironmentInfo;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace API.Data.ManualMigrations;
+
+
+/// <summary>
+/// v0.8.9 - Convert past progress into Reading Sessions
+/// </summary>
+public static class MigrateProgressToReadingSessions
+{
+    private const int BatchSize = 1000;
+
+    public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
+    {
+        try
+        {
+            if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateProgressToReadingSessions"))
+            {
+                return;
+            }
+
+            logger.LogCritical(
+                "Running MigrateProgressToReadingSessions migration - Please be patient, this may take some time. This is not an error");
+
+            var totalProgressRecords = await dataContext.AppUserProgresses.CountAsync();
+            if (totalProgressRecords > 0)
+            {
+                logger.LogInformation("Found {Count} progress records to migrate", totalProgressRecords);
+
+                var totalBatches = (int)Math.Ceiling(totalProgressRecords / (double)BatchSize);
+                var migratedCount = 0;
+
+                for (var batchNumber = 0; batchNumber < totalBatches; batchNumber++)
+                {
+                    // Join with Chapter to get TotalPages and WordCount
+                    var progressBatch = await dataContext.AppUserProgresses
+                        .AsNoTracking()
+                        .Where(p => p.PagesRead > 0)
+                        .OrderBy(p => p.Id)
+                        .Skip(batchNumber * BatchSize)
+                        .Take(BatchSize)
+                        .Join(dataContext.Chapter,
+                            p => p.ChapterId,
+                            c => c.Id,
+                            (progress, chapter) => new { Progress = progress, Chapter = chapter })
+                        .Join(dataContext.Series,
+                            p => p.Progress.SeriesId,
+                            s => s.Id,
+                            (combo, series) => new {combo.Progress, combo.Chapter, series.Format })
+                        .ToListAsync();
+
+                    var sessions = new List<AppUserReadingSession>();
+
+                    foreach (var item in progressBatch)
+                    {
+                        var progress = item.Progress;
+                        var chapter = item.Chapter;
+                        var format = item.Format;
+
+                        if (progress.PagesRead == 0) continue;
+
+                        var sessionsForProgress = CreateSessionsFromProgress(progress, chapter, format);
+                        sessions.AddRange(sessionsForProgress);
+                    }
+
+                    if (sessions.Count > 0)
+                    {
+                        await dataContext.AppUserReadingSession.AddRangeAsync(sessions);
+                        await dataContext.SaveChangesAsync();
+                        migratedCount += sessions.Count;
+                    }
+
+                    logger.LogInformation("Migrated batch {Current}/{Total} ({Count} sessions)",
+                        batchNumber + 1, totalBatches, migratedCount);
+                }
+
+                logger.LogInformation("Migration complete: {Count} sessions created from {Total} progress records",
+                    migratedCount, totalProgressRecords);
+            }
+            else
+            {
+                logger.LogInformation("No progress records found to migrate");
+            }
+
+            logger.LogCritical(
+                "Running MigrateProgressToReadingSessions migration - Completed. This is not an error");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error during MigrateProgressToReadingSessions migration");
+            throw;
+        }
+
+        dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
+        {
+            Name = "MigrateProgressToReadingSessions",
+            ProductVersion = BuildInfo.Version.ToString(),
+            RanAt = DateTime.UtcNow
+        });
+        await dataContext.SaveChangesAsync();
+    }
+
+    private static List<AppUserReadingSession> CreateSessionsFromProgress(AppUserProgress progress, Chapter chapter, MangaFormat format)
+    {
+        var sessions = new List<AppUserReadingSession>();
+
+        // Use LastModified as the actual reading time - this is when the user finished/last read
+        var sessionDate = progress.LastModified.Date;
+        var sessionDateUtc = progress.LastModifiedUtc.Date;
+
+        var totalWordsRead = 0;
+        if (format == MangaFormat.Epub && chapter.WordCount > 0 && chapter.Pages > 0)
+        {
+            totalWordsRead = (int)Math.Round(chapter.WordCount * (progress.PagesRead / (1.0f * chapter.Pages)));
+        }
+
+        var activityData = new AppUserReadingSessionActivityData
+        {
+            ChapterId = progress.ChapterId,
+            VolumeId = progress.VolumeId,
+            SeriesId = progress.SeriesId,
+            LibraryId = progress.LibraryId,
+            StartPage = 0,
+            EndPage = progress.PagesRead,
+            StartBookScrollId = null,
+            EndBookScrollId = progress.BookScrollId,
+            StartTime = sessionDate,
+            StartTimeUtc = sessionDateUtc,
+            EndTime = sessionDate.AddHours(23).AddMinutes(59).AddSeconds(59),
+            EndTimeUtc = sessionDateUtc.AddHours(23).AddMinutes(59).AddSeconds(59),
+            PagesRead = progress.PagesRead,
+            WordsRead = totalWordsRead,
+            TotalPages = chapter.Pages,
+            TotalWords = chapter.WordCount,
+            ClientInfo = null,
+            DeviceIds = []
+        };
+
+        var session = new AppUserReadingSession
+        {
+            AppUserId = progress.AppUserId,
+            StartTime = sessionDate,
+            StartTimeUtc = sessionDateUtc,
+            EndTime = sessionDate.AddHours(23).AddMinutes(59).AddSeconds(59),
+            EndTimeUtc = sessionDateUtc.AddHours(23).AddMinutes(59).AddSeconds(59),
+            IsActive = false,
+            ActivityData = [activityData],
+            Created = sessionDate,
+            CreatedUtc = sessionDateUtc,
+            LastModified = sessionDate,
+            LastModifiedUtc = sessionDateUtc
+        };
+
+        sessions.Add(session);
+        return sessions;
+    }
+}

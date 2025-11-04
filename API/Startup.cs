@@ -477,6 +477,9 @@ public class Startup
                     await ManualMigrateEnableMetadataMatchingDefault.Migrate(dataContext, unitOfWork, logger);
                     await ManualMigrateBookReadingProgress.Migrate(dataContext, unitOfWork, logger);
 
+                    // v0.8.9
+                    await MigrateProgressToReadingSessions.Migrate(dataContext, logger);
+
                     #endregion
 
                     //  Update the version in the DB after all migrations are run
