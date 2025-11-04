@@ -61,16 +61,38 @@ public static class MigrateProgressToReadingSessions
 
                     var sessions = new List<AppUserReadingSession>();
 
-                    foreach (var item in progressBatch)
+                    var groupedProgress = progressBatch
+                        .Where(item => item.Progress.PagesRead > 0)
+                        .GroupBy(item => new
+                        {
+                            item.Progress.AppUserId,
+                            item.Progress.LastModified.Date,
+                        });
+
+                    foreach (var group in groupedProgress)
                     {
-                        var progress = item.Progress;
-                        var chapter = item.Chapter;
-                        var format = item.Format;
+                        var firstItem = group.FirstOrDefault();
+                        if (firstItem == null) continue;
 
-                        if (progress.PagesRead == 0) continue;
+                        var sessionDate = firstItem.Progress.LastModified.Date;
+                        var sessionDateUtc = firstItem.Progress.LastModifiedUtc.Date;
 
-                        var sessionsForProgress = CreateSessionsFromProgress(progress, chapter, format);
-                        sessions.AddRange(sessionsForProgress);
+                        var session = new AppUserReadingSession
+                        {
+                            AppUserId = group.Key.AppUserId,
+                            StartTime = sessionDate,
+                            StartTimeUtc = sessionDateUtc,
+                            EndTime = sessionDate.AddHours(23).AddMinutes(59).AddSeconds(59),
+                            EndTimeUtc = sessionDateUtc.AddHours(23).AddMinutes(59).AddSeconds(59),
+                            IsActive = false,
+                            ActivityData = [.. group.Select(item => CreateSessionActivityDataFromProgress(item.Progress, item.Chapter, item.Format))],
+                            Created = sessionDate,
+                            CreatedUtc = sessionDateUtc,
+                            LastModified = sessionDate,
+                            LastModifiedUtc = sessionDateUtc
+                        };
+
+                        sessions.Add(session);
                     }
 
                     if (sessions.Count > 0)
@@ -110,11 +132,9 @@ public static class MigrateProgressToReadingSessions
         await dataContext.SaveChangesAsync();
     }
 
-    private static List<AppUserReadingSession> CreateSessionsFromProgress(AppUserProgress progress, Chapter chapter, MangaFormat format)
+    private static AppUserReadingSessionActivityData CreateSessionActivityDataFromProgress(AppUserProgress progress, Chapter chapter, MangaFormat format)
     {
-        var sessions = new List<AppUserReadingSession>();
 
-        // Use LastModified as the actual reading time - this is when the user finished/last read
         var sessionDate = progress.LastModified.Date;
         var sessionDateUtc = progress.LastModifiedUtc.Date;
 
@@ -124,7 +144,7 @@ public static class MigrateProgressToReadingSessions
             totalWordsRead = (int)Math.Round(chapter.WordCount * (progress.PagesRead / (1.0f * chapter.Pages)));
         }
 
-        var activityData = new AppUserReadingSessionActivityData
+        return new AppUserReadingSessionActivityData
         {
             ChapterId = progress.ChapterId,
             VolumeId = progress.VolumeId,
@@ -145,23 +165,5 @@ public static class MigrateProgressToReadingSessions
             ClientInfo = null,
             DeviceIds = []
         };
-
-        var session = new AppUserReadingSession
-        {
-            AppUserId = progress.AppUserId,
-            StartTime = sessionDate,
-            StartTimeUtc = sessionDateUtc,
-            EndTime = sessionDate.AddHours(23).AddMinutes(59).AddSeconds(59),
-            EndTimeUtc = sessionDateUtc.AddHours(23).AddMinutes(59).AddSeconds(59),
-            IsActive = false,
-            ActivityData = [activityData],
-            Created = sessionDate,
-            CreatedUtc = sessionDateUtc,
-            LastModified = sessionDate,
-            LastModifiedUtc = sessionDateUtc
-        };
-
-        sessions.Add(session);
-        return sessions;
     }
 }
