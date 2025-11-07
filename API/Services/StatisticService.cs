@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -37,6 +38,7 @@ public interface IStatisticService
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
+    Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year);
 }
 
 /// <summary>
@@ -618,6 +620,72 @@ public class StatisticService : IStatisticService
         return result;
     }
 
+    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year)
+    {
+        var startDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var endDate = startDate.AddYears(1).AddSeconds(-1);
+
+        var sessions = await _context.AppUserReadingSession
+            .Where(s => s.AppUserId == userId)
+            .Where(s => s.StartTimeUtc >= startDate && s.EndTimeUtc <= endDate)
+            .OrderBy(s => s.StartTimeUtc)
+            .ToListAsync();
+
+        var result = new ReadingActivityGraphDto();
+
+        // Pre-populate all days of the year with empty entries
+        var currentDate = startDate;
+        while (currentDate.Year == year)
+        {
+            var dateKey = currentDate.ToString("yyyy-MM-dd");
+            result[dateKey] = new ReadingActivityGraphEntryDto
+            {
+                Date = currentDate,
+                TotalTimeReadingSeconds = 0,
+                TotalPages = 0,
+                TotalWords = 0,
+                TotalChaptersFullyRead = 0
+            };
+            currentDate = currentDate.AddDays(1);
+        }
+
+        // Group sessions by day and aggregate data
+        foreach (var session in sessions)
+        {
+            if (session.EndTimeUtc == null || session.ActivityData == null)
+                continue;
+
+            var sessionDate = session.StartTimeUtc.Date;
+            var dateKey = sessionDate.ToString("yyyy-MM-dd");
+
+            if (!result.TryGetValue(dateKey, out var entry))
+                continue; // Skip if date is somehow outside our year range
+
+            // Calculate session duration
+            var sessionDuration = (int)(session.EndTimeUtc.Value - session.StartTimeUtc).TotalSeconds;
+            entry.TotalTimeReadingSeconds += sessionDuration;
+
+            // Aggregate activity data from the session
+            var processedChapters = new HashSet<int>(); // Track unique chapters per day
+
+            foreach (var activity in session.ActivityData)
+            {
+                entry.TotalPages += activity.PagesRead;
+                entry.TotalWords += activity.WordsRead;
+
+                // Check if chapter was fully read (comparing pages read to total pages)
+                if (activity.PagesRead > 0 && activity.TotalPages > 0 && activity.PagesRead >= activity.TotalPages)
+                {
+                    processedChapters.Add(activity.ChapterId);
+                }
+            }
+
+            entry.TotalChaptersFullyRead += processedChapters.Count;
+        }
+
+        return result;
+    }
+
     private static string CapitalizeDeviceType(string deviceType)
     {
         return deviceType switch
@@ -625,7 +693,7 @@ public class StatisticService : IStatisticService
             "mobile" => "Mobile",
             "desktop" => "Desktop",
             "tablet" => "Tablet",
-            _ => System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(deviceType)
+            _ => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(deviceType)
         };
     }
 

@@ -614,6 +614,15 @@
         "years-ago": "{{value}} years ago"
     },
 
+    "duration-pipe": {
+        "seconds": "{{num}} seconds",
+        "minutes": "{{num}} minutes",
+        "hours": "{{num}} hours",
+        "combo": "{{hour}}h {{min}}m"
+
+    },
+
+
     "relationship-pipe": {
         "adaptation": "Adaptation",
         "alternative-setting": "Alternative Setting",
@@ -2802,6 +2811,77 @@
         "words-count": "{{series-detail.words-count}}",
         "started-label": "Started",
         "view-label": "View"
+    },
+
+    "activity-graph": {
+        "title": "Reading Activity",
+        "day-of-week-alt": "Day of the Week",
+        "less": "Less",
+        "more": "More",
+        "reading-time": "Reading Time",
+        "pages": "Pages",
+        "words": "Words",
+        "chapters": "Chapters",
+        "no-activity": "No Activity",
+        "no-activity-tooltip": "No reading activity on {{date}}.",
+        "low-activity": "Low Activity",
+        "moderate-activity": "Moderate Activity",
+        "good-activity": "Good Activity",
+        "high-activity": "High Activity"
+    },
+
+    "month-label-pipe": {
+        "january": "January",
+        "january-short": "Jan",
+        "february": "February",
+        "february-short": "Feb",
+        "march": "March",
+        "march-short": "Mar",
+        "april": "April",
+        "april-short": "Apr",
+        "may": "May",
+        "may-short": "May",
+        "june": "June",
+        "june-short": "Jun",
+        "july": "July",
+        "july-short": "Jul",
+        "august": "August",
+        "august-short": "Aug",
+        "september": "September",
+        "september-short": "Sep",
+        "october": "October",
+        "october-short": "Oct",
+        "november": "November",
+        "november-short": "Nov",
+        "december": "December",
+        "december-short": "Dec"
+    },
+
+    "day-label-pipe": {
+        "sunday": "Sunday",
+        "sunday-short": "Sun",
+        "monday": "Monday",
+        "monday-short": "Mon",
+        "tuesday": "Tuesday",
+        "tuesday-short": "Tue",
+        "wednesday": "Wednesday",
+        "wednesday-short": "Wed",
+        "thursday": "Thursday",
+        "thursday-short": "Thu",
+        "friday": "Friday",
+        "friday-short": "Fri",
+        "saturday": "Saturday",
+        "saturday-short": "Sat"
+    },
+
+    "ordinal-date-pipe": {
+        "ordinalFormat": "{{month}} {{day}}",
+        "ordinal": {
+            "st": "st",
+            "nd": "nd",
+            "rd": "rd",
+            "th": "th"
+        }
     },
 
 

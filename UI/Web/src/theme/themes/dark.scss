@@ -457,4 +457,10 @@
     --setting-tablet-breakpoint: 1280;
     --setting-desktop-breakpoint: 1440;
 
+    /** Tooltips **/
+    --tooltip-bg-color: var(--bs-dark, var(--popover-body-bg-color));
+    --tooltip-outline-color: white;
+    --tooltip-caret-color: var(--tooltip-outline-color);
+
+
 }
