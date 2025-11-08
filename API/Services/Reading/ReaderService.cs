@@ -142,6 +142,7 @@ public class ReaderService : IReaderService
                 userProgress.PagesRead = chapter.Pages;
                 userProgress.SeriesId = seriesId;
                 userProgress.VolumeId = chapter.VolumeId;
+                userProgress.TotalReads += 1;
             }
 
             userProgress?.MarkModified();
@@ -281,12 +282,6 @@ public class ReaderService : IReaderService
                 userProgress.VolumeId = progressDto.VolumeId;
                 userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
-                _unitOfWork.AppUserProgressRepository.Update(userProgress);
-            }
-
-            if (userProgress.PagesRead >= totalPages)
-            {
-                userProgress.TotalReads += 1;
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 

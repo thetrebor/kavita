@@ -378,6 +378,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
         var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
 
+
         // Mark session as inactive in DB
         await context.AppUserReadingSession
             .Where(s => s.Id == sessionId)
@@ -388,8 +389,34 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
                 .SetProperty(x => x.LastModified, DateTime.Now)
                 .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow));
 
+        await UpdateTotalReadsOnSessionClose(sessionId);
+
         // Trigger a SessionClose Event so Activity Feed can update
         await eventHub.SendMessageAsync(MessageFactory.SessionClose, MessageFactory.SessionCloseEvent(sessionId));
+    }
+
+    private async Task UpdateTotalReadsOnSessionClose(int sessionId)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+        // Check if the user fully read any chapter and increment totalReads for said chapter
+        var sessionEntry = await context.AppUserReadingSession
+            .Where(s => s.Id == sessionId)
+            .FirstAsync();
+
+        var chapterIds = sessionEntry.ActivityData
+            .Where(d => d.PagesRead >= d.TotalPages)
+            .Select(d => d.ChapterId)
+            .ToList();
+
+        if (chapterIds.Count > 0)
+        {
+            await context.AppUserProgresses
+                .Where(p => chapterIds.Contains(p.ChapterId))
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.TotalReads, x => x.TotalReads + 1));
+        }
     }
 
     private void ScheduleMidnightRollover()
