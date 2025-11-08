@@ -287,6 +287,7 @@ public class ReaderService : IReaderService
             if (userProgress.PagesRead >= totalPages)
             {
                 userProgress.TotalReads += 1;
+                _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
             _logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);

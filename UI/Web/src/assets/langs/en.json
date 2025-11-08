@@ -1207,7 +1207,8 @@
         "publication-status-tooltip": "Publication Status",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "read-count-tooltip": "Total Reads"
     },
 
     "match-series-modal": {

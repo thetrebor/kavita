@@ -42,8 +42,9 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public int PagesRead { get; set; }
     /// <summary>
-    /// Calcuated at API time. Total number of complete reads.
+    /// Total number of complete reads
     /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
     public int TotalReads { get; set; }
     /// <summary>
     /// The last time a chapter was read by current authenticated user

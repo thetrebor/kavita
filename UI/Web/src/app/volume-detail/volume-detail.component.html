@@ -29,6 +29,7 @@
                                    [mangaFormat]="series.format"
                                    [totalBytes]="size"
                                    [releaseYear]="(volume.chapters.at(0)?.releaseDate | utcToLocaleDate)?.getFullYear()"
+                                   [totalReads]="totalReads()"
           />
 
           @if (libraryType !== null && series && volume.chapters.length === 1) {

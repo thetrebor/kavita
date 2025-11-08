@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, Input} from '@angular/core';
 import {AgeRatingImageComponent} from "../../../_single-module/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
@@ -17,7 +17,6 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {MangaFormat} from "../../../_models/manga-format";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
-import {PublisherFlipperComponent} from "../../../_single-module/publisher-flipper/publisher-flipper.component";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 
 @Component({
@@ -31,7 +30,6 @@ import {BytesPipe} from "../../../_pipes/bytes.pipe";
     TranslocoDirective,
     ImageComponent,
     SeriesFormatComponent,
-    PublisherFlipperComponent,
     BytesPipe
   ],
     templateUrl: './metadata-detail-row.component.html',
@@ -55,6 +53,7 @@ export class MetadataDetailRowComponent {
   @Input({required: true}) mangaFormat!: MangaFormat;
   @Input() releaseYear: number | undefined;
   @Input() totalBytes: number | undefined;
+  totalReads = input(0);
 
   openGeneric(queryParamName: FilterField, filter: string | number) {
     if (queryParamName === FilterField.None) return;

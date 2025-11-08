@@ -802,7 +802,8 @@ public class SeriesRepository : ISeriesRepository
 
         foreach (var s in series)
         {
-            s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
+            var seriesProgress = userProgress.Where(p => p.SeriesId == s.Id).ToList();
+            s.PagesRead = seriesProgress.Sum(p => p.PagesRead);
             var rating = userRatings.SingleOrDefault(r => r.SeriesId == s.Id);
             if (rating != null)
             {
@@ -812,7 +813,8 @@ public class SeriesRepository : ISeriesRepository
 
             if (userProgress.Count > 0)
             {
-                s.LatestReadDate = userProgress.Where(p => p.SeriesId == s.Id).Max(p => p.LastModified);
+                s.LatestReadDate = seriesProgress.Max(p => p.LastModified);
+                s.TotalReads = seriesProgress.Min(p => p.TotalReads);
             }
         }
     }

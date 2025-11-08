@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   inject,
@@ -53,7 +54,7 @@ import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
-import {Breakpoint, UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
+import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
@@ -127,7 +128,7 @@ interface VolumeCast extends IHasCast {
 }
 
 @Component({
-    selector: 'app-volume-detail',
+  selector: 'app-volume-detail',
   imports: [
     LoadingComponent,
     NgbNavOutlet,
@@ -162,9 +163,9 @@ interface VolumeCast extends IHasCast {
     AnnotationsTabComponent,
     UtcToLocaleDatePipe
   ],
-    templateUrl: './volume-detail.component.html',
-    styleUrl: './volume-detail.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './volume-detail.component.html',
+  styleUrl: './volume-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VolumeDetailComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
@@ -220,6 +221,12 @@ export class VolumeDetailComponent implements OnInit {
   hasBeenRated: boolean = false;
   size: number = 0;
   annotations = model<Annotation[]>([]);
+  totalReads = computed(() => {
+    const chapters = this.volume?.chapters || [];
+    if (chapters.length === 0) return 0;
+
+    return chapters.reduce((min, curr) => Math.min(min, curr.totalReads), Infinity);
+  });
 
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
