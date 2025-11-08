@@ -24,7 +24,6 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
         IClientInfoAccessor clientInfoAccessor,
         IUserContext userContext)
     {
-        var sw = Stopwatch.StartNew();
         try
         {
             var endpoint = context.GetEndpoint();
@@ -57,7 +56,6 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
             logger.LogError(ex, "Failed to track device activity");
         }
 
-        logger.LogDebug("DeviceTrackingMiddleware took {Time}", sw.ElapsedMilliseconds);
         await next(context);
     }
 }
