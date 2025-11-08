@@ -25,7 +25,7 @@ import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
 import {SettingsService} from "../settings.service";
 import {ServerSettings} from "../_models/server-settings";
-import {IdentityProvider} from "../../_models/user";
+import {IdentityProvider} from "../../_models/user/user";
 import {ImageComponent} from "../../shared/image/image.component";
 
 @Component({

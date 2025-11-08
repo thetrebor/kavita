@@ -44,10 +44,6 @@ export class NavService {
 
   public navItems: NavItem[] = [
     {
-      transLocoKey: 'my-profile',
-      routerLink: '/profile/',
-    },
-    {
       transLocoKey: 'all-filters',
       routerLink: '/all-filters/',
     },

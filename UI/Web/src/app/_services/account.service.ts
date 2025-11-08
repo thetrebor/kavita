@@ -4,7 +4,7 @@ import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {Preferences} from '../_models/preferences/preferences';
-import {User} from '../_models/user';
+import {User} from '../_models/user/user';
 import {Router} from '@angular/router';
 import {EVENTS, MessageHubService} from './message-hub.service';
 import {InviteUserResponse} from '../_models/auth/invite-user-response';

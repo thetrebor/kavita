@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.DTOs.Account;
 using API.Entities.Enums;
 
-namespace API.DTOs;
+namespace API.DTOs.Account;
 #nullable enable
 
 /// <summary>

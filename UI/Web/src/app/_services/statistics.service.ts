@@ -20,6 +20,8 @@ import {download} from "../shared/_models/download";
 import {Saver, SAVER} from "../_providers/saver.provider";
 import {ClientDeviceBreakdown} from "../statistics/_models/client-device-breakdown";
 import {ActivityGraphData} from "../statistics/_components/activity-graph/activity-graph.component";
+import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
+
 export enum DayOfWeek
 {
     Sunday = 0,
@@ -150,5 +152,9 @@ export class StatisticsService {
 
   getReadingActivity(userId: number, year: number) {
     return this.httpClient.get<ActivityGraphData>(this.baseUrl + `stats/reading-activity?userId=${userId}&year=${year}`);
+  }
+
+  getReadingPace(userId: number, year: number) {
+    return this.httpClient.get<ReadingPace>(this.baseUrl + `stats/reading-pace?userId=${userId}&year=${year}`);
   }
 }

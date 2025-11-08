@@ -2831,6 +2831,17 @@
         "high-activity": "High Activity"
     },
 
+    "reading-pace": {
+        "hours-read": "Hours Read",
+        "pages-read": "Pages Read",
+        "words-read": "Words Read",
+        "comics-read": "Comics Read",
+        "books-read": "Books Read",
+        "per-year": "Per Year",
+        "per-month": "Per Month",
+        "per-day": "Per Day"
+    },
+
     "month-label-pipe": {
         "january": "January",
         "january-short": "Jan",

@@ -266,4 +266,19 @@ public class StatsController : BaseApiController
 
     #endregion
 
+    #region Profile Stats
+
+    [HttpGet("reading-pace")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<ReadingPaceDto>> GetReadingPace(int userId, int year)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return BadRequest();
+        //if (!user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
+
+        return Ok(await _statService.GetReadingPaceForUser(user.Id, year));
+
+    }
+    #endregion
+
 }

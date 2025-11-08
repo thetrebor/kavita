@@ -3,7 +3,7 @@ import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/ca
 import {ReviewCardComponent} from "../review-card/review-card.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {UserReview} from "../review-card/user-review";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {AccountService} from "../../_services/account.service";
 import {
   ReviewModalCloseAction,

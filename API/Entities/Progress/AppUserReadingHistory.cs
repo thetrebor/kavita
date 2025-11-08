@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities.Progress;
 
+/// <summary>
+/// Represents a single day's worth of Reading Sessions
+/// </summary>
 [Index(nameof(DateUtc), IsUnique = true)]
 public class AppUserReadingHistory
 {

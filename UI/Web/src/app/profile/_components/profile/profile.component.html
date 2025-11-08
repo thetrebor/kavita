@@ -1,12 +1,70 @@
-<h1>My Profile</h1>
-@let user = accountService.currentUserSignal();
-@if (user) {
-
-  <app-activity-graph />
-
-
-  <app-reading-pace [stats]="testReadingPace" [userName]="user.username"/>
+<ng-container *transloco="let t; prefix: 'profile'">
+  <h1>My Profile</h1>
+  @let user = userInfo();
+  @if (user) {
 
 
-}
+    <div class="main-container container-fluid pt-2 mb-5">
+      <div class="row mb-0 mb-xl-3 info-container">
+        @if (hasCoverImage()) {
+          <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mt-2">
+            <div class="person-badge">
+              <app-image objectFit="cover"
+                         [styles]="{'object-position': 'top'}"
+                         height="200px"
+                         width="200px"
+                         [imageUrl]="imageService.noPersonImage"
+                         [errorImage]="imageService.noPersonImage" />
+            </div>
+          </div>
+        } @else {
+          <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mt-2">
+            <div class="person-badge d-flex align-items-center justify-content-center">
+              <i class="fas fa-user" aria-hidden="true"></i>
+            </div>
+          </div>
+        }
 
+        <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
+          <div class="row g-0 mt-2">
+
+            Joined: {{userInfo()?.createdUtc | utcToLocalTime | timeAgo}}
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="carousel-tabs-container mb-2">
+      <ul ngbNav #nav="ngbNav" [activeId]="activeTabId()" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
+
+        <li [ngbNavItem]="TabID.Overview">
+          <a ngbNavLink>{{t(TabID.Overview)}}</a>
+          <ng-template ngbNavContent>
+            @defer (when activeTabId() === TabID.Overview; prefetch on idle) {
+              Overview Here
+            }
+          </ng-template>
+        </li>
+
+        <li [ngbNavItem]="TabID.Stats">
+          <a ngbNavLink>{{t(TabID.Stats)}}</a>
+          <ng-template ngbNavContent>
+            @defer (when activeTabId() === TabID.Stats; prefetch on idle) {
+              Stats Here
+              <app-activity-graph />
+
+
+              <app-reading-pace [userId]="user.id" [userName]="user.username"/>
+            }
+          </ng-template>
+        </li>
+      </ul>
+    </div>
+
+    <div [ngbNavOutlet]="nav"></div>
+  }
+
+
+</ng-container>

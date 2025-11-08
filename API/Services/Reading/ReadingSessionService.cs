@@ -406,7 +406,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             .FirstAsync();
 
         var chapterIds = sessionEntry.ActivityData
-            .Where(d => d.PagesRead >= d.TotalPages)
+            .Where(d => d.EndPage >= d.TotalPages)
             .Select(d => d.ChapterId)
             .ToList();
 

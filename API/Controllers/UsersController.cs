@@ -5,6 +5,7 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Account;
 using API.DTOs.KavitaPlus.Account;
 using API.Services;
 using API.Services.Plus;
@@ -78,6 +79,23 @@ public class UsersController : BaseApiController
     {
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
         return Ok(users.Where(u => u.UserName == Username!).DefaultIfEmpty().Select(u => _mapper.Map<MemberDto>(u)).SingleOrDefault());
+    }
+
+    /// <summary>
+    /// Get Information about a given user
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("profile-info")]
+    [Authorize]
+    public async Task<ActionResult<MemberInfoDto>> GetProfileInfo(int userId)
+    {
+        // Validate that the user has sharing enabled
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return BadRequest();
+        //if (!user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
+
+        return Ok(_mapper.Map<MemberInfoDto>(user));
+
     }
 
 

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {DatePipe, DecimalPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
@@ -49,7 +58,7 @@ import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {IHasCast} from "../../../_models/common/i-has-cast";
-import {User} from "../../../_models/user";
+import {User} from "../../../_models/user/user";
 
 enum TabID {
   Storyline = 'storyline-tab',

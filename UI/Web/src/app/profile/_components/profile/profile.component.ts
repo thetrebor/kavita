@@ -1,13 +1,43 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {ReadingPaceComponent, ReadingStats} from "../../../statistics/_components/reading-pace/reading-pace.component";
-import {AccountService} from "../../../_services/account.service";
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, model} from '@angular/core';
+import {Location} from '@angular/common';
+import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
+import {MemberInfo} from "../../../_models/user/member-info";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ActivatedRoute, Router} from "@angular/router";
+import {TranslocoDirective} from "@jsverse/transloco";
+import {ImageComponent} from "../../../shared/image/image.component";
+import {ImageService} from "../../../_services/image.service";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
+import {
+  NgbNav,
+  NgbNavChangeEvent,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet
+} from "@ng-bootstrap/ng-bootstrap";
+
+enum TabID {
+  Overview = 'overview-tab',
+  Stats = 'stats-tab'
+}
 
 @Component({
   selector: 'app-profile',
   imports: [
     ReadingPaceComponent,
-    ActivityGraphComponent
+    ActivityGraphComponent,
+    TranslocoDirective,
+    ImageComponent,
+    UtcToLocalTimePipe,
+    TimeAgoPipe,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLink,
+    NgbNavItem,
+    NgbNavOutlet
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -15,15 +45,38 @@ import {ActivityGraphComponent} from "../../../statistics/_components/activity-g
 })
 export class ProfileComponent {
 
-  protected readonly accountService = inject(AccountService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly location = inject(Location);
+  protected readonly imageService = inject(ImageService);
 
-  testReadingPace: ReadingStats = {
-    hoursRead: 25,
-    pagesRead: 92201,
-    wordsRead: 15000000,
-    booksRead: 308,
-    comicsRead: 45,
-    daysInRange: 365
-  };
+  userInfo = model<MemberInfo | null>(null);
+  hasCoverImage = computed(() => false);
+  activeTabId = model<TabID>(TabID.Overview);
+
+  constructor() {
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.userInfo.set(data['memberInfo']);
+      if (data['memberInfo'] == null) {
+        this.router.navigateByUrl('/home');
+        return;
+      }
+    });
+  }
+
+  onNavChange(event: NgbNavChangeEvent) {
+    this.updateUrl(event.nextId);
+    this.activeTabId.set(event.nextId);
+  }
+
+  updateUrl(activeTab: TabID) {
+    const tokens = this.location.path().split('#');
+    const newUrl = `${tokens[0]}#${activeTab}`;
+    this.location.replaceState(newUrl) // TODO: Look into making this a directive for tabs
+  }
+
+
+  protected readonly TabID = TabID;
 
 }

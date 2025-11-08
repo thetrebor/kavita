@@ -39,6 +39,7 @@ public interface IStatisticService
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year);
+    Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year);
 }
 
 /// <summary>
@@ -684,6 +685,96 @@ public class StatisticService : IStatisticService
         }
 
         return result;
+    }
+
+    public async Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year)
+    {
+        var startOfYear = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var endOfYear = new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc);
+        var now = DateTime.UtcNow;
+
+        // Don't count future days in the calculation
+        var effectiveEndDate = endOfYear > now ? now : endOfYear;
+
+        var readingHistory = await _context.AppUserReadingHistory
+            .Where(h => h.AppUserId == userId &&
+                        h.DateUtc >= startOfYear &&
+                        h.DateUtc <= effectiveEndDate)
+            .Select(h => new { h.DateUtc, h.Data })
+            .ToListAsync();
+
+        var readingSessions = await _context.AppUserReadingSession
+            .Where(s => s.AppUserId == userId &&
+                        s.StartTimeUtc >= startOfYear &&
+                        s.StartTimeUtc <= effectiveEndDate &&
+                        !s.IsActive)
+            .Select(s => new { s.StartTimeUtc, s.EndTimeUtc, s.ActivityData })
+            .ToListAsync();
+
+        var allSeriesIds = readingSessions.SelectMany(r => r.ActivityData.Select(d => d.ChapterId)).Distinct();
+
+        var seriesFormats = await _context.Series
+            .Where(s => allSeriesIds.Contains(s.Id))
+            .ToDictionaryAsync(keySelector: s => s.Id, s => s.Format);
+
+        var hoursRead = 0;
+        var pagesRead = 0;
+        var wordsRead = 0;
+        var booksRead = new HashSet<int>();
+        var comicsRead = new HashSet<int>();
+
+        foreach (var history in readingHistory)
+        {
+            if (history.Data != null)
+            {
+                pagesRead += history.Data.TotalPagesRead;
+                wordsRead += history.Data.TotalWordsRead;
+            }
+        }
+
+        foreach (var session in readingSessions)
+        {
+            if (session.EndTimeUtc.HasValue)
+            {
+                var duration = (session.EndTimeUtc.Value - session.StartTimeUtc).TotalHours;
+                hoursRead += (int)Math.Round(duration);
+            }
+
+            if (session.ActivityData != null)
+            {
+                foreach (var activity in session.ActivityData)
+                {
+                    pagesRead += activity.PagesRead;
+                    wordsRead += activity.WordsRead;
+
+                    if (seriesFormats.TryGetValue(activity.SeriesId, out var seriesFormat))
+                    {
+                        if (seriesFormat == MangaFormat.Epub)
+                        {
+                            booksRead.Add(activity.ChapterId);
+                        }
+                        else
+                        {
+                            comicsRead.Add(activity.ChapterId);
+                        }
+                    }
+
+                }
+            }
+
+        }
+
+        var daysInRange = (int)(effectiveEndDate - startOfYear).TotalDays + 1;
+
+        return new ReadingPaceDto
+        {
+            HoursRead = hoursRead,
+            PagesRead = pagesRead,
+            WordsRead = wordsRead,
+            BooksRead = booksRead.Count,
+            ComicsRead = comicsRead.Count,
+            DaysInRange = daysInRange
+        };
     }
 
     private static string CapitalizeDeviceType(string deviceType)

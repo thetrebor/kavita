@@ -18,7 +18,7 @@ import {DeviceService} from "../../_services/device.service";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {DOCUMENT} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 
 @Component({
   selector: 'app-client-device-card',

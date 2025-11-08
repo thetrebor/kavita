@@ -7,6 +7,7 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Account;
 using API.DTOs.JumpBar;
 using API.DTOs.System;
 using API.Entities;

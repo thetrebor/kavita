@@ -3,10 +3,8 @@ import {ApiKeyComponent} from "../api-key/api-key.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {SettingsService} from "../../admin/settings.service";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {WikiLink} from "../../_models/wiki";
 import {LicenseService} from "../../_services/license.service";
 

@@ -9,7 +9,8 @@ import {
   ElementRef,
   inject,
   model,
-  OnInit, signal,
+  OnInit,
+  signal,
   ViewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
@@ -38,7 +39,7 @@ import {
   EditSeriesModalComponent
 } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
-import {Breakpoint, UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
@@ -49,7 +50,7 @@ import {Series} from 'src/app/_models/series';
 import {RelatedSeries} from 'src/app/_models/series-detail/related-series';
 import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
-import {User} from 'src/app/_models/user';
+import {User} from 'src/app/_models/user/user';
 import {Volume} from 'src/app/_models/volume';
 import {AccountService} from 'src/app/_services/account.service';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';

@@ -6,7 +6,7 @@ import {Title} from "@angular/platform-browser";
 import {Router} from "@angular/router";
 import {LocalizationService} from "../../_services/localization.service";
 import {FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, of, switchMap, tap} from "rxjs";

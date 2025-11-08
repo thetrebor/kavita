@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   HostListener,
@@ -85,6 +86,10 @@ export class NavHeaderComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('search') searchViewRef!: any;
+
+  profileLink = computed(() => {
+    return `/profile/${this.accountService.currentUserSignal()?.id ?? ''}`
+  })
 
 
   isLoading = false;

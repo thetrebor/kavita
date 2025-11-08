@@ -13,7 +13,7 @@ import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {translate} from "@jsverse/transloco";
 import {Person} from "../_models/metadata/person";
-import {User} from '../_models/user';
+import {User} from '../_models/user/user';
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {ClientDevice} from "../_models/client-device";
 

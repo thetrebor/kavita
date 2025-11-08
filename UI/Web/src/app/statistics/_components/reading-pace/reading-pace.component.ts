@@ -1,6 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, model} from '@angular/core';
+import {TranslocoDirective} from "@jsverse/transloco";
+import {StatisticsService} from "../../../_services/statistics.service";
 
-export interface ReadingStats {
+export interface ReadingPace {
   hoursRead: number;
   pagesRead: number;
   wordsRead: number;
@@ -11,20 +13,28 @@ export interface ReadingStats {
 
 @Component({
   selector: 'app-reading-pace',
-  imports: [],
+  imports: [
+    TranslocoDirective
+  ],
   templateUrl: './reading-pace.component.html',
   styleUrl: './reading-pace.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReadingPaceComponent {
-  stats = input.required<ReadingStats>();
-  userName = input<string>('User');
-  //dateRange = input<string>();
+  private readonly statsService = inject(StatisticsService);
+
+  userName = input.required<string>();
+  userId = input.required<number>();
+
+  stats = model<ReadingPace>();
 
   // Calculate pace in days - books per day inverted
   paceInDays = computed(() => {
-    const booksRead = this.stats().booksRead;
-    const days = this.stats().daysInRange;
+    const stats = this.stats();
+    if (stats == null) return '∞';
+
+    const booksRead = stats.booksRead;
+    const days = stats.daysInRange;
 
     if (booksRead === 0) return '∞';
 
@@ -32,48 +42,55 @@ export class ReadingPaceComponent {
   });
 
   // Hours calculations
-  hoursPerYear = computed(() => this.projectAnnually(this.stats().hoursRead));
-  hoursPerMonth = computed(() => this.projectMonthly(this.stats().hoursRead));
-  hoursPerDay = computed(() => this.projectDaily(this.stats().hoursRead));
+  hoursPerYear = computed(() => this.projectAnnually(this.stats()?.hoursRead, this.stats()?.daysInRange));
+  hoursPerMonth = computed(() => this.projectMonthly(this.stats()?.hoursRead, this.stats()?.daysInRange));
+  hoursPerDay = computed(() => this.projectDaily(this.stats()?.hoursRead, this.stats()?.daysInRange));
 
   // Pages calculations
-  pagesPerYear = computed(() => this.projectAnnually(this.stats().pagesRead));
-  pagesPerMonth = computed(() => this.projectMonthly(this.stats().pagesRead));
-  pagesPerDay = computed(() => this.projectDaily(this.stats().pagesRead));
+  pagesPerYear = computed(() => this.projectAnnually(this.stats()?.pagesRead, this.stats()?.daysInRange));
+  pagesPerMonth = computed(() => this.projectMonthly(this.stats()?.pagesRead, this.stats()?.daysInRange));
+  pagesPerDay = computed(() => this.projectDaily(this.stats()?.pagesRead, this.stats()?.daysInRange));
 
   // Words calculations
-  wordsPerYear = computed(() => this.projectAnnually(this.stats().wordsRead));
-  wordsPerMonth = computed(() => this.projectMonthly(this.stats().wordsRead));
-  wordsPerDay = computed(() => this.projectDaily(this.stats().wordsRead));
+  wordsPerYear = computed(() => this.projectAnnually(this.stats()?.wordsRead, this.stats()?.daysInRange));
+  wordsPerMonth = computed(() => this.projectMonthly(this.stats()?.wordsRead, this.stats()?.daysInRange));
+  wordsPerDay = computed(() => this.projectDaily(this.stats()?.wordsRead, this.stats()?.daysInRange));
 
   // Comics calculations
-  comicsPerYear = computed(() => this.projectAnnually(this.stats().comicsRead));
-  comicsPerMonth = computed(() => this.projectMonthly(this.stats().comicsRead));
-  comicsPerDay = computed(() => this.projectDaily(this.stats().comicsRead));
+  comicsPerYear = computed(() => this.projectAnnually(this.stats()?.comicsRead, this.stats()?.daysInRange));
+  comicsPerMonth = computed(() => this.projectMonthly(this.stats()?.comicsRead, this.stats()?.daysInRange));
+  comicsPerDay = computed(() => this.projectDaily(this.stats()?.comicsRead, this.stats()?.daysInRange));
 
   // Books calculations
-  booksPerYear = computed(() => this.projectAnnually(this.stats().booksRead));
-  booksPerMonth = computed(() => this.projectMonthly(this.stats().booksRead));
-  booksPerDay = computed(() => this.projectDaily(this.stats().booksRead));
+  booksPerYear = computed(() => this.projectAnnually(this.stats()?.booksRead, this.stats()?.daysInRange));
+  booksPerMonth = computed(() => this.projectMonthly(this.stats()?.booksRead, this.stats()?.daysInRange));
+  booksPerDay = computed(() => this.projectDaily(this.stats()?.booksRead, this.stats()?.daysInRange));
 
-  private projectAnnually(value: number): string {
-    const days = this.stats().daysInRange;
-    if (days === 0) return '0';
-    const projected = (value / days) * 365;
+  constructor() {
+    effect(() => {
+      this.statsService.getReadingPace(this.userId(), new Date().getFullYear()).subscribe(res => {
+        this.stats.set(res);
+      });
+    });
+  }
+
+  private projectAnnually(value: number | undefined, daysInRange: number | undefined) {
+    if (value === undefined || daysInRange === undefined || daysInRange === 0) return '0';
+    const projected = (value / daysInRange) * 365;
+
     return this.formatNumber(projected);
   }
 
-  private projectMonthly(value: number): string {
-    const days = this.stats().daysInRange;
-    if (days === 0) return '0';
-    const projected = (value / days) * 30;
+  private projectMonthly(value: number | undefined, daysInRange: number | undefined) {
+    if (value === undefined || daysInRange === undefined || daysInRange === 0) return '0';
+    const projected = (value / daysInRange) * 30;
     return this.formatNumber(projected);
   }
 
-  private projectDaily(value: number): string {
-    const days = this.stats().daysInRange;
-    if (days === 0) return '0';
-    const projected = value / days;
+  private projectDaily(value: number | undefined, daysInRange: number | undefined) {
+
+    if (value === undefined || daysInRange === undefined || daysInRange === 0) return '0';
+    const projected = value / daysInRange;
     return this.formatNumber(projected);
   }
 

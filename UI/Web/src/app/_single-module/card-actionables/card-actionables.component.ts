@@ -19,7 +19,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 
 
 @Component({

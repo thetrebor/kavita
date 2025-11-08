@@ -18,7 +18,7 @@ import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
 import {map, Observable, of, shareReplay, switchMap, take, tap} from "rxjs";
 import {ServerService} from "../../_services/server.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {filter} from "rxjs/operators";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {LicenseService} from "../../_services/license.service";
