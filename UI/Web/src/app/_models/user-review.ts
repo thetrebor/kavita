@@ -1,5 +1,5 @@
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
-import {RatingAuthority} from "../../_models/rating";
+import {ScrobbleProvider} from "../_services/scrobbling.service";
+import {RatingAuthority} from "./rating";
 
 
 export interface UserReview {

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -133,5 +134,17 @@ public class ReviewController : BaseApiController
         await _unitOfWork.CommitAsync();
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Returns all reviews for the user. If you are authenticated as the user, will always return data, regardless of ShareReviews setting
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [HttpGet("all")]
+    public async Task<ActionResult<IList<UserReviewDto>>> GetAllReviewsForUser(int userId)
+    {
+
+        return Ok(await _unitOfWork.UserRepository.GetAllReviewsForUser(userId, userId == UserId));
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Entities.User;
 using API.Services.Plus;
 using Hangfire;
 using Microsoft.Extensions.Logging;

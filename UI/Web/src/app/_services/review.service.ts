@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import {UserReview} from "../_single-module/review-card/user-review";
+import {inject, Injectable} from '@angular/core';
+import {UserReview} from "../_models/user-review";
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Rating} from "../_models/rating";
@@ -51,6 +51,10 @@ export class ReviewService {
     }
 
     return this.httpClient.get<Rating>(this.baseUrl + `rating/overall-series?seriesId=${seriesId}`);
+  }
+
+  getReviewsFromUser(userId: number) {
+    return this.httpClient.get<UserReview[]>(this.baseUrl + `review/all?userId=${userId}`);
   }
 
 }

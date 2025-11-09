@@ -78,7 +78,7 @@ import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/ed
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../_models/default-modal-options";
-import {UserReview} from "../_single-module/review-card/user-review";
+import {UserReview} from "../_models/user-review";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {ChapterService} from "../_services/chapter.service";

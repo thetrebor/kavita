@@ -123,6 +123,7 @@ public interface IUserRepository
     Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
     Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
     Task UpdateUserAsActive(int userId);
+    Task<IList<UserReviewDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
 
 }
 
@@ -653,6 +654,28 @@ public class UserRepository : IUserRepository
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(u => u.LastActiveUtc, DateTime.UtcNow)
                 .SetProperty(u => u.LastActive, DateTime.Now));
+    }
+
+    public async Task<IList<UserReviewDto>> GetAllReviewsForUser(int userId, bool bypassPreferences)
+    {
+        var userPreferences = await _context.AppUserPreferences
+            .FirstOrDefaultAsync(u => u.AppUserId == userId);
+
+        if (!bypassPreferences && userPreferences != null)
+        {
+            var allowsSharingReviews = userPreferences.SocialPreferences!.ShareReviews;
+
+            if (!allowsSharingReviews) return Array.Empty<UserReviewDto>();
+        }
+
+
+        return await _context.AppUserChapterRating
+            .Include(r => r.AppUser)
+            .Where(r => r.AppUserId == userId)
+            .OrderBy(r => r.SeriesId) // NOTE: For some reason, I didn't include time stamps on the ratings
+            .AsSplitQuery()
+            .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
 

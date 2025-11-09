@@ -1,15 +1,16 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  effect,
   EventEmitter,
   inject,
-  Input,
+  input,
+  model,
   OnInit,
   Output
 } from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
-import {UserReview} from "./user-review";
+import {UserReview} from "../../_models/user-review";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
 import {AccountService} from "../../_services/account.service";
@@ -30,35 +31,35 @@ import {RatingAuthority} from "../../_models/rating";
 })
 export class ReviewCardComponent implements OnInit {
   private readonly modalService = inject(NgbModal);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
   private readonly accountService = inject(AccountService);
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
-  @Input({required: true}) review!: UserReview;
+  review = input.required<UserReview>();
   @Output() refresh = new EventEmitter<ReviewModalCloseEvent>();
 
-  isMyReview: boolean = false;
+  isMyReview = model<boolean>(false);
 
   ngOnInit() {
-    this.accountService.currentUser$.subscribe(u => {
-      if (u) {
-        this.isMyReview = this.review.username === u.username && !this.review.isExternal;
-        this.cdRef.markForCheck();
-      }
+    effect(() => {
+      this.accountService.currentUser$.subscribe(u => {
+        if (u) {
+          this.isMyReview.set(this.review().username === u.username && !this.review().isExternal);
+        }
+      });
     });
   }
 
   showModal() {
     let component;
-    if (this.isMyReview) {
+    if (this.isMyReview()) {
       component = ReviewModalComponent;
     } else {
       component = ReviewCardModalComponent;
     }
     const ref = this.modalService.open(component, {size: 'lg', fullscreen: 'md'});
 
-    ref.componentInstance.review = this.review;
+    ref.componentInstance.review = this.review();
     ref.closed.subscribe((res: ReviewModalCloseEvent | undefined) => {
       if (res) {
         this.refresh.emit(res);

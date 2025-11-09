@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, model} from '@angular/core';
 import {Location} from '@angular/common';
 import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
@@ -18,10 +18,14 @@ import {
   NgbNavLink,
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
+import {ReviewService} from "../../../_services/review.service";
+import {UserReview} from "../../../_models/user-review";
+import {ReviewCardComponent} from "../../../_single-module/review-card/review-card.component";
 
 enum TabID {
   Overview = 'overview-tab',
-  Stats = 'stats-tab'
+  Stats = 'stats-tab',
+  Reviews = 'reviews-tab',
 }
 
 @Component({
@@ -37,7 +41,8 @@ enum TabID {
     NgbNavContent,
     NgbNavLink,
     NgbNavItem,
-    NgbNavOutlet
+    NgbNavOutlet,
+    ReviewCardComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -49,20 +54,30 @@ export class ProfileComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly location = inject(Location);
+  private readonly reviewService = inject(ReviewService);
   protected readonly imageService = inject(ImageService);
 
   userInfo = model<MemberInfo | null>(null);
+  reviews = model<UserReview[]>([]);
   hasCoverImage = computed(() => false);
   activeTabId = model<TabID>(TabID.Overview);
 
   constructor() {
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.userInfo.set(data['memberInfo']);
+
       if (data['memberInfo'] == null) {
         this.router.navigateByUrl('/home');
         return;
       }
     });
+
+    effect(() => {
+      if (!this.userInfo()) return;
+      this.reviewService.getReviewsFromUser(this.userInfo()!.id || 0).subscribe(reviews => {
+        this.reviews.set(reviews);
+      })
+    })
   }
 
   onNavChange(event: NgbNavChangeEvent) {

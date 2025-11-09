@@ -2814,6 +2814,15 @@
         "view-label": "View"
     },
 
+    "profile": {
+        "title": "{{username}}'s Profile",
+        "joined-label": "Joined: ",
+        "overview-tab": "{{tabs.overview}}",
+        "stats-tab": "{{tabs.stats}}",
+        "reviews-tab": "{{tabs.reviews}}"
+
+    },
+
     "activity-graph": {
         "title": "Reading Activity",
         "day-of-week-alt": "Day of the Week",
@@ -3563,7 +3572,8 @@
         "stats-tab": "Stats",
         "scrobbling-tab": "Scrobbling",
         "smart-filters-tab": "Smart Filters",
-        "annotations-tab": "Annotations"
+        "annotations-tab": "Annotations",
+        "overview-tab": "Overview"
     },
 
     "common": {
