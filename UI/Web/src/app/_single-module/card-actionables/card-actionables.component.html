@@ -2,7 +2,7 @@
     @let labelId = 'actions-' + labelBy();
     @if (actions().length > 0) {
       @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
-        <button [disabled]="disabled" class="btn {{btnClass()}}" id="{{labelId}}"
+        <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}"
                 (click)="openMobileActionableMenu($event)">
           {{label()}}
           <i class="fa {{iconClass()}}" aria-hidden="true"></i>

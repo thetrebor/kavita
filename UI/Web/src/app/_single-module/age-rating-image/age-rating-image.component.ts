@@ -16,6 +16,7 @@ const basePath = './assets/images/ratings/';
       NgbTooltip,
       AgeRatingPipe,
   ],
+  standalone: true,
   templateUrl: './age-rating-image.component.html',
   styleUrl: './age-rating-image.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

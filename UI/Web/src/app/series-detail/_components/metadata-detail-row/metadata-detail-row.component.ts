@@ -20,7 +20,7 @@ import {SeriesFormatComponent} from "../../../shared/series-format/series-format
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 
 @Component({
-    selector: 'app-metadata-detail-row',
+  selector: 'app-metadata-detail-row',
   imports: [
     AgeRatingImageComponent,
     CompactNumberPipe,
@@ -32,9 +32,10 @@ import {BytesPipe} from "../../../_pipes/bytes.pipe";
     SeriesFormatComponent,
     BytesPipe
   ],
-    templateUrl: './metadata-detail-row.component.html',
-    styleUrl: './metadata-detail-row.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  standalone: true,
+  templateUrl: './metadata-detail-row.component.html',
+  styleUrl: './metadata-detail-row.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataDetailRowComponent {
   protected readonly imageService = inject(ImageService);
