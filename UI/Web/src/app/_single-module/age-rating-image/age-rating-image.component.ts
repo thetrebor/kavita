@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, effect, inject, input, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, model} from '@angular/core';
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
@@ -25,64 +25,43 @@ export class AgeRatingImageComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   rating = input.required<AgeRating>();
+  imageUrl = computed(() => this.computeImageUrl());
 
-  imageUrl = model<string>('unknown-rating.png');
-
-  constructor() {
-    effect(() => {
-      this.rating();
-      this.setImage();
-    });
-  }
-
-  setImage() {
+  computeImageUrl() {
     switch (this.rating()) {
       case AgeRating.Unknown:
-        this.imageUrl.set(basePath + 'unknown-rating.png');
-        break;
+        return basePath + 'unknown-rating.png';
       case AgeRating.RatingPending:
-        this.imageUrl.set(basePath + 'rating-pending-rating.png');
-        break;
+        return basePath + 'rating-pending-rating.png';
       case AgeRating.EarlyChildhood:
-        this.imageUrl.set(basePath + 'early-childhood-rating.png');
-        break;
+        return basePath + 'early-childhood-rating.png';
       case AgeRating.Everyone:
-        this.imageUrl.set(basePath + 'everyone-rating.png');
-        break;
+        return basePath + 'everyone-rating.png';
       case AgeRating.G:
-        this.imageUrl.set(basePath + 'g-rating.png');
-        break;
+        return basePath + 'g-rating.png';
       case AgeRating.Everyone10Plus:
-        this.imageUrl.set(basePath + 'everyone-10+-rating.png');
-        break;
+        return basePath + 'everyone-10+-rating.png';
       case AgeRating.PG:
-        this.imageUrl.set(basePath + 'pg-rating.png');
-        break;
+        return basePath + 'pg-rating.png';
       case AgeRating.KidsToAdults:
-        this.imageUrl.set(basePath + 'kids-to-adults-rating.png');
-        break;
+        return basePath + 'kids-to-adults-rating.png';
       case AgeRating.Teen:
-        this.imageUrl.set(basePath + 'teen-rating.png');
-        break;
+        return basePath + 'teen-rating.png';
       case AgeRating.Mature15Plus:
-        this.imageUrl.set(basePath + 'ma15+-rating.png');
-        break;
+        return basePath + 'ma15+-rating.png';
       case AgeRating.Mature17Plus:
-        this.imageUrl.set(basePath + 'mature-17+-rating.png');
-        break;
+        return basePath + 'mature-17+-rating.png';
       case AgeRating.Mature:
-        this.imageUrl.set(basePath + 'm-rating.png');
-        break;
+        return basePath + 'm-rating.png';
       case AgeRating.R18Plus:
-        this.imageUrl.set(basePath + 'r18+-rating.png');
-        break;
+        return basePath + 'r18+-rating.png';
       case AgeRating.AdultsOnly:
-        this.imageUrl.set(basePath + 'adults-only-18+-rating.png');
-        break;
+        return basePath + 'adults-only-18+-rating.png';
       case AgeRating.X18Plus:
-        this.imageUrl.set(basePath + 'x18+-rating.png');
-        break;
+        return basePath + 'x18+-rating.png';
     }
+
+    return basePath + 'unknown-rating.png';
   }
 
   openRating() {
