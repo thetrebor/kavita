@@ -3,7 +3,7 @@ import {PreloadAllModules, RouterModule, Routes} from '@angular/router';
 import {AuthGuard} from './_guards/auth.guard';
 import {LibraryAccessGuard} from './_guards/library-access.guard';
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     canActivate: [AuthGuard],
@@ -112,9 +112,3 @@ const routes: Routes = [
   {path: '**', pathMatch: 'full', redirectTo: 'home'},
   {path: '', pathMatch: 'full', redirectTo: 'home'},
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes, {scrollPositionRestoration: 'enabled', preloadingStrategy: PreloadAllModules})],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }

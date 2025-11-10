@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'profile'">
-  @let user = userInfo();
+  @let user = memberInfo();
   @if (user) {
 
     <h1>{{user.username}}</h1>
@@ -27,10 +27,7 @@
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
           <div class="row g-0 mt-2">
-
-            Joined: {{userInfo()?.createdUtc | utcToLocalTime | timeAgo}}
-
-
+            Joined: {{user.createdUtc | utcToLocalTime | timeAgo}}
           </div>
         </div>
       </div>

@@ -1,10 +1,16 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, model} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  model
+} from '@angular/core';
 import {Location} from '@angular/common';
 import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
 import {MemberInfo} from "../../../_models/user/member-info";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ActivatedRoute, Router} from "@angular/router";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {ImageService} from "../../../_services/image.service";
@@ -50,33 +56,23 @@ enum TabID {
 })
 export class ProfileComponent {
 
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly location = inject(Location);
   private readonly reviewService = inject(ReviewService);
   protected readonly imageService = inject(ImageService);
 
-  userInfo = model<MemberInfo | null>(null);
+  // Set by angular from the resolver
+  memberInfo = input.required<MemberInfo>();
+
   reviews = model<UserReview[]>([]);
   hasCoverImage = computed(() => false);
   activeTabId = model<TabID>(TabID.Overview);
 
   constructor() {
-    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.userInfo.set(data['memberInfo']);
-
-      if (data['memberInfo'] == null) {
-        this.router.navigateByUrl('/home');
-        return;
-      }
-    });
-
     effect(() => {
-      if (!this.userInfo()) return;
-      this.reviewService.getReviewsFromUser(this.userInfo()!.id || 0).subscribe(reviews => {
+      if (!this.memberInfo()) return;
+      this.reviewService.getReviewsFromUser(this.memberInfo()!.id || 0).subscribe(reviews => {
         this.reviews.set(reviews);
-      })
+      });
     })
   }
 

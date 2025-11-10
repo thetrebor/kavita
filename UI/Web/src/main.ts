@@ -3,7 +3,7 @@ import {AppComponent} from './app/app.component';
 import {NgCircleProgressModule} from 'ng-circle-progress';
 import {ToastrModule} from 'ngx-toastr';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {AppRoutingModule} from './app/app-routing.module';
+import {routes} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
 import {jwtInterceptor} from './app/_interceptors/jwt.interceptor';
 import {errorInterceptor} from './app/_interceptors/error.interceptor';
@@ -21,6 +21,13 @@ import {HttpLoader} from "./httpLoader";
 import {register as registerSwiperElements} from 'swiper/element/bundle';
 import {ColorPickerModule} from "@iplab/ngx-color-picker";
 import {clientInfoInterceptor} from "./app/_interceptors/client-info.interceptor";
+import {
+  PreloadAllModules,
+  provideRouter,
+  withComponentInputBinding,
+  withInMemoryScrolling,
+  withPreloading
+} from "@angular/router";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -122,7 +129,6 @@ function bootstrapUser() {
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
-          AppRoutingModule,
           BrowserAnimationsModule.withConfig({ disableAnimations }),
           LazyLoadImageModule,
           ToastrModule.forRoot({
@@ -135,6 +141,7 @@ bootstrapApplication(AppComponent, {
           NgCircleProgressModule.forRoot(),
           ColorPickerModule,
         ),
+        provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules), withInMemoryScrolling({scrollPositionRestoration: 'enabled'})),
         provideTransloco(translocoOptions),
         provideTranslocoLocale({
           defaultLocale: 'en'

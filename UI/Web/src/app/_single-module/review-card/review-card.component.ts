@@ -1,12 +1,9 @@
 import {
   ChangeDetectionStrategy,
-  Component,
-  effect,
+  Component, computed,
   EventEmitter,
   inject,
   input,
-  model,
-  OnInit,
   Output
 } from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
@@ -29,7 +26,7 @@ import {RatingAuthority} from "../../_models/rating";
   styleUrls: ['./review-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReviewCardComponent implements OnInit {
+export class ReviewCardComponent {
   private readonly modalService = inject(NgbModal);
 
   private readonly accountService = inject(AccountService);
@@ -38,17 +35,8 @@ export class ReviewCardComponent implements OnInit {
   review = input.required<UserReview>();
   @Output() refresh = new EventEmitter<ReviewModalCloseEvent>();
 
-  isMyReview = model<boolean>(false);
-
-  ngOnInit() {
-    effect(() => {
-      this.accountService.currentUser$.subscribe(u => {
-        if (u) {
-          this.isMyReview.set(this.review().username === u.username && !this.review().isExternal);
-        }
-      });
-    });
-  }
+  isMyReview = computed(() =>
+    this.review().username === this.accountService.currentUserSignal()?.username && !this.review().isExternal);
 
   showModal() {
     let component;
