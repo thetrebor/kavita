@@ -16,6 +16,7 @@ const basePath = './assets/images/ratings/';
       NgbTooltip,
       AgeRatingPipe,
   ],
+  standalone: true,
   templateUrl: './age-rating-image.component.html',
   styleUrl: './age-rating-image.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -23,8 +24,7 @@ const basePath = './assets/images/ratings/';
 export class AgeRatingImageComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
-  // @ts-ignore
-  rating = input.required<AgeRating>(AgeRating.Unknown);
+  rating = input.required<AgeRating>();
 
   imageUrl = model<string>('unknown-rating.png');
 
