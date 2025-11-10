@@ -813,8 +813,8 @@ public class SeriesRepository : ISeriesRepository
 
             if (userProgress.Count > 0)
             {
-                s.LatestReadDate = seriesProgress.Max(p => p.LastModified);
-                s.TotalReads = seriesProgress.Min(p => p.TotalReads);
+                s.LatestReadDate = seriesProgress.MaxOrDefault(p => p.LastModified, DateTime.MinValue);
+                s.TotalReads = seriesProgress.MinOrDefault(p => p.TotalReads, 0);
             }
         }
     }

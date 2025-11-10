@@ -18,13 +18,13 @@ const basePath = './assets/images/ratings/';
   ],
   templateUrl: './age-rating-image.component.html',
   styleUrl: './age-rating-image.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class AgeRatingImageComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
-  // @ts-ignore
-  rating = input.required<AgeRating>(AgeRating.Unknown);
+  rating = input.required<AgeRating>();
 
   imageUrl = model<string>('unknown-rating.png');
 
