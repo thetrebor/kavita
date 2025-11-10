@@ -1,10 +1,10 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, computed,
   DestroyRef,
   ElementRef,
-  inject,
+  inject, model,
   OnInit,
   ViewChild
 } from '@angular/core';
@@ -112,13 +112,15 @@ export class ReadingListDetailComponent implements OnInit {
 
   items: Array<ReadingListItem> = [];
   listId!: number;
-  readingList: ReadingList | undefined;
+  readingList = model<ReadingList | undefined>(undefined);
   actions: Array<ActionItem<any>> = [];
   isAdmin: boolean = false;
   isLoading: boolean = false;
   accessibilityMode: boolean = false;
   editMode: boolean = false;
-  readingListSummary: string = '';
+  readingListSummary = computed(() => {
+    return (this.readingList()?.summary || '').replace(/\n/g, '<br>');
+  });
 
   libraryTypes: {[key: number]: LibraryType} = {};
   activeTabId = TabID.Storyline;
@@ -243,8 +245,7 @@ export class ReadingListDetailComponent implements OnInit {
         return;
       }
 
-      this.readingList = readingList;
-      this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
+      this.readingList.set(readingList);
       this.titleService.setTitle('Kavita - ' + readingList.title);
 
       this.cdRef.markForCheck();
@@ -278,12 +279,15 @@ export class ReadingListDetailComponent implements OnInit {
 
 
   readChapter(item: ReadingListItem) {
-    if (!this.readingList) return;
-    const params = this.readerService.getQueryParamsObject(false, true, this.readingList.id);
+    const currentList = this.readingList();
+    if (!currentList) return;
+    const params = this.readerService.getQueryParamsObject(false, true, currentList.id);
     this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
   }
 
   async handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
+    const currentList = this.readingList();
+
     switch(action.action) {
       case Action.Delete:
         await this.deleteList(readingList);
@@ -292,18 +296,16 @@ export class ReadingListDetailComponent implements OnInit {
         this.editReadingList(readingList);
         break;
       case Action.Promote:
-        this.actionService.promoteMultipleReadingLists([this.readingList!], true, () => {
-          if (this.readingList) {
-            this.readingList.promoted = true;
-            this.cdRef.markForCheck();
+        this.actionService.promoteMultipleReadingLists([currentList!], true, () => {
+          if (currentList) {
+            this.readingList.set({...currentList, promoted: true});
           }
         });
         break;
       case Action.UnPromote:
-        this.actionService.promoteMultipleReadingLists([this.readingList!], false, () => {
-          if (this.readingList) {
-            this.readingList.promoted = false;
-            this.cdRef.markForCheck();
+        this.actionService.promoteMultipleReadingLists([currentList!], false, () => {
+          if (currentList) {
+            this.readingList.set({...currentList, promoted: false});
           }
         });
         break;
@@ -326,8 +328,7 @@ export class ReadingListDetailComponent implements OnInit {
     this.actionService.editReadingList(readingList, (readingList: ReadingList) => {
       // Reload information around list
       this.readingListService.getReadingList(this.listId).subscribe(rl => {
-        this.readingList = rl!;
-        this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
+        this.readingList.set(rl!);
         this.cdRef.markForCheck();
       });
     });
@@ -343,15 +344,15 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   orderUpdated(event: IndexUpdateEvent) {
-    if (!this.readingList) return;
-    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
+    if (!this.readingList()) return;
+    this.readingListService.updatePosition(this.readingList()!.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
       this.getListItems();
     });
   }
 
   removeItem(removeEvent: ItemRemoveEvent) {
-    if (!this.readingList) return;
-    this.readingListService.deleteItem(this.readingList.id, removeEvent.item.id).subscribe(() => {
+    if (!this.readingList()) return;
+    this.readingListService.deleteItem(this.readingList()!.id, removeEvent.item.id).subscribe(() => {
       this.items.splice(removeEvent.position, 1);
       this.items = [...this.items];
       this.cdRef.markForCheck();
@@ -360,10 +361,10 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   removeRead() {
-    if (!this.readingList) return;
+    if (!this.readingList()) return;
     this.isLoading = true;
     this.cdRef.markForCheck();
-    this.readingListService.removeRead(this.readingList.id).subscribe((resp) => {
+    this.readingListService.removeRead(this.readingList()!.id).subscribe((resp) => {
       if (resp === 'Nothing to remove') {
         this.toastr.info(translate('toasts.nothing-to-remove'));
         return;
@@ -373,16 +374,16 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   read(incognitoMode: boolean = false) {
-    if (!this.readingList) return;
+    if (!this.readingList()) return;
     const firstItem = this.items[0];
     this.router.navigate(
       this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat),
-      {queryParams: {readingListId: this.readingList.id, incognitoMode: incognitoMode}});
+      {queryParams: {readingListId: this.readingList()!.id, incognitoMode: incognitoMode}});
   }
 
   continue(incognitoMode: boolean = false) {
     // TODO: Can I do this in the backend?
-    if (!this.readingList) return;
+    if (!this.readingList()) return;
     let currentlyReadingChapter = this.items[0];
     for (let i = 0; i < this.items.length; i++) {
       if (this.items[i].pagesRead >= this.items[i].pagesTotal) {
@@ -394,7 +395,7 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.router.navigate(
       this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat),
-      {queryParams: {readingListId: this.readingList.id, incognitoMode: incognitoMode}});
+      {queryParams: {readingListId: this.readingList()!.id, incognitoMode: incognitoMode}});
   }
 
   toggleReorder() {

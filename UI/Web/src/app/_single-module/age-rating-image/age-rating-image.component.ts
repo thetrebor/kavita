@@ -16,10 +16,10 @@ const basePath = './assets/images/ratings/';
       NgbTooltip,
       AgeRatingPipe,
   ],
+  standalone: true,
   templateUrl: './age-rating-image.component.html',
   styleUrl: './age-rating-image.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
 })
 export class AgeRatingImageComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
