@@ -2817,9 +2817,9 @@
     "profile": {
         "title": "{{username}}'s Profile",
         "joined-label": "Joined: ",
-        "overview-tab": "{{tabs.overview}}",
-        "stats-tab": "{{tabs.stats}}",
-        "reviews-tab": "{{tabs.reviews}}"
+        "overview-tab": "{{tabs.overview-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "reviews-tab": "{{tabs.reviews-tab}}"
 
     },
 
