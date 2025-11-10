@@ -16,6 +16,7 @@ using AutoMapper;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -32,9 +33,11 @@ public class SettingsController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly ILocalizationService _localizationService;
     private readonly ISettingsService _settingsService;
+    private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
 
     public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, IMapper mapper,
-        IEmailService emailService, ILocalizationService localizationService, ISettingsService settingsService)
+        IEmailService emailService, ILocalizationService localizationService, ISettingsService settingsService,
+        IAuthenticationSchemeProvider authenticationSchemeProvider)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
@@ -42,6 +45,7 @@ public class SettingsController : BaseApiController
         _emailService = emailService;
         _localizationService = localizationService;
         _settingsService = settingsService;
+        _authenticationSchemeProvider = authenticationSchemeProvider;
     }
 
     /// <summary>
@@ -278,9 +282,12 @@ public class SettingsController : BaseApiController
     [HttpGet("oidc")]
     public async Task<ActionResult<OidcPublicConfigDto>> GetOidcConfig()
     {
+        var oidcScheme = await _authenticationSchemeProvider.GetSchemeAsync(IdentityServiceExtensions.OpenIdConnect);
+
         var settings = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
         var publicConfig = _mapper.Map<OidcPublicConfigDto>(settings);
-        publicConfig.Enabled = !string.IsNullOrEmpty(settings.Authority) &&
+        publicConfig.Enabled = oidcScheme != null &&
+                               !string.IsNullOrEmpty(settings.Authority) &&
                                !string.IsNullOrEmpty(settings.ClientId) &&
                                !string.IsNullOrEmpty(settings.Secret);
 

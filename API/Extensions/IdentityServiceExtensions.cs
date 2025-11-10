@@ -72,41 +72,34 @@ public static class IdentityServiceExtensions
 
         var oidcSettings = Configuration.OidcSettings;
 
-        var auth = services.AddAuthentication(DynamicHybrid)
-            .AddPolicyScheme(DynamicHybrid, JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                var enabled = oidcSettings.Enabled;
+        var auth = services.AddAuthentication(DynamicHybrid);
+        var enableOidc = oidcSettings.Enabled && services.SetupOpenIdConnectAuthentication(auth, oidcSettings, environment);
 
-                options.ForwardDefaultSelector = ctx =>
-                {
-                    if (!enabled) return LocalIdentity;
-
-                    if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
-                        ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
-                    {
-                        return OpenIdConnect;
-                    }
-
-                    if (ctx.Request.Headers.Authorization.Count != 0)
-                    {
-                        return LocalIdentity;
-                    }
-
-                    if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
-                    {
-                        return OpenIdConnect;
-                    }
-
-                    return LocalIdentity;
-                };
-
-            });
-
-
-        if (oidcSettings.Enabled)
+        auth.AddPolicyScheme(DynamicHybrid, JwtBearerDefaults.AuthenticationScheme, options =>
         {
-            services.SetupOpenIdConnectAuthentication(auth, oidcSettings, environment);
-        }
+            options.ForwardDefaultSelector = ctx =>
+            {
+                if (!enableOidc) return LocalIdentity;
+
+                if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
+                    ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
+                {
+                    return OpenIdConnect;
+                }
+
+                if (ctx.Request.Headers.Authorization.Count != 0)
+                {
+                    return LocalIdentity;
+                }
+
+                if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
+                {
+                    return OpenIdConnect;
+                }
+
+                return LocalIdentity;
+            };
+        });
 
         auth.AddJwtBearer(LocalIdentity, options =>
         {
@@ -134,7 +127,7 @@ public static class IdentityServiceExtensions
         return services;
     }
 
-    private static void SetupOpenIdConnectAuthentication(this IServiceCollection services, AuthenticationBuilder auth,
+    private static bool SetupOpenIdConnectAuthentication(this IServiceCollection services, AuthenticationBuilder auth,
         Configuration.OpenIdConnectSettings settings, IWebHostEnvironment environment)
     {
         var isDevelopment = environment.IsEnvironment(Environments.Development);
@@ -147,7 +140,7 @@ public static class IdentityServiceExtensions
         if (!isDevelopment && !authority.StartsWith("https"))
         {
             Log.Error("OpenIdConnect authority is not using https, you must configure tls for your idp.");
-            return;
+            return false;
         }
 
         var hasTrailingSlash = authority.EndsWith('/');
@@ -174,7 +167,7 @@ public static class IdentityServiceExtensions
         {
             // Do not interrupt startup if OIDC fails (Network outage should still allow Kavita to run)
             Log.Error(ex, "Failed to load OIDC configuration, OIDC will not be enabled. Restart to retry");
-            return;
+            return false;
         }
 
         List<string> scopes = ["openid", "profile", "offline_access", "roles", "email"];
@@ -335,6 +328,8 @@ public static class IdentityServiceExtensions
                 },
             };
         });
+
+        return true;
     }
 
     /// <summary>

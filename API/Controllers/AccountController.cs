@@ -22,6 +22,7 @@ using AutoMapper;
 using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -51,6 +52,7 @@ public class AccountController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -59,7 +61,8 @@ public class AccountController : BaseApiController
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IAuthenticationSchemeProvider authenticationSchemeProvider)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -71,18 +74,21 @@ public class AccountController : BaseApiController
         _emailService = emailService;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _authenticationSchemeProvider = authenticationSchemeProvider;
     }
 
     /// <summary>
-    /// Returns true if OIDC authentication cookies are present
+    /// Returns true if OIDC authentication cookies are present and the <see cref="IdentityServiceExtensions.OpenIdConnect"/>
+    /// scheme has been registered
     /// </summary>
     /// <remarks>Makes not guarantee about their validity</remarks>
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("oidc-authenticated")]
-    public ActionResult<bool> OidcAuthenticated()
+    public async Task<ActionResult<bool>> OidcAuthenticated()
     {
-        return Ok(HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName));
+        var oidcScheme = await _authenticationSchemeProvider.GetSchemeAsync(IdentityServiceExtensions.OpenIdConnect);
+        return Ok(oidcScheme != null && HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName));
     }
 
     /// <summary>

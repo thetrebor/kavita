@@ -73,10 +73,7 @@ export class UserLoginComponent implements OnInit {
 
     return loaded && config && !config.disablePasswordAuthentication;
   });
-  showOidcButton = computed(() => {
-    const config = this.oidcConfig();
-    return config && config.enabled;
-  });
+  showOidcButton = computed(() => this.oidcConfig()?.enabled ?? false);
 
   constructor() {
     this.navService.hideNavBar();
@@ -86,7 +83,7 @@ export class UserLoginComponent implements OnInit {
       const skipAutoLogin = this.skipAutoLogin();
       const oidcConfig = this.oidcConfig();
 
-      if (!oidcConfig || skipAutoLogin === undefined) return;
+      if (!oidcConfig || !oidcConfig.enabled || skipAutoLogin === undefined) return;
 
       if (oidcConfig.autoLogin && !skipAutoLogin) {
         window.location.href = this.baseUrl + 'oidc/login';
