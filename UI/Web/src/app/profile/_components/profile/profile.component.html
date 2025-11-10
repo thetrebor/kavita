@@ -62,10 +62,11 @@
           <a ngbNavLink>{{t(TabID.Reviews)}}</a>
           <ng-template ngbNavContent>
             @defer (when activeTabId() === TabID.Reviews; prefetch on idle) {
-              @for(review of reviews(); track review) {
-                <app-review-card [review]="review" />
+              @if (reviewsResource.hasValue()) {
+                @for(review of reviewsResource.value(); track review) {
+                  <app-review-card [review]="review" />
+                }
               }
-
             }
           </ng-template>
         </li>

@@ -62,19 +62,11 @@ export class ProfileComponent {
 
   // Set by angular from the resolver
   memberInfo = input.required<MemberInfo>();
+  reviewsResource = this.reviewService
+    .getReviewsByUserResource(() => this.memberInfo().id);
 
-  reviews = model<UserReview[]>([]);
   hasCoverImage = computed(() => false);
   activeTabId = model<TabID>(TabID.Overview);
-
-  constructor() {
-    effect(() => {
-      if (!this.memberInfo()) return;
-      this.reviewService.getReviewsFromUser(this.memberInfo()!.id || 0).subscribe(reviews => {
-        this.reviews.set(reviews);
-      });
-    })
-  }
 
   onNavChange(event: NgbNavChangeEvent) {
     this.updateUrl(event.nextId);
