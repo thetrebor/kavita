@@ -24,34 +24,23 @@ namespace API.Controllers;
 
 #nullable enable
 
-public class StatsController : BaseApiController
+public class StatsController(
+    IStatisticService statService,
+    IUnitOfWork unitOfWork,
+    UserManager<AppUser> userManager,
+    ILocalizationService localizationService,
+    IDirectoryService directoryService)
+    : BaseApiController
 {
-    private readonly IStatisticService _statService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly UserManager<AppUser> _userManager;
-    private readonly ILocalizationService _localizationService;
-    private readonly IDirectoryService _directoryService;
-
-    public StatsController(IStatisticService statService, IUnitOfWork unitOfWork,
-        UserManager<AppUser> userManager, ILocalizationService localizationService,
-        IDirectoryService directoryService)
-    {
-        _statService = statService;
-        _unitOfWork = unitOfWork;
-        _userManager = userManager;
-        _localizationService = localizationService;
-        _directoryService = directoryService;
-    }
-
     [HttpGet("user/{userId}/read")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user!.Id != userId && !await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
-            return Unauthorized(await _localizationService.Translate(UserId, "stats-permission-denied"));
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        if (user!.Id != userId && !await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
+            return Unauthorized(await localizationService.Translate(UserId, "stats-permission-denied"));
 
-        return Ok(await _statService.GetUserReadStatistics(userId, new List<int>()));
+        return Ok(await statService.GetUserReadStatistics(userId, new List<int>()));
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -59,7 +48,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<ServerStatisticsDto>> GetHighLevelStats()
     {
-        return Ok(await _statService.GetServerStatistics());
+        return Ok(await statService.GetServerStatistics());
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -67,7 +56,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
     {
-        return Ok(await _statService.GetYearCount());
+        return Ok(await statService.GetYearCount());
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -75,7 +64,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<StatCount<PublicationStatus>>>> GetPublicationStatus()
     {
-        return Ok(await _statService.GetPublicationCount());
+        return Ok(await statService.GetPublicationCount());
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -83,7 +72,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<StatCount<MangaFormat>>>> GetMangaFormat()
     {
-        return Ok(await _statService.GetMangaFormatCount());
+        return Ok(await statService.GetMangaFormatCount());
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
@@ -91,7 +80,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
     {
-        return Ok(await _statService.GetTopYears());
+        return Ok(await statService.GetTopYears());
     }
 
     /// <summary>
@@ -104,7 +93,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
     {
-        return Ok(await _statService.GetTopUsers(days));
+        return Ok(await statService.GetTopUsers(days));
     }
 
     /// <summary>
@@ -116,7 +105,7 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()
     {
-        return Ok(await _statService.GetFileBreakdown());
+        return Ok(await statService.GetFileBreakdown());
     }
 
     /// <summary>
@@ -132,12 +121,12 @@ public class StatsController : BaseApiController
         {
             return BadRequest("Invalid file format");
         }
-        var tempFile = Path.Join(_directoryService.TempDirectory,
+        var tempFile = Path.Join(directoryService.TempDirectory,
             $"file_breakdown_{fileExtension.Replace(".", string.Empty)}.csv");
 
-        if (!_directoryService.FileSystem.File.Exists(tempFile))
+        if (!directoryService.FileSystem.File.Exists(tempFile))
         {
-            var results = await _statService.GetFilesByExtension(fileExtension);
+            var results = await statService.GetFilesByExtension(fileExtension);
             await using var writer = new StreamWriter(tempFile);
             await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
             await csv.WriteRecordsAsync(results);
@@ -158,11 +147,11 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin && userId != user!.Id) return BadRequest();
 
-        return Ok(await _statService.ReadCountByDay(userId, days));
+        return Ok(await statService.ReadCountByDay(userId, days));
     }
 
     [HttpGet("day-breakdown")]
@@ -171,12 +160,12 @@ public class StatsController : BaseApiController
     {
         if (userId == 0)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+            var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user);
             if (!isAdmin) return BadRequest();
         }
 
-        return Ok(_statService.GetDayBreakdown(userId));
+        return Ok(statService.GetDayBreakdown(userId));
     }
 
 
@@ -185,11 +174,11 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin && userId != user!.Id) return BadRequest();
 
-        return Ok(await _statService.GetReadingHistory(userId));
+        return Ok(await statService.GetReadingHistory(userId));
     }
 
     /// <summary>
@@ -202,8 +191,8 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
-        return Ok(_statService.GetPagesReadCountByYear(userId));
+        if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
+        return Ok(statService.GetPagesReadCountByYear(userId));
     }
 
     /// <summary>
@@ -216,8 +205,8 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int userId = 0)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
-        return Ok(_statService.GetWordsReadCountByYear(userId));
+        if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
+        return Ok(statService.GetWordsReadCountByYear(userId));
     }
 
     #region Device Insights
@@ -231,7 +220,7 @@ public class StatsController : BaseApiController
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<DeviceClientBreakdownDto>> GetClientTypeBreakdown()
     {
-        return Ok(await _statService.GetClientTypeBreakdown(DateTime.UtcNow.StartOfMonth()));
+        return Ok(await statService.GetClientTypeBreakdown(DateTime.UtcNow.StartOfMonth()));
     }
 
 
@@ -245,7 +234,7 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<StatCount<string>>> GetDeviceTypeCounts()
     {
         // Mobile vs Desktop Ratio - Overall usage pattern
-        return Ok(await _statService.GetDeviceTypeCounts(DateTime.UtcNow.StartOfMonth()));
+        return Ok(await statService.GetDeviceTypeCounts(DateTime.UtcNow.StartOfMonth()));
     }
 
     #endregion
@@ -257,11 +246,11 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<ReadingActivityGraphDto>> GetReadingActivity(int userId, int year)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin && userId != user!.Id) userId = user.Id;
 
-        return Ok(await _statService.GetReadingActivityGraphData(userId, year));
+        return Ok(await statService.GetReadingActivityGraphData(userId, year));
     }
 
     #endregion
@@ -272,11 +261,11 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<ReadingPaceDto>> GetReadingPace(int userId, int year)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return BadRequest();
         //if (!user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
 
-        return Ok(await _statService.GetReadingPaceForUser(user.Id, year));
+        return Ok(await statService.GetReadingPaceForUser(user.Id, year));
 
     }
     #endregion

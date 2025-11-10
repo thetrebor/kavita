@@ -9,6 +9,7 @@ using API.DTOs.Dashboard;
 using API.DTOs.Filtering.v2;
 using API.Entities;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -38,11 +39,11 @@ public class FilterController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> CreateOrUpdateSmartFilter(FilterV2Dto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters);
         if (user == null) return Unauthorized();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name must be set");
         if (Seed.DefaultStreams.Any(s => s.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -92,10 +93,9 @@ public class FilterController : BaseApiController
     /// <param name="filterId"></param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteFilter(int filterId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         var filter = await _unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
         if (filter == null) return Ok();
         // This needs to delete any dashboard filters that have it too
@@ -139,6 +139,7 @@ public class FilterController : BaseApiController
     /// <param name="name"></param>
     /// <returns></returns>
     [HttpPost("rename")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> RenameFilter([FromQuery] int filterId, [FromQuery] string name)
     {
         try
@@ -148,11 +149,6 @@ public class FilterController : BaseApiController
             if (user == null) return Unauthorized();
 
             name = name.Trim();
-
-            if (User.IsInRole(PolicyConstants.ReadOnlyRole))
-            {
-                return BadRequest(await _localizationService.Translate(user.Id, "permission-denied"));
-            }
 
             if (string.IsNullOrWhiteSpace(name))
             {

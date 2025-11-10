@@ -9,6 +9,7 @@ using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Helpers.Builders;
+using API.Middleware;
 using API.Services;
 using API.Services.Plus;
 using API.SignalR;
@@ -102,10 +103,9 @@ public class CollectionController : BaseApiController
     /// <param name="updatedTag"></param>
     /// <returns></returns>
     [HttpPost("update")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateTag(AppUserCollectionDto updatedTag)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         try
         {
             if (await _collectionService.UpdateTag(updatedTag, UserId))
@@ -129,10 +129,9 @@ public class CollectionController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("promote-multiple")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> PromoteMultipleCollections(PromoteCollectionsDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         // This needs to take into account owner as I can select other users cards
         var collections = await _unitOfWork.CollectionTagRepository.GetCollectionsByIds(dto.CollectionIds);
         var userId = UserId;
@@ -162,10 +161,9 @@ public class CollectionController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("delete-multiple")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteMultipleCollections(DeleteCollectionsDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         // This needs to take into account owner as I can select other users cards
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
@@ -185,10 +183,9 @@ public class CollectionController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-for-series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         // Create a new tag and save
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
@@ -228,10 +225,9 @@ public class CollectionController : BaseApiController
     /// <param name="updateSeriesForTagDto"></param>
     /// <returns></returns>
     [HttpPost("update-series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> RemoveTagFromMultipleSeries(UpdateSeriesForTagDto updateSeriesForTagDto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         try
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(updateSeriesForTagDto.Tag.Id, CollectionIncludes.Series);
@@ -254,10 +250,9 @@ public class CollectionController : BaseApiController
     /// <param name="tagId"></param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteTag(int tagId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         try
         {
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
@@ -285,10 +280,9 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("mal-stacks")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<IList<MalStackDto>>> GetMalStacksForUser()
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         return Ok(await _externalMetadataService.GetStacksForUser(UserId));
     }
 
@@ -298,12 +292,11 @@ public class CollectionController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("import-stack")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> ImportMalStack(MalStackDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
 
         // Validation check to ensure stack doesn't exist already
         if (await _unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, user.Id))

@@ -6,6 +6,7 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Font;
 using API.Entities.Enums.Font;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner.Parser;
@@ -82,10 +83,9 @@ public class FontController : BaseApiController
     /// <param name="force">If the font is in use by other users and an admin wants it deleted, they must confirm to force delete it. This is prompted in the UI.</param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> DeleteFont(int fontId, bool force = false)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "denied"));
-
         var forceDelete = User.IsInRole(PolicyConstants.AdminRole) && force;
         var fontInUse = await _fontService.IsFontInUse(fontId);
         if (!fontInUse || forceDelete)
@@ -113,10 +113,9 @@ public class FontController : BaseApiController
     /// <param name="formFile"></param>
     /// <returns></returns>
     [HttpPost("upload")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<EpubFontDto>> UploadFont(IFormFile formFile)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "denied"));
-
         if (!_fontFileExtensionRegex.IsMatch(Path.GetExtension(formFile.FileName))) return BadRequest("Invalid file");
 
         if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
@@ -128,9 +127,9 @@ public class FontController : BaseApiController
     }
 
     [HttpPost("upload-by-url")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UploadFontByUrl([FromQuery]string url)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "denied"));
         // Validate url
         try
         {

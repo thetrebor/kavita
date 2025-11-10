@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs.ReadingLists.CBL;
+using API.Middleware;
 using API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -89,12 +90,11 @@ public class CblController : BaseApiController
     /// <param name="dryRun">If true, will only emulate the import but not perform. This should be done to preview what will happen</param>
     /// <param name="useComicVineMatching">Use comic vine matching or not. Defaults to false</param>
     /// <returns></returns>
-    [HttpPost("import")]
     [SwaggerIgnore]
+    [HttpPost("import")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblImportSummaryDto>> ImportCbl(IFormFile cbl, [FromQuery] bool dryRun = false, [FromQuery] bool useComicVineMatching = false)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         try
         {
             var userId = UserId;

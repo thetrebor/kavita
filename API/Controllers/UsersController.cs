@@ -7,6 +7,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.KavitaPlus.Account;
+using API.Middleware;
 using API.Services;
 using API.Services.Plus;
 using API.SignalR;
@@ -121,12 +122,12 @@ public class UsersController : BaseApiController
     /// <param name="preferencesDto"></param>
     /// <returns></returns>
     [HttpPost("update-preferences")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserPreferencesDto>> UpdatePreferences(UserPreferencesDto preferencesDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!,
             AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         var existingPreferences = user.UserPreferences;
 

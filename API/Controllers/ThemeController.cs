@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs.Theme;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks;
 using AutoMapper;
@@ -97,9 +98,9 @@ public class ThemeController : BaseApiController
     /// <param name="themeId"></param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> DeleteTheme(int themeId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         await _themeService.DeleteTheme(themeId);
 
         return Ok();
@@ -122,10 +123,9 @@ public class ThemeController : BaseApiController
     /// <param name="formFile"></param>
     /// <returns></returns>
     [HttpPost("upload-theme")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<SiteThemeDto>> DownloadTheme(IFormFile formFile)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         if (!formFile.FileName.EndsWith(".css")) return BadRequest("Invalid file");
         if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
         var tempFile = await UploadToTemp(formFile);

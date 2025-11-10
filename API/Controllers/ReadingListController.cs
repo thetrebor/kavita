@@ -9,6 +9,7 @@ using API.DTOs.ReadingLists;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using API.Services.Reading;
 using Kavita.Common;
@@ -115,9 +116,9 @@ public class ReadingListController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-position")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateListItemPosition(UpdateReadingListPosition dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         // Make sure UI buffers events
         var user = await _readingListService.UserHasReadingListAccess(dto.ReadingListId, Username!);
         if (user == null)
@@ -137,9 +138,9 @@ public class ReadingListController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("delete-item")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteListItem(UpdateReadingListPosition dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var user = await _readingListService.UserHasReadingListAccess(dto.ReadingListId, Username!);
         if (user == null)
         {
@@ -160,10 +161,9 @@ public class ReadingListController : BaseApiController
     /// <param name="readingListId"></param>
     /// <returns></returns>
     [HttpPost("remove-read")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteReadFromList([FromQuery] int readingListId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         var user = await _readingListService.UserHasReadingListAccess(readingListId, Username!);
         if (user == null)
         {
@@ -184,9 +184,9 @@ public class ReadingListController : BaseApiController
     /// <param name="readingListId"></param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteList([FromQuery] int readingListId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var user = await _readingListService.UserHasReadingListAccess(readingListId, Username!);
         if (user == null)
         {
@@ -205,9 +205,9 @@ public class ReadingListController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("create")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<ReadingListDto>> CreateList(CreateReadingListDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.ReadingLists);
         if (user == null) return Unauthorized();
 
@@ -229,9 +229,9 @@ public class ReadingListController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateList(UpdateReadingListDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
         if (readingList == null) return BadRequest(await _localizationService.Translate(UserId, "reading-list-doesnt-exist"));
 
@@ -259,9 +259,9 @@ public class ReadingListController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-by-series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateListBySeries(UpdateReadingListBySeriesDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var user = await _readingListService.UserHasReadingListAccess(dto.ReadingListId, Username!);
         if (user == null)
         {
@@ -302,9 +302,9 @@ public class ReadingListController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-by-multiple")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateListByMultiple(UpdateReadingListByMultipleDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var user = await _readingListService.UserHasReadingListAccess(dto.ReadingListId, Username!);
         if (user == null)
         {
@@ -347,9 +347,9 @@ public class ReadingListController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-by-multiple-series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateListByMultipleSeries(UpdateReadingListByMultipleSeriesDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var user = await _readingListService.UserHasReadingListAccess(dto.ReadingListId, Username!);
         if (user == null)
         {
@@ -386,9 +386,9 @@ public class ReadingListController : BaseApiController
     }
 
     [HttpPost("update-by-volume")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateListByVolume(UpdateReadingListByVolumeDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var user = await _readingListService.UserHasReadingListAccess(dto.ReadingListId, Username!);
         if (user == null)
         {
@@ -423,9 +423,9 @@ public class ReadingListController : BaseApiController
     }
 
     [HttpPost("update-by-chapter")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateListByChapter(UpdateReadingListByChapterDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var user = await _readingListService.UserHasReadingListAccess(dto.ReadingListId, Username!);
         if (user == null)
         {
@@ -545,10 +545,9 @@ public class ReadingListController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("promote-multiple")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> PromoteMultipleReadingLists(PromoteReadingListsDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         // This needs to take into account owner as I can select other users cards
         var userId = UserId;
         if (!User.IsInRole(PolicyConstants.PromoteRole) && !User.IsInRole(PolicyConstants.AdminRole))

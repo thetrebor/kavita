@@ -10,6 +10,7 @@ using API.Entities.Enums;
 using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
@@ -56,12 +57,11 @@ public class ChapterController : BaseApiController
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpDelete]
+    [Authorize(Policy = "RequireAdminRole")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> DeleteChapter(int chapterId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
-
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId,
             ChapterIncludes.Files | ChapterIncludes.ExternalReviews | ChapterIncludes.ExternalRatings);
         if (chapter == null)

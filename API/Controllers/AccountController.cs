@@ -16,6 +16,7 @@ using API.Entities.User;
 using API.Errors;
 using API.Extensions;
 using API.Helpers.Builders;
+using API.Middleware;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
@@ -125,14 +126,13 @@ public class AccountController : BaseApiController
     /// <param name="resetPasswordDto"></param>
     /// <returns></returns>
     [HttpPost("reset-password")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
         var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
         if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
 
         _logger.LogInformation("{UserName} is changing {ResetUser}'s password", Username!, resetPasswordDto.UserName);
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole))
-            return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
 
         if (resetPasswordDto.UserName == Username! && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))
@@ -393,10 +393,10 @@ public class AccountController : BaseApiController
     /// <remarks>This will log unauthorized requests to Security log</remarks>
     /// <returns></returns>
     [HttpPost("reset-api-key")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<string>> ResetApiKey()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!) ?? throw new KavitaUnauthenticatedUserException();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         user.ApiKey = HashUtil.ApiKey();
 
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
@@ -420,13 +420,11 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns>Returns just if the email was sent or server isn't reachable</returns>
     [HttpPost("update/email")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<InviteUserResponse>> UpdateEmail(UpdateEmailDto? dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user == null || User.IsInRole(PolicyConstants.ReadOnlyRole))
-            return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
-
-        if (dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
+        if (user == null || dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
             return BadRequest(await _localizationService.Translate(UserId, "invalid-payload"));
 
 
@@ -534,11 +532,11 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update/age-restriction")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateAgeRestriction(UpdateAgeRestrictionDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
@@ -570,14 +568,14 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     /// <remarks>Users who's <see cref="AppUser.IdentityProvider"/> is not <see cref="IdentityProvider.Kavita"/> cannot be edited if <see cref="OidcConfigDto.SyncUserSettings"/> is true</remarks>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
+    [Authorize(Policy = "RequireAdminRole")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
     {
         var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (adminUser == null) return Unauthorized();
         if (!await _unitOfWork.UserRepository.IsUserAdminAsync(adminUser)) return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(UserId, "no-user"));
