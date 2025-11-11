@@ -2820,8 +2820,8 @@
         "joined-label": "Joined: ",
         "overview-tab": "{{tabs.overview-tab}}",
         "stats-tab": "{{tabs.stats-tab}}",
-        "reviews-tab": "{{tabs.reviews-tab}}"
-
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "no-reviews": "No Reviews yet"
     },
 
     "activity-graph": {

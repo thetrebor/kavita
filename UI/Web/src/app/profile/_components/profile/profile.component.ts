@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
+  computed, DestroyRef,
   effect,
   inject,
   input,
@@ -27,6 +27,9 @@ import {
 import {ReviewService} from "../../../_services/review.service";
 import {UserReview} from "../../../_models/user-review";
 import {ReviewCardComponent} from "../../../_single-module/review-card/review-card.component";
+import {tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ActivatedRoute} from "@angular/router";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -58,6 +61,8 @@ export class ProfileComponent {
 
   private readonly location = inject(Location);
   private readonly reviewService = inject(ReviewService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
 
   // Set by angular from the resolver
@@ -67,6 +72,16 @@ export class ProfileComponent {
 
   hasCoverImage = computed(() => false);
   activeTabId = model<TabID>(TabID.Overview);
+
+  constructor() {
+    this.route.fragment.pipe(tap(frag => {
+      const fragId = frag as TabID;
+      if (frag !== null && this.activeTabId() !== fragId) {
+        this.updateUrl(fragId);
+        this.activeTabId.set(fragId); // BUG: This is not auto-selecting the active tab
+      }
+    }), takeUntilDestroyed(this.destroyRef)).subscribe();
+  }
 
   onNavChange(event: NgbNavChangeEvent) {
     this.updateUrl(event.nextId);
