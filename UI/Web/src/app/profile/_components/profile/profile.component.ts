@@ -30,6 +30,7 @@ import {ReviewCardComponent} from "../../../_single-module/review-card/review-ca
 import {tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
+import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -51,7 +52,8 @@ enum TabID {
     NgbNavLink,
     NgbNavItem,
     NgbNavOutlet,
-    ReviewCardComponent
+    ReviewCardComponent,
+    ReviewListItemComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

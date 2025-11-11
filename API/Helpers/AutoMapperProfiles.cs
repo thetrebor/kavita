@@ -413,5 +413,27 @@ public class AutoMapperProfiles : Profile
         CreateMap<ClientDevice, ClientDeviceDto>()
             .ForMember(dest => dest.OwnerUserId, opt => opt.MapFrom(src => src.AppUserId))
             .ForMember(dest => dest.OwnerUsername, opt => opt.MapFrom(src => src.AppUser.UserName));
+
+        CreateMap<AppUserRating, UserReviewExtendedDto>()
+            .ForMember(dest => dest.Body, opt => opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.SeriesId))
+            .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => (int?)null))
+            .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName))
+            .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Rating))
+            .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series))
+            .ForMember(dest => dest.Chapter, opt => opt.MapFrom(src => (ChapterDto?)null));
+
+        // Map from AppUserChapterRating (chapter-level reviews)
+        CreateMap<AppUserChapterRating, UserReviewExtendedDto>()
+            .ForMember(dest => dest.Body, opt => opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.SeriesId))
+            .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => src.ChapterId))
+            .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName))
+            .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Rating))
+            .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series))
+            .ForMember(dest => dest.Chapter, opt => opt.MapFrom(src => src.Chapter));
+
     }
 }

@@ -123,7 +123,7 @@ public interface IUserRepository
     Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
     Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
     Task UpdateUserAsActive(int userId);
-    Task<IList<UserReviewDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
+    Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
 
 }
 
@@ -656,26 +656,43 @@ public class UserRepository : IUserRepository
                 .SetProperty(u => u.LastActive, DateTime.Now));
     }
 
-    public async Task<IList<UserReviewDto>> GetAllReviewsForUser(int userId, bool bypassPreferences)
+    public async Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences)
     {
-        var userPreferences = await _context.AppUserPreferences
-            .FirstOrDefaultAsync(u => u.AppUserId == userId);
-
-        if (!bypassPreferences && userPreferences != null)
+        if (!bypassPreferences)
         {
-            var allowsSharingReviews = userPreferences.SocialPreferences!.ShareReviews;
+            var userPreferences = await _context.AppUserPreferences
+                .FirstOrDefaultAsync(u => u.AppUserId == userId);
 
-            if (!allowsSharingReviews) return Array.Empty<UserReviewDto>();
+            if (userPreferences?.SocialPreferences?.ShareReviews == false)
+            {
+                return Array.Empty<UserReviewExtendedDto>();
+            }
         }
 
-
-        return await _context.AppUserChapterRating
+        // Get series-level reviews
+        var seriesReviews = await _context.AppUserRating
             .Include(r => r.AppUser)
+            .Include(r => r.Series)
             .Where(r => r.AppUserId == userId && !string.IsNullOrEmpty(r.Review))
-            .OrderBy(r => r.SeriesId) // NOTE: For some reason, I didn't include time stamps on the ratings
+            .OrderBy(r => r.SeriesId)
             .AsSplitQuery()
-            .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<UserReviewExtendedDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+
+        // Get chapter-level reviews
+        var chapterReviews = await _context.AppUserChapterRating
+            .Include(r => r.AppUser)
+            .Include(r => r.Series)
+            .Include(r => r.Chapter)
+            .Where(r => r.AppUserId == userId && !string.IsNullOrEmpty(r.Review))
+            .OrderBy(r => r.SeriesId)
+            .ThenBy(r => r.ChapterId)
+            .AsSplitQuery()
+            .ProjectTo<UserReviewExtendedDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        // Combine and return both lists
+        return seriesReviews.Concat(chapterReviews).ToList();
     }
 
 

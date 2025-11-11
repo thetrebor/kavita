@@ -1,5 +1,5 @@
 import {inject, Injectable, Signal} from '@angular/core';
-import {UserReview} from "../_models/user-review";
+import {UserReview, UserReviewExtended} from "../_models/user-review";
 import {environment} from "../../environments/environment";
 import {HttpClient, httpResource} from "@angular/common/http";
 import {Rating} from "../_models/rating";
@@ -53,12 +53,8 @@ export class ReviewService {
     return this.httpClient.get<Rating>(this.baseUrl + `rating/overall-series?seriesId=${seriesId}`);
   }
 
-  getReviewsFromUser(userId: number) {
-    return this.httpClient.get<UserReview[]>(this.baseUrl + `review/all?userId=${userId}`);
-  }
-
   getReviewsByUserResource(userId: () => number) {
-    return httpResource<UserReview[]>(() => this.baseUrl + `review/all?userId=${userId()}`).asReadonly();
+    return httpResource<UserReviewExtended[]>(() => this.baseUrl + `review/all?userId=${userId()}`).asReadonly();
   }
 
 }

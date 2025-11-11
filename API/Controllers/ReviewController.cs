@@ -142,7 +142,7 @@ public class ReviewController : BaseApiController
     /// <param name="userId"></param>
     /// <returns></returns>
     [HttpGet("all")]
-    public async Task<ActionResult<IList<UserReviewDto>>> GetAllReviewsForUser(int userId)
+    public async Task<ActionResult<IList<UserReviewExtendedDto>>> GetAllReviewsForUser(int userId)
     {
         return Ok(await _unitOfWork.UserRepository.GetAllReviewsForUser(userId, userId == UserId));
     }
