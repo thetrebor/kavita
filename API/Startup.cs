@@ -479,6 +479,7 @@ public class Startup
 
                     // v0.8.9
                     await MigrateProgressToReadingSessions.Migrate(dataContext, logger);
+                    await MigrateMissingCreatedUtcDate.Migrate(dataContext, logger);
 
                     #endregion
 

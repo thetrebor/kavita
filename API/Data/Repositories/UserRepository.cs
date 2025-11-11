@@ -671,7 +671,7 @@ public class UserRepository : IUserRepository
 
         return await _context.AppUserChapterRating
             .Include(r => r.AppUser)
-            .Where(r => r.AppUserId == userId)
+            .Where(r => r.AppUserId == userId && !string.IsNullOrEmpty(r.Review))
             .OrderBy(r => r.SeriesId) // NOTE: For some reason, I didn't include time stamps on the ratings
             .AsSplitQuery()
             .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
