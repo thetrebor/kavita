@@ -30,7 +30,7 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
 
     #region Progress (applied on the fly)
     /// <summary>
-    /// Rating from logged in user
+    /// Rating from logged-in user
     /// </summary>
     /// <remarks>Calculated at API-time</remarks>
     public float UserRating { get; set; }
@@ -91,16 +91,20 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     public bool IsBlacklisted { get; set; }
     #endregion
 
+    #region ColorScape
     /// <inheritdoc cref="API.Entities.Series.CoverImage"/>
     public string? CoverImage { get; set; }
     /// <inheritdoc cref="API.Entities.Series.PrimaryColor"/>
     public string? PrimaryColor { get; set; } = string.Empty;
     /// <inheritdoc cref="API.Entities.Series.SecondaryColor"/>
     public string? SecondaryColor { get; set; } = string.Empty;
+    #endregion
 
     public void ResetColorScape()
     {
         PrimaryColor = string.Empty;
         SecondaryColor = string.Empty;
     }
+
+
 }

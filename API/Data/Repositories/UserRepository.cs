@@ -673,6 +673,9 @@ public class UserRepository : IUserRepository
         var seriesReviews = await _context.AppUserRating
             .Include(r => r.AppUser)
             .Include(r => r.Series)
+            .ThenInclude(s => s.Metadata)
+            .ThenInclude(sm => sm.People)
+            .ThenInclude(smp => smp.Person)
             .Where(r => r.AppUserId == userId && !string.IsNullOrEmpty(r.Review))
             .OrderBy(r => r.SeriesId)
             .AsSplitQuery()
@@ -684,6 +687,7 @@ public class UserRepository : IUserRepository
             .Include(r => r.AppUser)
             .Include(r => r.Series)
             .Include(r => r.Chapter)
+            .ThenInclude(c => c.People)
             .Where(r => r.AppUserId == userId && !string.IsNullOrEmpty(r.Review))
             .OrderBy(r => r.SeriesId)
             .ThenBy(r => r.ChapterId)

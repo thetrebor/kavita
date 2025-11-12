@@ -45,6 +45,7 @@ using PublicationStatus = API.Entities.Enums.PublicationStatus;
 using SiteTheme = API.Entities.SiteTheme;
 
 namespace API.Helpers;
+#nullable enable
 
 public class AutoMapperProfiles : Profile
 {
@@ -65,7 +66,6 @@ public class AutoMapperProfiles : Profile
                 opt => opt.MapFrom(src => src.Chapters.OrderBy(c => c.SortOrder)));
         CreateMap<MangaFile, MangaFileDto>();
         CreateMap<Series, SeriesDto>();
-        CreateMap<CollectionTag, CollectionTagDto>();
         CreateMap<AppUserCollection, AppUserCollectionDto>()
             .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
@@ -415,25 +415,56 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.OwnerUsername, opt => opt.MapFrom(src => src.AppUser.UserName));
 
         CreateMap<AppUserRating, UserReviewExtendedDto>()
-            .ForMember(dest => dest.Body, opt => opt.MapFrom(src => src.Review))
-            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.SeriesId))
-            .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => (int?)null))
-            .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Series.LibraryId))
-            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName))
-            .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Rating))
-            .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series))
-            .ForMember(dest => dest.Chapter, opt => opt.MapFrom(src => (ChapterDto?)null));
+            .ForMember(dest => dest.Body,
+            opt => opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.SeriesId,
+            opt => opt.MapFrom(src => src.SeriesId))
+            .ForMember(dest => dest.ChapterId,
+            opt => opt.MapFrom(src => (int?)null))
+            .ForMember(dest => dest.LibraryId,
+            opt => opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Username,
+            opt => opt.MapFrom(src => src.AppUser.UserName))
+            .ForMember(dest => dest.Rating,
+            opt => opt.MapFrom(src => src.Rating))
+            .ForMember(dest => dest.Series,
+            opt => opt.MapFrom(src => src.Series))
+            .ForMember(dest => dest.Writers,
+                opt =>
+                    opt.MapFrom(src =>
+                        src.Series.Metadata.People
+                            .Where(p => p.Role == PersonRole.Writer)
+                                .OrderBy(p => p.OrderWeight)
+                                .Select(p => p.Person))
+                    )
+            .ForMember(dest => dest.Chapter,
+            opt => opt.MapFrom(src => (ChapterDto?)null));
 
         // Map from AppUserChapterRating (chapter-level reviews)
         CreateMap<AppUserChapterRating, UserReviewExtendedDto>()
-            .ForMember(dest => dest.Body, opt => opt.MapFrom(src => src.Review))
-            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.SeriesId))
-            .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => src.ChapterId))
-            .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Series.LibraryId))
-            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName))
-            .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Rating))
-            .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series))
-            .ForMember(dest => dest.Chapter, opt => opt.MapFrom(src => src.Chapter));
+            .ForMember(dest => dest.Body,
+            opt => opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.SeriesId,
+            opt => opt.MapFrom(src => src.SeriesId))
+            .ForMember(dest => dest.ChapterId,
+            opt => opt.MapFrom(src => src.ChapterId))
+            .ForMember(dest => dest.LibraryId,
+            opt => opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Username,
+                opt => opt.MapFrom(src => src.AppUser.UserName))
+            .ForMember(dest => dest.Rating,
+                opt => opt.MapFrom(src => src.Rating))
+            .ForMember(dest => dest.Series,
+                opt => opt.MapFrom(src => src.Series))
+            .ForMember(dest => dest.Writers,
+                opt => opt.MapFrom(src =>
+                    src.Chapter.People
+                        .Where(p => p.Role == PersonRole.Writer)
+                        .OrderBy(p => p.OrderWeight)
+                        .Select(p => p.Person))
+                )
+            .ForMember(dest => dest.Chapter,
+                opt => opt.MapFrom(src => src.Chapter));
 
     }
 }

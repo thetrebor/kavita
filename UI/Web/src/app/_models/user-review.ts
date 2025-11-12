@@ -2,6 +2,7 @@ import {ScrobbleProvider} from "../_services/scrobbling.service";
 import {RatingAuthority} from "./rating";
 import {Chapter} from "./chapter";
 import {Series} from "./series";
+import {Person} from "./metadata/person";
 
 
 export interface UserReview {
@@ -56,4 +57,5 @@ export interface UserReviewExtended {
    * Date the review/rating was made
    */
   createdUtc: string;
+  writers: Person[];
 }

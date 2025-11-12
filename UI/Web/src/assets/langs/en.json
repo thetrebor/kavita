@@ -172,6 +172,11 @@
         "critic": "critic"
     },
 
+    "review-list-item": {
+        "by-label": "By",
+        "created-alt": "Created"
+    },
+
     "want-to-read": {
         "title": "Want To Read",
         "series-count": "{{common.series-count}}",

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using API.DTOs.Person;
 
 namespace API.DTOs.SeriesDetail;
 
@@ -27,4 +29,6 @@ public sealed record UserReviewExtendedDto
     public SeriesDto Series { get; set; }
     public ChapterDto? Chapter { get; set; }
     public DateTime CreatedUtc { get; set; }
+
+    public ICollection<PersonDto> Writers { get; set; } = [];
 }

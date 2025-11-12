@@ -17,23 +17,17 @@
             </div>
           </h5>
           <div class="d-none d-md-inline-block mb-1">
-            {{item.rating}}
             <ngx-stars [initialStars]="item.rating" [size]="1" [maxStars]="5" [color]="starColor" [readonly]="true" />
-            @if (item.chapter) {
-             @for(writer of item.chapter.writers; track writer; let last = $last) {
-               <a href="/person/{{writer.name}}">{{writer.name}}</a>
-               @if (!last) {
-                 ,
-               }
-             }
-            } @else {
-              <!--TODO: Need to make people available on series-->
-<!--              @for(writer of item.series.writers; track writer; let last = $last) {-->
-<!--                <a href="/person/{{writer.id}}">{{writer.name}}</a>-->
-<!--                @if (!last) {-->
-<!--                  ,-->
-<!--                }-->
-<!--              }-->
+
+            @if (item.writers.length > 0) {
+              {{t('by-label')}}
+            }
+
+            @for(writer of item.writers; track writer; let last = $last) {
+              <a href="/person/{{writer.name}}">{{writer.name}}</a>
+              @if (!last) {
+                ,
+              }
             }
 <!--            <app-series-format [format]="item.series.format">-->
 <!--              <a class="ms-1" href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.series.name}}</a>-->
@@ -45,7 +39,8 @@
 
           @if (item.createdUtc !== '0001-01-01T00:00:00') {
             <div class="ps-1 mt-2">
-              {{t('created-label', {date: item.createdUtc | date:'longDate'})}}
+              <span class="visually-hidden">{{t('created-alt')}}</span>
+              {{item.createdUtc | date:'longDate'}}
             </div>
           }
         </div>
