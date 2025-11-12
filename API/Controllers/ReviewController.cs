@@ -45,7 +45,6 @@ public class ReviewController : BaseApiController
         var rating = ratingBuilder
             .WithBody(dto.Body)
             .WithSeriesId(dto.SeriesId)
-            .WithTagline(string.Empty)
             .Build();
 
         if (rating.Id == 0)

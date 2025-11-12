@@ -4,22 +4,40 @@
 
   @if (item) {
     <div class="d-flex flex-row g-0 reading-list-item">
-      <div class="d-none d-md-block pe-2">
+      <div class="d-none d-md-block pe-2"  [ngbTooltip]="item.series.name">
         <app-image width="106px" [styles]="{'max-height': '125px'}" class="img-top me-3" [imageUrl]="imageUrl()" />
       </div>
 
       <div class="flex-grow-1">
         <div class="g-0">
           <h5 class="mb-1 pb-0">
-            {{title()}}
+            <a class="ms-1" href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{title()}}</a>
             <div class="actions float-end">
               <app-card-actionables />
             </div>
-
           </h5>
-          <div class="ps-1 d-none d-md-inline-block mb-1">
-<!--            <app-series-format [format]="item.seriesFormat" />-->
-<!--            <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>-->
+          <div class="d-none d-md-inline-block mb-1">
+            {{item.rating}}
+            <ngx-stars [initialStars]="item.rating" [size]="1" [maxStars]="5" [color]="starColor" [readonly]="true" />
+            @if (item.chapter) {
+             @for(writer of item.chapter.writers; track writer; let last = $last) {
+               <a href="/person/{{writer.name}}">{{writer.name}}</a>
+               @if (!last) {
+                 ,
+               }
+             }
+            } @else {
+              <!--TODO: Need to make people available on series-->
+<!--              @for(writer of item.series.writers; track writer; let last = $last) {-->
+<!--                <a href="/person/{{writer.id}}">{{writer.name}}</a>-->
+<!--                @if (!last) {-->
+<!--                  ,-->
+<!--                }-->
+<!--              }-->
+            }
+<!--            <app-series-format [format]="item.series.format">-->
+<!--              <a class="ms-1" href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.series.name}}</a>-->
+<!--            </app-series-format>-->
           </div>
 
           <app-read-more [text]="item.body || ''" [showToggle]="false" [maxLength]="500" />

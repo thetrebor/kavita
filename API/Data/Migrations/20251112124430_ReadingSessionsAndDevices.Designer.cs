@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251101174802_ReadingSessionsAndDevices")]
+    [Migration("20251112124430_ReadingSessionsAndDevices")]
     partial class ReadingSessionsAndDevices
     {
         /// <inheritdoc />
@@ -305,41 +305,6 @@ namespace API.Data.Migrations
                     b.ToTable("AppUserBookmark");
                 });
 
-            modelBuilder.Entity("API.Entities.AppUserChapterRating", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ChapterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("HasBeenRated")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<float>("Rating")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("Review")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("ChapterId");
-
-                    b.HasIndex("SeriesId");
-
-                    b.ToTable("AppUserChapterRating");
-                });
-
             modelBuilder.Entity("API.Entities.AppUserCollection", b =>
                 {
                     b.Property<int>("Id")
@@ -507,8 +472,20 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("HasBeenRated")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
 
                     b.Property<float>("Rating")
                         .HasColumnType("REAL");
@@ -518,9 +495,6 @@ namespace API.Data.Migrations
 
                     b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Tagline")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -2655,6 +2629,53 @@ namespace API.Data.Migrations
                     b.ToTable("Tag");
                 });
 
+            modelBuilder.Entity("API.Entities.User.AppUserChapterRating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ChapterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("HasBeenRated")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Rating")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Review")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("AppUserChapterRating");
+                });
+
             modelBuilder.Entity("API.Entities.User.AppUserPreferences", b =>
                 {
                     b.Property<int>("Id")
@@ -3211,33 +3232,6 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("AppUser");
-                });
-
-            modelBuilder.Entity("API.Entities.AppUserChapterRating", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("ChapterRatings")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Chapter", "Chapter")
-                        .WithMany("Ratings")
-                        .HasForeignKey("ChapterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Series", "Series")
-                        .WithMany()
-                        .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-
-                    b.Navigation("Chapter");
-
-                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserCollection", b =>
@@ -3798,6 +3792,33 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Library");
+                });
+
+            modelBuilder.Entity("API.Entities.User.AppUserChapterRating", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("ChapterRatings")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Chapter", "Chapter")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Chapter");
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("API.Entities.User.AppUserPreferences", b =>

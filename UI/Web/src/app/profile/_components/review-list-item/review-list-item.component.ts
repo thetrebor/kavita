@@ -2,12 +2,13 @@ import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angu
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DatePipe} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
-import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
-import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
-import {UserReview, UserReviewExtended} from "../../../_models/user-review";
+import {UserReviewExtended} from "../../../_models/user-review";
 import {ImageService} from "../../../_services/image.service";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgxStarsModule} from "ngx-stars";
+import {ThemeService} from "../../../_services/theme.service";
 
 @Component({
   selector: 'app-review-list-item',
@@ -16,7 +17,9 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
     DatePipe,
     ImageComponent,
     ReadMoreComponent,
-    CardActionablesComponent
+    CardActionablesComponent,
+    NgbTooltip,
+    NgxStarsModule
   ],
   templateUrl: './review-list-item.component.html',
   styleUrl: './review-list-item.component.scss',
@@ -25,6 +28,7 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 export class ReviewListItemComponent {
 
   protected readonly imageService = inject(ImageService);
+  protected readonly themeService = inject(ThemeService);
 
   review = input.required<UserReviewExtended>();
 
@@ -40,10 +44,19 @@ export class ReviewListItemComponent {
   title = computed(() => {
     const item = this.review();
     if (item.chapterId) {
-      return item.chapter?.title || item.series.name;
+      //if ( === LooseLeafOrDefaultNumber)
+
+      // If there is no actual title name, use a Chapter/Volume formatting
+      if (item.chapter?.titleName === item.series.name) {
+
+      }
+
+      return item.chapter?.titleName || item.series.name;
     }
 
     return item.series.name;
   });
+
+  protected readonly starColor = this.themeService.getCssVariable('--rating-star-color');
 
 }

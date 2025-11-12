@@ -11,12 +11,72 @@ namespace API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "Tagline",
+                table: "AppUserRating");
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "Created",
+                table: "AppUserRating",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedUtc",
+                table: "AppUserRating",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "LastModified",
+                table: "AppUserRating",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "LastModifiedUtc",
+                table: "AppUserRating",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
             migrationBuilder.AddColumn<int>(
                 name: "TotalReads",
                 table: "AppUserProgresses",
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: 0);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "Created",
+                table: "AppUserChapterRating",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedUtc",
+                table: "AppUserChapterRating",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "LastModified",
+                table: "AppUserChapterRating",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "LastModifiedUtc",
+                table: "AppUserChapterRating",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.CreateTable(
                 name: "AppUserReadingHistory",
@@ -165,8 +225,46 @@ namespace API.Data.Migrations
                 name: "ClientDevice");
 
             migrationBuilder.DropColumn(
+                name: "Created",
+                table: "AppUserRating");
+
+            migrationBuilder.DropColumn(
+                name: "CreatedUtc",
+                table: "AppUserRating");
+
+            migrationBuilder.DropColumn(
+                name: "LastModified",
+                table: "AppUserRating");
+
+            migrationBuilder.DropColumn(
+                name: "LastModifiedUtc",
+                table: "AppUserRating");
+
+            migrationBuilder.DropColumn(
                 name: "TotalReads",
                 table: "AppUserProgresses");
+
+            migrationBuilder.DropColumn(
+                name: "Created",
+                table: "AppUserChapterRating");
+
+            migrationBuilder.DropColumn(
+                name: "CreatedUtc",
+                table: "AppUserChapterRating");
+
+            migrationBuilder.DropColumn(
+                name: "LastModified",
+                table: "AppUserChapterRating");
+
+            migrationBuilder.DropColumn(
+                name: "LastModifiedUtc",
+                table: "AppUserChapterRating");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Tagline",
+                table: "AppUserRating",
+                type: "TEXT",
+                nullable: true);
         }
     }
 }
