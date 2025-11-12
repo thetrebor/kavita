@@ -1,4 +1,4 @@
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpParams, httpResource} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {environment} from 'src/environments/environment';
 import {UserReadStatistics} from '../statistics/_models/user-read-statistics';
@@ -21,6 +21,7 @@ import {Saver, SAVER} from "../_providers/saver.provider";
 import {ClientDeviceBreakdown} from "../statistics/_models/client-device-breakdown";
 import {ActivityGraphData} from "../statistics/_components/activity-graph/activity-graph.component";
 import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
+import {UserReviewExtended} from "../_models/user-review";
 
 export enum DayOfWeek
 {
@@ -156,5 +157,9 @@ export class StatisticsService {
 
   getReadingPace(userId: number, year: number) {
     return this.httpClient.get<ReadingPace>(this.baseUrl + `stats/reading-pace?userId=${userId}&year=${year}`);
+  }
+
+  getPreferredFormatResource(userId: () => number) {
+    return httpResource<StatCount<MangaFormat>[]>(() => this.baseUrl + `stats/preferred-format?userId=${userId()}`).asReadonly();
   }
 }

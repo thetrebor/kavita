@@ -53,8 +53,14 @@
               Stats Here
               <app-activity-graph />
 
-
               <app-reading-pace [userId]="user.id" [userName]="user.username"/>
+
+              <div class="row">
+                <div class="col-md-6"></div>
+                <div class="col-md-6">
+                  <app-preferred-format />
+                </div>
+              </div>
             }
           </ng-template>
 

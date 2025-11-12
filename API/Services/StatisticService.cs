@@ -40,6 +40,7 @@ public interface IStatisticService
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year);
     Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year);
+    Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
 }
 
 /// <summary>
@@ -775,6 +776,27 @@ public class StatisticService : IStatisticService
             ComicsRead = comicsRead.Count,
             DaysInRange = daysInRange
         };
+    }
+
+    public async Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId)
+    {
+
+        var query = _context.AppUserProgresses
+            .AsNoTracking()
+            .Where(p => p.AppUserId == userId)
+            .Join(_context.Series,
+                p => p.SeriesId,
+                s => s.Id,
+                (progress, series) => new { series.Format, progress.Id })
+            .GroupBy(x => x.Format)
+            .Select(g => new StatCount<MangaFormat>
+            {
+                Value = g.Key,
+                Count = g.Count()
+            })
+            .OrderByDescending(s => s.Count);
+
+        return await query.ToListAsync();
     }
 
     private static string CapitalizeDeviceType(string deviceType)
