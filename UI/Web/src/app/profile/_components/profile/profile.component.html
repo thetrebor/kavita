@@ -64,7 +64,7 @@
           <ng-template ngbNavContent>
             @defer (when activeTab === TabID.Reviews; prefetch on idle) {
               @if (reviewsResource.hasValue()) {
-                <div class="row g-0">
+                <div class="row mx-2">
                   @for(review of reviewsResource.value(); track review) {
                     <div class="col-md-12">
                       <app-review-list-item [review]="review" />
