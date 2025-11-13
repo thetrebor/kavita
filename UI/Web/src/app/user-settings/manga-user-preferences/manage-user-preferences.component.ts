@@ -50,6 +50,7 @@ type UserPreferencesForm = FormGroup<{
     socialLibraries: FormControl<number[]>,
     socialMaxAgeRating: FormControl<AgeRating>,
     socialIncludeUnknowns: FormControl<boolean>,
+    shareProfile: FormControl<boolean>,
   }>,
 
   opdsPreferences: FormGroup<{
@@ -171,6 +172,7 @@ export class ManageUserPreferencesComponent implements OnInit {
           socialLibraries: this.fb.control<number[]>(pref.socialPreferences.socialLibraries),
           socialMaxAgeRating: this.fb.control<AgeRating>(pref.socialPreferences.socialMaxAgeRating),
           socialIncludeUnknowns: this.fb.control<boolean>(pref.socialPreferences.socialIncludeUnknowns),
+          shareProfile: this.fb.control<boolean>(pref.socialPreferences.shareProfile),
         }),
 
         opdsPreferences: this.fb.group({

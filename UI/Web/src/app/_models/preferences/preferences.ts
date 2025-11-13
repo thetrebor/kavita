@@ -36,6 +36,7 @@ export interface SocialPreferences {
   socialLibraries: number[];
   socialMaxAgeRating: AgeRating;
   socialIncludeUnknowns: boolean;
+  shareProfile: boolean;
 }
 
 export interface OpdsPreferences {

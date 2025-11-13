@@ -261,9 +261,9 @@ public class StatsController(
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<ReadingPaceDto>> GetReadingPace(int userId, int year)
     {
+        // TODO: Turn this into an action middleware for sharing user profile stuff
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return BadRequest();
-        //if (!user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest(); // TODO: Turn this into an action middleware
+        if (user == null || !user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
 
         return Ok(await statService.GetReadingPaceForUser(user.Id, year));
 
@@ -274,8 +274,7 @@ public class StatsController(
     public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat(int userId)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return BadRequest();
-        //if (!user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
+        if (user == null || !user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
 
         return Ok(await statService.GetPreferredFormatForUser(user.Id));
     }

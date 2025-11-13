@@ -239,6 +239,9 @@
         "social-max-age-rating-tooltip": "Max age rating on which social features will work",
         "social-include-unknowns-label": "Include unknowns",
         "social-include-unknowns-tooltip": "Enable social features for series and chapters with an unknown age rating",
+        "social-share-profile-label": "Share Profile",
+        "social-share-profile-tooltip": "Enable sharing information about your reading activity to other server members",
+
 
         "embed-progress-indicator-label": "Embed Progress Indicator",
         "embed-progress-indicator-tooltip": "Embed Progress Indicator in Title",

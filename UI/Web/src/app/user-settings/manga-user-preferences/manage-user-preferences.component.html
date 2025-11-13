@@ -199,6 +199,17 @@
             </ng-template>
           </app-setting-switch>
         </div>
+
+        <div class="row g-0 mt-4">
+          <app-setting-switch [title]="t('social-share-profile-label')" [subtitle]="t('social-share-profile-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="social-share-profile"
+                       formControlName="shareProfile" class="form-check-input">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
       </ng-container>
 
       <div class="setting-section-break"></div>

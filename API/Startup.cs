@@ -480,6 +480,7 @@ public class Startup
                     // v0.8.9
                     await MigrateProgressToReadingSessions.Migrate(dataContext, logger);
                     await MigrateMissingCreatedUtcDate.Migrate(dataContext, logger);
+                    await MigrateProfilePreferences.Migrate(dataContext, logger);
 
                     #endregion
 
@@ -494,7 +495,7 @@ public class Startup
 
                     if (isVersionDifferent)
                     {
-                        // Clear the Github cache so update stuff shows correctly
+                        // Clear the GitHub cache so update stuff shows correctly
                         versionService.BustGithubCache();
                     }
 
