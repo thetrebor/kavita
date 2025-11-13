@@ -2813,6 +2813,10 @@
     },
 
     "server-activity": {
+        "no-data": "Nothing to see here"
+    },
+
+    "fiction-graph": {
 
     },
 
