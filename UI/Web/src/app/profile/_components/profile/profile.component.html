@@ -56,9 +56,31 @@
               <app-reading-pace [userId]="user.id" [userName]="user.username"/>
 
               <div class="row">
-                <div class="col-md-6"></div>
+                <div class="col-md-6">
+                  <app-fiction-graph />
+                </div>
                 <div class="col-md-6">
                   <app-preferred-format />
+                </div>
+              </div>
+
+              <!--TODO: In the component, use defer to avoid extra loading on the initial page-->
+
+              <div class="row">
+                <div class="col-md-6">
+                  <app-preferred-genre />
+                </div>
+                <div class="col-md-6">
+                  <app-preferred-tag />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <app-page-spread />
+                </div>
+                <div class="col-md-6">
+                  <app-word-spread />
                 </div>
               </div>
             }

@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed, DestroyRef,
-  effect,
-  inject,
-  input,
-  model
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, model} from '@angular/core';
 import {Location} from '@angular/common';
 import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
@@ -25,13 +17,16 @@ import {
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
 import {ReviewService} from "../../../_services/review.service";
-import {UserReview} from "../../../_models/user-review";
-import {ReviewCardComponent} from "../../../_single-module/review-card/review-card.component";
 import {tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
 import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
 import {PreferredFormatComponent} from "../../../statistics/_components/preferred-format/preferred-format.component";
+import {FictionGraphComponent} from "../../../statistics/_components/fiction-graph/fiction-graph.component";
+import {PreferredGenreComponent} from "../../../statistics/_components/preferred-genre/preferred-genre.component";
+import {PreferredTagComponent} from "../../../statistics/_components/preferred-tag/preferred-tag.component";
+import {PageSpreadComponent} from "../../../statistics/_components/page-spread/page-spread.component";
+import {WordSpreadComponent} from "../../../statistics/_components/word-spread/word-spread.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -54,7 +49,12 @@ enum TabID {
     NgbNavItem,
     NgbNavOutlet,
     ReviewListItemComponent,
-    PreferredFormatComponent
+    PreferredFormatComponent,
+    FictionGraphComponent,
+    PreferredGenreComponent,
+    PreferredTagComponent,
+    PageSpreadComponent,
+    WordSpreadComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
