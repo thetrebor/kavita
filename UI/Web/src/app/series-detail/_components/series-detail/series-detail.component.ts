@@ -146,22 +146,11 @@ interface StoryLineItem {
     NgbDropdownItem, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
-    NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
+    NgClass, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent,
-  JsonPipe]
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
-
-  protected readonly LibraryType = LibraryType;
-  protected readonly TabID = TabID;
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
-  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
-  protected readonly SettingsTabId = SettingsTabId;
-  protected readonly FilterField = FilterField;
-  protected readonly AgeRating = AgeRating;
-  protected readonly UserBreakpoint = UserBreakpoint;
-  protected readonly encodeURIComponent = encodeURIComponent;
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
@@ -211,13 +200,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   storyChapters: Chapter[] = [];
   storylineItems: StoryLineItem[] = [];
   libraryId = 0;
-  isAdmin = false;
-  hasDownloadingRole = false;
+
+  isAdmin = computed(() => {
+    return this.accountService.isAdmin();
+  });
+
   isLoading = true;
   isLoadingExtra = false;
   libraryAllowsScrobbling = false;
   isScrobbling: boolean = true;
-  mobileSeriesImgBackground: string | undefined;
+  mobileSeriesImgBackground = getComputedStyle(this.document.documentElement)
+    .getPropertyValue('--mobile-series-img-background').trim();
 
   currentlyReadingChapter: Chapter | undefined = undefined;
   hasReadingProgress = model<boolean>(false);
@@ -269,6 +262,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (!libType || !chapters) return false;
 
     if (libType === LibraryType.ComicVine) return false;
+
     // Edge case for bad pdf parse
     if ((libType === LibraryType.Book || libType === LibraryType.LightNovel) && (this.volumes.length === 0 && chapters.length === 0 && this.storyChapters.length > 0)) return true;
 
@@ -284,8 +278,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
     if (libType === LibraryType.ComicVine) {
       if (this.volumes.length > 1) return true;
-      if (this.specials.length === 0 && chapters.length === 0) return true;
-      return false;
+
+      return this.specials.length === 0 && chapters.length === 0;
+
     }
 
     return this.volumes.length > 0;
@@ -330,19 +325,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   combinedRecs: Array<any> = [];
 
-  sortingOptions: Array<{value: string, text: string}> = [
-    {value: 'Storyline', text: 'Storyline'},
-    {value: 'Release', text: 'Release'},
-    {value: 'Added', text: 'Added'},
-  ];
-  renderMode: PageLayoutMode = PageLayoutMode.Cards;
-
-  pageExtrasGroup = new FormGroup({
-    'sortingOption': new FormControl(this.sortingOptions[0].value, []),
-    'renderMode': new FormControl(this.renderMode, []),
-  });
-
-  user: User | undefined;
   showChapterTab = computed(() => this.chapters().length > 0);
   annotations = model<Annotation[]>([]);
 
@@ -487,18 +469,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
-
-    this.accountService.currentUser$.subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.isAdmin = this.accountService.hasAdminRole(user);
-        this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
-        this.renderMode = user.preferences.globalPageLayoutMode;
-        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
-        this.cdRef.markForCheck();
-      }
-    });
   }
 
   ngAfterContentChecked(): void {
@@ -512,10 +482,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.router.navigateByUrl('/home');
       return;
     }
-
-    this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
-      .getPropertyValue('--mobile-series-img-background').trim();
-
 
     // Set up the download in progress
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
@@ -577,14 +543,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
-    //this.loadSeries(this.seriesId, true);
     this.loadPageSource.next(true);
-
-    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
-      if (val == null) return;
-      this.renderMode = val;
-      this.cdRef.markForCheck();
-    });
   }
 
 
@@ -834,11 +793,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadPlusMetadata(this.seriesId, results.libType);
       }
 
-      if (results.libType === LibraryType.LightNovel) {
-        this.renderMode = PageLayoutMode.List;
-        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
-        this.cdRef.markForCheck();
-      }
+      // if (results.libType === LibraryType.LightNovel) {
+      //   this.renderMode = PageLayoutMode.List;
+      //   this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
+      //   this.cdRef.markForCheck();
+      // }
 
 
       this.titleService.setTitle('Kavita - ' + results.series.name + ' Details');
@@ -1208,4 +1167,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     }, 10);
   }
+
+  protected readonly LibraryType = LibraryType;
+  protected readonly TabID = TabID;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly FilterField = FilterField;
+  protected readonly AgeRating = AgeRating;
+  protected readonly UserBreakpoint = UserBreakpoint;
+  protected readonly encodeURIComponent = encodeURIComponent;
 }
