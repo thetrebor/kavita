@@ -22,6 +22,7 @@ import {ClientDeviceBreakdown} from "../statistics/_models/client-device-breakdo
 import {ActivityGraphData} from "../statistics/_components/activity-graph/activity-graph.component";
 import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
 import {UserReviewExtended} from "../_models/user-review";
+import {Breakdown} from "../statistics/_models/breakdown";
 
 export enum DayOfWeek
 {
@@ -161,5 +162,9 @@ export class StatisticsService {
 
   getPreferredFormatResource(userId: () => number) {
     return httpResource<StatCount<MangaFormat>[]>(() => this.baseUrl + `stats/preferred-format?userId=${userId()}`).asReadonly();
+  }
+
+  getGenreBreakDownResource(userId: () => number) {
+    return httpResource<Breakdown<string>>(() => this.baseUrl + `stats/genre-breakdown?userId=${userId()}`).asReadonly();
   }
 }

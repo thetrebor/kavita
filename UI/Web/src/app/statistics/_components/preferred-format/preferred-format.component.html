@@ -1,13 +1,7 @@
 <ng-container *transloco="let t; prefix: 'preferred-format'">
 
-  <div class="card" style="height: 300px; width: 300px;">
-    @if (formatsResource.hasValue()) {
-
-      <ngx-charts-advanced-pie-chart
-        [results]="formats()"
-      />
-
-    }
-  </div>
+  @if (formatsResource.hasValue()) {
+    <div style="height: 300px; width: 300px;" appECharts [options]="options()"></div>
+  }
 
 </ng-container>

@@ -41,6 +41,7 @@ public interface IStatisticService
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year);
     Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
+    Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId);
 }
 
 /// <summary>
@@ -797,6 +798,43 @@ public class StatisticService : IStatisticService
             .OrderByDescending(s => s.Count);
 
         return await query.ToListAsync();
+    }
+
+    public async Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId)
+    {
+        // DOESN'T WORK
+        var readsPerGenre = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => new { p.TotalReads, c.Genres })
+            .SelectMany(x => x.Genres.Select(g => new { g.NormalizedTitle, x.TotalReads }))
+            .GroupBy(x => x.NormalizedTitle)
+            .Select(g => new StatCount<string> { Value = g.Key, Count = g.Sum(x => x.TotalReads) })
+            .ToListAsync();
+
+        var totalMissingData = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Genres)
+            .CountAsync(g => !g.Any());
+
+        var totalReads = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .SumAsync(p => p.TotalReads);
+
+        var totalReadGenres = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Genres)
+            .SelectMany(g => g.Select(gg => gg.NormalizedTitle))
+            .Distinct()
+            .CountAsync();
+
+        return new BreakDownDto<string>()
+        {
+            Data = readsPerGenre,
+            Missing = totalMissingData,
+            Total = totalReads,
+            TotalOptions = totalReadGenres,
+        };
+
     }
 
     private static string CapitalizeDeviceType(string deviceType)

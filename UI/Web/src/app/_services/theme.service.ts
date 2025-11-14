@@ -10,7 +10,7 @@ import {NotificationProgressEvent} from '../_models/events/notification-progress
 import {SiteTheme, ThemeProvider} from '../_models/preferences/site-theme';
 import {TextResonse} from '../_types/text-response';
 import {EVENTS, MessageHubService} from './message-hub.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {translate} from "@jsverse/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
@@ -39,6 +39,7 @@ export class ThemeService {
 
   private currentThemeSource = new ReplaySubject<SiteTheme>(1);
   public currentTheme$ = this.currentThemeSource.asObservable();
+  public currentTheme = toSignal(this.currentTheme$);
 
   private themesSource = new ReplaySubject<SiteTheme[]>(1);
   public themes$ = this.themesSource.asObservable();

@@ -29,10 +29,12 @@ import {
   withPreloading
 } from "@angular/router";
 import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
+import {registerECharts} from "./echarts";
 
 const disableAnimations = !('animate' in document.documentElement);
 
 registerSwiperElements();
+registerECharts();
 
 function transformLanguageCodes(arr: Array<string>) {
     const transformedArray: Array<string> = [];

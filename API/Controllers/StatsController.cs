@@ -275,6 +275,14 @@ public class StatsController(
         return Ok(await statService.GetPreferredFormatForUser(userId));
     }
 
+    [ProfilePrivacy]
+    [HttpGet("genre-breakdown")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<BreakDownDto<string>>> GetGenreBreakdown(int userId)
+    {
+        return Ok(await statService.GetGenreBreakdownForUser(userId));
+    }
+
     #endregion
 
 }

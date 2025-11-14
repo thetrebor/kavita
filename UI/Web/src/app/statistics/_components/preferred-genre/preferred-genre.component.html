@@ -1,1 +1,3 @@
-<p>preferred-genre works!</p>
+@if (genreBreakdown.hasValue()) {
+  <div appECharts [options]="options()"  style="height: 300px; width: 300px;"></div>
+}
