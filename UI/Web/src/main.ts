@@ -25,9 +25,10 @@ import {
   PreloadAllModules,
   provideRouter,
   withComponentInputBinding,
-  withInMemoryScrolling,
+  withInMemoryScrolling, withNavigationErrorHandler,
   withPreloading
 } from "@angular/router";
+import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -141,7 +142,12 @@ bootstrapApplication(AppComponent, {
           NgCircleProgressModule.forRoot(),
           ColorPickerModule,
         ),
-        provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules), withInMemoryScrolling({scrollPositionRestoration: 'enabled'})),
+        provideRouter(routes,
+          withComponentInputBinding(),
+          withPreloading(PreloadAllModules),
+          withInMemoryScrolling({scrollPositionRestoration: 'enabled'}),
+          withNavigationErrorHandler(routingErrorHandler),
+          ),
         provideTransloco(translocoOptions),
         provideTranslocoLocale({
           defaultLocale: 'en'
