@@ -6,7 +6,7 @@ import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {RouterLink} from "@angular/router";
 import {ImageComponent} from "../../shared/image/image.component";
-import {ClientDeviceTypePipe} from "../../_pipes/client-device-type.pipe";
+import {ClientDeviceClientTypePipe} from "../../_pipes/client-device-client-type.pipe";
 import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe";
 
 @Component({
@@ -17,7 +17,7 @@ import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe
     DefaultValuePipe,
     RouterLink,
     ImageComponent,
-    ClientDeviceTypePipe,
+    ClientDeviceClientTypePipe,
     ClientDevicePlatformPipe
   ],
   templateUrl: './activity-card.component.html',

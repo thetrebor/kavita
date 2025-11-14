@@ -7,6 +7,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {PieChartModule} from "@swimlane/ngx-charts";
 import {PieDataItem} from "../../statistics/_models/pie-data-item";
 import {StatisticsService} from "../../_services/statistics.service";
+import {ClientDeviceClientTypePipe} from "../../_pipes/client-device-client-type.pipe";
 import {ClientDeviceTypePipe} from "../../_pipes/client-device-type.pipe";
 
 @Component({
@@ -36,7 +37,7 @@ export class ServerDevicesComponent {
     });
 
     this.statsService.getClientDeviceBreakdown().subscribe(clientDeviceBreakdown => {
-      const pipe = new ClientDeviceTypePipe();
+      const pipe = new ClientDeviceClientTypePipe();
       this.clientDeviceTypeBreakdown.set(
         clientDeviceBreakdown.records.map(record => ({
           name: pipe.transform(record.value),
@@ -47,9 +48,10 @@ export class ServerDevicesComponent {
     });
 
     this.statsService.getClientDeviceTypeCounts().subscribe(data => {
+      const pipe = new ClientDeviceTypePipe();
       this.mobileVsDesktop.set(
         data.map(record => ({
-          name: record.value,
+          name: pipe.transform(record.value),
           value: record.count,
           extra: { clientType: record.value }
         }))

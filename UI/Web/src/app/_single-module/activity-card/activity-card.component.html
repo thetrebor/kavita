@@ -19,7 +19,7 @@
         <div class="activity-header">
           <div class="media-info">
             <span class="badge bg-secondary product-badge">{{ activeData.clientInfo?.platform | clientDevicePlatform }}</span>
-            <span class="badge bg-primary player-badge">{{activeData.clientInfo?.clientType | clientDeviceType}}</span>
+            <span class="badge bg-primary player-badge">{{activeData.clientInfo?.clientType | clientDeviceClientType}}</span>
             <span class="quality-badge">
             {{t('pages-count', {num: activeData.pagesRead})}}
             @if (activeData.wordsRead > 0) {

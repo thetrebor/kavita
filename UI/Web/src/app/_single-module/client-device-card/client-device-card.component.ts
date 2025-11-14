@@ -6,7 +6,7 @@ import {ClientDeviceType} from "../../_services/client-info.service";
 import {ClientDeviceAuthTypePipe} from "../../_pipes/client-device-authtype.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe";
-import {ClientDeviceTypePipe} from "../../_pipes/client-device-type.pipe";
+import {ClientDeviceClientTypePipe} from "../../_pipes/client-device-client-type.pipe";
 import {DateTime, Duration, Interval} from "luxon";
 import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
@@ -28,7 +28,7 @@ import {User} from "../../_models/user/user";
     ClientDeviceAuthTypePipe,
     DefaultValuePipe,
     ClientDevicePlatformPipe,
-    ClientDeviceTypePipe,
+    ClientDeviceClientTypePipe,
     UtcToLocaleDatePipe,
     DefaultDatePipe,
     UtcToLocalTimePipe,

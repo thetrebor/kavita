@@ -38,9 +38,27 @@ export class PreferredFormatComponent {
     ];
 
     return {
-      legend: {},
-      dataset: { source },
-      series: [{ type: 'pie' }],
+      name: 'Format',
+      legend: {
+        top: '5%',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item'
+      },
+      radius: ['40%', '70%'],
+      center: ['50%', '70%'],
+      series: [{
+        type: 'pie',
+        startAngle: 180,
+        endAngle: 360,
+        data: (data || []).map(r => {
+          return {
+            value: r.count,
+            name: pipe.transform(r.value)
+          }
+        })
+      }],
     };
   });
 

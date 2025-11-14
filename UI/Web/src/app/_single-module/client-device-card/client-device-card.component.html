@@ -18,7 +18,7 @@
             </h5>
             <div class="text-muted small">
               <span class="badge" [class]="clientTypeBadgeClass()">
-                {{clientDevice().currentClientInfo.clientType | clientDeviceType}}
+                {{clientDevice().currentClientInfo.clientType | clientDeviceClientType}}
               </span>
               <span class="ms-2 badge bg-secondary" [title]="t('auth-type-label')">
                 {{clientDevice().currentClientInfo.authType | clientDeviceAuthType}}

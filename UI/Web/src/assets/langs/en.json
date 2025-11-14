@@ -2220,7 +2220,7 @@
         "unknown": "{{client-device-auth-type-pipe.unknown}}"
     },
 
-    "client-device-type-pipe": {
+    "client-device-client-type-pipe": {
         "unknown": "{{client-device-auth-type-pipe.unknown}}",
         "web-browser": "Web Browser",
         "web-app": "Web App",
@@ -2862,6 +2862,13 @@
         "per-year": "Per Year",
         "per-month": "Per Month",
         "per-day": "Per Day"
+    },
+
+    "client-device-type-pipe": {
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop",
+        "Unknown": "{{common.unknown}}"
     },
 
     "month-label-pipe": {

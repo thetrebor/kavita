@@ -614,7 +614,7 @@ public class StatisticService : IStatisticService
         var result = knownDeviceTypes
             .Select(deviceType => new StatCount<string>
             {
-                Value = CapitalizeDeviceType(deviceType),
+                Value = deviceType,
                 Count = grouped.GetValueOrDefault(deviceType, 0)
             })
             .OrderByDescending(s => s.Count)
@@ -835,17 +835,6 @@ public class StatisticService : IStatisticService
             TotalOptions = totalReadGenres,
         };
 
-    }
-
-    private static string CapitalizeDeviceType(string deviceType)
-    {
-        return deviceType switch
-        {
-            "mobile" => "Mobile",
-            "desktop" => "Desktop",
-            "tablet" => "Tablet",
-            _ => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(deviceType)
-        };
     }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)

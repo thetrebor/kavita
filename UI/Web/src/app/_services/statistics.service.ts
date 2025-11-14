@@ -21,7 +21,6 @@ import {Saver, SAVER} from "../_providers/saver.provider";
 import {ClientDeviceBreakdown} from "../statistics/_models/client-device-breakdown";
 import {ActivityGraphData} from "../statistics/_components/activity-graph/activity-graph.component";
 import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
-import {UserReviewExtended} from "../_models/user-review";
 import {Breakdown} from "../statistics/_models/breakdown";
 
 export enum DayOfWeek

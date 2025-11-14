@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace API.DTOs.Statistics;
 
-public class BreakDownDto<T>
+public sealed record BreakDownDto<T>
 {
 
     public IList<StatCount<T>> Data { get; set; }

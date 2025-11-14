@@ -259,6 +259,7 @@ public class StatsController(
 
     #region Profile Stats
 
+
     [ProfilePrivacy]
     [HttpGet("reading-pace")]
     [ResponseCache(CacheProfileName = "Statistics")]
@@ -267,6 +268,11 @@ public class StatsController(
         return Ok(await statService.GetReadingPaceForUser(userId, year));
     }
 
+    /// <summary>
+    /// Returns each format type read
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     [ProfilePrivacy]
     [HttpGet("preferred-format")]
     [ResponseCache(CacheProfileName = "Statistics")]
@@ -275,6 +281,11 @@ public class StatsController(
         return Ok(await statService.GetPreferredFormatForUser(userId));
     }
 
+    /// <summary>
+    /// Returns top 10 genres that user likes reading
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     [ProfilePrivacy]
     [HttpGet("genre-breakdown")]
     [ResponseCache(CacheProfileName = "Statistics")]
@@ -282,6 +293,7 @@ public class StatsController(
     {
         return Ok(await statService.GetGenreBreakdownForUser(userId));
     }
+
 
     #endregion
 
