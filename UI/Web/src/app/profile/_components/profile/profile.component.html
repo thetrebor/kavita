@@ -34,13 +34,12 @@
     </div>
 
     <div class="carousel-tabs-container mb-2">
-      @let activeTab = activeTabId();
-      <ul ngbNav #nav="ngbNav" [activeId]="activeTab" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
         <li [ngbNavItem]="TabID.Overview">
           <a ngbNavLink>{{t(TabID.Overview)}}</a>
           <ng-template ngbNavContent>
-            @defer (when activeTab === TabID.Overview; prefetch on idle) {
+            @defer (when activeTabId === TabID.Overview; prefetch on idle) {
               Overview Here
             }
           </ng-template>
@@ -49,7 +48,7 @@
         <li [ngbNavItem]="TabID.Stats">
           <a ngbNavLink>{{t(TabID.Stats)}}</a>
           <ng-template ngbNavContent>
-            @defer (when activeTab === TabID.Stats; prefetch on idle) {
+            @defer (when activeTabId === TabID.Stats; prefetch on idle) {
               Stats Here
               <app-activity-graph />
 
@@ -90,7 +89,7 @@
         <li [ngbNavItem]="TabID.Reviews">
           <a ngbNavLink>{{t(TabID.Reviews)}}</a>
           <ng-template ngbNavContent>
-            @defer (when activeTab === TabID.Reviews; prefetch on idle) {
+            @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
               @if (reviewsResource.hasValue()) {
                 <div class="row mx-2">
                   @for(review of reviewsResource.value(); track review) {

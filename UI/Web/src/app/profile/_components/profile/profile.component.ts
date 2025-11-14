@@ -36,6 +36,7 @@ enum TabID {
 
 @Component({
   selector: 'app-profile',
+  standalone: true,
   imports: [
     ReadingPaceComponent,
     ActivityGraphComponent,
@@ -74,21 +75,21 @@ export class ProfileComponent {
     .getReviewsByUserResource(() => this.memberInfo().id);
 
   hasCoverImage = computed(() => false);
-  activeTabId = model<TabID>(TabID.Overview);
+  activeTabId = TabID.Overview;
 
   constructor() {
     this.route.fragment.pipe(tap(frag => {
       const fragId = frag as TabID;
-      if (frag !== null && this.activeTabId() !== fragId) {
+      if (frag !== null && this.activeTabId !== fragId) {
         this.updateUrl(fragId);
-        this.activeTabId.set(fragId); // BUG: This is not auto-selecting the active tab
+        this.activeTabId = fragId;
       }
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onNavChange(event: NgbNavChangeEvent) {
     this.updateUrl(event.nextId);
-    this.activeTabId.set(event.nextId);
+    this.activeTabId = event.nextId;
   }
 
   updateUrl(activeTab: TabID) {
