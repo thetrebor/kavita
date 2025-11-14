@@ -6,12 +6,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Statistics;
 using API.DTOs.Stats.V3;
 using API.DTOs.Stats.V3.ClientDevice;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using CsvHelper;
@@ -257,26 +259,20 @@ public class StatsController(
 
     #region Profile Stats
 
+    [ProfilePrivacy]
     [HttpGet("reading-pace")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<ReadingPaceDto>> GetReadingPace(int userId, int year)
     {
-        // TODO: Turn this into an action middleware for sharing user profile stuff
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null || !user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
-
-        return Ok(await statService.GetReadingPaceForUser(user.Id, year));
-
+        return Ok(await statService.GetReadingPaceForUser(userId, year));
     }
 
+    [ProfilePrivacy]
     [HttpGet("preferred-format")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat(int userId)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null || !user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
-
-        return Ok(await statService.GetPreferredFormatForUser(user.Id));
+        return Ok(await statService.GetPreferredFormatForUser(userId));
     }
 
     #endregion
