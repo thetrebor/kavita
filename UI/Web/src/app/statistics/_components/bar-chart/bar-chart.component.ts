@@ -21,8 +21,32 @@ export class BarChartComponent {
   showLabels = input(false);
   labelPosition = input<'top' | 'bottom' | 'left' | 'right' | 'inside' | 'insideLeft' | 'insideRight' | 'insideTop' | 'insideBottom'>('right');
   seriesLabelFormatter = input<LabelFormatterCallback | undefined>(undefined);
+  multiColor = input(false);
 
   showToolTips = input(false);
+
+  processedData = computed(() => {
+    const data = this.data();
+    const multiColor = this.multiColor();
+
+    if (!multiColor) return data;
+
+    return data.map((d, index) => {
+      return {
+        value: d,
+        itemStyle: {
+          color: this.getColorForIndex(index),
+          borderRadius: 5
+        }
+      };
+    })
+  });
+
+  // TODO: Update colours, move into theme service?
+  private getColorForIndex(index: number): string {
+    const palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452'];
+    return palette[index % palette.length];
+  }
 
   protected options = computed(() => {
     const isHorizontal = this.horizontal();
@@ -44,7 +68,7 @@ export class BarChartComponent {
       yAxis: this.buildYAxis(),
       series: [{
         type: 'bar',
-        data: this.data(),
+        data: this.processedData(),
         label: {
           show: this.showLabels(),
           position: this.labelPosition(),
