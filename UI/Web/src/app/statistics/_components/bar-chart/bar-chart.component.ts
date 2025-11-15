@@ -75,7 +75,7 @@ export class BarChartComponent {
       data: isHorizontal ? this.axisLabels() : undefined,
       position: 'left' as const,
       axisLine: { show: false },
-      axisLabel: { rotate: isHorizontal ? 0 : 270 }
+      axisLabel: { rotate: 0 }
     };
 
     if (!this.axisLabelsRight()) {

@@ -54,7 +54,7 @@
 
               <app-reading-pace [userId]="user.id" [userName]="user.username | titlecase"/>
 
-              <div class="row">
+              <div class="row mt-4">
                 <div class="col-md-6">
                   <app-fiction-graph />
                 </div>
@@ -65,7 +65,7 @@
 
               <!--TODO: In the component, use defer to avoid extra loading on the initial page-->
 
-              <div class="row">
+              <div class="row mt-4">
                 <div class="col-md-6">
                   <app-preferred-genre [userId]="user.id" [userName]="user.username | titlecase" />
                 </div>
@@ -74,7 +74,7 @@
                 </div>
               </div>
 
-              <div class="row">
+              <div class="row mt-4">
                 <div class="col-md-6">
                   <app-page-spread [userId]="user.id" [userName]="user.username | titlecase" />
                 </div>
