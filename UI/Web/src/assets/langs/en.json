@@ -2842,12 +2842,12 @@
     "tag-breakdown": {
         "title": "Most read tags",
         "sub-title": "{{name}} most read tag is {{mostUsed}}",
-        "missing": "{{amount}} series do not have any tags assigned"
+        "missing": "Missing tags for {{amount}} series"
     },
     "genre-breakdown": {
         "title": "Most read genres",
         "sub-title": "{{name}} most read genre is {{mostUsed}}",
-        "missing": "{{amount}} series do not have any genres assigned"
+        "missing": "Missing genres for {{amount}} series"
     },
 
     "activity-graph": {

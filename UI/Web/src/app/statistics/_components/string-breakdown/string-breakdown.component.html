@@ -2,10 +2,10 @@
 
 <div class="card p-4" *transloco="let t; prefix: translationKey()">
 
-  <h4>{{t('title')}}</h4>
+  <span>{{t('title')}}</span>
 
   @if (breakDown().hasValue()) {
-    <span>{{t('sub-title', {name: userName(), mostUsed: mostUsed()?.value})}}</span>
+    <h4>{{t('sub-title', {name: userName(), mostUsed: mostUsed()?.value})}}</h4>
 
     <app-bar-chart
       [data]="data()"
