@@ -2,13 +2,13 @@ import {
   DestroyRef,
   Directive,
   effect,
-  ElementRef,
+  ElementRef, EmbeddedViewRef,
   inject,
   input,
   NgZone,
   OnDestroy,
-  OnInit,
-  untracked
+  OnInit, TemplateRef,
+  untracked, ViewContainerRef
 } from '@angular/core';
 import {EChartsInitOpts, init, EChartsType, ComposeOption, registerTheme} from "echarts/core";
 import { BarSeriesOption, LineSeriesOption, PieSeriesOption } from 'echarts/charts';
@@ -19,9 +19,10 @@ import {
   LegendComponentOption,
 } from 'echarts/components';
 import {ThemeService} from "../_services/theme.service";
-import {asyncScheduler, Subject, Subscription, tap} from "rxjs";
+import {asyncScheduler, Subject, tap, fromEvent, filter} from "rxjs";
 import {throttleTime} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SiteTheme} from "../_models/preferences/site-theme";
 
 export type ECOption = ComposeOption<
   | BarSeriesOption
@@ -45,9 +46,17 @@ export class EChartsDirective implements OnInit, OnDestroy {
   private readonly el = inject(ElementRef);
   private readonly themeService = inject(ThemeService);
   private ngZone = inject(NgZone);
+  private readonly vcr = inject(ViewContainerRef);
 
   readonly options = input<ECOption | null>(null);
   readonly initOptions = input<EChartsInitOpts | undefined>(undefined);
+  readonly useCustomTooltips = input(false);
+  readonly tooltipTemplate = input<TemplateRef<unknown> | null>(null);
+
+  private tooltipViewRef: EmbeddedViewRef<any> | null = null;
+  private tooltipContext = { $implicit: null as any };
+  private lastMousePosition = { x: 0, y: 0 };
+  private tooltipVisible = false;
 
   echart?: EChartsType;
 
@@ -59,16 +68,12 @@ export class EChartsDirective implements OnInit, OnDestroy {
   constructor() {
     // Keep up to date with themes
     effect(() => {
-      const kavitaTheme = this.themeService.currentTheme(); // Call on theme updates
+      const kavitaTheme = this.themeService.currentTheme();
       const options = untracked(this.options);
       if (!kavitaTheme || !options) return;
 
       this.ngZone.runOutsideAngular(() => {
-        registerTheme(kavitaTheme.name, this.createTheme());
-
-        this.echart?.dispose();
-        this.echart = init(this.el.nativeElement, kavitaTheme.name, untracked(this.initOptions));
-        this.echart.setOption(options);
+        this.initEChart(kavitaTheme, options);
       });
     });
 
@@ -89,10 +94,7 @@ export class EChartsDirective implements OnInit, OnDestroy {
     if (!options || !kavitaTheme) return;
 
     this.ngZone.runOutsideAngular(() => {
-      registerTheme(kavitaTheme.name, this.createTheme());
-
-      this.echart = init(this.el.nativeElement, kavitaTheme.name, this.initOptions());
-      this.echart.setOption(options);
+      this.initEChart(kavitaTheme, options);
     });
 
     this.resizer$.pipe(
@@ -123,6 +125,22 @@ export class EChartsDirective implements OnInit, OnDestroy {
     );
 
     this.resizeObserver.observe(this.el.nativeElement);
+
+    if (this.useCustomTooltips()) {
+      fromEvent<MouseEvent>(this.el.nativeElement, 'mousemove')
+        .pipe(
+          takeUntilDestroyed(this.destroyRef),
+          tap((event) => {
+            const rect = this.el.nativeElement.getBoundingClientRect();
+            this.lastMousePosition = {
+              x: event.clientX - rect.left,
+              y: event.clientY - rect.top
+            };
+          }),
+          filter(() => this.tooltipVisible),
+          tap(() => this.moveTooltip(this.lastMousePosition.x, this.lastMousePosition.y)),
+        ).subscribe();
+    }
   }
 
   ngOnDestroy() {
@@ -133,13 +151,58 @@ export class EChartsDirective implements OnInit, OnDestroy {
     if (this.resizeObserver) {
       this.resizeObserver.unobserve(this.el.nativeElement);
     }
+
+    this.clearTooltip();
   }
 
-  // TODO: Create a nice theme
+  private initEChart(kavitaTheme: SiteTheme, option: ECOption) {
+    registerTheme(kavitaTheme.name, this.createTheme());
+
+    this.echart?.dispose();
+    this.echart = init(this.el.nativeElement, kavitaTheme.name, untracked(this.initOptions));
+
+    if (this.useCustomTooltips()) {
+      option.tooltip = {
+        ...option.tooltip,
+        show: false,
+        showContent: false,
+        trigger: 'item',
+      }
+    }
+
+    this.echart.setOption(option);
+
+    if (this.useCustomTooltips()) {
+      this.echart.on('showTip', (params: any) => {
+        this.tooltipVisible = true;
+        this.renderTooltip({
+          dataIndex: params.dataIndex,
+          params: params,
+        });
+
+        const x = params.x ?? this.lastMousePosition.x;
+        const y = params.y ?? this.lastMousePosition.y;
+        this.moveTooltip(x, y);
+      });
+
+      this.echart.on('updateAxisPointer', (params: any) => {
+        if (this.tooltipVisible) {
+          const x = params.x ?? this.lastMousePosition.x;
+          const y = params.y ?? this.lastMousePosition.y;
+          this.moveTooltip(x, y);
+        }
+      });
+
+      this.echart.on('hideTip', () => {
+        this.tooltipVisible = false;
+        this.clearTooltip();
+      });
+    }
+  }
+
   private createTheme() {
     const textColour = this.getCssVar('--body-text-color');
 
-    // TODO: Use actual colours that don't all look alike
     const colorPalette = [
       this.getCssVar('--primary-color'),
       this.getCssVar('--primary-color-dark-shade'),
@@ -170,4 +233,51 @@ export class EChartsDirective implements OnInit, OnDestroy {
     return getComputedStyle(document.documentElement).getPropertyValue(key).trim();
   }
 
+  private renderTooltip(ctx: unknown) {
+    this.tooltipContext.$implicit = ctx;
+
+    if (!this.tooltipViewRef && this.tooltipTemplate()) {
+      this.tooltipViewRef = this.vcr.createEmbeddedView(
+        this.tooltipTemplate()!,
+        this.tooltipContext
+      );
+    }
+
+    this.tooltipViewRef?.detectChanges();
+  }
+
+  private moveTooltip(x: number, y: number) {
+    if (!this.tooltipViewRef) return;
+    const native = this.tooltipViewRef.rootNodes.find(
+      node => node.nodeType === Node.ELEMENT_NODE
+    ) as HTMLElement;
+    if (!native || !native.style) return;
+
+    const offsetX = 0;
+    const offsetY = 0;
+
+    native.style.position = 'absolute';
+    native.style.pointerEvents = 'none';
+    native.style.left = `${x + offsetX}px`;
+    native.style.top = `${y + offsetY}px`;
+    native.style.zIndex = '9999';
+
+    const rect = native.getBoundingClientRect();
+    const containerRect = this.el.nativeElement.getBoundingClientRect();
+
+    if (rect.right > containerRect.right) {
+      native.style.left = `${x - rect.width - offsetX}px`;
+    }
+
+    if (rect.bottom > containerRect.bottom) {
+      native.style.top = `${y - rect.height - offsetY}px`;
+    }
+  }
+
+  private clearTooltip() {
+    if (this.tooltipViewRef) {
+      this.tooltipViewRef.destroy();
+      this.tooltipViewRef = null;
+    }
+  }
 }

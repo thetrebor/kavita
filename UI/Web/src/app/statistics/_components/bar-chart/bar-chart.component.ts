@@ -1,10 +1,11 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, TemplateRef} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
 import {LabelFormatterCallback} from "echarts/types/dist/shared";
+import {NgTemplateOutlet} from "@angular/common";
 
 @Component({
   selector: 'app-bar-chart',
-  imports: [EChartsDirective],
+  imports: [EChartsDirective, NgTemplateOutlet],
   templateUrl: './bar-chart.component.html',
   styleUrl: './bar-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -24,6 +25,7 @@ export class BarChartComponent {
   multiColor = input(false);
 
   showToolTips = input(false);
+  readonly tooltipTemplate = input<TemplateRef<unknown> | null>(null);
 
   processedData = computed(() => {
     const data = this.data();

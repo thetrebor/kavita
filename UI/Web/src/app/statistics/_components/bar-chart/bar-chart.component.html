@@ -4,5 +4,15 @@
        [options]="options()"
        [style.width]="width()"
        [style.height]="height()"
+       [tooltipTemplate]="tooltipTemplateWrapper"
+       [useCustomTooltips]="tooltipTemplate() !== null"
   ></div>
+
+  <ng-template #tooltipTemplateWrapper let-tip>
+    <ng-container
+      [ngTemplateOutlet]="tooltipTemplate()"
+      [ngTemplateOutletContext]="{ $implicit: data()[tip.dataIndex] }">
+    </ng-container>
+  </ng-template>
+
 </ng-container>
