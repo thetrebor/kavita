@@ -1,9 +1,10 @@
 <ng-container *transloco="let t; prefix: 'profile'">
   @let user = memberInfo();
+  @let username = user.username | titlecase;
 
   @if (user) {
 
-    <h1>{{user.username}}</h1>
+    <h1>{{username}}</h1>
 
     <div class="main-container container-fluid pt-2 mb-5">
       <div class="row mb-0 mb-xl-3 info-container">
@@ -28,7 +29,7 @@
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
           <div class="row g-0 mt-2">
-            Joined: {{user.createdUtc | utcToLocalTime | timeAgo}}
+            Joined: {{user.createdUtc | utcToLocaleDate | timeAgo}}
           </div>
         </div>
       </div>
@@ -53,7 +54,7 @@
               Stats Here
               <app-activity-graph />
 
-              <app-reading-pace [userId]="user.id" [userName]="user.username | titlecase"/>
+              <app-reading-pace [userId]="user.id" [userName]="username"/>
 
               <div class="row mt-4">
                 <div class="col-md-6">
@@ -68,16 +69,16 @@
 
               <div class="row mt-4">
                 <div class="col-md-6">
-                  <app-string-breakdown [userId]="userId()" [userName]="user.username | titlecase" [breakDown]="genreBreakdown" translationKey="genre-breakdown" />
+                  <app-string-breakdown [userId]="userId()" [userName]="username" [breakDown]="genreBreakdown" translationKey="genre-breakdown" />
                 </div>
                 <div class="col-md-6">
-                  <app-string-breakdown [userId]="userId()" [userName]="user.username | titlecase" [breakDown]="tagsBreakdown" translationKey="tag-breakdown" />
+                  <app-string-breakdown [userId]="userId()" [userName]="username" [breakDown]="tagsBreakdown" translationKey="tag-breakdown" />
                 </div>
               </div>
 
               <div class="row mt-4">
                 <div class="col-md-6">
-                  <app-page-spread [userId]="user.id" [userName]="user.username | titlecase" />
+                  <app-page-spread [userId]="user.id" [userName]="username" />
                 </div>
                 <div class="col-md-6">
                   <app-word-spread [userId]="user.id"/>

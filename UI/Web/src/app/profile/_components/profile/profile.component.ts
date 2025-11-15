@@ -27,6 +27,7 @@ import {PageSpreadComponent} from "../../../statistics/_components/page-spread/p
 import {WordSpreadComponent} from "../../../statistics/_components/word-spread/word-spread.component";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StringBreakdownComponent} from "../../../statistics/_components/string-breakdown/string-breakdown.component";
+import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -55,7 +56,8 @@ enum TabID {
     PageSpreadComponent,
     WordSpreadComponent,
     TitleCasePipe,
-    StringBreakdownComponent
+    StringBreakdownComponent,
+    UtcToLocaleDatePipe
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
