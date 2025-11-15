@@ -46,10 +46,10 @@ export class PreferredFormatComponent {
       tooltip: {
         trigger: 'item'
       },
-      radius: ['40%', '70%'],
-      center: ['50%', '70%'],
       series: [{
         type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '70%'],
         startAngle: 180,
         endAngle: 360,
         data: (data || []).map(r => {
