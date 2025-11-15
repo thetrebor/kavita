@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -42,6 +41,7 @@ public interface IStatisticService
     Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId);
+    Task<PageSpreadStatsDto> GetPageSpreadForUser(int userId);
 }
 
 /// <summary>
@@ -53,6 +53,18 @@ public class StatisticService : IStatisticService
     private readonly DataContext _context;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
+
+    private static readonly (int Start, int? End)[] PageBuckets =
+    [
+        (1, 100),
+        (101, 200),
+        (201, 300),
+        (301, 400),
+        (401, 500),
+        (501, 600),
+        (601, 1000),
+        (1001, null) // 1000+
+    ];
 
     public StatisticService(DataContext context, IMapper mapper, IUnitOfWork unitOfWork)
     {
@@ -452,7 +464,7 @@ public class StatisticService : IStatisticService
         return results.OrderBy(r => r.Value);
     }
 
-    public IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown(int userId)
+    public IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown(int userId = 0)
     {
         return _context.AppUserProgresses
             .AsSplitQuery()
@@ -727,11 +739,10 @@ public class StatisticService : IStatisticService
 
         foreach (var history in readingHistory)
         {
-            if (history.Data != null)
-            {
-                pagesRead += history.Data.TotalPagesRead;
-                wordsRead += history.Data.TotalWordsRead;
-            }
+            if (history.Data == null) continue;
+
+            pagesRead += history.Data.TotalPagesRead;
+            wordsRead += history.Data.TotalWordsRead;
         }
 
         foreach (var session in readingSessions)
@@ -749,16 +760,15 @@ public class StatisticService : IStatisticService
                     pagesRead += activity.PagesRead;
                     wordsRead += activity.WordsRead;
 
-                    if (seriesFormats.TryGetValue(activity.SeriesId, out var seriesFormat))
+                    if (!seriesFormats.TryGetValue(activity.SeriesId, out var seriesFormat)) continue;
+
+                    if (seriesFormat == MangaFormat.Epub)
                     {
-                        if (seriesFormat == MangaFormat.Epub)
-                        {
-                            booksRead.Add(activity.ChapterId);
-                        }
-                        else
-                        {
-                            comicsRead.Add(activity.ChapterId);
-                        }
+                        booksRead.Add(activity.ChapterId);
+                    }
+                    else
+                    {
+                        comicsRead.Add(activity.ChapterId);
                     }
 
                 }
@@ -836,6 +846,47 @@ public class StatisticService : IStatisticService
         };
 
     }
+
+    public async Task<PageSpreadStatsDto> GetPageSpreadForUser(int userId)
+    {
+        var fullyReadChapters = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(
+                _context.Chapter,
+                progress => progress.ChapterId,
+                chapter => chapter.Id,
+                (progress, chapter) => new { progress, chapter }
+            )
+            .Where(x => x.progress.PagesRead >= x.chapter.Pages)
+            .Select(x => x.chapter.Pages)
+            .ToListAsync();
+
+        var totalCount = fullyReadChapters.Count;
+
+        var buckets = PageBuckets.Select(bucket =>
+        {
+            var count = fullyReadChapters.Count(pages =>
+                pages >= bucket.Start &&
+                (!bucket.End.HasValue || pages <= bucket.End.Value)
+            );
+
+            return new StatBucketDto
+            {
+                RangeStart = bucket.Start,
+                RangeEnd = bucket.End,
+                Count = count,
+                Percentage = totalCount > 0 ? (decimal)count / totalCount * 100 : 0
+            };
+        }).ToList();
+
+        return new PageSpreadStatsDto
+        {
+            Buckets = buckets,
+            TotalCount = totalCount
+        };
+    }
+
+
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
     {

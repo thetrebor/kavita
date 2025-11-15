@@ -70,16 +70,16 @@
                   <app-preferred-genre [userId]="user.id" />
                 </div>
                 <div class="col-md-6">
-                  <app-preferred-tag />
+                  <app-preferred-tag [userId]="user.id" />
                 </div>
               </div>
 
               <div class="row">
                 <div class="col-md-6">
-                  <app-page-spread />
+                  <app-page-spread [userId]="user.id" />
                 </div>
                 <div class="col-md-6">
-                  <app-word-spread />
+                  <app-word-spread [userId]="user.id"/>
                 </div>
               </div>
             }

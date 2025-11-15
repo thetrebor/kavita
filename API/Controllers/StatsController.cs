@@ -295,6 +295,15 @@ public class StatsController(
     }
 
 
+    [ProfilePrivacy]
+    [HttpGet("page-spread")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<PageSpreadStatsDto>> GetPageSpread(int userId)
+    {
+        return Ok(await statService.GetPageSpreadForUser(userId));
+    }
+
+
     #endregion
 
 }
