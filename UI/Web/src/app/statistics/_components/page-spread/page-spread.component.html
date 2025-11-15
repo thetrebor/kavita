@@ -14,7 +14,15 @@
         [horizontal]="false"
         [showToolTips]="true"
         labelPosition="top"
+        [tooltipTemplate]="tooltip"
       />
     }
   </div>
 </ng-container>
+
+<ng-template #tooltip let-data>
+  <div class="p-2 rounded border border-white bg-primary text-white shadow">
+    {{ data }}
+  </div>
+</ng-template>
+
