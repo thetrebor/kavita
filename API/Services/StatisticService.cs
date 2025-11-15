@@ -802,13 +802,18 @@ public class StatisticService : IStatisticService
 
     public async Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId)
     {
-        // DOESN'T WORK
-        var readsPerGenre = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => new { p.TotalReads, c.Genres })
-            .SelectMany(x => x.Genres.Select(g => new { g.NormalizedTitle, x.TotalReads }))
-            .GroupBy(x => x.NormalizedTitle)
-            .Select(g => new StatCount<string> { Value = g.Key, Count = g.Sum(x => x.TotalReads) })
+        var readsPerGenre = await _context.Database
+            .SqlQueryRaw<StatCount<string>>("""
+                                            SELECT g.Title as Value, SUM(p.TotalReads) as Count
+                                            FROM AppUserProgresses p
+                                            JOIN Chapter c ON p.ChapterId = c.Id
+                                            JOIN ChapterGenre cg ON c.Id = cg.ChaptersId
+                                            JOIN Genre g ON cg.GenresId = g.Id
+                                            WHERE p.AppUserId = {0}
+                                            GROUP BY g.NormalizedTitle
+                                            ORDER BY Count DESC
+                                            LIMIT 10
+                                            """, userId)
             .ToListAsync();
 
         var totalMissingData = await _context.AppUserProgresses

@@ -52,7 +52,7 @@
               Stats Here
               <app-activity-graph />
 
-              <app-reading-pace [userId]="user.id" [userName]="user.username"/>
+              <app-reading-pace [userId]="user.id" [userName]="user.username | titlecase"/>
 
               <div class="row">
                 <div class="col-md-6">
@@ -67,7 +67,7 @@
 
               <div class="row">
                 <div class="col-md-6">
-                  <app-preferred-genre [userId]="user.id" />
+                  <app-preferred-genre [userId]="user.id" [userName]="user.username | titlecase" />
                 </div>
                 <div class="col-md-6">
                   <app-preferred-tag />

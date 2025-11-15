@@ -2833,7 +2833,10 @@
         "overview-tab": "{{tabs.overview-tab}}",
         "stats-tab": "{{tabs.stats-tab}}",
         "reviews-tab": "{{tabs.reviews-tab}}",
-        "no-reviews": "No Reviews yet"
+        "no-reviews": "No Reviews yet",
+        "user-you": "you",
+        "user-possessive-your": "your",
+        "user-possessive": "{{name}}'s"
     },
 
     "activity-graph": {
