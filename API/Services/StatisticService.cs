@@ -804,12 +804,17 @@ public class StatisticService : IStatisticService
     {
         var readsPerGenre = await _context.Database
             .SqlQueryRaw<StatCount<string>>("""
-                                            SELECT g.Title as Value, SUM(p.TotalReads) as Count
-                                            FROM AppUserProgresses p
-                                            JOIN Chapter c ON p.ChapterId = c.Id
-                                            JOIN ChapterGenre cg ON c.Id = cg.ChaptersId
-                                            JOIN Genre g ON cg.GenresId = g.Id
-                                            WHERE p.AppUserId = {0}
+                                            SELECT g.Title as Value, SUM(MaxReads) as Count
+                                            FROM (
+                                                SELECT s.Id as SeriesId, MAX(p.TotalReads) as MaxReads
+                                                FROM AppUserProgresses p
+                                                JOIN Series s ON p.SeriesId = s.Id
+                                                WHERE p.AppUserId = {0}
+                                                GROUP BY s.Id
+                                            ) seriesReads
+                                            JOIN SeriesMetadata sm ON seriesReads.SeriesId = sm.SeriesId
+                                            JOIN GenreSeriesMetadata gsm ON sm.Id = gsm.SeriesMetadatasId
+                                            JOIN Genre g ON gsm.GenresId = g.Id
                                             GROUP BY g.NormalizedTitle
                                             ORDER BY Count DESC
                                             LIMIT 10
@@ -818,12 +823,14 @@ public class StatisticService : IStatisticService
 
         var totalMissingData = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
-            .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Genres)
+            .Join(_context.SeriesMetadata, p => p.SeriesId, sm => sm.SeriesId, (g, m) => m.Genres)
             .CountAsync(g => !g.Any());
 
         var totalReads = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
-            .SumAsync(p => p.TotalReads);
+            .GroupBy(p => p.SeriesId)
+            .Select(g => g.Max(x => x.TotalReads))
+            .SumAsync();
 
         var totalReadGenres = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
