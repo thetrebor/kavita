@@ -23,11 +23,10 @@ import {ActivatedRoute} from "@angular/router";
 import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
 import {PreferredFormatComponent} from "../../../statistics/_components/preferred-format/preferred-format.component";
 import {FictionGraphComponent} from "../../../statistics/_components/fiction-graph/fiction-graph.component";
-import {PreferredGenreComponent} from "../../../statistics/_components/preferred-genre/preferred-genre.component";
-import {PreferredTagComponent} from "../../../statistics/_components/preferred-tag/preferred-tag.component";
 import {PageSpreadComponent} from "../../../statistics/_components/page-spread/page-spread.component";
 import {WordSpreadComponent} from "../../../statistics/_components/word-spread/word-spread.component";
-import {AccountService} from "../../../_services/account.service";
+import {StatisticsService} from "../../../_services/statistics.service";
+import {StringBreakdownComponent} from "../../../statistics/_components/string-breakdown/string-breakdown.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -53,11 +52,10 @@ enum TabID {
     ReviewListItemComponent,
     PreferredFormatComponent,
     FictionGraphComponent,
-    PreferredGenreComponent,
-    PreferredTagComponent,
     PageSpreadComponent,
     WordSpreadComponent,
-    TitleCasePipe
+    TitleCasePipe,
+    StringBreakdownComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -70,11 +68,19 @@ export class ProfileComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
+  private readonly statsService = inject(StatisticsService);
 
   // Set by angular from the resolver
   memberInfo = input.required<MemberInfo>();
+
+  userId = computed(() => this.memberInfo().id);
+
   reviewsResource = this.reviewService
     .getReviewsByUserResource(() => this.memberInfo().id);
+  genreBreakdown = this.statsService
+    .getGenreBreakDownResource(() => this.userId());
+  tagsBreakdown = this.statsService
+    .getTagBreakDownResource(() => this.userId());
 
   hasCoverImage = computed(() => false);
   activeTabId = TabID.Overview;

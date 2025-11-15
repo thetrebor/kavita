@@ -294,6 +294,19 @@ public class StatsController(
         return Ok(await statService.GetGenreBreakdownForUser(userId));
     }
 
+    /// <summary>
+    /// Returns top 10 tags that user likes reading
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [ProfilePrivacy]
+    [HttpGet("tag-breakdown")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<BreakDownDto<string>>> GetTagBreakdown(int userId)
+    {
+        return Ok(await statService.GetTagBreakdownForUser(userId));
+    }
+
 
     [ProfilePrivacy]
     [HttpGet("page-spread")]

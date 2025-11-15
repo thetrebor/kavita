@@ -168,6 +168,10 @@ export class StatisticsService {
     return httpResource<Breakdown<string>>(() => this.baseUrl + `stats/genre-breakdown?userId=${userId()}`).asReadonly();
   }
 
+  getTagBreakDownResource(userId: () => number) {
+    return httpResource<Breakdown<string>>(() => this.baseUrl + `stats/tag-breakdown?userId=${userId()}`).asReadonly();
+  }
+
   getPageSpread(userId: () => number) {
     return httpResource<PageSpreadStats>(() => this.baseUrl + `stats/page-spread?userId=${userId()}`).asReadonly();
   }

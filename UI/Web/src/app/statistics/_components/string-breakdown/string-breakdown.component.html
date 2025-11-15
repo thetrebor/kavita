@@ -1,0 +1,25 @@
+
+
+<div class="card p-4" *transloco="let t; prefix: translationKey()">
+
+  <h4>{{t('title')}}</h4>
+
+  @if (breakDown().hasValue()) {
+    <span>{{t('sub-title', {name: userName(), mostUsed: mostUsed()?.value})}}</span>
+
+    <app-bar-chart
+      [data]="data()"
+      [axisLabels]="labels()"
+      [axisLabelsRight]="labelsRight()"
+      [showLabels]="false"
+      [horizontal]="true"
+      [showToolTips]="false"
+      labelPosition="right"
+    />
+
+    <span class="text-muted">{{t('missing', {amount: breakDown().value()?.missing})}}</span>
+  } @else if (breakDown().isLoading()) {
+    <app-loading [loading]="true" />
+  }
+
+</div>

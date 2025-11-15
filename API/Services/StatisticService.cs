@@ -41,6 +41,7 @@ public interface IStatisticService
     Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId);
+    Task<BreakDownDto<string>> GetTagBreakdownForUser(int userId);
     Task<PageSpreadStatsDto> GetPageSpreadForUser(int userId);
 }
 
@@ -857,6 +858,54 @@ public class StatisticService : IStatisticService
             TotalOptions = totalReadGenres,
         };
 
+    }
+
+    public async Task<BreakDownDto<string>> GetTagBreakdownForUser(int userId)
+    {
+        var readsPerTag = await _context.Database
+            .SqlQueryRaw<StatCount<string>>("""
+                                            SELECT t.Title as Value, SUM(MaxReads) as Count
+                                            FROM (
+                                                SELECT s.Id as SeriesId, MAX(p.TotalReads) as MaxReads
+                                                FROM AppUserProgresses p
+                                                JOIN Series s ON p.SeriesId = s.Id
+                                                WHERE p.AppUserId = {0}
+                                                GROUP BY s.Id
+                                            ) seriesReads
+                                            JOIN SeriesMetadata sm ON seriesReads.SeriesId = sm.SeriesId
+                                            JOIN SeriesMetadataTag smt ON sm.Id = smt.SeriesMetadatasId
+                                            JOIN Tag t ON smt.TagsId = t.Id
+                                            GROUP BY t.NormalizedTitle
+                                            ORDER BY Count DESC
+                                            LIMIT 10
+                                            """, userId)
+            .ToListAsync();
+
+        var totalMissingData = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(_context.SeriesMetadata, p => p.SeriesId, sm => sm.SeriesId, (g, m) => m.Tags)
+            .CountAsync(g => !g.Any());
+
+        var totalReads = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .GroupBy(p => p.SeriesId)
+            .Select(g => g.Max(x => x.TotalReads))
+            .SumAsync();
+
+        var totalReadTags = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Tags)
+            .SelectMany(g => g.Select(gg => gg.NormalizedTitle))
+            .Distinct()
+            .CountAsync();
+
+        return new BreakDownDto<string>()
+        {
+            Data = readsPerTag,
+            Missing = totalMissingData,
+            Total = totalReads,
+            TotalOptions = totalReadTags,
+        };
     }
 
     public async Task<PageSpreadStatsDto> GetPageSpreadForUser(int userId)
