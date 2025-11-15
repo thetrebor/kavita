@@ -1,5 +1,16 @@
-import {DestroyRef, Directive, effect, ElementRef, inject, input, NgZone, OnDestroy, OnInit} from '@angular/core';
-import {EChartsInitOpts, init, EChartsType, ComposeOption} from "echarts/core";
+import {
+  DestroyRef,
+  Directive,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  untracked
+} from '@angular/core';
+import {EChartsInitOpts, init, EChartsType, ComposeOption, registerTheme} from "echarts/core";
 import { BarSeriesOption, LineSeriesOption, PieSeriesOption } from 'echarts/charts';
 import {
   TitleComponentOption,
@@ -37,23 +48,31 @@ export class EChartsDirective implements OnInit, OnDestroy {
 
   readonly options = input<ECOption | null>(null);
   readonly initOptions = input<EChartsInitOpts | undefined>(undefined);
-  readonly theme = input<object | string | undefined>(undefined);
 
   echart?: EChartsType;
 
   private resizer$ = new Subject<void>();
-  private resizeSub?: Subscription;
   private resizeObserver?: ResizeObserver;
   private resizeObserverHasFired = false;
   private animationFrameID?: number;
 
   constructor() {
+    // Keep up to date with themes
     effect(() => {
-      this.themeService.currentTheme(); // Call on theme updates
+      const kavitaTheme = this.themeService.currentTheme(); // Call on theme updates
+      const options = untracked(this.options);
+      if (!kavitaTheme || !options) return;
 
-      const newTheme = this.createTheme();
-      this.echart?.setOption(newTheme);
+      this.ngZone.runOutsideAngular(() => {
+        registerTheme(kavitaTheme.name, this.createTheme());
+
+        this.echart?.dispose();
+        this.echart = init(this.el.nativeElement, kavitaTheme.name, untracked(this.initOptions));
+        this.echart.setOption(options);
+      });
     });
+
+    // Keep up to date with options
     effect(() => {
       const options = this.options();
       if (!options || !this.echart) return;
@@ -66,23 +85,24 @@ export class EChartsDirective implements OnInit, OnDestroy {
 
   ngOnInit() {
     const options = this.options();
-    if (!options) return;
+    const kavitaTheme = this.themeService.currentTheme();
+    if (!options || !kavitaTheme) return;
 
     this.ngZone.runOutsideAngular(() => {
-      this.echart = init(this.el.nativeElement, this.theme(), this.initOptions());
+      registerTheme(kavitaTheme.name, this.createTheme());
+
+      this.echart = init(this.el.nativeElement, kavitaTheme.name, this.initOptions());
       this.echart.setOption(options);
     });
 
-    this.resizeSub = this.resizer$
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        throttleTime(100, asyncScheduler, { leading: false, trailing: true}),
-        tap(() => {
-          if (this.echart) {
-            this.echart.resize();
-          }
-        }),
-      ).subscribe();
+    this.resizer$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      throttleTime(100, asyncScheduler, { leading: false, trailing: true}),
+      tap(() => {
+        if (this.echart) {
+          this.echart.resize();
+        }
+      })).subscribe();
 
     this.resizeObserver = this.ngZone.runOutsideAngular(
       () =>
@@ -117,7 +137,32 @@ export class EChartsDirective implements OnInit, OnDestroy {
 
   // TODO: Create a nice theme
   private createTheme() {
-    return {};
+    const textColour = this.getCssVar('--body-text-color');
+
+    // TODO: Use actual colours that don't all look alike
+    const colorPalette = [
+      this.getCssVar('--primary-color'),
+      this.getCssVar('--primary-color-dark-shade'),
+      this.getCssVar('--primary-color-darker-shade'),
+      this.getCssVar('--primary-color-darkest-shade'),
+    ];
+    return {
+      color: colorPalette,
+      categoryAxis: {
+        axisLabel: {
+          color: textColour,
+        }
+      },
+      valueAxis: {
+        axisLabel: {
+          color: textColour,
+        }
+      }
+    };
+  }
+
+  private getCssVar(key: string) {
+    return getComputedStyle(document.documentElement).getPropertyValue(key).trim();
   }
 
 }
