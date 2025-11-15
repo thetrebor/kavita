@@ -1,3 +1,24 @@
-@if (genreBreakdown.hasValue()) {
-  <div appECharts [options]="options()"  style="height: 300px; width: 300px;"></div>
-}
+
+
+<div class="card p-4">
+
+  <h4>Most read genres</h4>
+
+  <span>{{userName()}} most read genre is {{mostReadGenre()?.value}}</span>
+
+
+  @if (genreBreakdown.hasValue()) {
+    <app-bar-chart
+      [data]="data()"
+      [axisLabels]="labels()"
+      [axisLabelsRight]="labelsRight()"
+      [showLabels]="false"
+      [horizontal]="true"
+      [showToolTips]="false"
+      labelPosition="right"
+    />
+  }
+
+  <span class="text-muted">{{genreBreakdown.value()?.missing}} series are missing genre's</span>
+
+</div>

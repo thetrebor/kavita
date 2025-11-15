@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, model} from '@angular/core';
-import {Location} from '@angular/common';
+import {Location, TitleCasePipe} from '@angular/common';
 import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
 import {MemberInfo} from "../../../_models/user/member-info";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {ImageService} from "../../../_services/image.service";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
@@ -27,6 +27,7 @@ import {PreferredGenreComponent} from "../../../statistics/_components/preferred
 import {PreferredTagComponent} from "../../../statistics/_components/preferred-tag/preferred-tag.component";
 import {PageSpreadComponent} from "../../../statistics/_components/page-spread/page-spread.component";
 import {WordSpreadComponent} from "../../../statistics/_components/word-spread/word-spread.component";
+import {AccountService} from "../../../_services/account.service";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -55,7 +56,8 @@ enum TabID {
     PreferredGenreComponent,
     PreferredTagComponent,
     PageSpreadComponent,
-    WordSpreadComponent
+    WordSpreadComponent,
+    TitleCasePipe
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

@@ -1,11 +1,13 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {StatisticsService} from "../../../_services/statistics.service";
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
+import {BarChartComponent} from "../bar-chart/bar-chart.component";
+import {StatCount} from "../../_models/stat-count";
 
 @Component({
   selector: 'app-preferred-genre',
   imports: [
-    EChartsDirective
+    BarChartComponent
   ],
   templateUrl: './preferred-genre.component.html',
   styleUrl: './preferred-genre.component.scss',
@@ -18,48 +20,26 @@ export class PreferredGenreComponent {
     .getGenreBreakDownResource(() => this.userId());
 
   userId = input.required<number>();
+  userName = input.required<string>();
 
-  options = computed<ECOption>(() => {
-    const breakdown = this.genreBreakdown.value()!;
+  mostReadGenre = computed(() => {
+    if (!this.genreBreakdown.hasValue()) return null;
 
-    const labels = breakdown.data.map(d => d.value);
-    const values = breakdown.data.map(d => d.count);
-
-    return {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' },
-        formatter: (params: any) => {
-          const { name, value } = params[0];
-          const percent = ((value / breakdown.total) * 100).toFixed(1);
-          return `${name}: ${value} (${percent}%)`;
-        }
-      },
-      xAxis: {
-        type: 'value',
-        max: breakdown.total,
-      },
-      yAxis: {
-        type: 'category',
-        data: labels,
-        axisLabel: { rotate: 0 },
-      },
-      series: [
-        {
-          type: 'bar',
-          data: values,
-          label: {
-            show: true,
-            position: 'right',
-            formatter: (params: any) => {
-              const percent = ((params.value / breakdown.total) * 100).toFixed(1);
-              return `${params.value} (${percent}%)`;
-            }
-          }
-        }
-      ],
-      grid: { left: '20%', right: '5%', top: '5%', bottom: '5%' },
-    };
+    return this.genreBreakdown.value()!.data
+      .reduce((prev, cur) => prev.count > cur.count ? prev : cur,
+        {count: -1, value: ""});
   });
+
+  labels = computed(() => this.genreBreakdown.value()?.data.map(d => d.value).reverse() ?? []);
+  labelsRight = computed(() => this.genreBreakdown.value()?.data
+    .map(d => this.labelFormatter(d)).reverse() ?? []);
+
+  data = computed(() => this.genreBreakdown.value()?.data.map(d => d.count).reverse() ?? []);
+  totalReads = computed(() => this.genreBreakdown.value()?.total ?? 0);
+
+  labelFormatter = (params: StatCount<string>) => {
+    const percent = ((params.count / this.totalReads()) * 100).toFixed(1);
+    return `${params.count} (${percent}%)`;
+  }
 
 }
