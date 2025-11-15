@@ -1,3 +1,18 @@
 <ng-container *transloco="let t; prefix:'page-spread'">
+  <h4>Books By Page Count</h4>
 
+  <span>Most of {{userName()}}'s books are between {{highestBucket()}} pages</span>
+
+
+  @if (pageSpreadResource.hasValue()) {
+    <app-bar-chart
+      [data]="data()"
+      [axisLabels]="labels()"
+      [axisLabelsRight]="labelsRight()"
+      [showLabels]="true"
+      [horizontal]="false"
+      [showToolTips]="true"
+      labelPosition="top"
+    />
+  }
 </ng-container>
