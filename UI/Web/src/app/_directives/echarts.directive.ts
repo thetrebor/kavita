@@ -157,7 +157,12 @@ export class EChartsDirective implements OnInit, OnDestroy {
         axisLabel: {
           color: textColour,
         }
-      }
+      },
+      label: {
+        textBorderWidth: 0,
+        textBorderColor: 'transparent',
+        color: textColour,
+      },
     };
   }
 
