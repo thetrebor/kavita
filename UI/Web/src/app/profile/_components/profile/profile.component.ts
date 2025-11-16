@@ -3,10 +3,9 @@ import {Location, TitleCasePipe} from '@angular/common';
 import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
 import {MemberInfo} from "../../../_models/user/member-info";
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {ImageService} from "../../../_services/image.service";
-import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {
   NgbNav,
@@ -23,11 +22,12 @@ import {ActivatedRoute} from "@angular/router";
 import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
 import {PreferredFormatComponent} from "../../../statistics/_components/preferred-format/preferred-format.component";
 import {FictionGraphComponent} from "../../../statistics/_components/fiction-graph/fiction-graph.component";
-import {PageSpreadComponent} from "../../../statistics/_components/page-spread/page-spread.component";
-import {WordSpreadComponent} from "../../../statistics/_components/word-spread/word-spread.component";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StringBreakdownComponent} from "../../../statistics/_components/string-breakdown/string-breakdown.component";
 import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {
+  BucketSpreadChartComponent
+} from "../../../statistics/_components/bucket-spread-chart/bucket-spread-chart.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -43,7 +43,6 @@ enum TabID {
     ActivityGraphComponent,
     TranslocoDirective,
     ImageComponent,
-    UtcToLocalTimePipe,
     TimeAgoPipe,
     NgbNav,
     NgbNavContent,
@@ -53,11 +52,10 @@ enum TabID {
     ReviewListItemComponent,
     PreferredFormatComponent,
     FictionGraphComponent,
-    PageSpreadComponent,
-    WordSpreadComponent,
     TitleCasePipe,
     StringBreakdownComponent,
-    UtcToLocaleDatePipe
+    UtcToLocaleDatePipe,
+    BucketSpreadChartComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -77,12 +75,11 @@ export class ProfileComponent {
 
   userId = computed(() => this.memberInfo().id);
 
-  reviewsResource = this.reviewService
-    .getReviewsByUserResource(() => this.memberInfo().id);
-  genreBreakdown = this.statsService
-    .getGenreBreakDownResource(() => this.userId());
-  tagsBreakdown = this.statsService
-    .getTagBreakDownResource(() => this.userId());
+  protected readonly reviewsResource = this.reviewService.getReviewsByUserResource(() => this.memberInfo().id);
+  protected readonly genreBreakdown = this.statsService.getGenreBreakDownResource(() => this.userId());
+  protected readonly tagsBreakdown = this.statsService.getTagBreakDownResource(() => this.userId());
+  protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.userId());
+  protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.userId());
 
   hasCoverImage = computed(() => false);
   activeTabId = TabID.Overview;

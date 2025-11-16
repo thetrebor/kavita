@@ -2839,6 +2839,16 @@
         "user-possessive": "{{name}}'s"
     },
 
+    "page-spread": {
+        "title": "Chapters by Page Count",
+        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages"
+    },
+
+    "word-spread": {
+        "title": "Chapters by Word Count",
+        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} words"
+    },
+
     "tag-breakdown": {
         "title": "Most read tags",
         "sub-title": "{{name}} most read tag is {{mostUsed}}",

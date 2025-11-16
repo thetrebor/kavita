@@ -78,10 +78,10 @@
 
               <div class="row mt-4">
                 <div class="col-md-6">
-                  <app-page-spread [userId]="user.id" [userName]="username" />
+                  <app-bucket-spread-chart [userId]="user.id" [userName]="username" [bucketSpreadResource]="pageSpreadResource" endRangeFallback="1000+" translationKey="page-spread" />
                 </div>
                 <div class="col-md-6">
-                  <app-word-spread [userId]="user.id" [userName]="username" />
+                  <app-bucket-spread-chart [userId]="user.id" [userName]="username" [bucketSpreadResource]="wordSpreadResource" translationKey="word-spread" />
                 </div>
               </div>
             }

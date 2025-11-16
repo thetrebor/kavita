@@ -1,11 +1,11 @@
-<ng-container *transloco="let t; prefix:'word-spread'">
+<ng-container *transloco="let t; prefix: translationKey()">
   <div class="card p-4">
-    <h4>Books By Word Count</h4>
+    <h4>{{t('title')}}</h4>
 
-    <span>Most of {{userName()}}'s books contain between {{highestBucket()}} words</span>
+    <span>{{t('sub-title', {username: userName(), highestBucket: highestBucket()})}}</span>
 
 
-    @if (wordSpreadResource.hasValue()) {
+    @if (bucketSpreadResource().hasValue()) {
       <app-bar-chart
         [data]="data()"
         [axisLabels]="labels()"
