@@ -210,7 +210,7 @@ export class BarChartComponent {
         formatter: this.seriesLabelFormatter()
       },
       itemStyle: {
-        borderRadius: 5
+        borderRadius: this.horizontal() ? 5 : [5, 5, 0, 0],
       },
       barGap: '10%',
       barMinHeight: 5
