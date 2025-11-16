@@ -1,6 +1,14 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
-import {LabelFormatterCallback} from "echarts/types/dist/shared";
+import {LabelFormatterCallback, TopLevelFormatterParams} from "echarts/types/dist/shared";
+
+// Type copied over from ECharts, as it's not exported
+export type OptionDataValue = string | number | Date | null | undefined;
+
+export type ToolTipFormatterContext = {
+  data: any | any[];
+  event: TopLevelFormatterParams;
+}
 
 @Component({
   selector: 'app-bar-chart',
@@ -24,6 +32,9 @@ export class BarChartComponent {
   multiColor = input(false);
 
   showToolTips = input(false);
+  toolTipFormatter = input<((ctx: ToolTipFormatterContext) => (string | HTMLElement | HTMLElement[]) )| undefined>(undefined);
+  toolTipValueFormatter = input<((value: OptionDataValue | OptionDataValue[], dataIndex: number) => string) | undefined>(undefined)
+  htmlToolTip = input(false);
 
   processedData = computed(() => {
     const data = this.data();
@@ -84,8 +95,29 @@ export class BarChartComponent {
 
     if (this.showToolTips()) {
       option.tooltip = {
-        trigger: 'axis'
+        trigger: 'axis',
+        valueFormatter: this.toolTipValueFormatter(),
       };
+
+      const fn = this.toolTipFormatter();
+      if (fn) {
+        option.tooltip.formatter = (params: TopLevelFormatterParams) => {
+          const ctx: ToolTipFormatterContext = {
+            data: Array.isArray(params) ? params.map(p => this.data()[p.dataIndex]) : this.data()[params.dataIndex],
+            event: params,
+          }
+
+          return fn(ctx);
+        }
+
+        // Disable padding such that the custom HTML is all that's shown
+        if (this.htmlToolTip()) {
+          option.tooltip.padding = [0, 0, 0, 0];
+          option.tooltip.backgroundColor = 'transparent';
+          option.tooltip.borderColor = 'transparent';
+        }
+      }
+
     }
 
     return option;

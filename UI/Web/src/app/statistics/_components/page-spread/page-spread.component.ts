@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {StatisticsService} from "../../../_services/statistics.service";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {BarChartComponent} from "../bar-chart/bar-chart.component";
+import {BarChartComponent, ToolTipFormatterContext} from "../bar-chart/bar-chart.component";
 import {StatBucket} from "../../_models/stats/stat-bucket";
 
 @Component({
@@ -43,6 +43,11 @@ export class PageSpreadComponent {
 
   rangeFormatter = (params: StatBucket) => {
     return `${params.rangeStart}-${params.rangeEnd ?? '1000+'}`;
+  }
+
+  toolTipFormatter = (ctx: ToolTipFormatterContext) => {
+    const count = ctx.data as number;
+    return `<div class="p-2 rounded bg-primary text-white shadow">${count}</div>`;
   }
 
 }
