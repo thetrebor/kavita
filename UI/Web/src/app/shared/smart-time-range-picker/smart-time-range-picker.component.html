@@ -1,0 +1,90 @@
+<div class="dropdown ms-2" [class.show]="isOpen()">
+  <button
+    class="btn btn-outline-secondary dropdown-toggle w-100 text-start"
+    type="button"
+    (click)="toggleDropdown()"
+    [disabled]="formGroup.disabled">
+    <span class="dropdown-display-text">{{ displayText() }}</span>
+  </button>
+
+  @if (isOpen()) {
+    <div class="dropdown-menu show w-100">
+
+      @switch (dropDownMode()) {
+        @case ('all') {
+          <button class="dropdown-item" type="button" (click)="selectForever()">
+            <i class="bi bi-infinity me-2"></i>
+            Forever
+          </button>
+
+          <button class="dropdown-item" type="button" (click)="selectThisYear()">
+            <i class="bi bi-calendar-check me-2"></i>
+            This Year ({{ currentYear }})
+          </button>
+
+          <button class="dropdown-item" type="button" (click)="selectLastYear()">
+            <i class="bi bi-calendar-minus me-2"></i>
+            Last Year ({{ lastYear }})
+          </button>
+
+          <button class="dropdown-item" type="button" (click)="dropDownMode.set('year')">
+            <i class="bi bi-calendar3 me-2"></i>
+            Select Year
+          </button>
+
+          <button class="dropdown-item" type="button" (click)="dropDownMode.set('date')">
+            <i class="bi bi-calendar3 me-2"></i>
+            Custom range
+          </button>
+        }
+        @case ('year') {
+          <div class="px-3 py-2 year-picker-section">
+            <div class="input-group input-group-sm">
+              <input
+                type="number"
+                class="form-control"
+                [value]="customYearInput()"
+                (input)="customYearInput.set(+$any($event.target).value)"
+                min="1900"
+                max="2200"
+                placeholder="Enter year">
+              <button class="btn btn-primary" type="button" (click)="selectCustomYear()">
+                Apply
+              </button>
+            </div>
+          </div>
+        }
+        @case ('date') {
+          <div class="px-3 py-2">
+            <label class="small mb-1 date-picker-text">Custom Date Range</label>
+            <div class="mb-2">
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [formControl]="formGroup.controls.startDate"
+                placeholder="Start Date">
+            </div>
+            <div class="mb-2">
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [formControl]="formGroup.controls.endDate"
+                placeholder="End Date">
+            </div>
+            <button
+              class="btn btn-sm btn-primary w-100"
+              type="button"
+              (click)="closeDropdown()"
+              [disabled]="!formGroup.value.startDate || !formGroup.value.endDate">
+              Apply Dates
+            </button>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>
+
+@if (isOpen()) {
+  <div class="dropdown-backdrop" (click)="closeDropdown()"></div>
+}

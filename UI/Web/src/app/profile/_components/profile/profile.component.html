@@ -51,7 +51,42 @@
           <a ngbNavLink>{{t(TabID.Stats)}}</a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Stats; prefetch on idle) {
-              Stats Here
+
+              <form [formGroup]="filterForm" class="d-flex align-content-center align-items-center">
+                <h4 class="me-2">A look at {{username}}'s journey through</h4>
+                @if (filterForm.get('libraries'); as control) {
+                  <app-setting-item [control]="control" [title]="''" [showEdit]="false">
+                    <ng-template #view>
+                      <h4>
+                      @if (allLibraries().length === control.value?.length) {
+                        Kavita
+                      } @else {
+                        @for (lib of (control.value ?? []); track lib) {
+                          {{libraryName(lib)}}
+                          @if (!$last) {,}
+                        }
+                      }
+                      </h4>
+                    </ng-template>
+                    <ng-template #edit>
+                      @if (libraryTypeaheadSettings) {
+                        <app-typeahead [settings]="libraryTypeaheadSettings" (selectedData)="updateSelectedLibraries($event)">
+                          <ng-template #optionItem let-lib>
+                            {{lib.name}}
+                          </ng-template>
+                          <ng-template #badgeItem let-lib>
+                            {{lib.name}}
+                          </ng-template>
+                        </app-typeahead>
+                      }
+                    </ng-template>
+                  </app-setting-item>
+                }
+
+                <app-smart-time-range-picker formGroupName="timeFilter" />
+
+              </form>
+
               <app-activity-graph />
 
               <app-reading-pace [userId]="user.id" [userName]="username"/>

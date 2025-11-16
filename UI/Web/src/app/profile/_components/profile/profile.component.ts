@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, model} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  signal
+} from '@angular/core';
 import {Location, TitleCasePipe} from '@angular/common';
 import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
@@ -16,7 +25,7 @@ import {
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
 import {ReviewService} from "../../../_services/review.service";
-import {tap} from "rxjs";
+import {of, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
 import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
@@ -28,6 +37,15 @@ import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {
   BucketSpreadChartComponent
 } from "../../../statistics/_components/bucket-spread-chart/bucket-spread-chart.component";
+import {LibraryService} from "../../../_services/library.service";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {Library} from "../../../_models/library/library";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
+import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
+import {SmartTimeRangePickerComponent} from "../../../shared/smart-time-range-picker/smart-time-range-picker.component";
+import {map} from "rxjs/operators";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -55,13 +73,17 @@ enum TabID {
     TitleCasePipe,
     StringBreakdownComponent,
     UtcToLocaleDatePipe,
-    BucketSpreadChartComponent
+    BucketSpreadChartComponent,
+    SettingItemComponent,
+    ReactiveFormsModule,
+    TypeaheadComponent,
+    SmartTimeRangePickerComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
 
   private readonly location = inject(Location);
   private readonly reviewService = inject(ReviewService);
@@ -69,10 +91,11 @@ export class ProfileComponent {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
   private readonly statsService = inject(StatisticsService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly utilityService = inject(UtilityService);
 
   // Set by angular from the resolver
   memberInfo = input.required<MemberInfo>();
-
   userId = computed(() => this.memberInfo().id);
 
   protected readonly reviewsResource = this.reviewService.getReviewsByUserResource(() => this.memberInfo().id);
@@ -84,6 +107,19 @@ export class ProfileComponent {
   hasCoverImage = computed(() => false);
   activeTabId = TabID.Overview;
 
+  allLibraries = signal<Library[]>([]);
+  libraryTypeaheadSettings?: TypeaheadSettings<Library>;
+  filterForm = new FormGroup({
+    timeFilter: new FormGroup<{
+      startDate: FormControl<Date | null>,
+      endDate: FormControl<Date | null>,
+    }>({
+      startDate: new FormControl<Date | null>(null),
+      endDate: new FormControl<Date | null>(null),
+    }),
+    libraries: new FormControl<number[]>([]),
+  });
+
   constructor() {
     this.route.fragment.pipe(tap(frag => {
       const fragId = frag as TabID;
@@ -92,6 +128,57 @@ export class ProfileComponent {
         this.activeTabId = fragId;
       }
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
+  }
+
+  ngOnInit() {
+    this.libraryService.getLibraries().pipe(
+      tap(libs => this.allLibraries.set(libs)),
+      tap(libs => this.filterForm.get('libraries')?.setValue(libs.map(l => l.id))),
+      tap(libs => this.libraryTypeaheadSettings = this.setupLibrarySettings(libs, libs))
+    ).subscribe();
+  }
+
+  setupLibrarySettings(
+    allLibraries: Array<Library>,
+    currentSelectedLibraries: Array<Library> | undefined,
+  ): TypeaheadSettings<Library> {
+    const settings = new TypeaheadSettings<Library>();
+
+    settings.minCharacters = 0;
+    settings.multiple = true;
+    settings.id = 'libraries';
+    settings.unique = true;
+    settings.showLocked = false;
+    settings.addIfNonExisting = false;
+    settings.compareFn = (options: Library[], filter: string) => {
+      return options.filter(l => this.utilityService.filter(l.name, filter));
+    }
+    settings.compareFnForAdd = (options: Library[], filter: string) => {
+      return options.filter(l => this.utilityService.filterMatches(l.name, filter));
+    }
+    settings.fetchFn = (filter: string) => of(allLibraries)
+      .pipe(map(items => settings.compareFn(items, filter)));
+
+    settings.selectionCompareFn = (a: Library, b: Library) => {
+      return a.id === b.id;
+    }
+
+    settings.trackByIdentityFn = (_, value) => value.id + '';
+
+    const savedData = currentSelectedLibraries?.filter(l => allLibraries.indexOf(l) >= 0);
+    if (savedData) {
+      settings.savedData = savedData;
+    }
+
+    return settings;
+  }
+
+  updateSelectedLibraries(libs: Library[]) {
+    this.filterForm.get('libraries')!.setValue(libs.map(l => l.id));
+  }
+
+  libraryName(libraryId: number): string {
+    return this.allLibraries().find(l => l.id === libraryId)?.name ?? 'unknown';
   }
 
   onNavChange(event: NgbNavChangeEvent) {
