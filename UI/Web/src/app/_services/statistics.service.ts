@@ -22,7 +22,7 @@ import {ClientDeviceBreakdown} from "../statistics/_models/client-device-breakdo
 import {ActivityGraphData} from "../statistics/_components/activity-graph/activity-graph.component";
 import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
 import {Breakdown} from "../statistics/_models/breakdown";
-import {PageSpreadStats} from "../statistics/_models/stats/page-spread-stats";
+import {SpreadStats} from "../statistics/_models/stats/spread-stats";
 
 export enum DayOfWeek
 {
@@ -148,7 +148,7 @@ export class StatisticsService {
     return this.httpClient.get<Array<any>>(this.baseUrl + 'stats/reading-count-by-day?userId=' + userId + '&days=' + days);
   }
 
-  getDayBreakdown( userId = 0) {
+  getDayBreakdown(userId = 0) {
     return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown?userId=' + userId);
   }
 
@@ -173,6 +173,10 @@ export class StatisticsService {
   }
 
   getPageSpread(userId: () => number) {
-    return httpResource<PageSpreadStats>(() => this.baseUrl + `stats/page-spread?userId=${userId()}`).asReadonly();
+    return httpResource<SpreadStats>(() => this.baseUrl + `stats/page-spread?userId=${userId()}`).asReadonly();
+  }
+
+  getWordSpread(userId: () => number) {
+    return httpResource<SpreadStats>(() => this.baseUrl + `stats/word-spread?userId=${userId()}`).asReadonly();
   }
 }

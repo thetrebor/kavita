@@ -9,6 +9,7 @@ using API.DTOs.Stats;
 using API.DTOs.Stats.V3.ClientDevice;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
@@ -42,7 +43,8 @@ public interface IStatisticService
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(int userId);
-    Task<PageSpreadStatsDto> GetPageSpreadForUser(int userId);
+    Task<SpreadStatsDto> GetPageSpreadForUser(int userId);
+    Task<SpreadStatsDto> GetWordSpreadForUser(int userId);
     Task<IList<StatCount<int>>> PagesPerYear(int userId);
 }
 
@@ -65,7 +67,7 @@ public class StatisticService : IStatisticService
         (401, 500),
         (501, 600),
         (601, 1000),
-        (1001, null) // 1000+
+        (1001, null), // 1000+
     ];
 
     public StatisticService(DataContext context, IMapper mapper, IUnitOfWork unitOfWork)
@@ -913,7 +915,7 @@ public class StatisticService : IStatisticService
         };
     }
 
-    public async Task<PageSpreadStatsDto> GetPageSpreadForUser(int userId)
+    public async Task<SpreadStatsDto> GetPageSpreadForUser(int userId)
     {
         var fullyReadChapters = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
@@ -945,11 +947,59 @@ public class StatisticService : IStatisticService
             };
         }).ToList();
 
-        return new PageSpreadStatsDto
+        return new SpreadStatsDto
         {
             Buckets = buckets,
             TotalCount = totalCount,
         };
+    }
+
+    public async Task<SpreadStatsDto> GetWordSpreadForUser(int userId)
+    {
+        var wordsInFullyReadChapters = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(
+                _context.Chapter,
+                progress => progress.ChapterId,
+                chapter => chapter.Id,
+                (progress, chapter) => new { progress, chapter }
+            )
+            .Where(x => x.progress.PagesRead >= x.chapter.Pages)
+            .Where(x => x.chapter.WordCount > 0)
+            .Select(x => x.chapter.WordCount)
+            .ToListAsync();
+
+        var totalCount = wordsInFullyReadChapters.Count;
+        var highest = wordsInFullyReadChapters.MaxOrDefault(x => x, 0);
+
+        var magnitude = (int) Math.Floor(Math.Log10(highest));
+        var bucketSize = (int) Math.Pow(10, magnitude - 1);
+
+        var buckets = Enumerable.Range(0, 8)
+            .Select(i =>
+            {
+                var start = i * bucketSize;
+                var end = (i + 1) * bucketSize;
+
+                var count = wordsInFullyReadChapters
+                    .Count(v => v >= start && v < end);
+
+                return new StatBucketDto
+                {
+                    RangeStart = start,
+                    RangeEnd = end,
+                    Count = count,
+                    Percentage = totalCount > 0 ? (decimal)count / totalCount * 100 : 0,
+                };
+            })
+            .ToList();
+
+        return new SpreadStatsDto
+        {
+            Buckets = buckets,
+            TotalCount = totalCount,
+        };
+
     }
 
     // Needs JSON actions in DB

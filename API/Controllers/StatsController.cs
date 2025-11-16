@@ -311,9 +311,17 @@ public class StatsController(
     [ProfilePrivacy]
     [HttpGet("page-spread")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<PageSpreadStatsDto>> GetPageSpread(int userId)
+    public async Task<ActionResult<SpreadStatsDto>> GetPageSpread(int userId)
     {
         return Ok(await statService.GetPageSpreadForUser(userId));
+    }
+
+    [ProfilePrivacy]
+    [HttpGet("word-spread")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<SpreadStatsDto>> GetWordSpread(int userId)
+    {
+        return Ok(await statService.GetWordSpreadForUser(userId));
     }
 
 
