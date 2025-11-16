@@ -1,8 +1,10 @@
-import {ChangeDetectionStrategy, Component, computed, forwardRef, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, forwardRef, inject, OnInit, signal} from '@angular/core';
 import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, ReactiveFormsModule} from "@angular/forms";
 import { tap } from "rxjs";
 import { CommonModule } from '@angular/common';
 import {toSignal} from "@angular/core/rxjs-interop";
+import {ServerService} from "../../_services/server.service";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 export type TimeRangeFormGroup = FormGroup<{
   startDate: FormControl<Date | null>,
@@ -17,7 +19,7 @@ export type TimeRange = {
 @Component({
   selector: 'app-smart-time-range-picker',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, TranslocoDirective],
   templateUrl: './smart-time-range-picker.component.html',
   styleUrl: './smart-time-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,7 +31,9 @@ export type TimeRange = {
     }
   ]
 })
-export class SmartTimeRangePickerComponent implements ControlValueAccessor {
+export class SmartTimeRangePickerComponent implements ControlValueAccessor, OnInit {
+
+  private serverService = inject(ServerService);
 
   readonly formGroup: TimeRangeFormGroup = new FormGroup({
     startDate: new FormControl<Date | null>(null),
@@ -38,10 +42,9 @@ export class SmartTimeRangePickerComponent implements ControlValueAccessor {
 
   readonly isOpen = signal(false);
   readonly dropDownMode = signal<'all' | 'year' | 'date'>('all');
-  readonly customYearInput = signal<number>(new Date().getFullYear());
 
   readonly selectedTime = toSignal(this.formGroup.valueChanges,
-    { initialValue: {startDate: null, endDate: null} })
+    { initialValue: {startDate: null, endDate: null} });
 
   readonly displayText = computed(() => {
     const selectedTime = this.selectedTime();
@@ -67,12 +70,10 @@ export class SmartTimeRangePickerComponent implements ControlValueAccessor {
 
     return 'select a time range';
   });
+  readonly yearOptions = signal<number[]>([]);
 
   private _onChange: (v: TimeRange) => void = () => {};
   private _onTouch: () => void = () => {};
-
-  currentYear = new Date().getFullYear();
-  lastYear = this.currentYear - 1;
 
   constructor() {
     this.formGroup.valueChanges.pipe(
@@ -83,44 +84,42 @@ export class SmartTimeRangePickerComponent implements ControlValueAccessor {
     ).subscribe();
   }
 
-  toggleDropdown(): void {
+  ngOnInit() {
+    this.serverService.getServerInfo().pipe(
+      tap(info => {
+        const installDate = info.firstInstallDate;
+        if (installDate) {
+         const installYear = new Date(installDate).getFullYear();
+         const amountOfYears = new Date().getFullYear() - installYear + 1;
+
+         this.yearOptions.set(Array.from(
+           {length: amountOfYears},
+           (_, i) => installYear + i,
+         ));
+        }
+      })
+    ).subscribe();
+  }
+
+  toggleDropdown() {
     this.isOpen.update(v => !v);
   }
 
-  closeDropdown(): void {
+  closeDropdown() {
     this.isOpen.set(false);
     this.dropDownMode.set('all');
   }
 
-  selectForever(): void {
+  selectForever() {
     this.formGroup.setValue({ startDate: null, endDate: null });
     this.closeDropdown();
   }
 
-  selectThisYear(): void {
-    const year = new Date().getFullYear();
-    this.setYearRange(year);
-    this.closeDropdown();
-  }
-
-  selectLastYear(): void {
-    const year = new Date().getFullYear() - 1;
-    this.setYearRange(year);
-    this.closeDropdown();
-  }
-
-  selectCustomYear(): void {
-    const year = this.customYearInput();
-    if (year && year > 1900 && year < 2200) {
-      this.setYearRange(year);
-      this.closeDropdown();
-    }
-  }
-
-  private setYearRange(year: number): void {
+  setYearRange(year: number) {
     const startDate = new Date(year, 0, 1); // Jan 1
     const endDate = new Date(year, 11, 31); // Dec 31
     this.formGroup.setValue({ startDate, endDate });
+    this.closeDropdown();
   }
 
   private formatDate(date: Date): string {
@@ -132,25 +131,17 @@ export class SmartTimeRangePickerComponent implements ControlValueAccessor {
     return date.toLocaleDateString('en-US', options);
   }
 
-  registerOnChange(fn: (v: TimeRange) => void): void {
+  registerOnChange(fn: (v: TimeRange) => void) {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: () => void): void {
+  registerOnTouched(fn: () => void) {
     this._onTouch = fn;
   }
 
-  writeValue(obj: TimeRange): void {
+  writeValue(obj: TimeRange) {
     if (obj) {
       this.formGroup.setValue(obj, { emitEvent: false });
-    }
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    if (isDisabled) {
-      this.formGroup.disable();
-    } else {
-      this.formGroup.enable();
     }
   }
 }

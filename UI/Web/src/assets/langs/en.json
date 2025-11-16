@@ -2888,6 +2888,12 @@
         "per-day": "Per Day"
     },
 
+    "smart-time-picker": {
+        "forever": "Forever",
+        "select-year": "Select Year",
+        "custom-range": "Custom range"
+    },
+
     "client-device-type-pipe": {
         "mobile": "Mobile",
         "tablet": "Tablet",

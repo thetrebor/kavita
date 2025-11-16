@@ -29,20 +29,6 @@
       color: var(--dropdown-item-text-color);
     }
   }
-
-  .dropdown-item-wrapper {
-    .dropdown-item {
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-    }
-  }
-
-  .year-picker-section {
-    background-color: var(--dropdown-item-bg-color);
-    border-radius: 0.25rem;
-  }
 }
 
 .dropdown-backdrop {
