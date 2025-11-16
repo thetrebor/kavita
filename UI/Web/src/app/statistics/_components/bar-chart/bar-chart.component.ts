@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
-import {LabelFormatterCallback, TopLevelFormatterParams} from "echarts/types/dist/shared";
+import {LabelFormatterCallback, TopLevelFormatterParams, TooltipOption} from "echarts/types/dist/shared";
 
 // Type copied over from ECharts, as it's not exported
 export type OptionDataValue = string | number | Date | null | undefined;
@@ -10,6 +10,9 @@ export type ToolTipFormatterContext = {
   event: TopLevelFormatterParams;
 }
 
+/**
+ * Represents a BarChart with one series as backing data
+ */
 @Component({
   selector: 'app-bar-chart',
   imports: [EChartsDirective],
@@ -18,22 +21,80 @@ export type ToolTipFormatterContext = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BarChartComponent {
+  /**
+   * Data used for the series
+   */
   data = input.required<any[]>();
+  /**
+   * Labels used for the valueAxis
+   */
   axisLabels = input.required<string[]>();
 
-  axisLabelsRight = input<string[]>();
+  /**
+   * Labels used for the valueAxis but on the other side
+   */
+  axisLabelsOther = input<string[]>();
+  /**
+   * Should the bars lay horizontal
+   */
   horizontal = input(false);
+  /**
+   * Height of the chart
+   *
+   * @default 300px
+   */
   height = input('300px');
+  /**
+   * Width of the chart
+   *
+   * @default 100%
+   */
   width = input('100%');
 
+  /**
+   * Show labels on the series bars
+   *
+   * @default false
+   */
   showLabels = input(false);
+  /**
+   * Position of the bar labels
+   *
+   * @default right
+   */
   labelPosition = input<'top' | 'bottom' | 'left' | 'right' | 'inside' | 'insideLeft' | 'insideRight' | 'insideTop' | 'insideBottom'>('right');
+  /**
+   * Formatter method for the bar labels
+   */
   seriesLabelFormatter = input<LabelFormatterCallback | undefined>(undefined);
+  /**
+   * Cycle through the colour pallet
+   */
   multiColor = input(false);
 
+  /**
+   * Show tooltips when hovering over bars
+   *
+   * @default false
+   */
   showToolTips = input(false);
+  /**
+   * Full formatter for tooltips, use in conjugation with htmlTooltip to take full control
+   *
+   * @default undefined
+   */
   toolTipFormatter = input<((ctx: ToolTipFormatterContext) => (string | HTMLElement | HTMLElement[]) )| undefined>(undefined);
+  /**
+   * Simple formatter for tooltips
+   *
+   * @default undefined
+   */
   toolTipValueFormatter = input<((value: OptionDataValue | OptionDataValue[], dataIndex: number) => string) | undefined>(undefined)
+  /**
+   * When set to true, disabled some default styling on tooltips
+   *
+   * @default false
+   */
   htmlToolTip = input(false);
 
   processedData = computed(() => {
@@ -53,6 +114,36 @@ export class BarChartComponent {
     })
   });
 
+  protected tooltipOption = computed<TooltipOption | undefined>(() => {
+    if (!this.showToolTips()) return undefined;
+
+    const tooltipOption: TooltipOption = {
+      trigger: 'axis',
+      valueFormatter: this.toolTipValueFormatter(),
+    };
+
+    const fn = this.toolTipFormatter();
+    if (fn) {
+      tooltipOption.formatter = (params: TopLevelFormatterParams) => {
+        const ctx: ToolTipFormatterContext = {
+          data: Array.isArray(params) ? params.map(p => this.data()[p.dataIndex]) : this.data()[params.dataIndex],
+          event: params,
+        }
+
+        return fn(ctx);
+      }
+    }
+
+    // Disable padding such that the custom HTML is all that's shown
+    if (this.htmlToolTip()) {
+      tooltipOption.padding = [0, 0, 0, 0];
+      tooltipOption.backgroundColor = 'transparent';
+      tooltipOption.borderColor = 'transparent';
+    }
+
+    return tooltipOption;
+  });
+
   // TODO: Update colours, move into theme service?
   private getColorForIndex(index: number): string {
     const palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452'];
@@ -65,7 +156,7 @@ export class BarChartComponent {
     const option: ECOption = {
       grid: {
         left: '10%',
-        right: this.axisLabelsRight() ? '10%' : '5%',
+        right: this.axisLabelsOther() ? '10%' : '5%',
         top: '5%',
         bottom: '5%'
       },
@@ -90,35 +181,9 @@ export class BarChartComponent {
         },
         barGap: '10%',
         barMinHeight: 5
-      }]
+      }],
+      tooltip: this.tooltipOption(),
     };
-
-    if (this.showToolTips()) {
-      option.tooltip = {
-        trigger: 'axis',
-        valueFormatter: this.toolTipValueFormatter(),
-      };
-
-      const fn = this.toolTipFormatter();
-      if (fn) {
-        option.tooltip.formatter = (params: TopLevelFormatterParams) => {
-          const ctx: ToolTipFormatterContext = {
-            data: Array.isArray(params) ? params.map(p => this.data()[p.dataIndex]) : this.data()[params.dataIndex],
-            event: params,
-          }
-
-          return fn(ctx);
-        }
-
-        // Disable padding such that the custom HTML is all that's shown
-        if (this.htmlToolTip()) {
-          option.tooltip.padding = [0, 0, 0, 0];
-          option.tooltip.backgroundColor = 'transparent';
-          option.tooltip.borderColor = 'transparent';
-        }
-      }
-
-    }
 
     return option;
   });
@@ -134,13 +199,13 @@ export class BarChartComponent {
       axisLabel: { rotate: 0 }
     };
 
-    if (!this.axisLabelsRight()) {
+    if (!this.axisLabelsOther()) {
       return leftYAxis;
     }
 
     const rightYAxis = {
       type: isHorizontal ? 'category' : 'value',
-      data: isHorizontal ? this.axisLabelsRight() : undefined,
+      data: isHorizontal ? this.axisLabelsOther() : undefined,
       position: 'right' as const,
       axisLine: { show: false },
       axisTick: { show: false }
