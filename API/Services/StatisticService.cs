@@ -43,6 +43,7 @@ public interface IStatisticService
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(int userId);
     Task<PageSpreadStatsDto> GetPageSpreadForUser(int userId);
+    Task<IList<StatCount<int>>> PagesPerYear(int userId);
 }
 
 /// <summary>
@@ -834,7 +835,9 @@ public class StatisticService : IStatisticService
 
         var totalMissingData = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
-            .Join(_context.SeriesMetadata, p => p.SeriesId, sm => sm.SeriesId, (g, m) => m.Genres)
+            .Select(p => p.SeriesId)
+            .Distinct()
+            .Join(_context.SeriesMetadata, p => p, sm => sm.SeriesId, (g, m) => m.Genres)
             .CountAsync(g => !g.Any());
 
         var totalReads = await _context.AppUserProgresses
@@ -883,7 +886,9 @@ public class StatisticService : IStatisticService
 
         var totalMissingData = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
-            .Join(_context.SeriesMetadata, p => p.SeriesId, sm => sm.SeriesId, (g, m) => m.Tags)
+            .Select(p => p.SeriesId)
+            .Distinct()
+            .Join(_context.SeriesMetadata, p => p, sm => sm.SeriesId, (g, m) => m.Tags)
             .CountAsync(g => !g.Any());
 
         var totalReads = await _context.AppUserProgresses
@@ -943,10 +948,21 @@ public class StatisticService : IStatisticService
         return new PageSpreadStatsDto
         {
             Buckets = buckets,
-            TotalCount = totalCount
+            TotalCount = totalCount,
         };
     }
 
+    // Needs JSON actions in DB
+    public async Task<IList<StatCount<int>>> PagesPerYear(int userId)
+    {
+        return await _context.AppUserReadingSession
+            .GroupBy(s => s.CreatedUtc.Year)
+            .Select(g => new StatCount<int>()
+            {
+                Value = g.Key,
+                Count = g.Sum(s => s.ActivityData.Sum(a => a.PagesRead)),
+            }).ToListAsync();
+    }
 
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
