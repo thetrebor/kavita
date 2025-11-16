@@ -38,8 +38,6 @@ export class PageSpreadComponent {
   data = computed(() => this.pageSpreadResource.value()?.buckets.map(d => d.count) ?? []);
   labels = computed(() => this.pageSpreadResource.value()?.buckets
     .map(d => this.rangeFormatter(d)) ?? []);
-  labelsRight = computed(() => this.pageSpreadResource.value()?.buckets
-    .map(d => this.rangeFormatter(d)) ?? []);
 
   rangeFormatter = (params: StatBucket) => {
     return `${params.rangeStart}-${params.rangeEnd ?? '1000+'}`;

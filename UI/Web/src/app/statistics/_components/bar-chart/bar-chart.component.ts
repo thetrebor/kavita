@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
 import {LabelFormatterCallback, TopLevelFormatterParams, TooltipOption} from "echarts/types/dist/shared";
+import {BarSeriesOption} from "echarts/charts";
 
 // Type copied over from ECharts, as it's not exported
 export type OptionDataValue = string | number | Date | null | undefined;
@@ -9,6 +10,8 @@ export type ToolTipFormatterContext = {
   data: any | any[];
   event: TopLevelFormatterParams;
 }
+
+type ArrayAble<T> = T | T[];
 
 /**
  * Represents a BarChart with one series as backing data
@@ -32,6 +35,8 @@ export class BarChartComponent {
 
   /**
    * Labels used for the valueAxis but on the other side
+   *
+   * I.e. right for horizontal, top for vertical
    */
   axisLabelsOther = input<string[]>();
   /**
@@ -144,51 +149,32 @@ export class BarChartComponent {
     return tooltipOption;
   });
 
-  // TODO: Update colours, move into theme service?
-  private getColorForIndex(index: number): string {
-    const palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452'];
-    return palette[index % palette.length];
-  }
-
-  protected options = computed(() => {
+  protected xAxisOption = computed(() => {
     const isHorizontal = this.horizontal();
 
-    const option: ECOption = {
-      grid: {
-        left: '10%',
-        right: this.axisLabelsOther() ? '10%' : '5%',
-        top: '5%',
-        bottom: '5%'
-      },
-      xAxis: {
-        type: isHorizontal ? 'value' : 'category',
-        data: isHorizontal ? undefined : this.axisLabels(),
-        splitLine: { show: false },
-        axisLabel: { show: false },
-        axisLine: { show: false }
-      },
-      yAxis: this.buildYAxis(),
-      series: [{
-        type: 'bar',
-        data: this.processedData(),
-        label: {
-          show: this.showLabels(),
-          position: this.labelPosition(),
-          formatter: this.seriesLabelFormatter()
-        },
-        itemStyle: {
-          borderRadius: 5
-        },
-        barGap: '10%',
-        barMinHeight: 5
-      }],
-      tooltip: this.tooltipOption(),
+    const leftXAxis = {
+      type: isHorizontal ? 'value' : 'category',
+      data: isHorizontal ? undefined : this.axisLabels(),
+      splitLine: { show: false },
+      axisLine: { show: false }
     };
 
-    return option;
+    if (isHorizontal || !this.axisLabelsOther()) {
+      return leftXAxis;
+    }
+
+    const rightXAxis = {
+      type: 'category',
+      data: this.axisLabelsOther(),
+      position: 'right' as const,
+      axisLine: { show: false },
+      axisTick: { show: false }
+    };
+
+    return [leftXAxis, rightXAxis];
   });
 
-  private buildYAxis() {
+  protected yAxisOption = computed(() => {
     const isHorizontal = this.horizontal();
 
     const leftYAxis = {
@@ -199,18 +185,56 @@ export class BarChartComponent {
       axisLabel: { rotate: 0 }
     };
 
-    if (!this.axisLabelsOther()) {
+    if (!isHorizontal || !this.axisLabelsOther()) {
       return leftYAxis;
     }
 
     const rightYAxis = {
-      type: isHorizontal ? 'category' : 'value',
-      data: isHorizontal ? this.axisLabelsOther() : undefined,
+      type: 'category',
+      data: this.axisLabelsOther(),
       position: 'right' as const,
       axisLine: { show: false },
       axisTick: { show: false }
     };
 
     return [leftYAxis, rightYAxis];
+  });
+
+  protected seriesOption = computed<ArrayAble<BarSeriesOption>>(() => {
+    return [{
+      type: 'bar',
+      data: this.processedData(),
+      label: {
+        show: this.showLabels(),
+        position: this.labelPosition(),
+        formatter: this.seriesLabelFormatter()
+      },
+      itemStyle: {
+        borderRadius: 5
+      },
+      barGap: '10%',
+      barMinHeight: 5
+    }];
+  });
+
+  // TODO: Update colours, move into theme service?
+  private getColorForIndex(index: number): string {
+    const palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452'];
+    return palette[index % palette.length];
   }
+
+  protected options = computed(() => {
+    return {
+      grid: {
+        left: '10%',
+        right: this.axisLabelsOther() ? '10%' : '5%',
+        top: '5%',
+        bottom: '5%'
+      },
+      xAxis: this.xAxisOption(),
+      yAxis: this.yAxisOption(),
+      series: this.seriesOption(),
+      tooltip: this.tooltipOption(),
+    };
+  });
 }
