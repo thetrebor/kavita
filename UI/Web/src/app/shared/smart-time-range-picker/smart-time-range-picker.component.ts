@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { ControlValueAccessor, FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import {ChangeDetectionStrategy, Component, computed, forwardRef, signal} from '@angular/core';
+import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, ReactiveFormsModule} from "@angular/forms";
 import { tap } from "rxjs";
 import { CommonModule } from '@angular/common';
 import {toSignal} from "@angular/core/rxjs-interop";
@@ -14,15 +14,20 @@ export type TimeRange = {
   endDate: Date | null,
 }
 
-type SelectionMode = 'forever' | 'year' | 'custom';
-
 @Component({
   selector: 'app-smart-time-range-picker',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './smart-time-range-picker.component.html',
   styleUrl: './smart-time-range-picker.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => SmartTimeRangePickerComponent),
+      multi: true,
+    }
+  ]
 })
 export class SmartTimeRangePickerComponent implements ControlValueAccessor {
 
