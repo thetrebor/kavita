@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit {
   private readonly recommendationService = inject(RecommendationService);
   protected readonly accountService = inject(AccountService);
   private readonly libraryService = inject(LibraryService);
-  private readonly seriesService = inject(SeriesService);
+  protected readonly seriesService = inject(SeriesService);
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
   public readonly imageService = inject(ImageService);
