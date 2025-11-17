@@ -131,7 +131,7 @@ export class SeriesService {
     }));
   }
 
-  getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>) {
+  getOnDeck(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, libraryId: number = 0) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};

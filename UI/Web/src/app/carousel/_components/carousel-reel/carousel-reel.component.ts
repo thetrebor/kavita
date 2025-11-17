@@ -18,6 +18,7 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 import {ActionItem} from "../../../_services/action-factory.service";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {map, Observable, tap} from "rxjs";
+import {PaginatedResult} from "../../../_models/pagination";
 
 register();
 
@@ -60,7 +61,7 @@ export class CarouselReelComponent {
 
   currentPage = model<number>(1);
   pageSize = input(20);
-  nextPageLoader = input<((pageNumber: number, pageSize: number) => Observable<any[]>) | null>(null);
+  nextPageLoader = input<((pageNumber: number, pageSize: number) => Observable<any[] | PaginatedResult<any[]>>) | null>(null);
 
   paginationEnabled = computed(() => this.nextPageLoader() != null);
   loadingNextPage = signal(false);
@@ -75,6 +76,7 @@ export class CarouselReelComponent {
     const oldSize = this.items.length;
 
     this.nextPageLoader()!(this.currentPage(), this.pageSize()).pipe(
+      map(items => Array.isArray(items) ? items : (items as PaginatedResult<any[]>).result),
       tap(items => {
         this.items = [...this.items, ...items];
 
