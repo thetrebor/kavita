@@ -126,7 +126,8 @@ public interface IUserRepository
     Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
     Task UpdateUserAsActive(int userId);
     Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
-    Task<string?> GetCoverImageAsync(int userId);
+    Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
+    Task<string?> GetPersonCoverImageAsync(int personId);
 
 }
 
@@ -994,7 +995,7 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task<string?> GetCoverImageAsync(int userId)
+    public async Task<string?> GetCoverImageAsync(int userId, int requestingUserId)
     {
         // TODO: .NET JSON Support
         // return await _context.AppUser
@@ -1009,11 +1010,19 @@ public class UserRepository : IUserRepository
             .Select(c => new { c.CoverImage, c.UserPreferences })
             .FirstOrDefaultAsync();
 
-        if (user?.UserPreferences?.SocialPreferences?.ShareProfile == true)
+        if (user?.UserPreferences?.SocialPreferences?.ShareProfile == true || userId == requestingUserId)
         {
             return user.CoverImage;
         }
 
         return null;
+    }
+
+    public async Task<string?> GetPersonCoverImageAsync(int personId)
+    {
+        return await _context.Person
+            .Where(p => p.Id == personId)
+            .Select(p => p.CoverImage)
+            .FirstOrDefaultAsync();
     }
 }

@@ -310,7 +310,7 @@ public class ImageController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.UserRepository.GetCoverImageAsync(personId));
+        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.UserRepository.GetPersonCoverImageAsync(personId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
@@ -330,7 +330,7 @@ public class ImageController : BaseApiController
         var authedUser = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (authedUser == 0 || userId == 0) return BadRequest();
 
-        var filename = await _unitOfWork.UserRepository.GetCoverImageAsync(userId);
+        var filename = await _unitOfWork.UserRepository.GetCoverImageAsync(userId, authedUser);
         var path = Path.Join(_directoryService.CoverImageDirectory, filename);
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
