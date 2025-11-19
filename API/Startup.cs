@@ -37,7 +37,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Serilog;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -161,18 +161,9 @@ public class Startup
                 Type = SecuritySchemeType.ApiKey
             });
 
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
+            c.AddSecurityRequirement((document) => new OpenApiSecurityRequirement()
+            {
+                [new OpenApiSecuritySchemeReference("bearer", document)] = []
             });
 
             c.AddServer(new OpenApiServer
