@@ -106,8 +106,11 @@ export class SeriesService {
     );
   }
 
-  getRecentlyUpdatedSeries() {
-    return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {});
+  getRecentlyUpdatedSeries(pageNum?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {}, {params});
   }
 
   getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>): Observable<PaginatedResult<Series[]>> {
@@ -128,7 +131,7 @@ export class SeriesService {
     }));
   }
 
-  getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>) {
+  getOnDeck(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, libraryId: number = 0) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};
