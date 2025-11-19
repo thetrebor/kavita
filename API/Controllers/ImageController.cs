@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Metadata;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MimeTypes;
 
@@ -26,31 +28,32 @@ public class ImageController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
-    private readonly IImageService _imageService;
     private readonly ILocalizationService _localizationService;
     private readonly IReadingListService _readingListService;
     private readonly ICoverDbService _coverDbService;
+    private readonly UserManager<AppUser> _userManager;
 
     /// <inheritdoc />
     public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
-        IImageService imageService, ILocalizationService localizationService,
-        IReadingListService readingListService, ICoverDbService coverDbService)
+        ILocalizationService localizationService, IReadingListService readingListService,
+        ICoverDbService coverDbService, UserManager<AppUser> userManager)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
-        _imageService = imageService;
         _localizationService = localizationService;
         _readingListService = readingListService;
         _coverDbService = coverDbService;
+        _userManager = userManager;
     }
 
     /// <summary>
     /// Returns cover image for Chapter
     /// </summary>
     /// <param name="chapterId"></param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("chapter-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["chapterId", "apiKey"])]
     public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
@@ -66,6 +69,7 @@ public class ImageController : BaseApiController
     /// Returns cover image for Library
     /// </summary>
     /// <param name="libraryId"></param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("library-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["libraryId", "apiKey"])]
@@ -84,6 +88,7 @@ public class ImageController : BaseApiController
     /// Returns cover image for Volume
     /// </summary>
     /// <param name="volumeId"></param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("volume-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["volumeId", "apiKey"])]
@@ -102,6 +107,7 @@ public class ImageController : BaseApiController
     /// Returns cover image for Series
     /// </summary>
     /// <param name="seriesId">Id of Series</param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["seriesId", "apiKey"])]
     [HttpGet("series-cover")]
@@ -122,6 +128,7 @@ public class ImageController : BaseApiController
     /// Returns cover image for Collection
     /// </summary>
     /// <param name="collectionTagId"></param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("collection-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["collectionTagId", "apiKey"])]
@@ -148,6 +155,7 @@ public class ImageController : BaseApiController
     /// Returns cover image for a Reading List
     /// </summary>
     /// <param name="readingListId"></param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("readinglist-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["readingListId", "apiKey"])]
@@ -193,6 +201,7 @@ public class ImageController : BaseApiController
     /// <param name="chapterId"></param>
     /// <param name="pageNum">Starts at 0</param>
     /// <param name="apiKey">API Key for user. Needed to authenticate request</param>
+    /// <param name="imageOffset">Only applicable for Epubs - handles multiple images on one page</param>
     /// <returns></returns>
     [HttpGet("bookmark")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["chapterId", "pageNum", "apiKey", "imageOffset"])]
@@ -214,6 +223,7 @@ public class ImageController : BaseApiController
     /// <summary>
     /// Returns the image associated with a web-link
     /// </summary>
+    /// <param name="url"></param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("web-link")]
@@ -292,6 +302,7 @@ public class ImageController : BaseApiController
     /// Returns cover image for Person
     /// </summary>
     /// <param name="personId"></param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("person-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["personId", "apiKey"])]
@@ -299,7 +310,7 @@ public class ImageController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.PersonRepository.GetCoverImageAsync(personId));
+        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.UserRepository.GetCoverImageAsync(personId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
@@ -307,18 +318,20 @@ public class ImageController : BaseApiController
     }
 
     /// <summary>
-    /// Returns cover image for Person
+    /// Returns cover image for User
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="userId"></param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
-    [HttpGet("person-cover-by-name")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["personId", "apiKey"])]
-    public async Task<ActionResult> GetPersonCoverImageByName(string name, string apiKey)
+    [HttpGet("user-cover")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["userId", "apiKey"])]
+    public async Task<ActionResult> GetUserCoverImage(int userId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
+        var authedUser = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (authedUser == 0 || userId == 0) return BadRequest();
 
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.PersonRepository.GetCoverImageByNameAsync(name));
+        var filename = await _unitOfWork.UserRepository.GetCoverImageAsync(userId);
+        var path = Path.Join(_directoryService.CoverImageDirectory, filename);
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
@@ -328,15 +341,22 @@ public class ImageController : BaseApiController
     /// <summary>
     /// Returns a temp coverupload image
     /// </summary>
+    /// <remarks>Requires Admin Role to perform upload</remarks>
     /// <param name="filename">Filename of file. This is used with upload/upload-by-url</param>
+    /// <param name="apiKey"></param>
     /// <returns></returns>
-    [Authorize(Policy="RequireAdminRole")]
     [HttpGet("cover-upload")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["filename", "apiKey"])]
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         if (filename.Contains("..")) return BadRequest(await _localizationService.Translate(UserId, "invalid-filename"));
+
+        var roles = await _unitOfWork.UserRepository.GetRolesByApiKey(apiKey);
+        if (!roles.Contains(PolicyConstants.AdminRole))
+        {
+            return Forbid();
+        }
 
         var path = Path.Join(_directoryService.TempDirectory, filename);
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))

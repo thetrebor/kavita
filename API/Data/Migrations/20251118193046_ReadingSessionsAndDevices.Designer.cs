@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251112124430_ReadingSessionsAndDevices")]
+    [Migration("20251118193046_ReadingSessionsAndDevices")]
     partial class ReadingSessionsAndDevices
     {
         /// <inheritdoc />
@@ -78,6 +78,9 @@ namespace API.Data.Migrations
                     b.Property<string>("ConfirmationToken")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -137,11 +140,17 @@ namespace API.Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("PrimaryColor")
+                        .HasColumnType("TEXT");
+
                     b.Property<uint>("RowVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("ScrobbleEventGenerationRan")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SecondaryColor")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SecurityStamp")
@@ -2819,7 +2828,7 @@ namespace API.Data.Migrations
                     b.Property<string>("SocialPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true}");
+                        .HasDefaultValue("{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true,\"ShareProfile\":false}");
 
                     b.Property<bool>("SwipeToPaginate")
                         .HasColumnType("INTEGER");

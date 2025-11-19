@@ -15,6 +15,24 @@ namespace API.Data.Migrations
                 name: "Tagline",
                 table: "AppUserRating");
 
+            migrationBuilder.AddColumn<string>(
+                name: "CoverImage",
+                table: "AspNetUsers",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "PrimaryColor",
+                table: "AspNetUsers",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "SecondaryColor",
+                table: "AspNetUsers",
+                type: "TEXT",
+                nullable: true);
+
             migrationBuilder.AddColumn<DateTime>(
                 name: "Created",
                 table: "AppUserRating",
@@ -49,6 +67,17 @@ namespace API.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: 0);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "SocialPreferences",
+                table: "AppUserPreferences",
+                type: "TEXT",
+                nullable: true,
+                defaultValue: "{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true,\"ShareProfile\":false}",
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldNullable: true,
+                oldDefaultValue: "{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true}");
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "Created",
@@ -225,6 +254,18 @@ namespace API.Data.Migrations
                 name: "ClientDevice");
 
             migrationBuilder.DropColumn(
+                name: "CoverImage",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "PrimaryColor",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "SecondaryColor",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
                 name: "Created",
                 table: "AppUserRating");
 
@@ -265,6 +306,17 @@ namespace API.Data.Migrations
                 table: "AppUserRating",
                 type: "TEXT",
                 nullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "SocialPreferences",
+                table: "AppUserPreferences",
+                type: "TEXT",
+                nullable: true,
+                defaultValue: "{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true}",
+                oldClrType: typeof(string),
+                oldType: "TEXT",
+                oldNullable: true,
+                oldDefaultValue: "{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true,\"ShareProfile\":false}");
         }
     }
 }

@@ -46,6 +46,7 @@ import {SettingItemComponent} from "../../../settings/_components/setting-item/s
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {SmartTimeRangePickerComponent} from "../../../shared/smart-time-range-picker/smart-time-range-picker.component";
 import {map} from "rxjs/operators";
+import {ProfileImageComponent} from "../profile-image/profile-image.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -77,7 +78,8 @@ enum TabID {
     SettingItemComponent,
     ReactiveFormsModule,
     TypeaheadComponent,
-    SmartTimeRangePickerComponent
+    SmartTimeRangePickerComponent,
+    ProfileImageComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -104,7 +106,6 @@ export class ProfileComponent implements OnInit {
   protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.userId());
   protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.userId());
 
-  hasCoverImage = computed(() => false);
   activeTabId = TabID.Overview;
 
   allLibraries = signal<Library[]>([]);

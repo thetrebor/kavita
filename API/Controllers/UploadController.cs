@@ -14,7 +14,6 @@ using API.SignalR;
 using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
@@ -56,7 +55,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="dto">Escaped url to download from</param>
     /// <returns>filename</returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("upload-by-url")]
     public async Task<ActionResult<string>> GetImageFromFile(UploadUrlDto dto)
     {
@@ -95,7 +94,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("series")]
     public async Task<ActionResult> UploadSeriesCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -152,7 +151,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("collection")]
     public async Task<ActionResult> UploadCollectionCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -181,7 +180,7 @@ public class UploadController : BaseApiController
             {
                 await _unitOfWork.CommitAsync();
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.CollectionTag), false);
+                    MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.Collection), false);
                 return Ok();
             }
 
@@ -263,7 +262,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("chapter")]
     public async Task<ActionResult> UploadChapterCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -330,7 +329,7 @@ public class UploadController : BaseApiController
     /// <remarks>This will not update the underlying chapter</remarks>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("volume")]
     public async Task<ActionResult> UploadVolumeCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -390,7 +389,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("library")]
     public async Task<ActionResult> UploadLibraryCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -450,7 +449,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto">Does not use Url property</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("reset-chapter-lock")]
     [Obsolete("Use LockCover in UploadFileDto, will be removed in v0.9.0")]
     public async Task<ActionResult> ResetChapterLock(UploadFileDto uploadFileDto)
@@ -494,7 +493,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("person")]
     public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -510,6 +509,37 @@ public class UploadController : BaseApiController
         catch (Exception e)
         {
             _logger.LogError(e, "There was an issue uploading cover image for Person {Id}", uploadFileDto.Id);
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-person-save"));
+    }
+
+
+    /// <summary>
+    /// Replaces user cover image and locks it with a base64 encoded image
+    /// </summary>
+    /// <remarks>You MUST be the user in question</remarks>
+    /// <param name="uploadFileDto"></param>
+    /// <returns></returns>
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
+    [HttpPost("user")]
+    public async Task<ActionResult> UploadUserCoverImageFromUrl(UploadFileDto uploadFileDto)
+    {
+        try
+        {
+            if (uploadFileDto.Id != UserId) return Forbid();
+
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uploadFileDto.Id);
+            if (user == null) return BadRequest(await _localizationService.Translate(UserId, "user-doesnt-exist"));
+
+            await _coverDbService.SetUserCoverByUrl(user, uploadFileDto.Url, chooseBetterImage: false);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "There was an issue uploading cover image for User {Id}", uploadFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 

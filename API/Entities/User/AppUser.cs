@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace API.Entities;
 
-public class AppUser : IdentityUser<int>, IHasConcurrencyToken
+public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
 {
     public DateTime Created { get; set; } = DateTime.Now;
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
@@ -105,6 +105,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public IdentityProvider IdentityProvider { get; set; } = IdentityProvider.Kavita;
 
+    public string? CoverImage { get; set; }
+    public string? PrimaryColor { get; set; }
+    public string? SecondaryColor { get; set; }
+
 
     /// <summary>
     /// A list of Series the user doesn't want scrobbling for
@@ -140,6 +144,12 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     {
         LastActive = DateTime.Now;
         LastActiveUtc = DateTime.UtcNow;
+    }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
     }
 
 }

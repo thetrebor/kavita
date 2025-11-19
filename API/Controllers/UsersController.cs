@@ -88,12 +88,12 @@ public class UsersController : BaseApiController
     /// <returns></returns>
     [HttpGet("profile-info")]
     [Authorize]
+    [ProfilePrivacy]
     public async Task<ActionResult<MemberInfoDto>> GetProfileInfo(int userId)
     {
         // Validate that the user has sharing enabled
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return BadRequest();
-        //if (!user.UserPreferences.SocialPreferences.ShareProfile) return BadRequest();
 
         return Ok(_mapper.Map<MemberInfoDto>(user));
 

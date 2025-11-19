@@ -124,6 +124,12 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
             }
         }
 
+        // Check if embeded in route parameters (e.g., /api/somepath/{apiKey}/other)
+        if (string.IsNullOrEmpty(apiKey) && context.Request.RouteValues.TryGetValue("apiKey", out var routeApiKey))
+        {
+            apiKey = apiKeyQuery.ToString();
+        }
+
         if (string.IsNullOrEmpty(apiKey))
         {
             return (null, null, AuthenticationType.Unknown);

@@ -66,6 +66,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<IList<string>> GetRoles(int userId);
+    Task<IList<string>> GetRolesByApiKey(string? apiKey);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
     Task<AppUserChapterRating?> GetUserChapterRatingAsync(int userId, int chapterId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
@@ -80,6 +81,7 @@ public interface IUserRepository
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId);
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
     Task<UserDto?> GetUserDtoByApiKeyAsync(string apiKey);
+    Task<UserDto?> GetUserDtoById(int userId);
     Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<int> GetUserIdByUsernameAsync(string username);
@@ -124,6 +126,7 @@ public interface IUserRepository
     Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
     Task UpdateUserAsActive(int userId);
     Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
+    Task<string?> GetCoverImageAsync(int userId);
 
 }
 
@@ -205,7 +208,6 @@ public class UserRepository : IUserRepository
     {
         _context.AppUserSideNavStream.Remove(stream);
     }
-
 
 
     /// <summary>
@@ -729,6 +731,26 @@ public class UserRepository : IUserRepository
         return await _userManager.GetRolesAsync(user);
     }
 
+    public async Task<IList<string>> GetRolesByApiKey(string? apiKey)
+    {
+        if (string.IsNullOrEmpty(apiKey)) return ArraySegment<string>.Empty;
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.ApiKey == apiKey);
+        if (user == null) return ArraySegment<string>.Empty;
+
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (_userManager == null)
+        {
+            // userManager is null on Unit Tests only
+            return await _context.UserRoles
+                .Where(ur => ur.User.ApiKey == apiKey)
+                .Select(ur => ur.Role.Name)
+                .ToListAsync();
+        }
+
+        return await _userManager.GetRolesAsync(user);
+    }
+
     public async Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId)
     {
         return await _context.AppUserRating
@@ -924,6 +946,14 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<UserDto?> GetUserDtoById(int userId)
+    {
+        return await _context.AppUser
+            .Where(u => u.Id == userId)
+            .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+    }
+
 
     public async Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true)
     {
@@ -962,5 +992,28 @@ public class UserRepository : IUserRepository
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<string?> GetCoverImageAsync(int userId)
+    {
+        // TODO: .NET JSON Support
+        // return await _context.AppUser
+        //     .Include(c => c.UserPreferences)
+        //     .Where(c => c.Id == userId && c.UserPreferences.SocialPreferences.ShareProfile)
+        //     .Select(c => c.CoverImage)
+        //     .FirstOrDefaultAsync();
+
+        var user = await _context.AppUser
+            .Include(c => c.UserPreferences)
+            .Where(c => c.Id == userId)
+            .Select(c => new { c.CoverImage, c.UserPreferences })
+            .FirstOrDefaultAsync();
+
+        if (user?.UserPreferences?.SocialPreferences?.ShareProfile == true)
+        {
+            return user.CoverImage;
+        }
+
+        return null;
     }
 }

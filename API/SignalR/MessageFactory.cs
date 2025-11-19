@@ -13,9 +13,10 @@ public static class MessageFactoryEntityTypes
     public const string Series = "series";
     public const string Volume = "volume";
     public const string Chapter = "chapter";
-    public const string CollectionTag = "collection";
+    public const string Collection = "collection";
     public const string ReadingList = "readingList";
     public const string Person = "person";
+    public const string User = "User";
 }
 public static class MessageFactory
 {
