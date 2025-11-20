@@ -12,7 +12,7 @@
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
           <div class="row g-0 mt-2">
-            Joined: {{user.createdUtc | utcToLocaleDate | timeAgo}}
+            {{t('joined-label', {date: user.createdUtc | utcToLocaleDate | timeAgo})}}
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@
             @defer (when activeTabId === TabID.Stats; prefetch on idle) {
 
               <form [formGroup]="filterForm" class="d-flex align-content-center align-items-center">
-                <h4 class="me-2">A look at {{username}}'s journey through</h4>
+                <h4 class="mx-2">{{t('stats-title', {username: username, libraryName: ''})}}</h4>
                 @if (filterForm.get('libraries'); as control) {
                   <app-setting-item [control]="control" [title]="''" [showEdit]="false">
                     <ng-template #view>
@@ -70,9 +70,16 @@
 
               </form>
 
-              <app-activity-graph />
+              <div class="row mt-4">
+                <div class="col-md-6">
+                  <app-activity-graph />
+                </div>
+                <div class="col-md-6">
+                  <app-reading-pace [userId]="user.id" [userName]="username"/>
+                </div>
+              </div>
 
-              <app-reading-pace [userId]="user.id" [userName]="username"/>
+
 
               <div class="row mt-4">
                 <div class="col-md-6">

@@ -2829,7 +2829,8 @@
 
     "profile": {
         "title": "{{username}}'s Profile",
-        "joined-label": "Joined: ",
+        "joined-label": "Joined: {{date}}",
+        "stats-title": "A look at {{username}}'s journey through {{libraryName}}",
         "overview-tab": "{{tabs.overview-tab}}",
         "stats-tab": "{{tabs.stats-tab}}",
         "reviews-tab": "{{tabs.reviews-tab}}",
