@@ -972,7 +972,16 @@ public class StatisticService : IStatisticService
         var totalCount = wordsInFullyReadChapters.Count;
         var highest = wordsInFullyReadChapters.MaxOrDefault(x => x, 0);
 
-        // TODO: Handle highest being 0
+        if (highest == 0)
+        {
+            return new SpreadStatsDto()
+            {
+                Buckets = [],
+                TotalCount = 0
+            };
+        }
+
+
         var magnitude = (int) Math.Floor(Math.Log10(highest));
         var bucketSize = (int) Math.Pow(10, magnitude - 1);
 

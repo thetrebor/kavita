@@ -8,18 +8,6 @@
   align-self: flex-start;
   max-height: 400px;
   max-width: 280px;
-
-  &.drop-zone-active {
-    .drop-zone-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      z-index: 10;
-    }
-  }
 }
 
 .person-badge {
