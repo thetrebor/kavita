@@ -23,6 +23,7 @@ import {ActivityGraphData} from "../statistics/_components/activity-graph/activi
 import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
 import {Breakdown} from "../statistics/_models/breakdown";
 import {SpreadStats} from "../statistics/_models/stats/spread-stats";
+import {FavouriteAuthor} from "../statistics/_models/favourite-author";
 
 export enum DayOfWeek
 {
@@ -178,5 +179,9 @@ export class StatisticsService {
 
   getWordSpread(userId: () => number) {
     return httpResource<SpreadStats>(() => this.baseUrl + `stats/word-spread?userId=${userId()}`).asReadonly();
+  }
+
+  getFavouriteAuthors(userId: () => number) {
+    return httpResource<FavouriteAuthor[]>(() => this.baseUrl + `stats/favourite-authors?userId=${userId()}`).asReadonly();
   }
 }

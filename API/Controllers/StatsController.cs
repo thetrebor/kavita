@@ -324,6 +324,14 @@ public class StatsController(
         return Ok(await statService.GetWordSpreadForUser(userId));
     }
 
+    [ProfilePrivacy]
+    [HttpGet("favourite-authors")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<MostReadAuthorsDto>> GetMostReadAuthors(int userId)
+    {
+        return Ok(await statService.GetMostReadAuthors(userId));
+    }
+
 
     #endregion
 

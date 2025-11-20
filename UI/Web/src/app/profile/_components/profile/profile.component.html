@@ -109,6 +109,10 @@
                   <app-bucket-spread-chart [userId]="user.id" [userName]="username" [bucketSpreadResource]="wordSpreadResource" translationKey="word-spread" />
                 </div>
               </div>
+
+              <div class="row mt-4">
+                <app-favourite-authors [userId]="user.id" [userName]="username" />
+              </div>
             }
           </ng-template>
 

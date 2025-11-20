@@ -13,7 +13,6 @@ import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
 import {MemberInfo} from "../../../_models/user/member-info";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ImageComponent} from "../../../shared/image/image.component";
 import {ImageService} from "../../../_services/image.service";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {
@@ -47,6 +46,7 @@ import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.compo
 import {SmartTimeRangePickerComponent} from "../../../shared/smart-time-range-picker/smart-time-range-picker.component";
 import {map} from "rxjs/operators";
 import {ProfileImageComponent} from "../profile-image/profile-image.component";
+import {FavouriteAuthorsComponent} from "../../../statistics/_components/favourite-authors/favourite-authors.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -61,7 +61,6 @@ enum TabID {
     ReadingPaceComponent,
     ActivityGraphComponent,
     TranslocoDirective,
-    ImageComponent,
     TimeAgoPipe,
     NgbNav,
     NgbNavContent,
@@ -79,7 +78,8 @@ enum TabID {
     ReactiveFormsModule,
     TypeaheadComponent,
     SmartTimeRangePickerComponent,
-    ProfileImageComponent
+    ProfileImageComponent,
+    FavouriteAuthorsComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
