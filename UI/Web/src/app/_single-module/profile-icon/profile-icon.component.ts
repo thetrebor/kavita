@@ -15,6 +15,7 @@ export class ProfileIconComponent {
   protected readonly imageService = inject(ImageService);
 
   userId = input.required<number>();
+  size = input<number>(32);
 
   currentImageUrl = model<string | null>(null);
 

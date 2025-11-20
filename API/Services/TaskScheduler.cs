@@ -232,7 +232,7 @@ public class TaskScheduler : ITaskScheduler
     {
         // KavitaPlus based (needs license check)
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license))
+        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license)) // TODO: Need to convert this to a non-blocking request
         {
             return;
         }
