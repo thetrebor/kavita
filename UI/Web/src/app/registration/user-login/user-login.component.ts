@@ -71,7 +71,7 @@ export class UserLoginComponent implements OnInit {
     const force = this.forceShowPasswordLogin();
     if (force) return true;
 
-    return loaded && config && !config.disablePasswordAuthentication;
+    return loaded && config && !(config.enabled && config.disablePasswordAuthentication);
   });
   showOidcButton = computed(() => this.oidcConfig()?.enabled ?? false);
 
