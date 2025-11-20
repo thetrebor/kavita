@@ -729,7 +729,7 @@ public class StatisticService : IStatisticService
             .Select(s => new { s.StartTimeUtc, s.EndTimeUtc, s.ActivityData })
             .ToListAsync();
 
-        var allSeriesIds = readingSessions.SelectMany(r => r.ActivityData.Select(d => d.ChapterId)).Distinct();
+        var allSeriesIds = readingSessions.SelectMany(r => r.ActivityData.Select(d => d.SeriesId)).Distinct();
 
         var seriesFormats = await _context.Series
             .Where(s => allSeriesIds.Contains(s.Id))
