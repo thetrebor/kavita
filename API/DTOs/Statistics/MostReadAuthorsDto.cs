@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using API.Entities;
+
 namespace API.DTOs.Statistics;
 
 public sealed record MostReadAuthorsDto
@@ -8,9 +11,6 @@ public sealed record MostReadAuthorsDto
     public int TotalChaptersRead { get; init; }
     //public int AverageRating { get; init; }
 
-    /**
-     * Comma seperated list of ids
-     */
-    public string Chapters { get; init; }
+    public IList<ChapterDto> Chapters { get; init; }
 
 }

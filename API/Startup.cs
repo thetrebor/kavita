@@ -94,7 +94,7 @@ public class Startup
             options.CacheProfiles.Add(ResponseCacheProfiles.Statistics,
                 new CacheProfile()
                 {
-                    Duration = 60 * 60 * 6,
+                    Duration = _env.IsDevelopment() ? 0 : 60 * 60 * 6,
                     Location = ResponseCacheLocation.None,
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Images,

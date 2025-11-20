@@ -14,6 +14,7 @@ using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Extensions.QueryExtensions.Filtering;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -1030,56 +1031,51 @@ public class StatisticService : IStatisticService
             }).ToListAsync();
     }
 
-    private static string RawFilterSql(StatsFilterDto filter)
-    {
-        var startTime = filter.TimeFilter.StartDate?.ToUniversalTime().ToString("o");
-        var endTime = filter.TimeFilter.EndDate?.ToUniversalTime().ToString("o");
-        var libraries = string.Join(", ", filter.Libraries);
-
-        var sql = $"activity.value ->> '$.LibraryId' IN ({libraries})";
-
-        if (startTime != null)
-        {
-            sql += $" AND activity.value ->> '$.StartTimeUtc' >= '{startTime}'";
-        }
-
-        if (endTime != null)
-        {
-            sql += $" AND activity.value ->> '$.EndTimeUtc' <= '{endTime}'";
-        }
-
-        return sql;
-    }
-
     public async Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId)
     {
-        var sql = $"""
-                   SELECT
-                       p.id as AuthorId,
-                       p.Name as AuthorName,
-                       COUNT(DISTINCT activity.value ->> '$.ChapterId') as TotalChaptersRead,
-                       json_group_array(
-                               DISTINCT json_object(
-                               'ChapterId', activity.value ->> '$.ChapterId',
-                               'Title', c.TitleName)
-                           ) as Chapters
-                   FROM AppUserReadingSession urs
-                            CROSS JOIN json_each(urs.ActivityData) as activity
-                            INNER JOIN ChapterPeople cp ON cp.ChapterId = activity.value ->> '$.ChapterId'
-                            INNER JOIN Person p ON p.Id = cp.PersonId
-                            INNER JOIN Chapter c ON c.Id = cp.ChapterId
-                            INNER JOIN Volume v ON v.Id = c.VolumeId
-                            INNER JOIN Series s ON s.Id = v.SeriesId
-                   WHERE urs.AppUserId = {userId}
-                       AND activity.value ->> '$.PagesRead' == activity.value ->> '$.TotalPages'
-                       AND cp.Role = {3}
-                       AND {RawFilterSql(filter)}
-                   GROUP BY p.Id, p.Name
-                   ORDER BY TotalChaptersRead DESC
-                   LIMIT 10
-                   """;
+        var res = await _context.ChapterPeople
+            .Where(cp => cp.Role == PersonRole.Writer)
+            .Join(
+                _context.AppUserReadingSessionActivityData.ApplyStatsFilter(filter, userId),
+                cp => cp.ChapterId,
+                d => d.ChapterId,
+                (cp, data) => new { cp.PersonId, cp.ChapterId, cp.Person.Name }
+            )
+            .GroupBy(x => new { x.PersonId, x.Name })
+            .Select(g => new
+            {
+                g.Key.PersonId,
+                AuthorName = g.Key.Name,
+                TotalChaptersRead = g.Select(x => x.ChapterId).Distinct().Count(),
+            })
+            .OrderByDescending(x => x.TotalChaptersRead)
+            .Take(10)
+            .ToListAsync();
 
-        return await _context.Database.SqlQueryRaw<MostReadAuthorsDto>(sql).ToListAsync();
+        var final = new List<MostReadAuthorsDto>();
+
+        foreach (var m in res)
+        {
+            var randomChapters = await _context.Chapter
+                .Where(c => c.People.Any(p => p.PersonId == m.PersonId))
+                .OrderByDescending(c => !string.IsNullOrEmpty(c.TitleName))
+                .ThenBy(c => EF.Functions.Random())
+                .Take(5)
+                .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+
+            final.Add(new MostReadAuthorsDto
+            {
+                AuthorId = m.PersonId,
+                AuthorName = m.AuthorName,
+                TotalChaptersRead = m.TotalChaptersRead,
+                Chapters = randomChapters,
+            });
+        }
+
+        return final;
+
     }
 
 

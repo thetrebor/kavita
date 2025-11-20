@@ -11,13 +11,14 @@
         <div class="col-12 col-md-4 d-flex flex-row align-items-center text-center">
 
           <app-image
+            routerLink="/person/{{fAuthor.authorName}}"
             objectFit="cover"
             [styles]="{ 'object-position': 'top' }"
             height="150px"
             width="150px"
             [imageUrl]="imageService.getPersonImage(fAuthor.authorId)"
             [errorImage]="imageService.noPersonImage"
-            [classes]="'rounded shadow-sm mb-2'"
+            [classes]="'rounded shadow-sm mb-2 clickable'"
           ></app-image>
 
           <div class="ms-4">
@@ -32,16 +33,16 @@
 
         <div class="col-12 col-md-8 d-flex flex-wrap gap-2">
 
-          @for (chapter of chapters(fAuthor.chapters).slice(0, 5); track chapter.ChapterId) {
+          @for (chapter of fAuthor.chapters; track chapter.id) {
             <app-image
               objectFit="cover"
               [styles]="{ 'object-position': 'top' }"
               height="150px"
               width="150px"
-              [imageUrl]="imageService.getChapterCoverImage(chapter.ChapterId)"
+              [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
               [errorImage]="imageService.errorImage"
               [classes]="'rounded shadow-sm'"
-              [ngbTooltip]="chapter.Title"
+              [ngbTooltip]="chapter.titleName"
             ></app-image>
           }
 

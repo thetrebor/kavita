@@ -35,7 +35,7 @@ public class StatsController(
     : BaseApiController
 {
     [HttpGet("user/{userId}/read")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -47,7 +47,7 @@ public class StatsController(
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/stats")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<ServerStatisticsDto>> GetHighLevelStats()
     {
         return Ok(await statService.GetServerStatistics());
@@ -55,7 +55,7 @@ public class StatsController(
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/year")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
     {
         return Ok(await statService.GetYearCount());
@@ -63,7 +63,7 @@ public class StatsController(
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/publication-status")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<StatCount<PublicationStatus>>>> GetPublicationStatus()
     {
         return Ok(await statService.GetPublicationCount());
@@ -71,7 +71,7 @@ public class StatsController(
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/manga-format")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<StatCount<MangaFormat>>>> GetMangaFormat()
     {
         return Ok(await statService.GetMangaFormatCount());
@@ -79,7 +79,7 @@ public class StatsController(
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/top/years")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
     {
         return Ok(await statService.GetTopYears());
@@ -92,7 +92,7 @@ public class StatsController(
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/top/users")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
     {
         return Ok(await statService.GetTopUsers(days));
@@ -104,7 +104,7 @@ public class StatsController(
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/file-breakdown")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()
     {
         return Ok(await statService.GetFileBreakdown());
@@ -116,7 +116,7 @@ public class StatsController(
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/file-extension")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult> DownloadFilesByExtension(string fileExtension)
     {
         if (!Regex.IsMatch(fileExtension, Parser.SupportedExtensions))
@@ -146,7 +146,7 @@ public class StatsController(
     /// <param name="days">If 0, defaults to all time, else just those days asked for</param>
     /// <returns></returns>
     [HttpGet("reading-count-by-day")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -157,7 +157,7 @@ public class StatsController(
     }
 
     [HttpGet("day-breakdown")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
     {
         if (userId == 0)
@@ -173,7 +173,7 @@ public class StatsController(
 
 
     [HttpGet("user/reading-history")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -189,7 +189,7 @@ public class StatsController(
     /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
     /// <returns></returns>
     [HttpGet("pages-per-year")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
@@ -203,7 +203,7 @@ public class StatsController(
     /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
     /// <returns></returns>
     [HttpGet("words-per-year")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int userId = 0)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
@@ -218,7 +218,7 @@ public class StatsController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("device/client-type")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<DeviceClientBreakdownDto>> GetClientTypeBreakdown()
     {
@@ -231,7 +231,7 @@ public class StatsController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("device/device-type")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<StatCount<string>>> GetDeviceTypeCounts()
     {
@@ -245,7 +245,7 @@ public class StatsController(
     #region Reading History
 
     [HttpGet("reading-activity")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<ReadingActivityGraphDto>> GetReadingActivity(int userId, int year)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -262,7 +262,7 @@ public class StatsController(
 
     [ProfilePrivacy]
     [HttpGet("reading-pace")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<ReadingPaceDto>> GetReadingPace(int userId, int year)
     {
         return Ok(await statService.GetReadingPaceForUser(userId, year));
@@ -275,7 +275,7 @@ public class StatsController(
     /// <returns></returns>
     [ProfilePrivacy]
     [HttpGet("preferred-format")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat(int userId)
     {
         return Ok(await statService.GetPreferredFormatForUser(userId));
@@ -288,7 +288,7 @@ public class StatsController(
     /// <returns></returns>
     [ProfilePrivacy]
     [HttpGet("genre-breakdown")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<BreakDownDto<string>>> GetGenreBreakdown(int userId)
     {
         return Ok(await statService.GetGenreBreakdownForUser(userId));
@@ -301,7 +301,7 @@ public class StatsController(
     /// <returns></returns>
     [ProfilePrivacy]
     [HttpGet("tag-breakdown")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<BreakDownDto<string>>> GetTagBreakdown(int userId)
     {
         return Ok(await statService.GetTagBreakdownForUser(userId));
@@ -310,7 +310,7 @@ public class StatsController(
 
     [ProfilePrivacy]
     [HttpGet("page-spread")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<SpreadStatsDto>> GetPageSpread(int userId)
     {
         return Ok(await statService.GetPageSpreadForUser(userId));
@@ -318,7 +318,7 @@ public class StatsController(
 
     [ProfilePrivacy]
     [HttpGet("word-spread")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<SpreadStatsDto>> GetWordSpread(int userId)
     {
         return Ok(await statService.GetWordSpreadForUser(userId));
@@ -326,7 +326,7 @@ public class StatsController(
 
     [ProfilePrivacy]
     [HttpPost("favourite-authors")]
-    [ResponseCache(CacheProfileName = "Statistics")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId)
     {
         return Ok(await statService.GetMostReadAuthors(filter, userId));

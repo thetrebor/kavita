@@ -8,6 +8,7 @@ import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {StatsFilter} from "../../_models/stats-filter";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-favourite-authors',
@@ -18,7 +19,8 @@ import {StatsFilter} from "../../_models/stats-filter";
     TagBadgeComponent,
     FormsModule,
     ReactiveFormsModule,
-    NgbTooltip
+    NgbTooltip,
+    RouterLink
   ],
   templateUrl: './favourite-authors.component.html',
   styleUrl: './favourite-authors.component.scss',
@@ -38,9 +40,5 @@ export class FavouriteAuthorsComponent {
     () => this.statsFilter(),
     () => this.userId(),
   );
-
-  chapters(s: string): {ChapterId: number, Title: string}[] {
-    return JSON.parse(s)
-  }
 
 }
