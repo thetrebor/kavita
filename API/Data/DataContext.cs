@@ -86,6 +86,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserAnnotation> AppUserAnnotation { get; set; } = null!;
     public DbSet<EpubFont> EpubFont { get; set; } = null!;
     public DbSet<AppUserReadingSession> AppUserReadingSession { get; set; } = null!;
+    public DbSet<AppUserReadingSessionActivityData> AppUserReadingSessionActivityData { get; set; } = null!;
     public DbSet<AppUserReadingHistory> AppUserReadingHistory { get; set; } = null!;
     public DbSet<ClientDevice> ClientDevice { get; set; } = null!;
     public DbSet<ClientDeviceHistory> ClientDeviceHistory { get; set; } = null!;
@@ -335,10 +336,18 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(true);
 
         builder.Entity<AppUserReadingSession>()
-            .Property(sm => sm.ActivityData)
-            .HasJsonConversion([])
-            .HasColumnType("TEXT")
-            .HasDefaultValue(new List<AppUserReadingSessionActivityData>());
+            .HasMany(x => x.ActivityData)
+            .WithOne(a => a.ReadingSession)
+            .HasForeignKey(a => a.AppUserReadingSessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<AppUserReadingSessionActivityData>(b =>
+        {
+            b.ComplexProperty(d => d.ClientInfo, b =>
+            {
+                b.ToJson();
+            });
+        });
 
         builder.Entity<AppUserReadingHistory>()
             .Property(sm => sm.Data)

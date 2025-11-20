@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities.Progress;
 #nullable enable
 
 public class AppUserReadingSessionActivityData
 {
+    public int Id { get; set; }
+    public int AppUserReadingSessionId { get; set; }
+    public AppUserReadingSession ReadingSession { get; set; }
+
     public int ChapterId { get; set; }
+    public virtual Chapter Chapter { get; set; }
     public int VolumeId { get; set; }
     public int SeriesId { get; set; }
     public int LibraryId { get; set; }
