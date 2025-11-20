@@ -57,6 +57,7 @@ public static class MigrateTotalReads
                     foreach (var progress in progressBatch)
                     {
                         progress.Progress.TotalReads = 1;
+                        dataContext.AppUserProgresses.Update(progress.Progress);
                         migratedCount += 1;
                     }
 
