@@ -325,13 +325,12 @@ public class StatsController(
     }
 
     [ProfilePrivacy]
-    [HttpGet("favourite-authors")]
+    [HttpPost("favourite-authors")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<MostReadAuthorsDto>> GetMostReadAuthors(int userId)
+    public async Task<ActionResult<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId)
     {
-        return Ok(await statService.GetMostReadAuthors(userId));
+        return Ok(await statService.GetMostReadAuthors(filter, userId));
     }
-
 
     #endregion
 

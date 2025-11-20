@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, Component, computed, forwardRef, inject, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  EventEmitter,
+  forwardRef,
+  inject,
+  OnInit,
+  Output,
+  signal
+} from '@angular/core';
 import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, ReactiveFormsModule} from "@angular/forms";
 import { tap } from "rxjs";
 import { CommonModule } from '@angular/common';
@@ -23,17 +33,12 @@ export type TimeRange = {
   templateUrl: './smart-time-range-picker.component.html',
   styleUrl: './smart-time-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SmartTimeRangePickerComponent),
-      multi: true,
-    }
-  ]
 })
-export class SmartTimeRangePickerComponent implements ControlValueAccessor, OnInit {
+export class SmartTimeRangePickerComponent implements OnInit {
 
   private serverService = inject(ServerService);
+
+  @Output() timeRangeUpdate = new EventEmitter<TimeRange>();
 
   readonly formGroup: TimeRangeFormGroup = new FormGroup({
     startDate: new FormControl<Date | null>(null),
@@ -72,14 +77,10 @@ export class SmartTimeRangePickerComponent implements ControlValueAccessor, OnIn
   });
   readonly yearOptions = signal<number[]>([]);
 
-  private _onChange: (v: TimeRange) => void = () => {};
-  private _onTouch: () => void = () => {};
-
   constructor() {
     this.formGroup.valueChanges.pipe(
       tap(obj => {
-        this._onTouch();
-        this._onChange(obj as TimeRange);
+        this.timeRangeUpdate.emit(obj as TimeRange);
       })
     ).subscribe();
   }
@@ -129,14 +130,6 @@ export class SmartTimeRangePickerComponent implements ControlValueAccessor, OnIn
       day: 'numeric'
     };
     return date.toLocaleDateString('en-US', options);
-  }
-
-  registerOnChange(fn: (v: TimeRange) => void) {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void) {
-    this._onTouch = fn;
   }
 
   writeValue(obj: TimeRange) {

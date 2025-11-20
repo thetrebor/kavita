@@ -32,13 +32,13 @@
 
         <div class="col-12 col-md-8 d-flex flex-wrap gap-2">
 
-          @for (chapter of chapters(fAuthor.chapters).slice(0, 5); track chapter.Id) {
+          @for (chapter of chapters(fAuthor.chapters).slice(0, 5); track chapter.ChapterId) {
             <app-image
               objectFit="cover"
               [styles]="{ 'object-position': 'top' }"
               height="150px"
               width="150px"
-              [imageUrl]="imageService.getChapterCoverImage(chapter.Id)"
+              [imageUrl]="imageService.getChapterCoverImage(chapter.ChapterId)"
               [errorImage]="imageService.errorImage"
               [classes]="'rounded shadow-sm'"
               [ngbTooltip]="chapter.Title"

@@ -24,8 +24,8 @@ import {
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
 import {ReviewService} from "../../../_services/review.service";
-import {of, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {filter, fromEvent, of, tap} from "rxjs";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
 import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
 import {PreferredFormatComponent} from "../../../statistics/_components/preferred-format/preferred-format.component";
@@ -43,10 +43,14 @@ import {Library} from "../../../_models/library/library";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
-import {SmartTimeRangePickerComponent} from "../../../shared/smart-time-range-picker/smart-time-range-picker.component";
+import {
+  SmartTimeRangePickerComponent,
+  TimeRange
+} from "../../../shared/smart-time-range-picker/smart-time-range-picker.component";
 import {map} from "rxjs/operators";
 import {ProfileImageComponent} from "../profile-image/profile-image.component";
 import {FavouriteAuthorsComponent} from "../../../statistics/_components/favourite-authors/favourite-authors.component";
+import {StatsFilter} from "../../../statistics/_models/stats-filter";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -74,7 +78,6 @@ enum TabID {
     StringBreakdownComponent,
     UtcToLocaleDatePipe,
     BucketSpreadChartComponent,
-    SettingItemComponent,
     ReactiveFormsModule,
     TypeaheadComponent,
     SmartTimeRangePickerComponent,
@@ -109,17 +112,18 @@ export class ProfileComponent implements OnInit {
   activeTabId = TabID.Overview;
 
   allLibraries = signal<Library[]>([]);
+  showLibraryTypeahead = signal(false);
   libraryTypeaheadSettings?: TypeaheadSettings<Library>;
   filterForm = new FormGroup({
-    timeFilter: new FormGroup<{
-      startDate: FormControl<Date | null>,
-      endDate: FormControl<Date | null>,
-    }>({
+    timeFilter: new FormGroup({
       startDate: new FormControl<Date | null>(null),
       endDate: new FormControl<Date | null>(null),
     }),
     libraries: new FormControl<number[]>([]),
   });
+  filter = toSignal(this.filterForm.valueChanges.pipe(
+    map(value => value as StatsFilter),
+  ));
 
   constructor() {
     this.route.fragment.pipe(tap(frag => {
@@ -176,6 +180,11 @@ export class ProfileComponent implements OnInit {
 
   updateSelectedLibraries(libs: Library[]) {
     this.filterForm.get('libraries')!.setValue(libs.map(l => l.id));
+    this.libraryTypeaheadSettings = this.setupLibrarySettings(this.allLibraries(), libs);
+  }
+
+  updateTimeRange(tr: TimeRange) {
+    this.filterForm.get('timeFilter')!.setValue(tr);
   }
 
   libraryName(libraryId: number): string {

@@ -5,10 +5,9 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {ImageService} from "../../../_services/image.service";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {toSignal} from "@angular/core/rxjs-interop";
-import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {StatsFilter} from "../../_models/stats-filter";
 
 @Component({
   selector: 'app-favourite-authors',
@@ -19,7 +18,6 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
     TagBadgeComponent,
     FormsModule,
     ReactiveFormsModule,
-    SettingSwitchComponent,
     NgbTooltip
   ],
   templateUrl: './favourite-authors.component.html',
@@ -34,10 +32,14 @@ export class FavouriteAuthorsComponent {
 
   userId = input.required<number>();
   userName = input.required<string>();
+  statsFilter = input.required<StatsFilter>();
 
-  protected readonly favouriteAuthors = this.statsService.getFavouriteAuthors(() => this.userId());
+  protected readonly favouriteAuthors = this.statsService.getFavouriteAuthors(
+    () => this.statsFilter(),
+    () => this.userId(),
+  );
 
-  chapters(s: string): {Id: number, Title: string}[] {
+  chapters(s: string): {ChapterId: number, Title: string}[] {
     return JSON.parse(s)
   }
 
