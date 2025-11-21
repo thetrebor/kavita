@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  input,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
 import {Location, TitleCasePipe} from '@angular/common';
 import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
