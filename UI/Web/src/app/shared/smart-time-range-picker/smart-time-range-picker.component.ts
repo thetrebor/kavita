@@ -80,7 +80,10 @@ export class SmartTimeRangePickerComponent implements OnInit {
   constructor() {
     this.formGroup.valueChanges.pipe(
       tap(obj => {
-        this.timeRangeUpdate.emit(obj as TimeRange);
+        this.timeRangeUpdate.emit({
+          startDate: obj.startDate ? new Date(obj.startDate) : null,
+          endDate: obj.endDate ? new Date(obj.endDate) : null,
+        });
       })
     ).subscribe();
   }
@@ -130,11 +133,5 @@ export class SmartTimeRangePickerComponent implements OnInit {
       day: 'numeric'
     };
     return date.toLocaleDateString('en-US', options);
-  }
-
-  writeValue(obj: TimeRange) {
-    if (obj) {
-      this.formGroup.setValue(obj, { emitEvent: false });
-    }
   }
 }
