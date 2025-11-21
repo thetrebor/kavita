@@ -1091,7 +1091,7 @@ public class StatisticService : IStatisticService
                 ChapterIds = g.Select(x => x.ChapterId).OrderBy(x => EF.Functions.Random()).Take(5).ToList(),
             })
             .OrderByDescending(x => x.TotalChaptersRead)
-            .Take(10)
+            .Take(5)
             .ToListAsync();
 
         var final = new List<MostReadAuthorsDto>();

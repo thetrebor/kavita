@@ -50,12 +50,34 @@ namespace API.Data.Migrations
                         principalTable: "AppUserReadingSession",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AppUserReadingSessionActivityData_Chapter_ChapterId",
+                        column: x => x.ChapterId,
+                        principalTable: "Chapter",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AppUserReadingSessionActivityData_Series_SeriesId",
+                        column: x => x.SeriesId,
+                        principalTable: "Series",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppUserReadingSessionActivityData_AppUserReadingSessionId",
                 table: "AppUserReadingSessionActivityData",
                 column: "AppUserReadingSessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserReadingSessionActivityData_ChapterId",
+                table: "AppUserReadingSessionActivityData",
+                column: "ChapterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserReadingSessionActivityData_SeriesId",
+                table: "AppUserReadingSessionActivityData",
+                column: "SeriesId");
         }
 
         /// <inheritdoc />

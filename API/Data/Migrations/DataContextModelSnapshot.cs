@@ -1614,6 +1614,21 @@ namespace API.Data.Migrations
                     b.ToTable("ExternalSeriesMetadata");
                 });
 
+            modelBuilder.Entity("API.Entities.Metadata.GenreSeriesMetadata", b =>
+                {
+                    b.Property<int>("GenresId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GenresId", "SeriesMetadatasId");
+
+                    b.HasIndex("SeriesMetadatasId");
+
+                    b.ToTable("GenreSeriesMetadata");
+                });
+
             modelBuilder.Entity("API.Entities.Metadata.SeriesBlacklist", b =>
                 {
                     b.Property<int>("Id")
@@ -1746,6 +1761,21 @@ namespace API.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("SeriesMetadata");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.SeriesMetadataTag", b =>
+                {
+                    b.Property<int>("SeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TagsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("SeriesMetadatasId", "TagsId");
+
+                    b.HasIndex("TagsId");
+
+                    b.ToTable("SeriesMetadataTag");
                 });
 
             modelBuilder.Entity("API.Entities.Metadata.SeriesRelation", b =>
@@ -2232,6 +2262,10 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserReadingSessionId");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("SeriesId");
 
                     b.ToTable("AppUserReadingSessionActivityData");
                 });
@@ -3176,21 +3210,6 @@ namespace API.Data.Migrations
                     b.ToTable("ExternalReviewExternalSeriesMetadata");
                 });
 
-            modelBuilder.Entity("GenreSeriesMetadata", b =>
-                {
-                    b.Property<int>("GenresId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SeriesMetadatasId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("GenresId", "SeriesMetadatasId");
-
-                    b.HasIndex("SeriesMetadatasId");
-
-                    b.ToTable("GenreSeriesMetadata");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
@@ -3273,21 +3292,6 @@ namespace API.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("SeriesMetadataTag", b =>
-                {
-                    b.Property<int>("SeriesMetadatasId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TagsId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("SeriesMetadatasId", "TagsId");
-
-                    b.HasIndex("TagsId");
-
-                    b.ToTable("SeriesMetadataTag");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserAnnotation", b =>
@@ -3630,6 +3634,21 @@ namespace API.Data.Migrations
                     b.Navigation("Series");
                 });
 
+            modelBuilder.Entity("API.Entities.Metadata.GenreSeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Metadata.SeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesMetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("API.Entities.Metadata.SeriesBlacklist", b =>
                 {
                     b.HasOne("API.Entities.Series", "Series")
@@ -3650,6 +3669,21 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.SeriesMetadataTag", b =>
+                {
+                    b.HasOne("API.Entities.Metadata.SeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesMetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("API.Entities.Metadata.SeriesRelation", b =>
@@ -3784,7 +3818,23 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("API.Entities.Chapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chapter");
+
                     b.Navigation("ReadingSession");
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("API.Entities.ReadingList", b =>
@@ -4093,21 +4143,6 @@ namespace API.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GenreSeriesMetadata", b =>
-                {
-                    b.HasOne("API.Entities.Genre", null)
-                        .WithMany()
-                        .HasForeignKey("GenresId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Metadata.SeriesMetadata", null)
-                        .WithMany()
-                        .HasForeignKey("SeriesMetadatasId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("API.Entities.AppRole", null)
@@ -4140,21 +4175,6 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SeriesMetadataTag", b =>
-                {
-                    b.HasOne("API.Entities.Metadata.SeriesMetadata", null)
-                        .WithMany()
-                        .HasForeignKey("SeriesMetadatasId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

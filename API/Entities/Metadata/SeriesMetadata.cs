@@ -139,9 +139,9 @@ public class SeriesMetadataTag
     public int TagsId { get; set; }
 }
 
-[PrimaryKey(nameof(SeriesMetadatasId), nameof(GenresId))]
+[PrimaryKey(nameof(GenresId), nameof(SeriesMetadatasId))]
 public class GenreSeriesMetadata
 {
-    public int SeriesMetadatasId { get; set; }
     public int GenresId { get; set; }
+    public int SeriesMetadatasId { get; set; }
 }
