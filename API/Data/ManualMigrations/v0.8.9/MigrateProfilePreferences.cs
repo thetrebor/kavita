@@ -47,7 +47,7 @@ public static class MigrateProfilePreferences
 
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {
-            Name = "MigrateProgressToReadingSessions",
+            Name = "MigrateProfilePreferences",
             ProductVersion = BuildInfo.Version.ToString(),
             RanAt = DateTime.UtcNow
         });
