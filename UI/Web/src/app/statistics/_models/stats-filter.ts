@@ -1,8 +1,8 @@
 
 export type StatsFilter = {
   timeFilter: {
-    startTime: Date | null,
-    endTime: Date | null,
+    startDate: Date | null,
+    endDate: Date | null,
   },
   libraries: number[],
 }

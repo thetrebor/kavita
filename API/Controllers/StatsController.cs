@@ -288,9 +288,9 @@ public class StatsController(
     /// <param name="userId"></param>
     /// <returns></returns>
     [ProfilePrivacy]
-    [HttpPost("genre-breakdown")]
+    [HttpGet("genre-breakdown")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<BreakDownDto<string>>> GetGenreBreakdown(StatsFilterDto filter, int userId)
+    public async Task<ActionResult<BreakDownDto<string>>> GetGenreBreakdown([FromQuery] StatsFilterDto filter, int userId)
     {
         return Ok(await statService.GetGenreBreakdownForUser(filter, userId));
     }
@@ -302,34 +302,34 @@ public class StatsController(
     /// <param name="userId"></param>
     /// <returns></returns>
     [ProfilePrivacy]
-    [HttpPost("tag-breakdown")]
+    [HttpGet("tag-breakdown")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<BreakDownDto<string>>> GetTagBreakdown(StatsFilterDto filter, int userId)
+    public async Task<ActionResult<BreakDownDto<string>>> GetTagBreakdown([FromQuery] StatsFilterDto filter, int userId)
     {
         return Ok(await statService.GetTagBreakdownForUser(filter, userId));
     }
 
 
     [ProfilePrivacy]
-    [HttpPost("page-spread")]
+    [HttpGet("page-spread")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<SpreadStatsDto>> GetPageSpread(StatsFilterDto filter, int userId)
+    public async Task<ActionResult<SpreadStatsDto>> GetPageSpread([FromQuery] StatsFilterDto filter, int userId)
     {
         return Ok(await statService.GetPageSpreadForUser(filter, userId));
     }
 
     [ProfilePrivacy]
-    [HttpPost("word-spread")]
+    [HttpGet("word-spread")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<SpreadStatsDto>> GetWordSpread(StatsFilterDto filter, int userId)
+    public async Task<ActionResult<SpreadStatsDto>> GetWordSpread([FromQuery] StatsFilterDto filter, int userId)
     {
         return Ok(await statService.GetWordSpreadForUser(filter, userId));
     }
 
     [ProfilePrivacy]
-    [HttpPost("favourite-authors")]
+    [HttpGet("favourite-authors")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId)
+    public async Task<ActionResult<MostReadAuthorsDto>> GetMostReadAuthors([FromQuery] StatsFilterDto filter, int userId)
     {
         return Ok(await statService.GetMostReadAuthors(filter, userId));
     }

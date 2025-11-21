@@ -14,8 +14,8 @@ public static class ActivityFilter
         bool onlyCompleted = true
         )
     {
-        var startTime = filter.TimeFilter.StartDate?.ToUniversalTime();
-        var endTime = filter.TimeFilter.EndDate?.ToUniversalTime();
+        var startTime = filter.StartDate?.ToUniversalTime();
+        var endTime = filter.EndDate?.ToUniversalTime();
 
         return queryable
             .Where(d => filter.Libraries.Contains(d.LibraryId) && d.ReadingSession.AppUserId == userId)

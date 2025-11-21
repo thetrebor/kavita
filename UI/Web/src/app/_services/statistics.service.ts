@@ -175,10 +175,23 @@ export class StatisticsService {
       const filter = statsFilter();
       if (!filter) return undefined; // skip request until valid
 
+
+      let params = new HttpParams().set('userId', userId());
+
+      if (filter.timeFilter.startDate) {
+        params = params.set('startDate', filter.timeFilter.startDate.toISOString());
+      }
+      if (filter.timeFilter.endDate) {
+        params = params.set('endDate', filter.timeFilter.endDate.toISOString());
+      }
+
+      for (let library of filter.libraries) {
+        params = params.append('libraries', library)
+      }
+
       return {
-        url: `${this.baseUrl}stats/${path}?userId=${userId()}`,
-        method: 'POST',
-        body: filter,
+        url: `${this.baseUrl}stats/${path}`,
+        params: params,
       };
     }).asReadonly();
   }
