@@ -1,19 +1,9 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  input,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
 import {Location, TitleCasePipe} from '@angular/common';
 import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
 import {MemberInfo} from "../../../_models/user/member-info";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ImageComponent} from "../../../shared/image/image.component";
 import {ImageService} from "../../../_services/image.service";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {
@@ -61,7 +51,6 @@ enum TabID {
     ReadingPaceComponent,
     ActivityGraphComponent,
     TranslocoDirective,
-    ImageComponent,
     TimeAgoPipe,
     NgbNav,
     NgbNavContent,
