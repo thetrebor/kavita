@@ -262,9 +262,11 @@ public class StatsController(
     [ProfilePrivacy]
     [HttpGet("reading-pace")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<ReadingPaceDto>> GetReadingPace(int userId, int year)
+    public async Task<ActionResult<ReadingPaceDto>> GetReadingPace([FromQuery] StatsFilterDto filter, int userId, int year)
     {
-        return Ok(await statService.GetReadingPaceForUser(userId, year));
+        await CleanStatsFilter(filter, UserId);
+
+        return Ok(await statService.GetReadingPaceForUser(filter, userId, year));
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, effect, inject, input, model} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
+import {StatsFilter} from "../../_models/stats-filter";
 
 export interface ReadingPace {
   hoursRead: number;
@@ -26,8 +27,10 @@ export class ReadingPaceComponent {
   userName = input.required<string>();
   userId = input.required<number>();
   year = input.required<number>();
+  filter = input.required<StatsFilter>();
 
   readingPace = this.statsService.getReadingPaceResource(
+    () => this.filter(),
     () => this.userId(),
     () => this.year(),
   );

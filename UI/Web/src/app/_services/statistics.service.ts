@@ -154,7 +154,7 @@ export class StatisticsService {
     return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown?userId=' + userId);
   }
 
-  getReadingActivityResource(statsFilter: () => (StatsFilter | undefined),userId: () => number, year: () => number) {
+  getReadingActivityResource(statsFilter: () => (StatsFilter | undefined), userId: () => number, year: () => number) {
     return httpResource<ActivityGraphData>(() => {
       const filter = statsFilter();
       if (!filter) return undefined;
@@ -166,8 +166,16 @@ export class StatisticsService {
     }).asReadonly();
   }
 
-  getReadingPaceResource(userId: () => number, year: () => number) {
-    return httpResource<ReadingPace>(() => this.baseUrl + `stats/reading-pace?userId=${userId()}&year=${year()}`).asReadonly();
+  getReadingPaceResource(statsFilter: () => (StatsFilter | undefined), userId: () => number, year: () => number) {
+    return httpResource<ReadingPace>(() => {
+      const filter = statsFilter();
+      if (!filter) return undefined;
+
+      return {
+        url: this.baseUrl + `stats/reading-pace?year=${year()}`,
+        params: this.filterHttpParams(filter, userId())
+      }
+    }).asReadonly();
   }
 
   getPreferredFormatResource(userId: () => number) {
