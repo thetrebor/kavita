@@ -46,13 +46,15 @@
                       role="gridcell"
                       tabindex="-1">
                   </td>
-                } @else {
+                } @else if (day !== null) {
                   <td class="empty-cell"
                       [ngbTooltip]="noActivityTooltip"
                       container="body"
                       [tooltipContext]="{'item': day}"
                       [tooltipClass]="'activity-tooltip'"
                   ></td>
+                } @else {
+                  <td class="empty-cell"></td>
                 }
               }
             </tr>
