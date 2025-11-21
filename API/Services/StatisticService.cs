@@ -46,8 +46,8 @@ public interface IStatisticService
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year);
     Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
-    Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId);
-    Task<BreakDownDto<string>> GetTagBreakdownForUser(int userId);
+    Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId);
+    Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId);
     Task<SpreadStatsDto> GetPageSpreadForUser(int userId);
     Task<SpreadStatsDto> GetWordSpreadForUser(int userId);
     Task<IList<StatCount<int>>> PagesPerYear(int userId);
@@ -820,42 +820,63 @@ public class StatisticService : IStatisticService
         return await query.ToListAsync();
     }
 
-    public async Task<BreakDownDto<string>> GetGenreBreakdownForUser(int userId)
+    public async Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId)
     {
-        var readsPerGenre = await _context.Database
-            .SqlQueryRaw<StatCount<string>>("""
-                                            SELECT g.Title as Value, SUM(MaxReads) as Count
-                                            FROM (
-                                                SELECT s.Id as SeriesId, MAX(p.TotalReads) as MaxReads
-                                                FROM AppUserProgresses p
-                                                JOIN Series s ON p.SeriesId = s.Id
-                                                WHERE p.AppUserId = {0}
-                                                GROUP BY s.Id
-                                            ) seriesReads
-                                            JOIN SeriesMetadata sm ON seriesReads.SeriesId = sm.SeriesId
-                                            JOIN GenreSeriesMetadata gsm ON sm.Id = gsm.SeriesMetadatasId
-                                            JOIN Genre g ON gsm.GenresId = g.Id
-                                            GROUP BY g.NormalizedTitle
-                                            ORDER BY Count DESC
-                                            LIMIT 10
-                                            """, userId)
+        var readsPerGenre = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
+            .GroupBy(d => d.SeriesId)
+            .Select(d => new
+            {
+                SeriesId = d.Key,
+                TotalReads = d.Count(),
+            })
+            .Join(_context.SeriesMetadata, x => x.SeriesId, sm => sm.SeriesId, (x, sm) => new
+            {
+                x.SeriesId,
+                x.TotalReads,
+                SeriesMetadataId = sm.Id,
+            })
+            .Join(_context.GenreSeriesMetadata, x => x.SeriesMetadataId, gsm => gsm.SeriesMetadatasId, (x, gsm) => new
+            {
+                x.SeriesId,
+                x.TotalReads,
+                gsm.GenresId,
+            })
+            .Join(_context.Genre, x => x.GenresId, g => g.Id, (x, g) => new
+            {
+                x.SeriesId,
+                x.TotalReads,
+                Genre = g,
+            })
+            .GroupBy(x => new
+            {
+                x.Genre.Id,
+                x.Genre.Title,
+            })
+            .Select(g => new StatCount<string>
+            {
+                Value = g.Key.Title,
+                Count = g.Select(x => x.SeriesId).Distinct().Count(),
+            })
+            .OrderByDescending(x => x.Count)
+            .Take(10)
             .ToListAsync();
 
-        var totalMissingData = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
+        var totalMissingData = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
             .Select(p => p.SeriesId)
             .Distinct()
             .Join(_context.SeriesMetadata, p => p, sm => sm.SeriesId, (g, m) => m.Genres)
             .CountAsync(g => !g.Any());
 
-        var totalReads = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
+        var totalReads = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
             .GroupBy(p => p.SeriesId)
-            .Select(g => g.Max(x => x.TotalReads))
+            .Select(g => g.Count())
             .SumAsync();
 
-        var totalReadGenres = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
+        var totalReadGenres = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Genres)
             .SelectMany(g => g.Select(gg => gg.NormalizedTitle))
             .Distinct()
@@ -871,42 +892,64 @@ public class StatisticService : IStatisticService
 
     }
 
-    public async Task<BreakDownDto<string>> GetTagBreakdownForUser(int userId)
+    public async Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId)
     {
-        var readsPerTag = await _context.Database
-            .SqlQueryRaw<StatCount<string>>("""
-                                            SELECT t.Title as Value, SUM(MaxReads) as Count
-                                            FROM (
-                                                SELECT s.Id as SeriesId, MAX(p.TotalReads) as MaxReads
-                                                FROM AppUserProgresses p
-                                                JOIN Series s ON p.SeriesId = s.Id
-                                                WHERE p.AppUserId = {0}
-                                                GROUP BY s.Id
-                                            ) seriesReads
-                                            JOIN SeriesMetadata sm ON seriesReads.SeriesId = sm.SeriesId
-                                            JOIN SeriesMetadataTag smt ON sm.Id = smt.SeriesMetadatasId
-                                            JOIN Tag t ON smt.TagsId = t.Id
-                                            GROUP BY t.NormalizedTitle
-                                            ORDER BY Count DESC
-                                            LIMIT 10
-                                            """, userId)
+
+        var readsPerTag = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
+            .GroupBy(d => d.SeriesId)
+            .Select(d => new
+            {
+                SeriesId = d.Key,
+                TotalReads = d.Count(),
+            })
+            .Join(_context.SeriesMetadata, x => x.SeriesId, sm => sm.SeriesId, (x, sm) => new
+            {
+                x.SeriesId,
+                x.TotalReads,
+                SeriesMetadataId = sm.Id,
+            })
+            .Join(_context.SeriesMetadataTag, x => x.SeriesMetadataId, smt => smt.SeriesMetadatasId, (x, smt) => new
+            {
+                x.SeriesId,
+                x.TotalReads,
+                smt.TagsId,
+            })
+            .Join(_context.Tag, x => x.TagsId, t => t.Id, (x, t) => new
+            {
+                x.SeriesId,
+                x.TotalReads,
+                Tag = t,
+            })
+            .GroupBy(x => new
+            {
+                x.Tag.Id,
+                x.Tag.Title,
+            })
+            .Select(g => new StatCount<string>
+            {
+                Value = g.Key.Title,
+                Count = g.Select(x => x.SeriesId).Distinct().Count(),
+            })
+            .OrderByDescending(x => x.Count)
+            .Take(10)
             .ToListAsync();
 
-        var totalMissingData = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
+        var totalMissingData = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
             .Select(p => p.SeriesId)
             .Distinct()
             .Join(_context.SeriesMetadata, p => p, sm => sm.SeriesId, (g, m) => m.Tags)
             .CountAsync(g => !g.Any());
 
-        var totalReads = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
+        var totalReads = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
             .GroupBy(p => p.SeriesId)
-            .Select(g => g.Max(x => x.TotalReads))
+            .Select(g => g.Count())
             .SumAsync();
 
-        var totalReadTags = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
+        var totalReadTags = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Tags)
             .SelectMany(g => g.Select(gg => gg.NormalizedTitle))
             .Distinct()

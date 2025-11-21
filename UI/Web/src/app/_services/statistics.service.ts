@@ -166,12 +166,20 @@ export class StatisticsService {
     return httpResource<StatCount<MangaFormat>[]>(() => this.baseUrl + `stats/preferred-format?userId=${userId()}`).asReadonly();
   }
 
-  getGenreBreakDownResource(userId: () => number) {
-    return httpResource<Breakdown<string>>(() => this.baseUrl + `stats/genre-breakdown?userId=${userId()}`).asReadonly();
+  getGenreBreakDownResource(statsFilter: () => StatsFilter, userId: () => number) {
+    return httpResource<Breakdown<string>>(() => ({
+      url: this.baseUrl + `stats/genre-breakdown?userId=${userId()}`,
+      method: 'POST',
+      body: statsFilter()
+    })).asReadonly();
   }
 
-  getTagBreakDownResource(userId: () => number) {
-    return httpResource<Breakdown<string>>(() => this.baseUrl + `stats/tag-breakdown?userId=${userId()}`).asReadonly();
+  getTagBreakDownResource(statsFilter: () => StatsFilter, userId: () => number) {
+    return httpResource<Breakdown<string>>(() => ({
+      url: this.baseUrl + `stats/tag-breakdown?userId=${userId()}`,
+      method: 'POST',
+      body: statsFilter()
+    })).asReadonly();
   }
 
   getPageSpread(userId: () => number) {

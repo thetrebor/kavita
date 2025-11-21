@@ -44,6 +44,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ServerSetting> ServerSetting { get; set; } = null!;
     public DbSet<AppUserPreferences> AppUserPreferences { get; set; } = null!;
     public DbSet<SeriesMetadata> SeriesMetadata { get; set; } = null!;
+    public DbSet<SeriesMetadataTag> SeriesMetadataTag { get; set; } = null;
+    public DbSet<GenreSeriesMetadata> GenreSeriesMetadata { get; set; } = null;
     [Obsolete("Use AppUserCollection")]
     public DbSet<CollectionTag> CollectionTag { get; set; } = null!;
     public DbSet<AppUserBookmark> AppUserBookmark { get; set; } = null!;
@@ -371,6 +373,16 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion(new ClientInfoData())
             .HasColumnType("TEXT")
             .HasDefaultValue(new ClientInfoData());
+
+        builder.Entity<SeriesMetadata>()
+            .HasMany(sm => sm.Tags)
+            .WithMany(t => t.SeriesMetadatas)
+            .UsingEntity<SeriesMetadataTag>();
+
+        builder.Entity<SeriesMetadata>()
+            .HasMany(sm => sm.Genres)
+            .WithMany(t => t.SeriesMetadatas)
+            .UsingEntity<GenreSeriesMetadata>();
     }
 
     #nullable enable

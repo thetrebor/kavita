@@ -131,3 +131,17 @@ public class SeriesMetadata : IHasConcurrencyToken, IHasKPlusMetadata
         return false;
     }
 }
+
+[PrimaryKey(nameof(SeriesMetadatasId), nameof(TagsId))]
+public class SeriesMetadataTag
+{
+    public int SeriesMetadatasId { get; set; }
+    public int TagsId { get; set; }
+}
+
+[PrimaryKey(nameof(SeriesMetadatasId), nameof(GenresId))]
+public class GenreSeriesMetadata
+{
+    public int SeriesMetadatasId { get; set; }
+    public int GenresId { get; set; }
+}

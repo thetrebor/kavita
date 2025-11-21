@@ -287,11 +287,11 @@ public class StatsController(
     /// <param name="userId"></param>
     /// <returns></returns>
     [ProfilePrivacy]
-    [HttpGet("genre-breakdown")]
+    [HttpPost("genre-breakdown")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<BreakDownDto<string>>> GetGenreBreakdown(int userId)
+    public async Task<ActionResult<BreakDownDto<string>>> GetGenreBreakdown(StatsFilterDto filter, int userId)
     {
-        return Ok(await statService.GetGenreBreakdownForUser(userId));
+        return Ok(await statService.GetGenreBreakdownForUser(filter, userId));
     }
 
     /// <summary>
@@ -300,11 +300,11 @@ public class StatsController(
     /// <param name="userId"></param>
     /// <returns></returns>
     [ProfilePrivacy]
-    [HttpGet("tag-breakdown")]
+    [HttpPost("tag-breakdown")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<BreakDownDto<string>>> GetTagBreakdown(int userId)
+    public async Task<ActionResult<BreakDownDto<string>>> GetTagBreakdown(StatsFilterDto filter, int userId)
     {
-        return Ok(await statService.GetTagBreakdownForUser(userId));
+        return Ok(await statService.GetTagBreakdownForUser(filter, userId));
     }
 
 

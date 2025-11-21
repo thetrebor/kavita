@@ -15,6 +15,7 @@ public class AppUserReadingSessionActivityData
     public virtual Chapter Chapter { get; set; }
     public int VolumeId { get; set; }
     public int SeriesId { get; set; }
+    public virtual Series Series { get; set; }
     public int LibraryId { get; set; }
     public int StartPage { get; set; }
     public int EndPage { get; set; }
