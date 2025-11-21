@@ -284,6 +284,7 @@ public class StatsController(
     /// <summary>
     /// Returns top 10 genres that user likes reading
     /// </summary>
+    /// <param name="filter"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
     [ProfilePrivacy]
@@ -297,6 +298,7 @@ public class StatsController(
     /// <summary>
     /// Returns top 10 tags that user likes reading
     /// </summary>
+    /// <param name="filter"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
     [ProfilePrivacy]
@@ -309,19 +311,19 @@ public class StatsController(
 
 
     [ProfilePrivacy]
-    [HttpGet("page-spread")]
+    [HttpPost("page-spread")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<SpreadStatsDto>> GetPageSpread(int userId)
+    public async Task<ActionResult<SpreadStatsDto>> GetPageSpread(StatsFilterDto filter, int userId)
     {
-        return Ok(await statService.GetPageSpreadForUser(userId));
+        return Ok(await statService.GetPageSpreadForUser(filter, userId));
     }
 
     [ProfilePrivacy]
-    [HttpGet("word-spread")]
+    [HttpPost("word-spread")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<SpreadStatsDto>> GetWordSpread(int userId)
+    public async Task<ActionResult<SpreadStatsDto>> GetWordSpread(StatsFilterDto filter, int userId)
     {
-        return Ok(await statService.GetWordSpreadForUser(userId));
+        return Ok(await statService.GetWordSpreadForUser(filter, userId));
     }
 
     [ProfilePrivacy]

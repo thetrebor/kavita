@@ -48,8 +48,8 @@ public interface IStatisticService
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId);
-    Task<SpreadStatsDto> GetPageSpreadForUser(int userId);
-    Task<SpreadStatsDto> GetWordSpreadForUser(int userId);
+    Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId);
+    Task<SpreadStatsDto> GetWordSpreadForUser(StatsFilterDto filter, int userId);
     Task<IList<StatCount<int>>> PagesPerYear(int userId);
     Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId);
 }
@@ -964,17 +964,16 @@ public class StatisticService : IStatisticService
         };
     }
 
-    public async Task<SpreadStatsDto> GetPageSpreadForUser(int userId)
+    public async Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId)
     {
-        var fullyReadChapters = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
+        var fullyReadChapters = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
             .Join(
                 _context.Chapter,
                 progress => progress.ChapterId,
                 chapter => chapter.Id,
                 (progress, chapter) => new { progress, chapter }
             )
-            .Where(x => x.progress.PagesRead >= x.chapter.Pages)
             .Select(x => x.chapter.Pages)
             .ToListAsync();
 
@@ -1003,17 +1002,16 @@ public class StatisticService : IStatisticService
         };
     }
 
-    public async Task<SpreadStatsDto> GetWordSpreadForUser(int userId)
+    public async Task<SpreadStatsDto> GetWordSpreadForUser(StatsFilterDto filter, int userId)
     {
-        var wordsInFullyReadChapters = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
+        var wordsInFullyReadChapters = await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId)
             .Join(
                 _context.Chapter,
                 progress => progress.ChapterId,
                 chapter => chapter.Id,
                 (progress, chapter) => new { progress, chapter }
             )
-            .Where(x => x.progress.PagesRead >= x.chapter.Pages)
             .Where(x => x.chapter.WordCount > 0)
             .Select(x => x.chapter.WordCount)
             .ToListAsync();
@@ -1090,6 +1088,7 @@ public class StatisticService : IStatisticService
                 g.Key.PersonId,
                 AuthorName = g.Key.Name,
                 TotalChaptersRead = g.Select(x => x.ChapterId).Distinct().Count(),
+                ChapterIds = g.Select(x => x.ChapterId).OrderBy(x => EF.Functions.Random()).Take(5).ToList(),
             })
             .OrderByDescending(x => x.TotalChaptersRead)
             .Take(10)
@@ -1100,10 +1099,7 @@ public class StatisticService : IStatisticService
         foreach (var m in res)
         {
             var randomChapters = await _context.Chapter
-                .Where(c => c.People.Any(p => p.PersonId == m.PersonId))
-                .OrderByDescending(c => !string.IsNullOrEmpty(c.TitleName))
-                .ThenBy(c => EF.Functions.Random())
-                .Take(5)
+                .Where(c => m.ChapterIds.Contains(c.Id))
                 .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 

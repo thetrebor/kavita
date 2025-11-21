@@ -166,35 +166,41 @@ export class StatisticsService {
     return httpResource<StatCount<MangaFormat>[]>(() => this.baseUrl + `stats/preferred-format?userId=${userId()}`).asReadonly();
   }
 
-  getGenreBreakDownResource(statsFilter: () => StatsFilter, userId: () => number) {
-    return httpResource<Breakdown<string>>(() => ({
-      url: this.baseUrl + `stats/genre-breakdown?userId=${userId()}`,
-      method: 'POST',
-      body: statsFilter()
-    })).asReadonly();
+  private filterResource<T>(
+    statsFilter: () => (StatsFilter | undefined),
+    userId: () => number,
+    path: string
+  ) {
+    return httpResource<T>(() => {
+      const filter = statsFilter();
+      if (!filter) return undefined; // skip request until valid
+
+      return {
+        url: `${this.baseUrl}stats/${path}?userId=${userId()}`,
+        method: 'POST',
+        body: filter,
+      };
+    }).asReadonly();
   }
 
-  getTagBreakDownResource(statsFilter: () => StatsFilter, userId: () => number) {
-    return httpResource<Breakdown<string>>(() => ({
-      url: this.baseUrl + `stats/tag-breakdown?userId=${userId()}`,
-      method: 'POST',
-      body: statsFilter()
-    })).asReadonly();
+  getGenreBreakDownResource(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<Breakdown<string>>(statsFilter, userId, 'genre-breakdown');
   }
 
-  getPageSpread(userId: () => number) {
-    return httpResource<SpreadStats>(() => this.baseUrl + `stats/page-spread?userId=${userId()}`).asReadonly();
+  getTagBreakDownResource(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<Breakdown<string>>(statsFilter, userId, 'tag-breakdown');
   }
 
-  getWordSpread(userId: () => number) {
-    return httpResource<SpreadStats>(() => this.baseUrl + `stats/word-spread?userId=${userId()}`).asReadonly();
+  getPageSpread(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<SpreadStats>(statsFilter, userId, 'page-spread');
   }
 
-  getFavouriteAuthors(statsFilter: () => StatsFilter, userId: () => number) {
-    return httpResource<FavouriteAuthor[]>(() => ({
-      url: this.baseUrl + `stats/favourite-authors?userId=${userId()}`,
-      method: 'POST',
-      body: statsFilter()
-    })).asReadonly();
+  getWordSpread(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<SpreadStats>(statsFilter, userId, 'word-spread');
   }
+
+  getFavouriteAuthors(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<FavouriteAuthor[]>(statsFilter, userId, 'favourite-authors');
+  }
+
 }

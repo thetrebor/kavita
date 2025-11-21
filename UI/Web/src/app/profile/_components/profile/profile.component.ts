@@ -104,10 +104,10 @@ export class ProfileComponent implements OnInit {
   userId = computed(() => this.memberInfo().id);
 
   protected readonly reviewsResource = this.reviewService.getReviewsByUserResource(() => this.memberInfo().id);
-  protected readonly genreBreakdown = this.statsService.getGenreBreakDownResource(() => this.filter()!, () => this.userId());
-  protected readonly tagsBreakdown = this.statsService.getTagBreakDownResource(() => this.filter()!, () => this.userId());
-  protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.userId());
-  protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.userId());
+  protected readonly genreBreakdown = this.statsService.getGenreBreakDownResource(() => this.filter(), () => this.userId());
+  protected readonly tagsBreakdown = this.statsService.getTagBreakDownResource(() => this.filter(), () => this.userId());
+  protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.filter(), () => this.userId());
+  protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.filter(), () => this.userId());
 
   activeTabId = TabID.Overview;
 
