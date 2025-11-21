@@ -49,6 +49,12 @@
     <Deterministic Condition="$(AssemblyVersion.EndsWith('*'))">False</Deterministic>
   </PropertyGroup>
 
+  <!-- Override vulnerable transitive dependencies -->
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+  </ItemGroup>
+
   <ItemGroup>
       <PackageReference Include="CsvHelper" Version="33.1.0" />
       <PackageReference Include="MailKit" Version="4.14.1" />

@@ -152,7 +152,7 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
 
             if (result is {Id: not null, Username: not null})
             {
-                logger.LogDebug("Resolved user {UserId} from API key for path {Path}", result.Id, context.Request.Path);
+                logger.LogTrace("Resolved user {UserId} from API key for path {Path}", result.Id, context.Request.Path);
 
                 return (result.Id, result.Username, AuthenticationType.ApiKey);
             }
