@@ -35,39 +35,7 @@
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Stats; prefetch on idle) {
 
-              <form [formGroup]="filterForm" class="d-flex align-content-center align-items-center">
-                <h4 class="mx-2">{{t('stats-title', {username: username, libraryName: ''})}}</h4>
-                @if (filterForm.get('libraries'); as control) {
-
-                  @if (!showLibraryTypeahead()) {
-                    <h4 class="me-2" (click)="showLibraryTypeahead.set(true)">
-                      @if (allLibraries().length === control.value?.length) {
-                        Kavita
-                      } @else {
-                        @for (lib of (control.value ?? []); track lib) {
-                          {{libraryName(lib)}}
-                          @if (!$last) {,}
-                        }
-                      }
-                    </h4>
-                  }
-
-                  @if (showLibraryTypeahead() && libraryTypeaheadSettings) {
-                    <app-typeahead [settings]="libraryTypeaheadSettings" (selectedData)="updateSelectedLibraries($event)" id="library-typeahead">
-                      <ng-template #optionItem let-lib>
-                        {{lib.name}}
-                      </ng-template>
-                      <ng-template #badgeItem let-lib>
-                        {{lib.name}}
-                      </ng-template>
-                    </app-typeahead>
-                  }
-                }
-
-                <app-smart-time-range-picker (timeRangeUpdate)="updateTimeRange($event)" />
-
-              </form>
-
+              <app-library-and-time-selector [filterForm]="filterForm" [userId]="userId()" [label]="t('stats-title', {username: username, libraryName: ''})" />
               @let filterValue = filter();
 
               @if (filterValue) {
@@ -136,7 +104,7 @@
       </ul>
     </div>
 
-    <div [ngbNavOutlet]="nav"></div>
+    <div [ngbNavOutlet]="nav" class="mb-2"></div>
   }
 
 

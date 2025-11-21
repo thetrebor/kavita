@@ -22,18 +22,21 @@ import {FileBreakdownStatsComponent} from '../file-breakdown-stats/file-breakdow
 import {TopReadersComponent} from '../top-readers/top-readers.component';
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import {AsyncPipe, DecimalPipe} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {AccountService} from "../../../_services/account.service";
+import {ReactiveFormsModule} from "@angular/forms";
+import {SmartTimeRangePickerComponent} from "../../../shared/smart-time-range-picker/smart-time-range-picker.component";
+import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 
 @Component({
     selector: 'app-server-stats',
     templateUrl: './server-stats.component.html',
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
+  imports: [IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective, ReactiveFormsModule, SmartTimeRangePickerComponent, TypeaheadComponent]
 })
 export class ServerStatsComponent {
   private statService = inject(StatisticsService);
