@@ -3207,6 +3207,8 @@
         "annotation-highlights": "Highlight color",
         "annotation-comment": "Annotation Text",
         "annotation-selection": "Highlight Text",
+        "annotation-likes": "Likes",
+        "annotation-liked-by": "Liked by",
         "series": "{{tabs.series-tab}}"
     },
 
