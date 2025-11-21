@@ -42,7 +42,7 @@ public interface ILibraryRepository
     Task<IList<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None, bool track = true);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
-    IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
+    Task<IList<int>> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<LibraryType> GetLibraryTypeBySeriesIdAsync(int seriesId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
@@ -131,13 +131,13 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None)
+    public async Task<IList<int>> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None)
     {
-        return _context.Library
+        return await _context.Library
             .IsRestricted(queryContext)
             .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
             .Select(l => l.Id)
-            .AsEnumerable();
+            .ToListAsync();
     }
 
     public async Task<LibraryType> GetLibraryTypeAsync(int libraryId)

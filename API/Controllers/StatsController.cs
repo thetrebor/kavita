@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
@@ -292,6 +293,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<BreakDownDto<string>>> GetGenreBreakdown([FromQuery] StatsFilterDto filter, int userId)
     {
+        await CleanStatsFilter(filter, UserId);
+
         return Ok(await statService.GetGenreBreakdownForUser(filter, userId));
     }
 
@@ -306,6 +309,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<BreakDownDto<string>>> GetTagBreakdown([FromQuery] StatsFilterDto filter, int userId)
     {
+        await CleanStatsFilter(filter, UserId);
+
         return Ok(await statService.GetTagBreakdownForUser(filter, userId));
     }
 
@@ -315,6 +320,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<SpreadStatsDto>> GetPageSpread([FromQuery] StatsFilterDto filter, int userId)
     {
+        await CleanStatsFilter(filter, UserId);
+
         return Ok(await statService.GetPageSpreadForUser(filter, userId));
     }
 
@@ -323,6 +330,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<SpreadStatsDto>> GetWordSpread([FromQuery] StatsFilterDto filter, int userId)
     {
+        await CleanStatsFilter(filter, UserId);
+
         return Ok(await statService.GetWordSpreadForUser(filter, userId));
     }
 
@@ -331,7 +340,22 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<MostReadAuthorsDto>> GetMostReadAuthors([FromQuery] StatsFilterDto filter, int userId)
     {
+        await CleanStatsFilter(filter, UserId);
+
         return Ok(await statService.GetMostReadAuthors(filter, userId));
+    }
+
+    /// <summary>
+    /// Cleans the stats filter to only include valid data. I.e. only requests libraries the user has access to
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    private async Task CleanStatsFilter(StatsFilterDto filter, int userId)
+    {
+        var libraries = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
+
+        filter.Libraries = filter.Libraries.Intersect(libraries).ToList();
     }
 
     #endregion

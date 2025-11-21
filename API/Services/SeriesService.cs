@@ -513,7 +513,7 @@ public class SeriesService : ISeriesService
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
-        var libraryIds = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
+        var libraryIds = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         if (!libraryIds.Contains(series.LibraryId))
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
 

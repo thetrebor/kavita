@@ -13,5 +13,5 @@ public sealed record StatsFilterDto
         init => field = value == null || value == DateTime.MinValue ? DateTime.MaxValue : value;
     }
 
-    public IList<int> Libraries { get; init; }
+    public IList<int> Libraries { get; set; }
 }
