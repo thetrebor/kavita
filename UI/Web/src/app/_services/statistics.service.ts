@@ -154,12 +154,12 @@ export class StatisticsService {
     return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown?userId=' + userId);
   }
 
-  getReadingActivity(userId: number, year: number) {
-    return this.httpClient.get<ActivityGraphData>(this.baseUrl + `stats/reading-activity?userId=${userId}&year=${year}`);
+  getReadingActivityResource(userId: () => number, year: () => number) {
+    return httpResource<ActivityGraphData>(() => this.baseUrl + `stats/reading-activity?userId=${userId()}&year=${year()}`).asReadonly();
   }
 
-  getReadingPace(userId: number, year: number) {
-    return this.httpClient.get<ReadingPace>(this.baseUrl + `stats/reading-pace?userId=${userId}&year=${year}`);
+  getReadingPaceResource(userId: () => number, year: () => number) {
+    return httpResource<ReadingPace>(() => this.baseUrl + `stats/reading-pace?userId=${userId()}&year=${year()}`).asReadonly();
   }
 
   getPreferredFormatResource(userId: () => number) {

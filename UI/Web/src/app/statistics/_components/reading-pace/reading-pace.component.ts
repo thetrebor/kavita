@@ -25,8 +25,20 @@ export class ReadingPaceComponent {
 
   userName = input.required<string>();
   userId = input.required<number>();
+  year = input.required<number>();
 
-  stats = model<ReadingPace>();
+  readingPace = this.statsService.getReadingPaceResource(
+    () => this.userId(),
+    () => this.year(),
+  );
+
+  stats = computed(() => {
+    if (this.readingPace.hasValue()) {
+      return this.readingPace.value();
+    }
+
+    return null;
+  });
 
   // Calculate pace in days - books per day inverted
   paceInDays = computed(() => {
@@ -65,14 +77,6 @@ export class ReadingPaceComponent {
   booksPerYear = computed(() => this.projectAnnually(this.stats()?.booksRead, this.stats()?.daysInRange));
   booksPerMonth = computed(() => this.projectMonthly(this.stats()?.booksRead, this.stats()?.daysInRange));
   booksPerDay = computed(() => this.projectDaily(this.stats()?.booksRead, this.stats()?.daysInRange));
-
-  constructor() {
-    effect(() => {
-      this.statsService.getReadingPace(this.userId(), new Date().getFullYear()).subscribe(res => {
-        this.stats.set(res);
-      });
-    });
-  }
 
   private projectAnnually(value: number | undefined, daysInRange: number | undefined) {
     if (value === undefined || daysInRange === undefined || daysInRange === 0) return '0';

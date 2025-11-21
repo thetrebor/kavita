@@ -105,6 +105,7 @@ export class ProfileComponent implements OnInit {
   allLibraries = signal<Library[]>([]);
   showLibraryTypeahead = signal(false);
   libraryTypeaheadSettings?: TypeaheadSettings<Library>;
+
   filterForm = new FormGroup({
     timeFilter: new FormGroup({
       startDate: new FormControl<Date | null>(null),
@@ -112,9 +113,11 @@ export class ProfileComponent implements OnInit {
     }),
     libraries: new FormControl<number[]>([]),
   });
+
   filter = toSignal(this.filterForm.valueChanges.pipe(
     map(value => value as StatsFilter),
   ));
+  year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
 
   constructor() {
     this.route.fragment.pipe(tap(frag => {

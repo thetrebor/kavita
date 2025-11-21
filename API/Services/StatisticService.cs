@@ -654,6 +654,7 @@ public class StatisticService : IStatisticService
             .Where(s => s.AppUserId == userId)
             .Where(s => s.StartTimeUtc >= startDate && s.EndTimeUtc <= endDate)
             .OrderBy(s => s.StartTimeUtc)
+            .Include(s => s.ActivityData)
             .ToListAsync();
 
         var result = new ReadingActivityGraphDto();

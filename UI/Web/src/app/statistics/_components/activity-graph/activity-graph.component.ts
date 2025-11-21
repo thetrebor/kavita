@@ -3,14 +3,11 @@ import {
   Component,
   computed,
   CUSTOM_ELEMENTS_SCHEMA,
-  effect,
   inject,
-  input,
-  model
+  input
 } from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
-import {AccountService} from "../../../_services/account.service";
 import {DatePipe, DecimalPipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
@@ -18,6 +15,7 @@ import {DayLabelPipe} from "../../../_pipes/day-label.pipe";
 import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {OrdinalDatePipe} from "../../../_pipes/ordinal-date.pipe";
 import {DurationPipe} from "../../../_pipes/duration.pipe";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 
 export interface ActivityGraphData {
@@ -53,7 +51,8 @@ interface WeekRow {
     UtcToLocaleDatePipe,
     OrdinalDatePipe,
     DatePipe,
-    DurationPipe
+    DurationPipe,
+    LoadingComponent
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -62,30 +61,25 @@ interface WeekRow {
 export class ActivityGraphComponent {
 
   private readonly statsService = inject(StatisticsService);
-  private readonly accountService = inject(AccountService);
 
-  year = input<number>(new Date().getFullYear());
+  userId = input.required<number>();
+  year = input.required<number>();
+  readingActivity = this.statsService.getReadingActivityResource(
+    () => this.userId(),
+    () => this.year(),
+  );
 
-  data = model<ActivityGraphData>({});
+  data = computed(() => {
+    if (this.readingActivity.hasValue()) {
+      return this.readingActivity.value();
+    }
+
+    return {};
+  });
 
   // Computed values for the grid
   weeks = computed(() => this.generateWeeks());
   months = computed(() => this.generateMonthLabels());
-
-  constructor() {
-    effect(() => {
-      const userId = this.accountService.currentUserSignal()?.id;
-      if (userId) {
-        this.loadActivityData(userId, this.year());
-      }
-    });
-  }
-
-  private loadActivityData(userId: number, year: number): void {
-    this.statsService.getReadingActivity(userId, year).subscribe(res => {
-      this.data.set(res);
-    });
-  }
 
   private generateWeeks(): WeekRow[] {
     const year = this.year();

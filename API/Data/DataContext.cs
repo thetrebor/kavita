@@ -343,13 +343,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasForeignKey(a => a.AppUserReadingSessionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Entity<AppUserReadingSessionActivityData>(b =>
-        {
-            b.ComplexProperty(d => d.ClientInfo, b =>
-            {
-                b.ToJson();
-            });
-        });
+        builder.Entity<AppUserReadingSessionActivityData>(e
+            => e.ComplexProperty(d=> d.ClientInfo, b => b.ToJson()));
 
         builder.Entity<AppUserReadingHistory>()
             .Property(sm => sm.Data)

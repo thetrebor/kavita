@@ -1,7 +1,10 @@
 <ng-container *transloco="let t; prefix: 'activity-graph'">
 
   <div class="activity-graph-container">
-    <h3 class="graph-title">{{ t('title') }} {{ year() }}</h3>
+    <h3 class="graph-title d-flex">
+      <span class="me-2">{{ t('title') }} {{ year() }}</span>
+      <app-loading [loading]="readingActivity.isLoading()" />
+    </h3>
 
     <div class="graph-wrapper" role="region">
       <table class="activity-graph-table" role="grid" aria-readonly="true">

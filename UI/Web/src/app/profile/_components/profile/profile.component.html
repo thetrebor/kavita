@@ -73,12 +73,12 @@
               @if (filterValue) {
                 <div class="row mt-4">
                   <div class="col-md-12">
-                    <app-activity-graph />
+                    <app-activity-graph [userId]="userId()" [year]="year()" />
                   </div>
                 </div>
                 <div class="row mt-4">
                   <div class="col-md-6">
-                    <app-reading-pace [userId]="user.id" [userName]="username"/>
+                    <app-reading-pace [userId]="user.id" [year]="year()" [userName]="username"/>
                   </div>
                   <div class="col-md-6">
                     <app-preferred-format />
