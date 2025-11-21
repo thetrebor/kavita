@@ -472,6 +472,7 @@ public class Startup
                     await MigrateProgressToReadingSessions.Migrate(dataContext, logger);
                     await MigrateMissingCreatedUtcDate.Migrate(dataContext, logger);
                     await MigrateProfilePreferences.Migrate(dataContext, logger);
+                    await MigrateTotalReads.Migrate(dataContext, logger);
 
                     #endregion
 

@@ -11,6 +11,7 @@ export interface UserReview {
   chapterId?: number;
   score: number;
   username: string;
+  userId: number;
   body: string;
   tagline?: string;
   isExternal: boolean;

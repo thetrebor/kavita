@@ -1,0 +1,52 @@
+<div class="card p-4" *transloco="let t; prefix: 'favourite-authors'">
+
+  <app-loading [loading]="favouriteAuthors.isLoading()" />
+
+  @if (favouriteAuthors.hasValue()) {
+
+    @for (fAuthor of favouriteAuthors.value(); track fAuthor.authorName + $index) {
+
+      <div class="row mb-4 align-items-start">
+
+        <div class="col-12 col-md-4 d-flex flex-row align-items-center text-center">
+
+          <app-image
+            objectFit="cover"
+            [styles]="{ 'object-position': 'top' }"
+            height="150px"
+            width="150px"
+            [imageUrl]="imageService.getPersonImage(fAuthor.authorId)"
+            [errorImage]="imageService.noPersonImage"
+            [classes]="'rounded shadow-sm mb-2'"
+          ></app-image>
+
+          <div class="ms-4">
+            <h5 class="fw-semibold mb-2">{{ fAuthor.authorName }}</h5>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <app-tag-badge>{{ fAuthor.totalChaptersRead }} Chapters</app-tag-badge>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-12 col-md-8 d-flex flex-wrap gap-2">
+
+          @for (chapter of chapters(fAuthor.chapters).slice(0, 5); track chapter.ChapterId) {
+            <app-image
+              objectFit="cover"
+              [styles]="{ 'object-position': 'top' }"
+              height="150px"
+              width="150px"
+              [imageUrl]="imageService.getChapterCoverImage(chapter.ChapterId)"
+              [errorImage]="imageService.errorImage"
+              [classes]="'rounded shadow-sm'"
+              [ngbTooltip]="chapter.Title"
+            ></app-image>
+          }
+
+        </div>
+      </div>
+    }
+  }
+</div>

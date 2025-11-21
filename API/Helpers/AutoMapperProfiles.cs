@@ -96,6 +96,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Body,
                 opt =>
                     opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.UserId,
+                opt =>
+                    opt.MapFrom(src => src.AppUser.Id))
             .ForMember(dest => dest.Username,
                 opt =>
                     opt.MapFrom(src => src.AppUser.UserName));

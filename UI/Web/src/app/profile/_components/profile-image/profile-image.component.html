@@ -13,8 +13,8 @@
                      [imageUrl]="image"
                      [errorImage]="imageService.noPersonImage" />
         } @else {
-          <div class="person-badge-placeholder d-flex align-items-center justify-content-center">
-            <i class="fas fa-user" aria-hidden="true"></i>
+          <div class="d-flex align-items-center justify-content-center">
+            <i class="fa-solid fa-user-circle align-self-center"  aria-hidden="true"></i>
           </div>
         }
       </div>
@@ -41,5 +41,7 @@
            (change)="handleFileInput($event)"
            class="d-none"
            aria-hidden="true">
+
+
   </div>
 </ng-container>

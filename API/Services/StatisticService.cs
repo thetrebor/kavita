@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Person;
 using API.DTOs.Statistics;
 using API.DTOs.Stats;
 using API.DTOs.Stats.V3.ClientDevice;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Progress;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
@@ -46,6 +50,7 @@ public interface IStatisticService
     Task<SpreadStatsDto> GetPageSpreadForUser(int userId);
     Task<SpreadStatsDto> GetWordSpreadForUser(int userId);
     Task<IList<StatCount<int>>> PagesPerYear(int userId);
+    Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId);
 }
 
 /// <summary>
@@ -729,7 +734,7 @@ public class StatisticService : IStatisticService
             .Select(s => new { s.StartTimeUtc, s.EndTimeUtc, s.ActivityData })
             .ToListAsync();
 
-        var allSeriesIds = readingSessions.SelectMany(r => r.ActivityData.Select(d => d.ChapterId)).Distinct();
+        var allSeriesIds = readingSessions.SelectMany(r => r.ActivityData.Select(d => d.SeriesId)).Distinct();
 
         var seriesFormats = await _context.Series
             .Where(s => allSeriesIds.Contains(s.Id))
@@ -972,6 +977,16 @@ public class StatisticService : IStatisticService
         var totalCount = wordsInFullyReadChapters.Count;
         var highest = wordsInFullyReadChapters.MaxOrDefault(x => x, 0);
 
+        if (highest == 0)
+        {
+            return new SpreadStatsDto()
+            {
+                Buckets = [],
+                TotalCount = 0
+            };
+        }
+
+
         var magnitude = (int) Math.Floor(Math.Log10(highest));
         var bucketSize = (int) Math.Pow(10, magnitude - 1);
 
@@ -1006,12 +1021,65 @@ public class StatisticService : IStatisticService
     public async Task<IList<StatCount<int>>> PagesPerYear(int userId)
     {
         return await _context.AppUserReadingSession
+            .Where(p => p.AppUserId == userId)
             .GroupBy(s => s.CreatedUtc.Year)
             .Select(g => new StatCount<int>()
             {
                 Value = g.Key,
                 Count = g.Sum(s => s.ActivityData.Sum(a => a.PagesRead)),
             }).ToListAsync();
+    }
+
+    private static string RawFilterSql(StatsFilterDto filter)
+    {
+        var startTime = filter.TimeFilter.StartDate?.ToUniversalTime().ToString("o");
+        var endTime = filter.TimeFilter.EndDate?.ToUniversalTime().ToString("o");
+        var libraries = string.Join(", ", filter.Libraries);
+
+        var sql = $"activity.value ->> '$.LibraryId' IN ({libraries})";
+
+        if (startTime != null)
+        {
+            sql += $" AND activity.value ->> '$.StartTimeUtc' >= '{startTime}'";
+        }
+
+        if (endTime != null)
+        {
+            sql += $" AND activity.value ->> '$.EndTimeUtc' <= '{endTime}'";
+        }
+
+        return sql;
+    }
+
+    public async Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId)
+    {
+        var sql = $"""
+                   SELECT
+                       p.id as AuthorId,
+                       p.Name as AuthorName,
+                       COUNT(DISTINCT activity.value ->> '$.ChapterId') as TotalChaptersRead,
+                       json_group_array(
+                               DISTINCT json_object(
+                               'ChapterId', activity.value ->> '$.ChapterId',
+                               'Title', c.TitleName)
+                           ) as Chapters
+                   FROM AppUserReadingSession urs
+                            CROSS JOIN json_each(urs.ActivityData) as activity
+                            INNER JOIN ChapterPeople cp ON cp.ChapterId = activity.value ->> '$.ChapterId'
+                            INNER JOIN Person p ON p.Id = cp.PersonId
+                            INNER JOIN Chapter c ON c.Id = cp.ChapterId
+                            INNER JOIN Volume v ON v.Id = c.VolumeId
+                            INNER JOIN Series s ON s.Id = v.SeriesId
+                   WHERE urs.AppUserId = {userId}
+                       AND activity.value ->> '$.PagesRead' == activity.value ->> '$.TotalPages'
+                       AND cp.Role = {3}
+                       AND {RawFilterSql(filter)}
+                   GROUP BY p.Id, p.Name
+                   ORDER BY TotalChaptersRead DESC
+                   LIMIT 10
+                   """;
+
+        return await _context.Database.SqlQueryRaw<MostReadAuthorsDto>(sql).ToListAsync();
     }
 
 

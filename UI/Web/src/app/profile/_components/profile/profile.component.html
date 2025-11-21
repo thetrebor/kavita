@@ -12,7 +12,7 @@
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
           <div class="row g-0 mt-2">
-            Joined: {{user.createdUtc | utcToLocaleDate | timeAgo}}
+            {{t('joined-label', {date: user.createdUtc | utcToLocaleDate | timeAgo})}}
           </div>
         </div>
       </div>
@@ -36,11 +36,11 @@
             @defer (when activeTabId === TabID.Stats; prefetch on idle) {
 
               <form [formGroup]="filterForm" class="d-flex align-content-center align-items-center">
-                <h4 class="me-2">A look at {{username}}'s journey through</h4>
+                <h4 class="mx-2">{{t('stats-title', {username: username, libraryName: ''})}}</h4>
                 @if (filterForm.get('libraries'); as control) {
-                  <app-setting-item [control]="control" [title]="''" [showEdit]="false">
-                    <ng-template #view>
-                      <h4>
+
+                  @if (!showLibraryTypeahead()) {
+                    <h4 class="me-2" (click)="showLibraryTypeahead.set(true)">
                       @if (allLibraries().length === control.value?.length) {
                         Kavita
                       } @else {
@@ -49,59 +49,70 @@
                           @if (!$last) {,}
                         }
                       }
-                      </h4>
-                    </ng-template>
-                    <ng-template #edit>
-                      @if (libraryTypeaheadSettings) {
-                        <app-typeahead [settings]="libraryTypeaheadSettings" (selectedData)="updateSelectedLibraries($event)">
-                          <ng-template #optionItem let-lib>
-                            {{lib.name}}
-                          </ng-template>
-                          <ng-template #badgeItem let-lib>
-                            {{lib.name}}
-                          </ng-template>
-                        </app-typeahead>
-                      }
-                    </ng-template>
-                  </app-setting-item>
+                    </h4>
+                  }
+
+                  @if (showLibraryTypeahead() && libraryTypeaheadSettings) {
+                    <app-typeahead [settings]="libraryTypeaheadSettings" (selectedData)="updateSelectedLibraries($event)" id="library-typeahead">
+                      <ng-template #optionItem let-lib>
+                        {{lib.name}}
+                      </ng-template>
+                      <ng-template #badgeItem let-lib>
+                        {{lib.name}}
+                      </ng-template>
+                    </app-typeahead>
+                  }
                 }
 
-                <app-smart-time-range-picker formGroupName="timeFilter" />
+                <app-smart-time-range-picker (timeRangeUpdate)="updateTimeRange($event)" />
 
               </form>
 
-              <app-activity-graph />
+              @let filterValue = filter();
 
-              <app-reading-pace [userId]="user.id" [userName]="username"/>
+              @if (filterValue) {
+                <div class="row mt-4">
+                  <div class="col-md-6">
+                    <app-activity-graph />
+                  </div>
+                  <div class="col-md-6">
+                    <app-reading-pace [userId]="user.id" [userName]="username"/>
+                  </div>
+                </div>
+                <div class="row mt-4">
+                  <div class="col-md-6">
+                    <app-fiction-graph />
+                  </div>
+                  <div class="col-md-6">
+                    <app-preferred-format />
+                  </div>
+                </div>
 
-              <div class="row mt-4">
-                <div class="col-md-6">
-                  <app-fiction-graph />
-                </div>
-                <div class="col-md-6">
-                  <app-preferred-format />
-                </div>
-              </div>
+                <!--TODO: In the component, use defer to avoid extra loading on the initial page-->
 
-              <!--TODO: In the component, use defer to avoid extra loading on the initial page-->
+                <div class="row mt-4">
+                  <div class="col-md-6">
+                    <app-string-breakdown [userId]="userId()" [userName]="username" [breakDown]="genreBreakdown" translationKey="genre-breakdown" />
+                  </div>
+                  <div class="col-md-6">
+                    <app-string-breakdown [userId]="userId()" [userName]="username" [breakDown]="tagsBreakdown" translationKey="tag-breakdown" />
+                  </div>
+                </div>
 
-              <div class="row mt-4">
-                <div class="col-md-6">
-                  <app-string-breakdown [userId]="userId()" [userName]="username" [breakDown]="genreBreakdown" translationKey="genre-breakdown" />
+                <div class="row mt-4">
+                  <div class="col-md-6">
+                    <app-bucket-spread-chart [userId]="user.id" [userName]="username" [bucketSpreadResource]="pageSpreadResource" endRangeFallback="1000+" translationKey="page-spread" />
+                  </div>
+                  <div class="col-md-6">
+                    <app-bucket-spread-chart [userId]="user.id" [userName]="username" [bucketSpreadResource]="wordSpreadResource" translationKey="word-spread" />
+                  </div>
                 </div>
-                <div class="col-md-6">
-                  <app-string-breakdown [userId]="userId()" [userName]="username" [breakDown]="tagsBreakdown" translationKey="tag-breakdown" />
-                </div>
-              </div>
 
-              <div class="row mt-4">
-                <div class="col-md-6">
-                  <app-bucket-spread-chart [userId]="user.id" [userName]="username" [bucketSpreadResource]="pageSpreadResource" endRangeFallback="1000+" translationKey="page-spread" />
+                <div class="row mt-4">
+                  <app-favourite-authors [userId]="user.id" [userName]="username" [statsFilter]="filterValue" />
                 </div>
-                <div class="col-md-6">
-                  <app-bucket-spread-chart [userId]="user.id" [userName]="username" [bucketSpreadResource]="wordSpreadResource" translationKey="word-spread" />
-                </div>
-              </div>
+              }
+
             }
           </ng-template>
 
