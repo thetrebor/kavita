@@ -3,7 +3,7 @@
   <div class="activity-graph-container">
     <h3 class="graph-title">{{ t('title') }} {{ year() }}</h3>
 
-    <div class="graph-wrapper" role="region" aria-label="Reading activity graph">
+    <div class="graph-wrapper" role="region">
       <table class="activity-graph-table" role="grid" aria-readonly="true">
         <thead>
         <tr>
@@ -55,6 +55,8 @@
             </tr>
           }
         </tbody>
+
+
       </table>
 
       <!-- Legend -->
@@ -73,7 +75,7 @@
       </div>
     </div>
 
-
+    <!--TODO: Refactor this to take a template or be useable for multiple people -->
     <ng-template #noActivityTooltip let-item="item">
       <div class="activity-tooltip">
         {{t('no-activity-tooltip', {date: item.date | utcToLocaleDate | ordinalDate})}}
