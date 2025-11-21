@@ -205,17 +205,9 @@ public class LibraryController : BaseApiController
         var username = Username!;
         if (string.IsNullOrEmpty(username)) return Unauthorized();
 
-        var cacheKey = CacheKey + username;
-        var result = await _libraryCacheProvider.GetAsync<IEnumerable<LibraryDto>>(cacheKey);
-        if (result.HasValue)
-        {
-            return Ok(result.Value.FirstOrDefault(l => l.Id == libraryId));
-        }
+        var libraries = await GetLibrariesForUser(username);
 
-        var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username).ToList();
-        await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24));
-
-        return Ok(ret.Find(l => l.Id == libraryId));
+        return Ok(libraries.FirstOrDefault(l => l.Id == libraryId));
     }
 
     /// <summary>
@@ -228,14 +220,45 @@ public class LibraryController : BaseApiController
         var username = Username!;
         if (string.IsNullOrEmpty(username)) return Unauthorized();
 
+        return Ok(await GetLibrariesForUser(username));
+    }
+
+    /// <summary>
+    /// Gets libraries for the given user that you also have access to
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [HttpGet("user-libraries")]
+    public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(int userId)
+    {
+        var ownUserName = Username!;
+        if (string.IsNullOrEmpty(ownUserName)) return Unauthorized();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null || string.IsNullOrEmpty(user.UserName)) return BadRequest();
+
+        var ownLibraries = await GetLibrariesForUser(ownUserName);
+        var otherLibraries = await GetLibrariesForUser(user.UserName);
+
+        var sharedLibraries = otherLibraries.IntersectBy(ownLibraries.Select(l => l.Id), l => l.Id).ToList();
+
+        return Ok(sharedLibraries);
+    }
+
+    /// <summary>
+    /// Get all libraries a giver username has access to. And cache them for 24h
+    /// </summary>
+    /// <param name="username"></param>
+    /// <returns></returns>
+    private async Task<IList<LibraryDto>> GetLibrariesForUser(string username)
+    {
         var cacheKey = CacheKey + username;
-        var result = await _libraryCacheProvider.GetAsync<IEnumerable<LibraryDto>>(cacheKey);
-        if (result.HasValue) return Ok(result.Value);
+        var result = await _libraryCacheProvider.GetAsync<IList<LibraryDto>>(cacheKey);
+        if (result.HasValue) return result.Value;
 
-        var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username);
+        var ret = await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username);
         await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24));
-
-        return Ok(ret);
+        return ret;
     }
 
     /// <summary>

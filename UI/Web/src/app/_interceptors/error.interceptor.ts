@@ -70,7 +70,7 @@ function handleValidationError(error: any, toastr: ToastrService, translocoServi
       });
     }
     throw modalStateErrors.flat();
-  } else if (error.error.errors) {
+  } else if (error.error && error.error.errors) {
     const modalStateErrors = [];
     for (const key in error.error.errors) {
       if (error.error.errors[key]) {

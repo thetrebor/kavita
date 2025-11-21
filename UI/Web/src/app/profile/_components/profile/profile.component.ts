@@ -130,7 +130,7 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.libraryService.getLibraries().pipe(
+    this.libraryService.getLibrariesForUser(this.userId()).pipe(
       tap(libs => this.allLibraries.set(libs)),
       tap(libs => this.filterForm.get('libraries')?.setValue(libs.map(l => l.id))),
       tap(libs => this.libraryTypeaheadSettings = this.setupLibrarySettings(libs, libs))
