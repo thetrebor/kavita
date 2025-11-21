@@ -43,7 +43,7 @@ public interface IStatisticService
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
-    Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year);
+    Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year);
     Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId);
@@ -645,7 +645,7 @@ public class StatisticService : IStatisticService
         return result;
     }
 
-    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year)
+    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year)
     {
         var startDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         var endDate = startDate.AddYears(1).AddSeconds(-1);
@@ -687,6 +687,15 @@ public class StatisticService : IStatisticService
             if (!result.TryGetValue(dateKey, out var entry))
                 continue; // Skip if date is somehow outside our year range
 
+            var validSessionData = session.ActivityData
+                .AsQueryable()
+                .ApplyStatsFilter(filter, userId, false)
+                .AsEnumerable()
+                .ToList();
+
+            if (validSessionData.Count == 0)
+                continue;
+
             // Calculate session duration
             var sessionDuration = (int)(session.EndTimeUtc.Value - session.StartTimeUtc).TotalSeconds;
             entry.TotalTimeReadingSeconds += sessionDuration;
@@ -694,7 +703,7 @@ public class StatisticService : IStatisticService
             // Aggregate activity data from the session
             var processedChapters = new HashSet<int>(); // Track unique chapters per day
 
-            foreach (var activity in session.ActivityData)
+            foreach (var activity in validSessionData)
             {
                 entry.TotalPages += activity.PagesRead;
                 entry.TotalWords += activity.WordsRead;

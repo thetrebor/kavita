@@ -16,6 +16,7 @@ import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {OrdinalDatePipe} from "../../../_pipes/ordinal-date.pipe";
 import {DurationPipe} from "../../../_pipes/duration.pipe";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {StatsFilter} from "../../_models/stats-filter";
 
 
 export interface ActivityGraphData {
@@ -64,7 +65,10 @@ export class ActivityGraphComponent {
 
   userId = input.required<number>();
   year = input.required<number>();
+  filter = input.required<StatsFilter>();
+
   readingActivity = this.statsService.getReadingActivityResource(
+    () => this.filter(),
     () => this.userId(),
     () => this.year(),
   );

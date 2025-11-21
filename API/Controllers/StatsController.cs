@@ -247,13 +247,11 @@ public class StatsController(
 
     [HttpGet("reading-activity")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<ReadingActivityGraphDto>> GetReadingActivity(int userId, int year)
+    public async Task<ActionResult<ReadingActivityGraphDto>> GetReadingActivity([FromQuery] StatsFilterDto filter, int userId, int year)
     {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin && userId != user!.Id) userId = user.Id;
+        await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadingActivityGraphData(userId, year));
+        return Ok(await statService.GetReadingActivityGraphData(filter, userId, year));
     }
 
     #endregion

@@ -154,8 +154,16 @@ export class StatisticsService {
     return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown?userId=' + userId);
   }
 
-  getReadingActivityResource(userId: () => number, year: () => number) {
-    return httpResource<ActivityGraphData>(() => this.baseUrl + `stats/reading-activity?userId=${userId()}&year=${year()}`).asReadonly();
+  getReadingActivityResource(statsFilter: () => (StatsFilter | undefined),userId: () => number, year: () => number) {
+    return httpResource<ActivityGraphData>(() => {
+      const filter = statsFilter();
+      if (!filter) return undefined;
+
+      return {
+        url: this.baseUrl + `stats/reading-activity?year=${year()}`,
+        params: this.filterHttpParams(filter, userId())
+      }
+    }).asReadonly();
   }
 
   getReadingPaceResource(userId: () => number, year: () => number) {
@@ -164,6 +172,23 @@ export class StatisticsService {
 
   getPreferredFormatResource(userId: () => number) {
     return httpResource<StatCount<MangaFormat>[]>(() => this.baseUrl + `stats/preferred-format?userId=${userId()}`).asReadonly();
+  }
+
+  private filterHttpParams(filter: StatsFilter, userId: number) {
+    let params = new HttpParams().set('userId', userId);
+
+    if (filter.timeFilter.startDate) {
+      params = params.set('startDate', filter.timeFilter.startDate.toISOString());
+    }
+    if (filter.timeFilter.endDate) {
+      params = params.set('endDate', filter.timeFilter.endDate.toISOString());
+    }
+
+    for (let library of filter.libraries) {
+      params = params.append('libraries', library)
+    }
+
+    return params;
   }
 
   private filterResource<T>(
@@ -175,23 +200,9 @@ export class StatisticsService {
       const filter = statsFilter();
       if (!filter) return undefined; // skip request until valid
 
-
-      let params = new HttpParams().set('userId', userId());
-
-      if (filter.timeFilter.startDate) {
-        params = params.set('startDate', filter.timeFilter.startDate.toISOString());
-      }
-      if (filter.timeFilter.endDate) {
-        params = params.set('endDate', filter.timeFilter.endDate.toISOString());
-      }
-
-      for (let library of filter.libraries) {
-        params = params.append('libraries', library)
-      }
-
       return {
         url: `${this.baseUrl}stats/${path}`,
-        params: params,
+        params: this.filterHttpParams(filter, userId()),
       };
     }).asReadonly();
   }
