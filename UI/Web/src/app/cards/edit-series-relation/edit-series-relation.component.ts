@@ -30,6 +30,7 @@ interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well
   typeaheadSettings: TypeaheadSettings<SearchResult>;
   formControl: FormControl;
+  id: number; // Random id used track by
 }
 
 @Component({
@@ -70,6 +71,8 @@ export class EditSeriesRelationComponent implements OnInit {
 
   focusTypeahead = new EventEmitter();
 
+  idCount = 0;
+
   ngOnInit(): void {
     this.seriesService.getRelatedForSeries(this.series.id).subscribe( relations => {
         this.setupRelationRows(relations.prequels, RelationKind.Prequel);
@@ -98,22 +101,28 @@ export class EditSeriesRelationComponent implements OnInit {
   }
 
   setupRelationRows(relations: Array<Series>, kind: RelationKind) {
-    relations.map((item, indx) => {
+    for (let indx = 0; indx < relations.length; indx++) {
+      const item = relations[indx];
       const settings = this.createSeriesTypeahead(item, kind, indx);
       const form = new FormControl(kind, []);
       if (kind === RelationKind.Parent) {
         form.disable();
       }
-      return {series: item, typeaheadSettings: settings, formControl: form};
-    }).forEach(p => {
-      this.relations.push(p);
-      this.cdRef.markForCheck();
-    });
+
+      const relation = {series: item, typeaheadSettings: settings, formControl: form, id: this.idCount++};
+      this.relations.push(relation);
+    }
+
+    this.cdRef.markForCheck();
   }
 
   async addNewRelation() {
-    this.relations.push({series: undefined, formControl: new FormControl(RelationKind.Adaptation, []),
-      typeaheadSettings: this.createSeriesTypeahead(undefined, RelationKind.Adaptation, this.relations.length)});
+    this.relations.push({
+      series: undefined,
+      formControl: new FormControl(RelationKind.Adaptation, []),
+      typeaheadSettings: this.createSeriesTypeahead(undefined, RelationKind.Adaptation, this.relations.length),
+      id: this.idCount++,
+    });
     this.cdRef.markForCheck();
 
     // Focus on the new typeahead
@@ -150,6 +159,7 @@ export class EditSeriesRelationComponent implements OnInit {
       map(items => seriesSettings.compareFn(items, searchFilter)),
       map(series => series.filter(s => s.seriesId !== this.series.id)),
     );
+    seriesSettings.trackByIdentityFn = (idx, item) => item.seriesId + '';
 
     seriesSettings.compareFn = (options: SearchResult[], filter: string) => {
       return options.filter(m => {
