@@ -62,6 +62,8 @@ export class ServerStatsComponent {
     libraries: new FormControl<number[]>([], { nonNullable: true }),
   });
 
+  userId = computed(() => this.accountService.currentUserSignal()?.id);
+
   filter = toSignal(this.filterForm.valueChanges.pipe(
     map(value => value as StatsFilter),
   ));

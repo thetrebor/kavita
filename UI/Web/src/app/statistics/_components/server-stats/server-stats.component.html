@@ -1,6 +1,11 @@
 <ng-container *transloco="let t; prefix:'server-stats'">
 
-  <app-library-and-time-selector [filterForm]="filterForm" [label]="t('stats-title', {libraryName: ''})" />
+  @let uId = userId();
+  @if (uId !== undefined) {
+    <app-library-and-time-selector [filterForm]="filterForm" [label]="t('stats-title', {libraryName: ''})" [userId]="uId" />
+  }
+
+
 
 
   @if (stats$ | async; as stats) {
