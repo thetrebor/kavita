@@ -63,7 +63,7 @@ public class SearchController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized();
 
-        var libraries = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, QueryContext.Search).ToList();
+        var libraries = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, QueryContext.Search);
         if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(UserId, "libraries-restricted"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);

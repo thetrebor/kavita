@@ -35,18 +35,18 @@
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Stats; prefetch on idle) {
 
-              <app-library-and-time-selector [filterForm]="filterForm" [label]="t('stats-title', {username: username, libraryName: ''})" />
+              <app-library-and-time-selector [filterForm]="filterForm" [userId]="userId()" [label]="t('stats-title', {username: username, libraryName: ''})" />
               @let filterValue = filter();
 
               @if (filterValue) {
                 <div class="row mt-4">
                   <div class="col-md-12">
-                    <app-activity-graph [userId]="userId()" [year]="year()" />
+                    <app-activity-graph [userId]="userId()" [year]="year()" [filter]="filterValue" />
                   </div>
                 </div>
                 <div class="row mt-4">
                   <div class="col-md-6">
-                    <app-reading-pace [userId]="user.id" [year]="year()" [userName]="username"/>
+                    <app-reading-pace [userId]="user.id" [year]="year()" [userName]="username"  [filter]="filterValue" />
                   </div>
                   <div class="col-md-6">
                     <app-preferred-format />

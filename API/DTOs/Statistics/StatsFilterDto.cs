@@ -7,11 +7,19 @@ public sealed record StatsFilterDto
 {
     public DateTime? StartDate { get; init; }
 
+    private DateTime? _endDate;
     public DateTime? EndDate
     {
-        get;
-        init => field = value == null || value == DateTime.MinValue ? DateTime.MaxValue : value;
+        get => _endDate;
+        init => _endDate = value == null || value == DateTime.MinValue ? DateTime.MaxValue : value;
     }
 
-    public IList<int> Libraries { get; init; }
+
+    private IList<int>? _libraries;
+    public IList<int> Libraries
+    {
+        get => _libraries ?? [];
+        set => _libraries = value;
+    }
+
 }

@@ -60,6 +60,7 @@ public class ReadingHistoryService : IReadingHistoryService
         var yesterdaySessions = await _context.AppUserReadingSession
             .Where(s => !s.IsActive && s.EndTime.HasValue)
             .Where(s => s.StartTime >= yesterdayStart && s.StartTime <= yesterdayEnd)
+            .Include(s => s.ActivityData)
             .ToListAsync();
 
         if (yesterdaySessions.Count == 0)

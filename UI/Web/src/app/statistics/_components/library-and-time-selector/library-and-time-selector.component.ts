@@ -13,6 +13,7 @@ import {of, tap} from "rxjs";
 import {LibraryService} from "../../../_services/library.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../../shared/_services/utility.service";
+import {AccountService} from "../../../_services/account.service";
 
 export interface LibraryAndTimeFilterGroup {
   timeFilter: FormGroup<{
@@ -41,6 +42,7 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
 
   filterForm = input.required<FormGroup>();
   label = input.required<string>();
+  userId = input.required<number>();
 
   allLibraries = signal<Library[]>([]);
   showLibraryTypeahead = signal(false);
@@ -61,7 +63,7 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.libraryService.getLibraries().pipe(
+    this.libraryService.getLibrariesForUser(this.userId()).pipe(
       tap(libs => this.allLibraries.set(libs)),
       tap(libs => this.filterForm().get('libraries')?.setValue(libs.map(l => l.id))),
       tap(libs => this.libraryTypeaheadSettings = this.setupLibrarySettings(libs, libs))

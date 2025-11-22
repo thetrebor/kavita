@@ -16,6 +16,7 @@ using API.Entities.Progress;
 using API.Entities.Scrobble;
 using API.Entities.User;
 using API.Extensions;
+using Hangfire.Storage.SQLite.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -328,9 +329,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(new AppUserOpdsPreferences());
 
         builder.Entity<AppUserAnnotation>()
-            .Property(a => a.Likes)
-            .HasJsonConversion(new HashSet<int>())
-            .HasColumnType("TEXT")
+            .PrimitiveCollection(a => a.Likes)
             .HasDefaultValue(new HashSet<int>());
 
         builder.Entity<AppUserReadingSession>()

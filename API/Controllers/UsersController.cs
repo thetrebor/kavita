@@ -109,9 +109,9 @@ public class UsersController : BaseApiController
     }
 
     [HttpGet("has-library-access")]
-    public ActionResult<bool> HasLibraryAccess(int libraryId)
+    public async Task< ActionResult<bool>> HasLibraryAccess(int libraryId)
     {
-        var libs = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(Username!);
+        var libs = await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(Username!);
         return Ok(libs.Any(x => x.Id == libraryId));
     }
 

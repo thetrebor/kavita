@@ -16,6 +16,7 @@ import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {OrdinalDatePipe} from "../../../_pipes/ordinal-date.pipe";
 import {DurationPipe} from "../../../_pipes/duration.pipe";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {StatsFilter} from "../../_models/stats-filter";
 
 
 export interface ActivityGraphData {
@@ -64,7 +65,10 @@ export class ActivityGraphComponent {
 
   userId = input.required<number>();
   year = input.required<number>();
+  filter = input.required<StatsFilter>();
+
   readingActivity = this.statsService.getReadingActivityResource(
+    () => this.filter(),
     () => this.userId(),
     () => this.year(),
   );
@@ -123,44 +127,53 @@ export class ActivityGraphComponent {
   }
 
   private generateMonthLabels(): Array<{ label: string; colSpan: number }> {
-    const year = this.year();
-    const months: Array<{ label: string; colSpan: number }> = [];
-
     const monthLabelPipe = new MonthLabelPipe();
+    const monthLabels: Array<{ label: string; colSpan: number }> = [];
 
-    for (let month = 0; month < 12; month++) {
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(this.year(), 0, 1);
+    const endDate = new Date(this.year(), 11, 31);
 
-      // Calculate how many weeks this month spans
-      const firstWeek = this.getWeekNumber(firstDay);
-      const lastWeek = this.getWeekNumber(lastDay);
-      const colSpan = lastWeek - firstWeek + 1;
+    let currentDate = new Date(startDate);
 
-      if (colSpan > 0) {
-        months.push({
-          label: monthLabelPipe.transform(month + 1, true),
-          colSpan: Math.min(colSpan, 5)
-        });
+    // Get the first Saturday
+    const firstDayOfWeek = currentDate.getDay();
+    const daysUntilSaturday = (6 - firstDayOfWeek + 7) % 7;
+    currentDate.setDate(currentDate.getDate() + daysUntilSaturday);
+
+    let currentMonth = -1;
+    let currentMonthColSpan = 0;
+
+    while (currentDate <= endDate) {
+      const month = currentDate.getMonth();
+
+      if (month !== currentMonth) {
+        if (currentMonth !== -1) {
+          const monthName = monthLabelPipe.transform(currentMonth + 1, true);
+          monthLabels.push({
+            label: monthName,
+            colSpan: currentMonthColSpan
+          });
+        }
+
+        currentMonth = month;
+        currentMonthColSpan = 0;
       }
+
+      currentMonthColSpan++;
+
+      // Jump to next Saturday (7 days later)
+      currentDate.setDate(currentDate.getDate() + 7);
     }
 
-    return months;
-  }
-
-  private getWeekNumber(date: Date): number {
-    const year = this.year();
-    const startOfYear = new Date(year, 0, 1);
-    const startDay = startOfYear.getDay();
-
-    // Adjust to start of week
-    const adjustedStart = new Date(startOfYear);
-    if (startDay !== 0) {
-      adjustedStart.setDate(adjustedStart.getDate() - startDay);
+    if (currentMonth !== -1) {
+      const monthName = monthLabelPipe.transform(currentMonth + 1, true);
+      monthLabels.push({
+        label: monthName,
+        colSpan: currentMonthColSpan
+      });
     }
 
-    const diff = date.getTime() - adjustedStart.getTime();
-    return Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
+    return monthLabels;
   }
 
 

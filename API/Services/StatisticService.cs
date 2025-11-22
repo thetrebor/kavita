@@ -43,8 +43,8 @@ public interface IStatisticService
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
-    Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year);
-    Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year);
+    Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year);
+    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId);
@@ -645,7 +645,7 @@ public class StatisticService : IStatisticService
         return result;
     }
 
-    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year)
+    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year)
     {
         var startDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         var endDate = startDate.AddYears(1).AddSeconds(-1);
@@ -687,6 +687,15 @@ public class StatisticService : IStatisticService
             if (!result.TryGetValue(dateKey, out var entry))
                 continue; // Skip if date is somehow outside our year range
 
+            var validSessionData = session.ActivityData
+                .AsQueryable()
+                .ApplyStatsFilter(filter, userId, false)
+                .AsEnumerable()
+                .ToList();
+
+            if (validSessionData.Count == 0)
+                continue;
+
             // Calculate session duration
             var sessionDuration = (int)(session.EndTimeUtc.Value - session.StartTimeUtc).TotalSeconds;
             entry.TotalTimeReadingSeconds += sessionDuration;
@@ -694,7 +703,7 @@ public class StatisticService : IStatisticService
             // Aggregate activity data from the session
             var processedChapters = new HashSet<int>(); // Track unique chapters per day
 
-            foreach (var activity in session.ActivityData)
+            foreach (var activity in validSessionData)
             {
                 entry.TotalPages += activity.PagesRead;
                 entry.TotalWords += activity.WordsRead;
@@ -712,25 +721,25 @@ public class StatisticService : IStatisticService
         return result;
     }
 
-    public async Task<ReadingPaceDto> GetReadingPaceForUser(int userId, int year)
+    public async Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year)
     {
-        var startOfYear = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var endOfYear = new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc);
+        var startTime = filter.StartDate?.ToUniversalTime() ?? new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var endTime = filter.EndDate?.ToUniversalTime() ?? new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc);
         var now = DateTime.UtcNow;
 
         // Don't count future days in the calculation
-        var effectiveEndDate = endOfYear > now ? now : endOfYear;
+        var effectiveEndDate = endTime > now ? now : endTime;
 
         var readingHistory = await _context.AppUserReadingHistory
             .Where(h => h.AppUserId == userId &&
-                        h.DateUtc >= startOfYear &&
+                        h.DateUtc >= startTime &&
                         h.DateUtc <= effectiveEndDate)
             .Select(h => new { h.DateUtc, h.Data })
             .ToListAsync();
 
         var readingSessions = await _context.AppUserReadingSession
             .Where(s => s.AppUserId == userId &&
-                        s.StartTimeUtc >= startOfYear &&
+                        s.StartTimeUtc >= startTime &&
                         s.StartTimeUtc <= effectiveEndDate &&
                         !s.IsActive)
             .Select(s => new { s.StartTimeUtc, s.EndTimeUtc, s.ActivityData })
@@ -748,12 +757,12 @@ public class StatisticService : IStatisticService
         var booksRead = new HashSet<int>();
         var comicsRead = new HashSet<int>();
 
-        foreach (var history in readingHistory)
+        foreach (var history in readingHistory.Select(x => x.Data))
         {
-            if (history.Data == null) continue;
+            if (history == null) continue;
 
-            pagesRead += history.Data.TotalPagesRead;
-            wordsRead += history.Data.TotalWordsRead;
+            pagesRead += history.TotalPagesRead;
+            wordsRead += history.TotalWordsRead;
         }
 
         foreach (var session in readingSessions)
@@ -764,30 +773,29 @@ public class StatisticService : IStatisticService
                 hoursRead += (int)Math.Round(duration);
             }
 
-            if (session.ActivityData != null)
+            if (session.ActivityData == null)
+                continue;
+
+            foreach (var activity in session.ActivityData)
             {
-                foreach (var activity in session.ActivityData)
+                pagesRead += activity.PagesRead;
+                wordsRead += activity.WordsRead;
+
+                if (!seriesFormats.TryGetValue(activity.SeriesId, out var seriesFormat)) continue;
+
+                if (seriesFormat == MangaFormat.Epub)
                 {
-                    pagesRead += activity.PagesRead;
-                    wordsRead += activity.WordsRead;
-
-                    if (!seriesFormats.TryGetValue(activity.SeriesId, out var seriesFormat)) continue;
-
-                    if (seriesFormat == MangaFormat.Epub)
-                    {
-                        booksRead.Add(activity.ChapterId);
-                    }
-                    else
-                    {
-                        comicsRead.Add(activity.ChapterId);
-                    }
-
+                    booksRead.Add(activity.ChapterId);
+                }
+                else
+                {
+                    comicsRead.Add(activity.ChapterId);
                 }
             }
 
         }
 
-        var daysInRange = (int)(effectiveEndDate - startOfYear).TotalDays + 1;
+        var daysInRange = (int)(effectiveEndDate - startTime).TotalDays + 1;
 
         return new ReadingPaceDto
         {
