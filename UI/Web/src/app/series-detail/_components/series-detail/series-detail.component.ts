@@ -1099,7 +1099,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   openEditSeriesModal() {
     const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
-    modalRef.componentInstance.series = this.series;
+    modalRef.componentInstance.series = this.series();
     modalRef.closed.subscribe((closeResult: EditSeriesModalCloseResult) => {
       if (closeResult.success) {
         window.scrollTo(0, 0);
