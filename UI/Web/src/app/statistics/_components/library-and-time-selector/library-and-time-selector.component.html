@@ -4,7 +4,7 @@
     @if (filterForm().get('libraries'); as control) {
 
       @if (!showLibraryTypeahead()) {
-        <h4 class="me-2" (click)="showLibraryTypeahead.set(true)">
+        <h4 class="me-2 lib-selector" (click)="showLibraryTypeahead.set(true)">
           @if (allLibraries().length === control.value?.length) {
             Kavita
           } @else {
