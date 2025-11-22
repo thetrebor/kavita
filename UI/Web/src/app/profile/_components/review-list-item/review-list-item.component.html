@@ -3,45 +3,73 @@
   @let item = review();
 
   @if (item) {
-    <div class="d-flex flex-row reading-list-item">
-      <div class="d-none d-md-block pe-2"  [ngbTooltip]="item.series.name">
-        <app-image width="106px" [styles]="{'max-height': '125px'}" class="img-top me-3" [imageUrl]="imageUrl()" />
+    <div class="d-flex flex-column">
+
+    <div class="d-flex flex-row reading-list-item" role="listitem">
+      
+
+      <!-- Left: Cover Image -->
+      <div class="d-sm-block pe-2 image-col" [ngbTooltip]="item.series.name">
+        <app-image width="100%" [styles]="{'max-width':'106px','height':'auto'}" [objectFit]="'cover'" class="img-top me-2" [imageUrl]="imageUrl()" />
       </div>
 
-      <div class="flex-grow-1">
-        <div class="g-0">
-          <h5 class="mb-1 pb-0">
-            <a class="ms-1" href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{title()}}</a>
-            <div class="actions float-end">
-              <app-card-actionables />
-            </div>
-          </h5>
-          <div class="mb-1">
-            <ngx-stars [initialStars]="item.rating" [size]="1" [maxStars]="5" [color]="starColor" [readonly]="true" />
+      <!-- Right: Content column (vertical) -->
+      <div class="flex-grow-1 content-col d-flex flex-column">
 
+        <!-- Title and authors (title larger) -->
+        <div class="title-block mb-1">
+          <h5 class="mb-1">
+            <a class="title-link" href="/library/{{item.libraryId}}/series/{{item.seriesId}}" aria-label="Open {{title()}} details">{{title()}}</a>
+          </h5>
+
+          <div class="authors text-muted small">
             @if (item.writers.length > 0) {
-              {{t('by-label')}}
+              <span class="me-1">{{t('by-label')}}</span>
             }
 
             @for(writer of item.writers; track writer; let last = $last) {
-              <a href="/person/{{writer.name}}">{{writer.name}}</a>
-              @if (!last) {
-                ,
-              }
+              <a href="/person/{{writer.name}}" aria-label="View {{writer.name}}">{{writer.name}}</a>@if (!last) {, }
             }
           </div>
+        </div>
 
-          <app-read-more [text]="item.body || ''" [showToggle]="false" [maxLength]="500" />
+        <!-- Star rating -->
+        <div class="d-none d-sm-none d-lg-block pe-2 image-col rating-block mb-2" aria-hidden="true">
+          <ngx-stars [initialStars]="item.rating" [size]="1" [maxStars]="5" [color]="starColor" [readonly]="true" />
+        </div>
 
-
-          @if (item.createdUtc !== '0001-01-01T00:00:00') {
-            <div class="ps-1 mt-2">
-              <span class="visually-hidden">{{t('created-alt')}}</span>
-              {{item.createdUtc | date:'longDate'}}
-            </div>
-          }
+        <!-- Review body -->
+        <div class="d-none d-sm-none d-lg-block pe-2 image-col body-block">
+          <app-read-more class="review-body" [text]="item.body || ''" [showToggle]="false" [maxLength]="500" />
         </div>
       </div>
+      
+    </div>
+        <!-- Star rating -->
+        <div class="d-sm-block d-md-block d-lg-none pe-2 image-col rating-block mb-2" aria-hidden="true">
+          <ngx-stars [initialStars]="item.rating" [size]="1" [maxStars]="5" [color]="starColor" [readonly]="true" />
+        </div>
+
+        <!-- Review body -->
+        <div class="d-sm-block d-md-block d-lg-none pe-2 image-col body-block">
+          <app-read-more class="review-body" [text]="item.body || ''" [showToggle]="false" [maxLength]="500" />
+        </div>
+      
+        <!-- Footer: date (right) and actions -->
+        @if (item.createdUtc !== '0001-01-01T00:00:00') {
+          <div class="footer d-flex justify-content-end align-items-center mt-2">
+            <div class="text-muted small me-3">
+              <span class="visually-hidden">{{t('created-alt')}}</span>
+              <time [attr.datetime]="item.createdUtc">{{item.createdUtc | date:'longDate'}}</time>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-link p-0 ms-2" aria-label="Report review">
+                <i class="bi-flag" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        }
 
     </div>
   }

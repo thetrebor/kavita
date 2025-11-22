@@ -132,4 +132,14 @@ export class ProfileComponent {
 
 
   protected readonly TabID = TabID;
+
+  protected readonly backgroundImage = computed(() => {
+    const m = this.memberInfo();
+    if (!m) return '';
+    try {
+      return this.imageService.getUserCoverImage(this.userId());
+    } catch {
+      return '';
+    }
+  });
 }
