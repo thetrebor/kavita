@@ -98,22 +98,22 @@ export class EditSeriesRelationComponent implements OnInit {
   }
 
   setupRelationRows(relations: Array<Series>, kind: RelationKind) {
-    relations.map(async (item, indx) => {
-      const settings = await firstValueFrom(this.createSeriesTypeahead(item, kind, indx));
+    relations.map((item, indx) => {
+      const settings = this.createSeriesTypeahead(item, kind, indx);
       const form = new FormControl(kind, []);
       if (kind === RelationKind.Parent) {
         form.disable();
       }
       return {series: item, typeaheadSettings: settings, formControl: form};
-    }).forEach(async p => {
-      this.relations.push(await p);
+    }).forEach(p => {
+      this.relations.push(p);
       this.cdRef.markForCheck();
     });
   }
 
   async addNewRelation() {
     this.relations.push({series: undefined, formControl: new FormControl(RelationKind.Adaptation, []),
-      typeaheadSettings: await firstValueFrom(this.createSeriesTypeahead(undefined, RelationKind.Adaptation, this.relations.length))});
+      typeaheadSettings: this.createSeriesTypeahead(undefined, RelationKind.Adaptation, this.relations.length)});
     this.cdRef.markForCheck();
 
     // Focus on the new typeahead
@@ -138,7 +138,7 @@ export class EditSeriesRelationComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  createSeriesTypeahead(series: Series | undefined, relationship: RelationKind, index: number): Observable<TypeaheadSettings<SearchResult>> {
+  createSeriesTypeahead(series: Series | undefined, relationship: RelationKind, index: number): TypeaheadSettings<SearchResult> {
     const seriesSettings = new TypeaheadSettings<SearchResult>();
     seriesSettings.minCharacters = 0;
     seriesSettings.multiple = false;
@@ -162,14 +162,19 @@ export class EditSeriesRelationComponent implements OnInit {
     }
 
     if (series !== undefined) {
-      return this.searchService.search(series.name).pipe(
-        map(group => group.series), map(results => {
-          seriesSettings.savedData = results.filter(s => s.seriesId === series.id);
-          return seriesSettings;
-        }));
+      seriesSettings.savedData = {
+        name: series.name,
+        libraryId: series.libraryId,
+        libraryName: series.localizedName,
+        seriesId: series.id,
+        format: series.format,
+        localizedName: series.localizedName,
+        originalName: series.originalName,
+        sortName: series.sortName,
+      }
     }
 
-    return of(seriesSettings);
+    return seriesSettings;
   }
 
   saveState() {
