@@ -1324,7 +1324,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const offSetY = Math.min(32, imgRect.height * 0.05);
 
       icon.style.cssText = `
-          position: absolute;
+          ${imgRect.width < 5 ? '' : 'position:  absolute;'}
           left: ${imgRect.width + relativeX - offSetX}px;
           top: ${imgRect.height + relativeY - offSetY}px;
           margin: 0;
