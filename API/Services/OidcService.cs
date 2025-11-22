@@ -75,6 +75,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     public const string ExpiresAt = "expires_at";
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
+    public static readonly List<string> DefaultScopes = ["openid", "profile", "offline_access", "roles", "email"];
 
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
     private static readonly ConcurrentDictionary<string, DateTimeOffset> LastFailedRefresh = new();
