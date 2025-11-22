@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities;
+using API.Helpers;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -133,9 +132,6 @@ public static class IdentityServiceExtensions
         var isDevelopment = environment.IsEnvironment(Environments.Development);
         var baseUrl = Configuration.BaseUrl;
 
-        const string apiPrefix = "/api";
-        const string hubsPrefix = "/hubs";
-
         var authority = Configuration.OidcSettings.Authority;
         if (!isDevelopment && !authority.StartsWith("https"))
         {
@@ -153,33 +149,6 @@ public static class IdentityServiceExtensions
         );
 
         services.AddSingleton(configurationManager);
-
-        ICollection<string> supportedScopes;
-        try
-        {
-            supportedScopes = configurationManager.GetConfigurationAsync()
-                .ConfigureAwait(false)
-                .GetAwaiter()
-                .GetResult()
-                .ScopesSupported;
-        }
-        catch (Exception ex)
-        {
-            // Do not interrupt startup if OIDC fails (Network outage should still allow Kavita to run)
-            Log.Error(ex, "Failed to load OIDC configuration, OIDC will not be enabled. Restart to retry");
-            return false;
-        }
-
-        List<string> scopes = ["openid", "profile", "offline_access", "roles", "email"];
-        scopes.AddRange(settings.CustomScopes);
-        var validScopes = scopes.Where(scope =>
-        {
-            if (supportedScopes.Contains(scope))
-                return true;
-
-            Log.Warning("Scope {Scope} is configured, but not supported by your OIDC provider. Skipping", scope);
-            return false;
-        }).ToList();
 
         services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme).Configure<ITicketStore>((options, store) =>
         {
@@ -206,7 +175,7 @@ public static class IdentityServiceExtensions
 
                     if (user != null)
                     {
-                        var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user!, false);
+                        var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user, false);
                         ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(claims, ctx.Scheme.Name)));
                     }
                 },
@@ -243,121 +212,50 @@ public static class IdentityServiceExtensions
             options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "given_name");
 
             options.Scope.Clear();
-            foreach (var scope in validScopes)
+            foreach (var scope in GetValidScopes(configurationManager, settings))
             {
                 options.Scope.Add(scope);
             }
 
-
-            options.Events = new OpenIdConnectEvents
-            {
-                OnTicketReceived = async ctx =>
-                {
-                    try
-                    {
-                        await OidcClaimsPrincipalConverter(ctx);
-                    }
-                    catch (KavitaException ex)
-                    {
-                        Log.Error(ex, "An exception occured during initial OIDC flow");
-                        ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ex.Message));
-                        ctx.HandleResponse();
-                    }
-                },
-                OnUserInformationReceived = ctx =>
-                {
-                    if (ctx.Principal?.Identity == null)
-                    {
-                        return Task.CompletedTask;
-                    }
-
-                    var identity = (ClaimsIdentity) ctx.Principal.Identity;
-
-                    // Copy all claims over as in, the ones we need mapped to something specific are above
-                    foreach (var property in ctx.User.RootElement.EnumerateObject())
-                    {
-                        var claimType = property.Name;
-                        if (property.Value.ValueKind == JsonValueKind.Array)
-                        {
-                            foreach (var element in property.Value.EnumerateArray())
-                            {
-                                identity.AddClaim(new Claim(claimType, element.ToString(), ClaimValueTypes.String, OpenIdConnect));
-                            }
-                        }
-                        else
-                        {
-                            identity.AddClaim(new Claim(claimType, property.Value.ToString(), ClaimValueTypes.String, OpenIdConnect));
-                        }
-                    }
-
-                    return  Task.CompletedTask;
-                },
-                OnAuthenticationFailed = ctx =>
-                {
-                    ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
-                    ctx.HandleResponse();
-
-                    return Task.CompletedTask;
-                },
-                OnRedirectToIdentityProviderForSignOut = ctx =>
-                {
-                    if (!isDevelopment && !string.IsNullOrEmpty(ctx.ProtocolMessage.PostLogoutRedirectUri))
-                    {
-                        ctx.ProtocolMessage.PostLogoutRedirectUri = ctx.ProtocolMessage.PostLogoutRedirectUri.Replace("http://", "https://");
-                    }
-
-                    return Task.CompletedTask;
-                },
-                OnRedirectToIdentityProvider = ctx =>
-                {
-                    // Intercept redirects on API requests and instead return 401
-                    // These redirects are auto login when .NET finds a cookie that it can't match inside the cookie store. I.e. after a restart
-                    if (ctx.Request.Path.StartsWithSegments(apiPrefix) || ctx.Request.Path.StartsWithSegments(hubsPrefix))
-                    {
-                        ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                        ctx.HandleResponse();
-                        return Task.CompletedTask;
-                    }
-
-                    if (!isDevelopment && !string.IsNullOrEmpty(ctx.ProtocolMessage.RedirectUri))
-                    {
-                        ctx.ProtocolMessage.RedirectUri = ctx.ProtocolMessage.RedirectUri.Replace("http://", "https://");
-                    }
-
-                    return Task.CompletedTask;
-                },
-            };
+            options.Events = new OpenIdConnectEventsHelper(baseUrl, isDevelopment);
         });
 
         return true;
     }
 
-    /// <summary>
-    /// Called after the redirect from the OIDC provider, tries matching the user and update the principal
-    /// to have the correct claims and properties. This is required to later auto refresh; and ensure .NET knows which
-    /// Kavita roles the user has
-    /// </summary>
-    /// <param name="ctx"></param>
-    private static async Task OidcClaimsPrincipalConverter(TicketReceivedContext ctx)
+    private static IList<string> GetValidScopes(
+        ConfigurationManager<OpenIdConnectConfiguration> configurationManager,
+        Configuration.OpenIdConnectSettings settings
+    )
     {
-        if (ctx.Principal == null) return;
+        var scopes = OidcService.DefaultScopes;
+        scopes.AddRange(settings.CustomScopes);
 
-        var oidcService = ctx.HttpContext.RequestServices.GetRequiredService<IOidcService>();
-        var user = await oidcService.LoginOrCreate(ctx.Request, ctx.Principal);
-        if (user == null)
+        ICollection<string> supportedScopes;
+        try
         {
-            throw new KavitaException("errors.oidc.no-account");
+            supportedScopes = configurationManager.GetConfigurationAsync()
+                .ConfigureAwait(false)
+                .GetAwaiter()
+                .GetResult()
+                .ScopesSupported;
+        }
+        catch (Exception ex)
+        {
+            // Most idps will safely ignore invalid scopes (all except Authelia as far as I know), so we return them here
+            // to have the least amount of impact on users
+            Log.Error(ex, "Failed to load OIDC configuration, scopes will not be filtered. This may cause issues with some idps.");
+            return scopes;
         }
 
-        var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user);
+        return scopes.Where(scope =>
+        {
+            if (supportedScopes.Contains(scope))
+                return true;
 
-        var identity = new ClaimsIdentity(claims, ctx.Scheme.Name);
-        var principal = new ClaimsPrincipal(identity);
-
-        ctx.HttpContext.User = principal;
-        ctx.Principal = principal;
-
-        ctx.Success();
+            Log.Warning("Scope {Scope} is configured, but not supported by your OIDC provider. Skipping", scope);
+            return false;
+        }).ToList();
     }
 
     private static Task SetTokenFromQuery(MessageReceivedContext context)
