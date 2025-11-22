@@ -14,7 +14,7 @@ namespace API.Middleware;
 /// Middleware that will track any API calls as updating the authenticated (ApiKey) user's LastActive and inform <see cref="PresenceTracker"/>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class OpdsActiveUserMiddlewareAttribute(IUnitOfWork unitOfWork, IPresenceTracker presenceTracker, ILogger<OpdsController> logger, IUserContext userContext) : ActionFilterAttribute
+public class OpdsActiveUserMiddlewareAttribute(IUnitOfWork unitOfWork, ILogger<OpdsController> logger, IUserContext userContext) : ActionFilterAttribute
 {
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
