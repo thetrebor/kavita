@@ -5,10 +5,8 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  DestroyRef,
-  ElementRef,
+  DestroyRef, ElementRef,
   inject,
-  model,
   OnInit,
   signal,
   ViewChild
@@ -194,9 +192,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * Series Id. Set at load before UI renders
    */
   seriesId!: number;
-  series = model<Series | null>(null);
+  series = signal<Series | null>(null);
   volumes: Volume[] = [];
-  chapters = model<Chapter[]>([]);
+  chapters = signal<Chapter[]>([]);
   storyChapters: Chapter[] = [];
   storylineItems: StoryLineItem[] = [];
   libraryId = 0;
@@ -213,7 +211,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     .getPropertyValue('--mobile-series-img-background').trim();
 
   currentlyReadingChapter: Chapter | undefined = undefined;
-  hasReadingProgress = model<boolean>(false);
+  hasReadingProgress = signal<boolean>(false);
 
 
   seriesActions: ActionItem<Series>[] = [];
@@ -228,9 +226,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   plusReviews: Array<UserReview> = [];
   bookmarks: Array<PageBookmark> = [];
   ratings: Array<Rating> = [];
-  libraryType = model<LibraryType>(LibraryType.Manga);
+  libraryType = signal<LibraryType>(LibraryType.Manga);
 
-  seriesMetadata = model<SeriesMetadata | null>(null);
+  seriesMetadata = signal<SeriesMetadata | null>(null);
   readingLists: Array<ReadingList> = [];
   collections: Array<UserCollection> = [];
   isWantToRead: boolean = false;
@@ -250,16 +248,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   readonly useBookLogic = computed(() => {
     const libType = this.libraryType();
-    if (!libType) return false;
-
     return libType === LibraryType.Book || libType === LibraryType.LightNovel;
   });
 
   readonly shouldShowStorylineTab = computed(() => {
     const libType = this.libraryType();
     const chapters = this.chapters();
-
-    if (!libType || !chapters) return false;
 
     if (libType === LibraryType.ComicVine) return false;
 
@@ -273,8 +267,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   readonly shouldShowVolumeTab = computed(() => {
     const libType = this.libraryType();
     const chapters = this.chapters();
-
-    if (!libType || !chapters) return false;
 
     if (libType === LibraryType.ComicVine) {
       if (this.volumes.length > 1) return true;
@@ -326,7 +318,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   combinedRecs: Array<any> = [];
 
   showChapterTab = computed(() => this.chapters().length > 0);
-  annotations = model<Annotation[]>([]);
+  annotations = signal<Annotation[]>([]);
 
   /**
    * This is the download we get from download service.
@@ -896,7 +888,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
               if (this.volumes.length === 0) this.updateSelectedTab();
               break;
             case TabID.Chapters:
-              if (this.chapters.length === 0) this.updateSelectedTab();
+              if (this.chapters().length === 0) this.updateSelectedTab();
               break;
             case TabID.Recommendations:
               if (!this.hasRecommendations) this.updateSelectedTab();
