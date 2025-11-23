@@ -189,7 +189,9 @@ public class Startup
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UseInMemoryStorage());
-            //.UseSQLiteStorage("config/Hangfire.db")); // UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted (and locking can cause high utilization) (NOTE: There is code to clear jobs on startup a redditor gave me)
+            //.UseSQLiteStorage("config/Hangfire.db"));
+            //// UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted (and locking can cause high utilization)
+            /// (NOTE: There is code to clear jobs on startup a redditor gave me)
 
         // Add the processing server as IHostedService
         services.AddHangfireServer(options =>
@@ -473,6 +475,7 @@ public class Startup
                     await MigrateMissingCreatedUtcDate.Migrate(dataContext, logger);
                     await MigrateProfilePreferences.Migrate(dataContext, logger);
                     await MigrateTotalReads.Migrate(dataContext, logger);
+                    await MigrateToAuthKeys.Migrate(dataContext, logger);
 
                     #endregion
 

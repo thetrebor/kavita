@@ -1,0 +1,41 @@
+﻿using System;
+using API.Entities.Enums.User;
+using Microsoft.EntityFrameworkCore;
+
+namespace API.Entities.User;
+
+[Index(nameof(Key), IsUnique = true)]
+[Index(nameof(ExpiresAtUtc), IsUnique = false)]
+public class AppUserAuthKey
+{
+    public int Id { get; set; }
+    /// <summary>
+    /// Actual key
+    /// </summary>
+    /// <remarks>This is a variable string length from [6-32] alphanumeric characters</remarks>
+    public required string Key { get; set; }
+    /// <summary>
+    /// Name of the key
+    /// </summary>
+    public required string Name { get; set; }
+
+    public DateTime CreatedAtUtc { get; set; }
+    /// <summary>
+    /// An Optional time which the Key expires
+    /// </summary>
+    public DateTime? ExpiresAtUtc { get; set; }
+    public DateTime? LastAccessedAt { get; set; }
+
+    /// <summary>
+    /// A granular set of access permissions to Kavita. Defaults to all permissions.
+    /// </summary>
+    /// <remarks>This uses bit shifts for checking permissions</remarks>
+    public AuthKeyPermission Permissions { get; set; } = AuthKeyPermission.All;
+    /// <summary>
+    /// Kavita will have a short-lived key
+    /// </summary>
+    public AuthKeyProvider Provider { get; set; } = AuthKeyProvider.User;
+
+    public int AppUserId { get; set; }
+    public virtual AppUser AppUser { get; set; }
+}

@@ -14,8 +14,11 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Font;
 using API.Entities.Enums.Theme;
+using API.Entities.Enums.User;
 using API.Entities.MetadataMatching;
+using API.Entities.User;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner.Parser;
@@ -512,5 +515,30 @@ public static class Seed
             user.ApiKey = HashUtil.ApiKey();
         }
         await context.SaveChangesAsync();
+    }
+
+    public static List<AppUserAuthKey> CreateDefaultAuthKeys()
+    {
+        return
+        [
+            new AppUserAuthKey()
+            {
+                Name = "opds",
+                Key = AuthKeyHelper.GenerateKey(32),
+                CreatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = null,
+                Permissions = AuthKeyPermission.All,
+                Provider = AuthKeyProvider.System,
+            },
+            new AppUserAuthKey()
+            {
+                Name = "image-only",
+                Key = AuthKeyHelper.GenerateKey(32),
+                CreatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = null,
+                Permissions = AuthKeyPermission.All,
+                Provider = AuthKeyProvider.System,
+            }
+        ];
     }
 }

@@ -80,7 +80,7 @@ public interface IUserRepository
     Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int imageOffset, int userId);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId);
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
-    Task<UserDto?> GetUserDtoByApiKeyAsync(string apiKey);
+    Task<UserDto?> GetUserDtoByAuthKeyAsync(string authKey);
     Task<UserDto?> GetUserDtoById(int userId);
     Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
@@ -939,10 +939,14 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<UserDto?> GetUserDtoByApiKeyAsync(string apiKey)
+
+    public async Task<UserDto?> GetUserDtoByAuthKeyAsync(string authKey)
     {
-        return await _context.AppUser
-            .Where(u => u.ApiKey != null && u.ApiKey.Equals(apiKey))
+        if (string.IsNullOrEmpty(authKey)) return null;
+
+        return await _context.AppUserAuthKey
+            .Where(k => k.Key == authKey)
+            .Select(k => k.AppUser)
             .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }

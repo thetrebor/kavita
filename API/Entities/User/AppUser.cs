@@ -128,6 +128,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     public IList<AppUserSideNavStream> SideNavStreams { get; set; } = null!;
     public IList<AppUserExternalSource> ExternalSources { get; set; } = null!;
+    /// <summary>
+    /// Auth keys for access to Kavita
+    /// </summary>
+    public ICollection<AppUserAuthKey> AuthKeys { get; set; } = null!;
 
 
     /// <inheritdoc />

@@ -78,6 +78,6 @@ public enum AuthenticationType
 {
     Unknown = 0,
     JWT = 1,
-    ApiKey = 2,
-    OIDC = 3
+    AuthKey = 2,
+    OIDC = 3,
 }
