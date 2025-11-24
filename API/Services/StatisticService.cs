@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
-using API.DTOs.Person;
 using API.DTOs.Statistics;
 using API.DTOs.Stats;
 using API.DTOs.Stats.V3.ClientDevice;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Progress;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
@@ -43,16 +39,16 @@ public interface IStatisticService
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
-    Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year);
+    Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId);
     Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
-    Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId);
-    Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId);
-    Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId);
-    Task<SpreadStatsDto> GetWordSpreadForUser(StatsFilterDto filter, int userId);
+    Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
+    Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
+    Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId);
+    Task<SpreadStatsDto> GetWordSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<StatCount<int>>> PagesPerYear(int userId);
-    Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId);
-    Task<int> GetTotalReads(int userId);
+    Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId, int requestingUserId);
+    Task<int> GetTotalReads(int userId, int requestingUserId);
 }
 
 /// <summary>
@@ -646,8 +642,11 @@ public class StatisticService : IStatisticService
         return result;
     }
 
-    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year)
+    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId)
     {
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
         var startDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         var endDate = startDate.AddYears(1).AddSeconds(-1);
 
@@ -659,6 +658,11 @@ public class StatisticService : IStatisticService
             .ToListAsync();
 
         var result = new ReadingActivityGraphDto();
+
+        if (sessions.Count == 0)
+        {
+            return result;
+        }
 
         // Pre-populate all days of the year with empty entries
         var currentDate = startDate;
@@ -690,7 +694,7 @@ public class StatisticService : IStatisticService
 
             var validSessionData = session.ActivityData
                 .AsQueryable()
-                .ApplyStatsFilter(filter, userId, false)
+                .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, false)
                 .AsEnumerable()
                 .ToList();
 
@@ -830,10 +834,13 @@ public class StatisticService : IStatisticService
         return await query.ToListAsync();
     }
 
-    public async Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId)
+    public async Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId)
     {
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
         var readsPerGenre = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .GroupBy(d => d.SeriesId)
             .Select(d => new
             {
@@ -873,20 +880,20 @@ public class StatisticService : IStatisticService
             .ToListAsync();
 
         var totalMissingData = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Select(p => p.SeriesId)
             .Distinct()
             .Join(_context.SeriesMetadata, p => p, sm => sm.SeriesId, (g, m) => m.Genres)
             .CountAsync(g => !g.Any());
 
         var totalReads = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .GroupBy(p => p.SeriesId)
             .Select(g => g.Count())
             .SumAsync();
 
         var totalReadGenres = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Genres)
             .SelectMany(g => g.Select(gg => gg.NormalizedTitle))
             .Distinct()
@@ -902,11 +909,13 @@ public class StatisticService : IStatisticService
 
     }
 
-    public async Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId)
+    public async Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId)
     {
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var readsPerTag = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .GroupBy(d => d.SeriesId)
             .Select(d => new
             {
@@ -946,20 +955,20 @@ public class StatisticService : IStatisticService
             .ToListAsync();
 
         var totalMissingData = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Select(p => p.SeriesId)
             .Distinct()
             .Join(_context.SeriesMetadata, p => p, sm => sm.SeriesId, (g, m) => m.Tags)
             .CountAsync(g => !g.Any());
 
         var totalReads = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .GroupBy(p => p.SeriesId)
             .Select(g => g.Count())
             .SumAsync();
 
         var totalReadTags = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Tags)
             .SelectMany(g => g.Select(gg => gg.NormalizedTitle))
             .Distinct()
@@ -974,10 +983,13 @@ public class StatisticService : IStatisticService
         };
     }
 
-    public async Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId)
+    public async Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId)
     {
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
         var fullyReadChapters = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Join(
                 _context.Chapter,
                 progress => progress.ChapterId,
@@ -1012,10 +1024,13 @@ public class StatisticService : IStatisticService
         };
     }
 
-    public async Task<SpreadStatsDto> GetWordSpreadForUser(StatsFilterDto filter, int userId)
+    public async Task<SpreadStatsDto> GetWordSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId)
     {
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
         var wordsInFullyReadChapters = await _context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Join(
                 _context.Chapter,
                 progress => progress.ChapterId,
@@ -1082,12 +1097,15 @@ public class StatisticService : IStatisticService
             }).ToListAsync();
     }
 
-    public async Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId)
+    public async Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId, int requestingUserId)
     {
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
         var res = await _context.ChapterPeople
             .Where(cp => cp.Role == PersonRole.Writer)
             .Join(
-                _context.AppUserReadingSessionActivityData.ApplyStatsFilter(filter, userId),
+                _context.AppUserReadingSessionActivityData.ApplyStatsFilter(filter, userId, socialPreferences, requestingUser),
                 cp => cp.ChapterId,
                 d => d.ChapterId,
                 (cp, data) => new { cp.PersonId, cp.ChapterId, cp.Person.Name }
@@ -1127,10 +1145,19 @@ public class StatisticService : IStatisticService
 
     }
 
-    public Task<int> GetTotalReads(int userId)
+    public async Task<int> GetTotalReads(int userId, int requestingUserId)
     {
-        return _context.AppUserReadingSessionActivityData
-            .Where(d => d.ReadingSession.AppUserId == userId && d.EndPage >= d.Chapter.Pages)
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
+        var librariesForUser = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
+        var filter = new StatsFilterDto
+        {
+            Libraries = librariesForUser,
+        };
+
+        return await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .CountAsync();
     }
 

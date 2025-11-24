@@ -13,6 +13,7 @@ using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.DTOs.SideNav;
 using API.Entities;
+using API.Entities.Enums.UserPreferences;
 using API.Entities.User;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
@@ -128,6 +129,8 @@ public interface IUserRepository
     Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
     Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
     Task<string?> GetPersonCoverImageAsync(int personId);
+    Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId);
+    Task<AppUserPreferences> GetPreferencesForUser(int userId);
 
 }
 
@@ -1024,5 +1027,20 @@ public class UserRepository : IUserRepository
             .Where(p => p.Id == personId)
             .Select(p => p.CoverImage)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId)
+    {
+        return await _context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .Select(p => p.SocialPreferences)
+            .FirstAsync();
+    }
+
+    public async Task<AppUserPreferences> GetPreferencesForUser(int userId)
+    {
+        return await _context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .FirstAsync();
     }
 }
