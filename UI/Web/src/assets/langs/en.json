@@ -2837,7 +2837,9 @@
         "no-reviews": "No Reviews yet",
         "user-you": "you",
         "user-possessive-your": "your",
-        "user-possessive": "{{name}}'s"
+        "user-possessive": "{{name}}'s",
+        "total-reads-badge": "{{reads}} Reads",
+        "k+-badge": "K+ Subscriber"
     },
 
     "profile-image": {

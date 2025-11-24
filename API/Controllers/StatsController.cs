@@ -346,6 +346,20 @@ public class StatsController(
     }
 
     /// <summary>
+    /// Returns the total amount reads in the given filter
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [ProfilePrivacy]
+    [HttpGet("total-reads")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<int>> GetTotalReads(int userId)
+    {
+        return Ok(await statService.GetTotalReads(userId));
+    }
+
+    // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?
+    /// <summary>
     /// Cleans the stats filter to only include valid data. I.e. only requests libraries the user has access to
     /// </summary>
     /// <param name="filter"></param>

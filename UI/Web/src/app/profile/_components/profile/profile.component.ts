@@ -37,6 +37,8 @@ import {
 } from "../../../statistics/_components/library-and-time-selector/library-and-time-selector.component";
 import {map} from "rxjs/operators";
 import {StatsFilter} from "../../../statistics/_models/stats-filter";
+import {LicenseService} from "../../../_services/license.service";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -66,7 +68,8 @@ enum TabID {
     ReactiveFormsModule,
     ProfileImageComponent,
     FavouriteAuthorsComponent,
-    LibraryAndTimeSelectorComponent
+    LibraryAndTimeSelectorComponent,
+    LoadingComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -80,8 +83,7 @@ export class ProfileComponent {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
   private readonly statsService = inject(StatisticsService);
-  private readonly libraryService = inject(LibraryService);
-  private readonly utilityService = inject(UtilityService);
+  protected readonly licenseService = inject(LicenseService);
 
   // Set by angular from the resolver
   memberInfo = input.required<MemberInfo>();
@@ -92,9 +94,9 @@ export class ProfileComponent {
   protected readonly tagsBreakdown = this.statsService.getTagBreakDownResource(() => this.filter(), () => this.userId());
   protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.filter(), () => this.userId());
   protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.filter(), () => this.userId());
+  protected readonly totalReadsResource = this.statsService.getTotalReads(() => this.userId());
 
   activeTabId = TabID.Overview;
-
 
   filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
     timeFilter: new FormGroup({
@@ -108,6 +110,14 @@ export class ProfileComponent {
     map(value => value as StatsFilter),
   ));
   year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
+
+  totalReads = computed(() => {
+    if (!this.totalReadsResource.hasValue()) {
+      return 0;
+    }
+
+    return this.totalReadsResource.value();
+  });
 
   constructor() {
     this.route.fragment.pipe(tap(frag => {

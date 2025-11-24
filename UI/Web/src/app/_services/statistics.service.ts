@@ -235,4 +235,8 @@ export class StatisticsService {
     return this.filterResource<FavouriteAuthor[]>(statsFilter, userId, 'favourite-authors');
   }
 
+  getTotalReads(userId: () => number) {
+    return httpResource<number>(() => this.baseUrl + `stats/total-reads?userId=${userId()}`).asReadonly();
+  }
+
 }

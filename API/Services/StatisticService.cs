@@ -52,6 +52,7 @@ public interface IStatisticService
     Task<SpreadStatsDto> GetWordSpreadForUser(StatsFilterDto filter, int userId);
     Task<IList<StatCount<int>>> PagesPerYear(int userId);
     Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId);
+    Task<int> GetTotalReads(int userId);
 }
 
 /// <summary>
@@ -1124,6 +1125,13 @@ public class StatisticService : IStatisticService
 
         return final;
 
+    }
+
+    public Task<int> GetTotalReads(int userId)
+    {
+        return _context.AppUserReadingSessionActivityData
+            .Where(d => d.ReadingSession.AppUserId == userId && d.EndPage >= d.Chapter.Pages)
+            .CountAsync();
     }
 
 
