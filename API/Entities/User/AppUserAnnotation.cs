@@ -54,7 +54,7 @@ public class AppUserAnnotation : IEntityDate
     /// <summary>
     /// A set container userIds of all users who have liked this annotations
     /// </summary>
-    public ISet<int> Likes { get; set; } = new HashSet<int>();
+    public IList<int> Likes { get; set; } = new List<int>();
 
      /// <summary>
      /// Title of the TOC Chapter within Epub (not Chapter Entity)
