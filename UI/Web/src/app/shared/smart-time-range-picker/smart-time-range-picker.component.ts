@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import {toSignal} from "@angular/core/rxjs-interop";
 import {ServerService} from "../../_services/server.service";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {SettingsService} from "../../admin/settings.service";
 
 export type TimeRangeFormGroup = FormGroup<{
   startDate: FormControl<Date | null>,
@@ -36,7 +37,7 @@ export type TimeRange = {
 })
 export class SmartTimeRangePickerComponent implements OnInit {
 
-  private serverService = inject(ServerService);
+  private settingsService = inject(SettingsService);
 
   @Output() timeRangeUpdate = new EventEmitter<TimeRange>();
 
@@ -89,18 +90,15 @@ export class SmartTimeRangePickerComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.serverService.getServerInfo().pipe(
-      tap(info => {
-        const installDate = info.firstInstallDate;
-        if (installDate) {
-         const installYear = new Date(installDate).getFullYear();
-         const amountOfYears = new Date().getFullYear() - installYear + 1;
+    this.settingsService.getFirstInstallDate().pipe(
+      tap(installDate => {
+        const installYear = new Date(installDate).getFullYear();
+        const amountOfYears = new Date().getFullYear() - installYear + 1;
 
-         this.yearOptions.set(Array.from(
-           {length: amountOfYears},
-           (_, i) => installYear + i,
-         ));
-        }
+        this.yearOptions.set(Array.from(
+          {length: amountOfYears},
+          (_, i) => installYear + i,
+        ));
       })
     ).subscribe();
   }

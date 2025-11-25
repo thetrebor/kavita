@@ -35,6 +35,10 @@ export class SettingsService {
     return this.http.get<OidcPublicConfig>(this.baseUrl + "settings/oidc");
   }
 
+  getFirstInstallDate() {
+    return this.http.get<Date>(this.baseUrl + 'settings/first-install-date');
+  }
+
   getMetadataSettings() {
     return this.http.get<MetadataSettings>(this.baseUrl + 'settings/metadata-settings');
   }
