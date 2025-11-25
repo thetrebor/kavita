@@ -650,12 +650,25 @@ public class StatisticService : IStatisticService
         var startDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         var endDate = startDate.AddYears(1).AddSeconds(-1);
 
+        filter.StartDate = startDate;
+        filter.EndDate = endDate;
+
         var sessions = await _context.AppUserReadingSession
             .Where(s => s.AppUserId == userId)
             .Where(s => s.StartTimeUtc >= startDate && s.EndTimeUtc <= endDate)
             .OrderBy(s => s.StartTimeUtc)
-            .Include(s => s.ActivityData)
             .ToListAsync();
+
+        var sessionIds = sessions.Select(s => s.Id).ToList();
+
+        var filteredActivityData = await _context.AppUserReadingSessionActivityData
+            .Where(ad => sessionIds.Contains(ad.AppUserReadingSessionId))
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, false)
+            .ToListAsync();
+
+        var activityDataBySession = filteredActivityData
+            .GroupBy(ad => ad.AppUserReadingSessionId)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
         var result = new ReadingActivityGraphDto();
 
@@ -683,7 +696,8 @@ public class StatisticService : IStatisticService
         // Group sessions by day and aggregate data
         foreach (var session in sessions)
         {
-            if (session.EndTimeUtc == null || session.ActivityData == null)
+            var activityData = activityDataBySession.GetValueOrDefault(session.Id);
+            if (session.EndTimeUtc == null || activityData == null)
                 continue;
 
             var sessionDate = session.StartTimeUtc.Date;
@@ -692,13 +706,7 @@ public class StatisticService : IStatisticService
             if (!result.TryGetValue(dateKey, out var entry))
                 continue; // Skip if date is somehow outside our year range
 
-            var validSessionData = session.ActivityData
-                .AsQueryable()
-                .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, false)
-                .AsEnumerable()
-                .ToList();
-
-            if (validSessionData.Count == 0)
+            if (activityData.Count == 0)
                 continue;
 
             // Calculate session duration
@@ -708,7 +716,7 @@ public class StatisticService : IStatisticService
             // Aggregate activity data from the session
             var processedChapters = new HashSet<int>(); // Track unique chapters per day
 
-            foreach (var activity in validSessionData)
+            foreach (var activity in activityData)
             {
                 entry.TotalPages += activity.PagesRead;
                 entry.TotalWords += activity.WordsRead;

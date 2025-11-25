@@ -5,13 +5,12 @@ namespace API.DTOs.Statistics;
 
 public sealed record StatsFilterDto
 {
-    public DateTime? StartDate { get; init; }
+    public DateTime? StartDate { get; set; }
 
-    private DateTime? _endDate;
     public DateTime? EndDate
     {
-        get => _endDate;
-        init => _endDate = value == null || value == DateTime.MinValue ? DateTime.MaxValue : value;
+        get;
+        set => field = value == null || value == DateTime.MinValue ? DateTime.MaxValue : value;
     }
 
 
