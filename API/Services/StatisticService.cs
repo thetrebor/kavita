@@ -46,7 +46,7 @@ public interface IStatisticService
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<SpreadStatsDto> GetWordSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId);
-    Task<IList<StatCount<int>>> PagesPerYear(int userId);
+    Task<IList<StatCount<YearMonthGroupingDto>>> GetReadsPerMonth(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId, int requestingUserId);
     Task<int> GetTotalReads(int userId, int requestingUserId);
 }
@@ -1092,16 +1092,26 @@ public class StatisticService : IStatisticService
 
     }
 
-    // Needs JSON actions in DB
-    public async Task<IList<StatCount<int>>> PagesPerYear(int userId)
+    public async Task<IList<StatCount<YearMonthGroupingDto>>> GetReadsPerMonth(StatsFilterDto filter, int userId, int requestingUserId)
     {
-        return await _context.AppUserReadingSession
-            .Where(p => p.AppUserId == userId)
-            .GroupBy(s => s.CreatedUtc.Year)
-            .Select(g => new StatCount<int>()
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
+        // It makes no sense to filter this in time. Remove them
+        filter.StartDate = null;
+        filter.EndDate = null;
+
+        return await _context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .GroupBy(s => new {s.ReadingSession.CreatedUtc.Year, s.ReadingSession.CreatedUtc.Month})
+            .Select(g => new StatCount<YearMonthGroupingDto>()
             {
-                Value = g.Key,
-                Count = g.Sum(s => s.ActivityData.Sum(a => a.PagesRead)),
+                Value = new YearMonthGroupingDto()
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                },
+                Count = g.Count(),
             }).ToListAsync();
     }
 

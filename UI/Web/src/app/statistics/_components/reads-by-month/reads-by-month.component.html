@@ -1,0 +1,9 @@
+<ng-container *transloco="let t; prefix: 'preferred-format'">
+
+  <div class="card p-4">
+    @if (readsByMonthResource().hasValue()) {
+      <app-line-chart [axisLabels]="axisLabels()" [data]="data()" [legendLabels]="legendLabels()" />
+    }
+  </div>
+
+</ng-container>

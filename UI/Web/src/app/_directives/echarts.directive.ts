@@ -17,6 +17,7 @@ import {
   TooltipComponentOption,
   DatasetComponentOption,
   LegendComponentOption,
+  ToolboxComponentOption,
 } from 'echarts/components';
 import {ThemeService} from "../_services/theme.service";
 import {asyncScheduler, Subject, Subscription, tap} from "rxjs";
@@ -31,6 +32,7 @@ export type ECOption = ComposeOption<
   | TooltipComponentOption
   | DatasetComponentOption
   | LegendComponentOption
+  | ToolboxComponentOption
 >;
 
 /**

@@ -358,6 +358,22 @@ public class StatsController(
         return Ok(await statService.GetTotalReads(userId, User.GetUserId()));
     }
 
+    /// <summary>
+    /// Gives the total amount of chapters reads per month, filters start & end date will not apply
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [ProfilePrivacy]
+    [HttpGet("reads-by-month")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<YearMonthGroupingDto>>>> GetReadsPerMonth([FromQuery] StatsFilterDto filter, int userId)
+    {
+        await CleanStatsFilter(filter, UserId);
+
+        return Ok(await statService.GetReadsPerMonth(filter, userId, User.GetUserId()));
+    }
+
     // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?
     /// <summary>
     /// Cleans the stats filter to only include valid data. I.e. only requests libraries the user has access to

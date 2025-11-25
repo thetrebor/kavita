@@ -39,6 +39,8 @@ import {map} from "rxjs/operators";
 import {StatsFilter} from "../../../statistics/_models/stats-filter";
 import {LicenseService} from "../../../_services/license.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {LineChartComponent} from "../../../statistics/_components/line-chart/line-chart.component";
+import {ReadsByMonthComponent} from "../../../statistics/_components/reads-by-month/reads-by-month.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -69,7 +71,9 @@ enum TabID {
     ProfileImageComponent,
     FavouriteAuthorsComponent,
     LibraryAndTimeSelectorComponent,
-    LoadingComponent
+    LoadingComponent,
+    LineChartComponent,
+    ReadsByMonthComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -94,6 +98,7 @@ export class ProfileComponent {
   protected readonly tagsBreakdown = this.statsService.getTagBreakDownResource(() => this.filter(), () => this.userId());
   protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.filter(), () => this.userId());
   protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.filter(), () => this.userId());
+  protected readonly readsByMonth = this.statsService.getReadsByMonths(() => this.filter(), () => this.userId());
   protected readonly totalReadsResource = this.statsService.getTotalReads(() => this.userId());
 
   activeTabId = TabID.Overview;

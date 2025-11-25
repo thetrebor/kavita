@@ -235,6 +235,10 @@ export class StatisticsService {
     return this.filterResource<FavouriteAuthor[]>(statsFilter, userId, 'favourite-authors');
   }
 
+  getReadsByMonths(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<{year: number, month: number}>[]>(statsFilter, userId, 'reads-by-month');
+  }
+
   getTotalReads(userId: () => number) {
     return httpResource<number>(() => this.baseUrl + `stats/total-reads?userId=${userId()}`).asReadonly();
   }

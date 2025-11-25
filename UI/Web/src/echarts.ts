@@ -5,7 +5,8 @@ import {
   GridComponent, LegendComponent,
   TitleComponent,
   TooltipComponent,
-  TransformComponent
+  TransformComponent,
+  ToolboxComponent
 } from "echarts/components";
 import {LabelLayout, UniversalTransition} from "echarts/features";
 import {SVGRenderer} from "echarts/renderers";
@@ -24,6 +25,7 @@ export function registerECharts() {
     LegendComponent,
     LabelLayout,
     UniversalTransition,
-    SVGRenderer
+    SVGRenderer,
+    ToolboxComponent
   ]);
 }
