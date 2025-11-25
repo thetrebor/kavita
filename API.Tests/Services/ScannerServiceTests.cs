@@ -1132,4 +1132,48 @@ public class ScannerServiceTests: AbstractDbTest
         Assert.Equal("The Avengers", postLib.Series.First().Name);
         Assert.Equal("Avengers", postLib.Series.First().SortName);
     }
+
+    [Fact]
+    public async Task ScanAfterNumberAddDoesntCreateNewChapter()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Adding Number After Scan - Manga.json";
+
+        // No metadata
+        var library = await scannerHelper.GenerateScannerData(testcase);
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var series = postLib.Series.First();
+        Assert.Single(series.Volumes);
+        Assert.Single(series.Volumes.First().Chapters);
+
+        await scannerHelper.GenerateScannerData(testcase, new Dictionary<string, ComicInfo>
+        {
+            ["Spice And Wolf Vol. 1.cbz"] = new ()
+            {
+                Number = "1-5",
+            },
+        });
+
+        await scanner.ScanLibrary(library.Id, true);
+
+        postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        series = postLib.Series.First();
+        Assert.Single(series.Volumes);
+        Assert.Single(series.Volumes.First().Chapters);
+        Assert.Equal(1, series.Volumes.First().Chapters.First().MinNumber);
+        Assert.Equal(5, series.Volumes.First().Chapters.First().MaxNumber);
+
+    }
 }
