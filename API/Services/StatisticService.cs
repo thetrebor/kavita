@@ -896,9 +896,9 @@ public class StatisticService : IStatisticService
 
         var totalReads = await _context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
-            .GroupBy(p => p.SeriesId)
-            .Select(g => g.Count())
-            .SumAsync();
+            .Select(p => p.SeriesId)
+            .Distinct()
+            .CountAsync();
 
         var totalReadGenres = await _context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
@@ -971,9 +971,9 @@ public class StatisticService : IStatisticService
 
         var totalReads = await _context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
-            .GroupBy(p => p.SeriesId)
-            .Select(g => g.Count())
-            .SumAsync();
+            .Select(p => p.SeriesId)
+            .Distinct()
+            .CountAsync();
 
         var totalReadTags = await _context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
