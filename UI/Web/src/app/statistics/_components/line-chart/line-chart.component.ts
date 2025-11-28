@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
-import {EChartsDirective} from "../../../_directives/echarts.directive";
+import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
 import {LineSeriesOption} from "echarts/charts";
 
 type ArrayAble<T> = T | T[];
@@ -24,6 +24,7 @@ export class LineChartComponent {
    */
   axisLabels = input.required<string[]>();
   legendLabels = input<string[]>([]);
+  showLegend = input(true);
 
   /**
    * Height of the chart
@@ -45,6 +46,12 @@ export class LineChartComponent {
     return Array.isArray(data[0]);
   });
 
+  // TODO: Update colours, move into theme service?
+  private getColorForIndex(index: number): string {
+    const palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452'];
+    return palette[index % palette.length];
+  }
+
   private seriesOption = computed<ArrayAble<LineSeriesOption>>(() => {
     const data = this.data();
     const isMultiLineChart = this.isMultiLineChart();
@@ -63,26 +70,27 @@ export class LineChartComponent {
       type: 'line',
       stack: 'Total',
       data: dataSet as any[],
+      itemStyle: {
+        color: this.getColorForIndex(index),
+      }
     }))
   })
 
-  protected options = computed(() => ({
+  protected options = computed<ECOption>(() => ({
     legend: {
+      show: this.showLegend(),
       data: this.legendLabels(),
     },
     tooltip: {
-      show: true
+      show: true,
+      trigger: "axis",
+      order: "valueDesc"
     },
     grid: {
       left: '10%',
       right: '5%',
       top: '5%',
       bottom: '5%'
-    },
-    toolbox: {
-      feature: {
-        saveAsImage: {}
-      }
     },
     xAxis: {
       type: 'category',

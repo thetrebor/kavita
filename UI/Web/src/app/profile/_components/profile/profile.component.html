@@ -4,7 +4,7 @@
 
   @if (user) {
 
-        <div class="main-container container-fluid pt-2 pb-2 mb-5 ms-md-2 me-md-2 w-auto"
+    <div class="main-container container-fluid pt-2 pb-2 mb-5 ms-md-2 me-md-2 w-auto"
           [class.has-bg]="backgroundImage()"
           [style.--profile-bg]="backgroundImage() ? 'url(' + backgroundImage() + ')' : null">
       <div class="row mb-0 mb-xl-3 info-container align-items-center justify-content-center justify-content-lg-start">
@@ -131,7 +131,7 @@
       </ul>
     </div>
 
-    <div [ngbNavOutlet]="nav" class="pt-2"></div>
+    <div [ngbNavOutlet]="nav" class="pt-2 m-2"></div>
   }
 
 

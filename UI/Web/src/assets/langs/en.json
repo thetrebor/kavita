@@ -2867,6 +2867,11 @@
         "missing": "Missing genres for {{amount}} series"
     },
 
+    "reads-by-month": {
+        "title": "Total reads by month",
+        "sub-title": "{{username}} has read the most in {{month}} {{year}} with {{reads}} chapters read"
+    },
+
     "activity-graph": {
         "title": "Reading Activity",
         "day-of-week-alt": "Day of the Week",

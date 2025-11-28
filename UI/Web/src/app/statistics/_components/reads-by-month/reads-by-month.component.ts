@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, input, Resource} from '@an
 import {StatCount} from "../../_models/stat-count";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LineChartComponent} from "../line-chart/line-chart.component";
+import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
 
 @Component({
   selector: 'app-reads-by-month',
@@ -18,6 +19,20 @@ export class ReadsByMonthComponent {
   userName = input.required<string>();
   readsByMonthResource = input.required<Resource<StatCount<{year: number, month: number}>[] | undefined>>();
 
+  highestRead = computed(() => {
+    if (!this.readsByMonthResource().hasValue()) return undefined;
+
+    const mostRead = this.readsByMonthResource().value()!.reduce((prev, cur) =>
+      cur.count > prev.count ? cur : prev);
+
+    const monthLabelPipe = new MonthLabelPipe();
+    return {
+      year: mostRead.value.year,
+      month: monthLabelPipe.transform(mostRead.value.month + 1, false),
+      count: mostRead.count,
+    }
+  })
+
   legendLabels = computed(() => {
     if (!this.readsByMonthResource().hasValue()) return [];
 
@@ -25,7 +40,10 @@ export class ReadsByMonthComponent {
     return Array.from(new Set(years)).sort((a, b) => a - b).map(y => y + '');
   });
 
-  axisLabels = computed(() => ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
+  axisLabels = computed(() => {
+    const monthLabelPipe = new MonthLabelPipe();
+    return Array.from({length: 12}, (_, i) => monthLabelPipe.transform(i+1, false));
+  });
 
   data = computed(() => {
     if (!this.readsByMonthResource().hasValue()) return [];

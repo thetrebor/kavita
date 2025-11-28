@@ -1,8 +1,21 @@
-<ng-container *transloco="let t; prefix: 'preferred-format'">
+<ng-container *transloco="let t; prefix: 'reads-by-month'">
 
   <div class="card p-4">
+
+    <h4>{{t('title')}}</h4>
+
+    @let mostReadValue = highestRead();
+    @if (mostReadValue) {
+      <span>{{t('sub-title', {username: userName(), year: mostReadValue.year, month: mostReadValue.month, reads: mostReadValue.count})}}</span>
+    }
+
     @if (readsByMonthResource().hasValue()) {
-      <app-line-chart [axisLabels]="axisLabels()" [data]="data()" [legendLabels]="legendLabels()" />
+      <app-line-chart
+        [axisLabels]="axisLabels()"
+        [data]="data()"
+        [legendLabels]="legendLabels()"
+        [showLegend]="false"
+      />
     }
   </div>
 

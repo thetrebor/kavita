@@ -235,11 +235,6 @@ export class BarChartComponent {
       yAxis: this.yAxisOption(),
       series: this.seriesOption(),
       tooltip: this.tooltipOption(),
-      toolbox: {
-        feature: {
-          saveAsImage: {}
-        }
-      },
     };
   });
 }

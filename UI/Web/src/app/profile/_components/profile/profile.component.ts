@@ -26,9 +26,7 @@ import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {
   BucketSpreadChartComponent
 } from "../../../statistics/_components/bucket-spread-chart/bucket-spread-chart.component";
-import {LibraryService} from "../../../_services/library.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {UtilityService} from "../../../shared/_services/utility.service";
 import {ProfileImageComponent} from "../profile-image/profile-image.component";
 import {FavouriteAuthorsComponent} from "../../../statistics/_components/favourite-authors/favourite-authors.component";
 import {
@@ -39,7 +37,6 @@ import {map} from "rxjs/operators";
 import {StatsFilter} from "../../../statistics/_models/stats-filter";
 import {LicenseService} from "../../../_services/license.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
-import {LineChartComponent} from "../../../statistics/_components/line-chart/line-chart.component";
 import {ReadsByMonthComponent} from "../../../statistics/_components/reads-by-month/reads-by-month.component";
 
 enum TabID {
@@ -72,7 +69,6 @@ enum TabID {
     FavouriteAuthorsComponent,
     LibraryAndTimeSelectorComponent,
     LoadingComponent,
-    LineChartComponent,
     ReadsByMonthComponent
   ],
   templateUrl: './profile.component.html',
