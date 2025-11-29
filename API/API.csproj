@@ -28,6 +28,7 @@
     <PropertyGroup>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
+        <NoWarn>$(NoWarn);CA1873</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup>
