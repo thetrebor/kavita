@@ -99,6 +99,7 @@ public class LibraryController : BaseApiController
             .ToList();
         library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
         library.DefaultLanguage = dto.DefaultLanguage;
+        library.InheritWebLinksFromFirstChapter = dto.InheritWebLinksFromFirstChapter;
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
@@ -666,6 +667,8 @@ public class LibraryController : BaseApiController
 
     private void UpdateLibrarySettings(UpdateLibraryDto dto, Library library, bool updateType = true)
     {
+        // ALSO ADD NEW FIELDS IN THE CREATE LIBRARY ENDPOINT
+
         if (updateType)
         {
             library.Type = dto.Type;
