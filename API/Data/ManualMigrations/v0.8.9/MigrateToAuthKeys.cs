@@ -30,7 +30,7 @@ public class MigrateToAuthKeys : ManualMigration
         {
             var key = new AppUserAuthKey()
             {
-                Name = "ApiKey",
+                Name = "opds",
                 Key = user.ApiKey,
                 CreatedAtUtc = DateTime.UtcNow,
                 ExpiresAtUtc = null,

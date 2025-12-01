@@ -12,6 +12,7 @@ using API.DTOs.Email;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.User;
 using API.Entities.User;
 using API.Errors;
 using API.Extensions;
@@ -1179,7 +1180,13 @@ public class AccountController : BaseApiController
                 baseUrl = baseUrl.Substring(1, baseUrl.Length - 1);
             }
         }
-        return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
+
+        var opdsAuthKey = (await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId))
+            .Where(k => k.Name == "opds" && k.Provider == AuthKeyProvider.System)
+            .Select(k => k.Key)
+            .FirstOrDefault();
+
+        return Ok(origin + "/" + baseUrl + "api/opds/" + opdsAuthKey);
     }
 
 
@@ -1205,9 +1212,6 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<IList<AuthKeyDto>>> GetAuthKeys()
     {
         // TODO: Make sure the Auth isn't an AuthKey itself
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.AuthKeys);
-        if (user == null) return Unauthorized();
-
-        return Ok(_mapper.Map<List<AuthKeyDto>>(user.AuthKeys));
+        return Ok(await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId));
     }
 }

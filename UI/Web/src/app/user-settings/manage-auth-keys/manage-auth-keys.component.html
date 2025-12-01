@@ -1,18 +1,20 @@
 <ng-container *transloco="let t; prefix:'manage-auth-keys'">
-  @if (!opdsEnabled) {
-    <div class="alert alert-warning" role="alert">{{t('clients-opds-alert')}}</div>
+  @if (isOpdsEnabledResource.hasValue()) {
+    @let opdsEnabled = isOpdsEnabledResource.value();
+    @if (!opdsEnabled) {
+      <div class="alert alert-warning" role="alert">{{t('clients-opds-alert')}}</div>
+    }
+
+    <p>{{t('clients-opds-description')}}</p>
+
+
+    @if (opdsEnabled && opdsUrl) {
+      <div class="mt-4">
+        <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true" [showRefresh]="false"
+                     [transform]="makeUrl" />
+      </div>
+    }
   }
-
-  <p>{{t('clients-opds-description')}}</p>
-
-
-  @if (opdsEnabled && opdsUrl) {
-    <div class="mt-4">
-      <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true" [showRefresh]="false"
-                 [transform]="makeUrl" />
-    </div>
-  }
-
 
   <h4 class="mt-2">
     {{t('auth-keys-title')}}

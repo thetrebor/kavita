@@ -1,12 +1,10 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {ApiKeyComponent} from "../api-key/api-key.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {SettingsService} from "../../admin/settings.service";
 import {User} from "../../_models/user/user";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {WikiLink} from "../../_models/wiki";
-import {LicenseService} from "../../_services/license.service";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AuthKey, AuthKeyProvider} from "../../_models/user/auth-key";
 import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
@@ -34,11 +32,9 @@ import {CreateAuthKeyComponent} from "../_modals/create-auth-key/create-auth-key
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageAuthKeysComponent {
-  private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly licenseService = inject(LicenseService);
   private readonly confirmService = inject(ConfirmService);
   private readonly modalService = inject(NgbModal);
 
@@ -46,26 +42,15 @@ export class ManageAuthKeysComponent {
   user: User | undefined = undefined;
   opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
-  opdsEnabled: boolean = false;
   opdsUrl: string = '';
-  hasActiveLicense = false;
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
 
   protected readonly authKeysResource = this.accountService.getAuthKeysResource();
+  protected readonly isOpdsEnabledResource = this.settingsService.getOpdsEnabledResource();
 
   constructor() {
     this.accountService.getOpdsUrl().subscribe(res => {
       this.opdsUrl = res;
-      this.cdRef.markForCheck();
-    });
-
-    this.settingsService.getOpdsEnabled().subscribe(res => {
-      this.opdsEnabled = res;
-      this.cdRef.markForCheck();
-    });
-
-    this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-      this.hasActiveLicense = res;
       this.cdRef.markForCheck();
     });
   }

@@ -129,6 +129,7 @@ public interface IUserRepository
     Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
     Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
     Task<string?> GetPersonCoverImageAsync(int personId);
+    Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId);
 
 }
 
@@ -1029,5 +1030,13 @@ public class UserRepository : IUserRepository
             .Where(p => p.Id == personId)
             .Select(p => p.CoverImage)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId)
+    {
+        return await _context.AppUserAuthKey
+            .Where(k => k.AppUserId == userId)
+            .ProjectTo<AuthKeyDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 }
