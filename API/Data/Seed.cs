@@ -527,7 +527,6 @@ public static class Seed
                 Key = AuthKeyHelper.GenerateKey(32),
                 CreatedAtUtc = DateTime.UtcNow,
                 ExpiresAtUtc = null,
-                Permissions = AuthKeyPermission.All,
                 Provider = AuthKeyProvider.System,
             },
             new AppUserAuthKey()
@@ -536,7 +535,6 @@ public static class Seed
                 Key = AuthKeyHelper.GenerateKey(32),
                 CreatedAtUtc = DateTime.UtcNow,
                 ExpiresAtUtc = null,
-                Permissions = AuthKeyPermission.All,
                 Provider = AuthKeyProvider.System,
             }
         ];

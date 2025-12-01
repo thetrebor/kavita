@@ -381,10 +381,6 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .UsingEntity<GenreSeriesMetadata>();
 
         builder.Entity<AppUserAuthKey>()
-            .Property(a => a.Permissions)
-            .HasDefaultValue(AuthKeyPermission.All);
-
-        builder.Entity<AppUserAuthKey>()
             .Property(a => a.Provider)
             .HasDefaultValue(AuthKeyProvider.User);
     }

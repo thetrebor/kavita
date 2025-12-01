@@ -102,7 +102,7 @@ public class AccountController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams | AppUserIncludes.AuthKeys);
         if (user == null) throw new UnauthorizedAccessException();
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -251,6 +251,7 @@ public class AccountController : BaseApiController
         {
             user = await _userManager.Users
                 .Include(u => u.UserPreferences)
+                .Include(u => u.AuthKeys)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpperInvariant());
         }
@@ -320,6 +321,7 @@ public class AccountController : BaseApiController
 
     private async Task<UserDto> ConstructUserDto(AppUser user, IList<string> roles, bool includeTokens = true)
     {
+        // TODO: Clean this up to be streamlined
         var dto = _mapper.Map<UserDto>(user);
 
         if (includeTokens)
@@ -329,13 +331,14 @@ public class AccountController : BaseApiController
         }
 
         dto.Roles = roles;
-        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value;
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value; // Why are we getting this from the DB?
 
         var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
         if (pref == null) return dto;
 
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
+        dto.AuthKeys = _mapper.Map<List<AuthKeyDto>>(user.AuthKeys);
         return dto;
     }
 
@@ -346,7 +349,7 @@ public class AccountController : BaseApiController
     [HttpGet("refresh-account")]
     public async Task<ActionResult<UserDto>> RefreshAccount()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys);
         if (user == null) return Unauthorized();
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -1192,5 +1195,19 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(user.Email)) return Ok(false);
 
         return Ok(_emailService.IsValidEmail(user.Email));
+    }
+
+    /// <summary>
+    /// Returns all Auth Keys with the account
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("auth-keys")]
+    public async Task<ActionResult<IList<AuthKeyDto>>> GetAuthKeys()
+    {
+        // TODO: Make sure the Auth isn't an AuthKey itself
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.AuthKeys);
+        if (user == null) return Unauthorized();
+
+        return Ok(_mapper.Map<List<AuthKeyDto>>(user.AuthKeys));
     }
 }

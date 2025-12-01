@@ -1,12 +1,9 @@
 ﻿using System;
 using API.Entities.Enums.User;
-using Microsoft.EntityFrameworkCore;
 
-namespace API.Entities.User;
+namespace API.DTOs.Account;
 
-[Index(nameof(Key), IsUnique = true)]
-[Index(nameof(ExpiresAtUtc), IsUnique = false)]
-public class AppUserAuthKey
+public sealed record AuthKeyDto
 {
     public int Id { get; set; }
     /// <summary>
@@ -30,7 +27,4 @@ public class AppUserAuthKey
     /// Kavita will have a short-lived key
     /// </summary>
     public AuthKeyProvider Provider { get; set; } = AuthKeyProvider.User;
-
-    public int AppUserId { get; set; }
-    public virtual AppUser AppUser { get; set; }
 }

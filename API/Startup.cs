@@ -475,7 +475,7 @@ public class Startup
                     await MigrateMissingCreatedUtcDate.Migrate(dataContext, logger);
                     await MigrateProfilePreferences.Migrate(dataContext, logger);
                     await MigrateTotalReads.Migrate(dataContext, logger);
-                    await MigrateToAuthKeys.Migrate(dataContext, logger);
+                    await new MigrateToAuthKeys().RunAsync(dataContext, logger);
 
                     #endregion
 

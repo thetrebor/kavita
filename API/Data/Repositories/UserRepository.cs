@@ -45,6 +45,7 @@ public enum AppUserIncludes
     ExternalSources = 1 << 13,
     Collections = 1 << 14,
     ChapterRatings = 1 << 15,
+    AuthKeys = 1 << 16
 }
 
 public interface IUserRepository

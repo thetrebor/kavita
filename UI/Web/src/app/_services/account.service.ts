@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, httpResource} from '@angular/common/http';
 import {computed, DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
@@ -17,6 +17,7 @@ import {Action} from "./action-factory.service";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
+import {AuthKey} from "../_models/user/auth-key";
 
 export enum Role {
   Admin = 'Admin',
@@ -454,6 +455,10 @@ export class AccountService {
 
   getOpdsUrl() {
     return this.httpClient.get<string>(this.baseUrl + 'account/opds-url', TextResonse);
+  }
+
+  getAuthKeysResource() {
+    return httpResource<AuthKey[]>(() => this.baseUrl + `account/auth-keys`).asReadonly();
   }
 
 

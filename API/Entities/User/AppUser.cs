@@ -56,6 +56,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// <summary>
     /// An API Key to interact with external services, like OPDS
     /// </summary>
+    [Obsolete("Migrated to AuthKey in v0.8.9")]
     public string? ApiKey { get; set; }
     /// <summary>
     /// The confirmation token for the user (invite). This will be set to null after the user confirms.

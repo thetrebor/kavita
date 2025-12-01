@@ -1,0 +1,29 @@
+<ng-container *transloco="let t; prefix:'create-auth-key'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body scrollable-modal">
+    <form [formGroup]="settingsForm">
+      <div class="row g-0 mb-2">
+        <label for="name" class="form-label">{{t('name-label')}}</label>
+        @if(settingsForm.get('platform'); as formControl) {
+          <input type="text" autocomplete="off" formControlName="name" class="form-control" />
+          @if (formControl.errors; as errors) {
+            @if (errors.required) {
+              <p class="invalid-feedback">{{t('required-field')}}</p>
+            }
+            @if (errors.email) {
+              <p class="invalid-feedback">{{t('valid-email')}}</p>
+            }
+          }
+        }
+
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
+  </div>
+</ng-container>
