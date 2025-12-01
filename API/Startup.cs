@@ -471,10 +471,10 @@ public class Startup
                     await ManualMigrateBookReadingProgress.Migrate(dataContext, unitOfWork, logger);
 
                     // v0.8.9
-                    await MigrateProgressToReadingSessions.Migrate(dataContext, logger);
-                    await MigrateMissingCreatedUtcDate.Migrate(dataContext, logger);
+                    await new MigrateProgressToReadingSessions().RunAsync(dataContext, logger);
+                    await new MigrateMissingCreatedUtcDate().RunAsync(dataContext, logger);
                     await MigrateProfilePreferences.Migrate(dataContext, logger);
-                    await MigrateTotalReads.Migrate(dataContext, logger);
+                    await new MigrateTotalReads().RunAsync(dataContext, logger);
                     await new MigrateToAuthKeys().RunAsync(dataContext, logger);
 
                     #endregion

@@ -17,7 +17,7 @@ namespace API.Data.ManualMigrations;
 /// </summary>
 public class MigrateToAuthKeys : ManualMigration
 {
-    protected override string MigrationName => nameof(MigrateVolumeNumber);
+    protected override string MigrationName => nameof(MigrateToAuthKeys);
 
     protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
     {
