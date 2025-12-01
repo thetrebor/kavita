@@ -90,8 +90,6 @@ public static class MigrateTotalReads
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {
             Name = "MigrateTotalReads",
-            ProductVersion = BuildInfo.Version.ToString(),
-            RanAt = DateTime.UtcNow
         });
         await dataContext.SaveChangesAsync();
     }
