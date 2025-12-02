@@ -87,6 +87,19 @@
         "add-auth-key": "New"
     },
 
+    "create-auth-key": {
+        "title": "Create Auth Key",
+        "name-label": "Name",
+        "key-length-label": "Key Length",
+        "expiration-label": "Expiration",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "Total Key Length: {{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "Never"
+    },
+
     "identity-provider-pipe": {
         "kavita": "Kavita",
         "oidc": "OpenID Connect"

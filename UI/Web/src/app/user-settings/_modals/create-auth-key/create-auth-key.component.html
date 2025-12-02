@@ -5,21 +5,68 @@
   </div>
   <div class="modal-body scrollable-modal">
     <form [formGroup]="settingsForm">
-      <div class="row g-0 mb-2">
-        <label for="name" class="form-label">{{t('name-label')}}</label>
-        @if(settingsForm.get('platform'); as formControl) {
-          <input type="text" autocomplete="off" formControlName="name" class="form-control" />
-          @if (formControl.errors; as errors) {
-            @if (errors.required) {
-              <p class="invalid-feedback">{{t('required-field')}}</p>
-            }
-            @if (errors.email) {
-              <p class="invalid-feedback">{{t('valid-email')}}</p>
-            }
-          }
-        }
+      @if(settingsForm.get('name'); as formControl) {
+        <div class="row g-0 mb-2">
+          <app-setting-item [title]="t('name-label')" [canEdit]="true"
+                            [isEditMode]="true" [control]="formControl"
+                            [showEdit]="false" labelId="name">
+            <ng-template #edit>
+              <input id="name" type="text" autocomplete="off" formControlName="name" class="form-control" />
 
-      </div>
+              @if (formControl.errors; as errors) {
+                @if (errors.required) {
+                  <p class="invalid-feedback">{{t('required-field')}}</p>
+                }
+              }
+            </ng-template>
+          </app-setting-item>
+        </div>
+      }
+
+      @if(settingsForm.get('keyLength'); as formControl) {
+        <div class="row g-0 mb-2">
+          <app-setting-item [title]="t('key-length-label')" [canEdit]="true"
+                            [isEditMode]="true" [control]="formControl"
+                            [showEdit]="false"  labelId="key-length">
+            <ng-template #edit>
+              <input id="key-length" type="range" min="8" max="32" class="form-range" formControlName="keyLength">
+              <span><output for="key-length">{{t('total-key-length', {length: formControl.value})}}</output></span>
+
+              @if (formControl.errors; as errors) {
+                @if (errors.required) {
+                  <p class="invalid-feedback">{{t('required-field')}}</p>
+                }
+              }
+
+            </ng-template>
+          </app-setting-item>
+        </div>
+      }
+
+      @if(settingsForm.get('expiration'); as formControl) {
+        <div class="row g-0 mb-2">
+          <app-setting-item [title]="t('expiration-label')" [canEdit]="true"
+                            [control]="formControl" labelId="expiration">
+            <ng-template #view>
+              @if (formControl.value === '') {
+                {{t('never')}}
+              } @else {
+                {{formControl.value | date}}
+              }
+            </ng-template>
+            <ng-template #edit>
+              <input id="expiration" type="date" class="form-control" formControlName="expiration">
+
+              @if (formControl.errors; as errors) {
+                @if (errors.required) {
+                  <p class="invalid-feedback">{{t('required-field')}}</p>
+                }
+              }
+            </ng-template>
+          </app-setting-item>
+        </div>
+      }
+
     </form>
   </div>
   <div class="modal-footer">

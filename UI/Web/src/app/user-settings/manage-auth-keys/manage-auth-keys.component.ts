@@ -57,7 +57,6 @@ export class ManageAuthKeysComponent {
 
   createAuthKey() {
     const ref = this.modalService.open(CreateAuthKeyComponent, DefaultModalOptions);
-    ref.componentInstance.device = null;
 
     ref.closed.subscribe((result: Device | null) => {
       if (result === null) return;

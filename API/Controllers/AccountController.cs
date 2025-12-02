@@ -1214,4 +1214,23 @@ public class AccountController : BaseApiController
         // TODO: Make sure the Auth isn't an AuthKey itself
         return Ok(await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId));
     }
+
+    // [HttpPost("rotate-auth-key")]
+    // public async Task<ActionResult<AuthKeyDto>> RotateAuthKey([FromQuery] int authKeyId, RotateAuthKeyRequestDto dto)
+    // {
+    //     // Get the Auth Key
+    // }
+
+    [HttpPost("create-auth-key")]
+    public async Task<ActionResult<AuthKeyDto>> CreateAuthKey(RotateAuthKeyRequestDto dto)
+    {
+        // Validate the name doesn't collide
+        var authKeys = await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId);
+        if (authKeys.Any(k => string.Equals(k.Name, dto.Name, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            return BadRequest(await _localizationService.Translate(UserId, "auth-key-unique"));
+        }
+
+        //
+    }
 }

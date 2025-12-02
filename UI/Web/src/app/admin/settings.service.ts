@@ -86,13 +86,8 @@ export class SettingsService {
     return this.http.get<string[]>(this.baseUrl + 'settings/library-types');
   }
 
-  getOpdsEnabled() {
-    return this.http.get<string>(this.baseUrl + 'settings/opds-enabled', TextResonse).pipe(map(d => d === 'true'));
-  }
-
   getOpdsEnabledResource() {
     return httpResource<boolean>(() => this.baseUrl + 'settings/opds-enabled').asReadonly();
-    //return this.http.get<string>(this.baseUrl + 'settings/opds-enabled', TextResonse).pipe(map(d => d === 'true'));
   }
 
   isValidCronExpression(val: string) {
