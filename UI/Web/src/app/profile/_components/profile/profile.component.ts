@@ -39,6 +39,9 @@ import {LicenseService} from "../../../_services/license.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {ReadsByMonthComponent} from "../../../statistics/_components/reads-by-month/reads-by-month.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {NgxStarsModule} from "ngx-stars";
+import {ThemeService} from "../../../_services/theme.service";
+import {ProfileReviewListComponent} from "../profile-review-list/profile-review-list.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -71,7 +74,9 @@ enum TabID {
     LibraryAndTimeSelectorComponent,
     LoadingComponent,
     ReadsByMonthComponent,
-    VirtualScrollerModule
+    VirtualScrollerModule,
+    NgxStarsModule,
+    ProfileReviewListComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -80,18 +85,18 @@ enum TabID {
 export class ProfileComponent {
 
   private readonly location = inject(Location);
-  private readonly reviewService = inject(ReviewService);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
   private readonly statsService = inject(StatisticsService);
   protected readonly licenseService = inject(LicenseService);
 
+
   // Set by angular from the resolver
   memberInfo = input.required<MemberInfo>();
   userId = computed(() => this.memberInfo().id);
 
-  protected readonly reviewsResource = this.reviewService.getReviewsByUserResource(() => this.memberInfo().id);
+
   protected readonly genreBreakdown = this.statsService.getGenreBreakDownResource(() => this.filter(), () => this.userId());
   protected readonly tagsBreakdown = this.statsService.getTagBreakDownResource(() => this.filter(), () => this.userId());
   protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.filter(), () => this.userId());
@@ -100,6 +105,7 @@ export class ProfileComponent {
   protected readonly totalReadsResource = this.statsService.getTotalReads(() => this.userId());
 
   activeTabId = TabID.Overview;
+
 
   filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
     timeFilter: new FormGroup({
@@ -143,10 +149,6 @@ export class ProfileComponent {
     this.location.replaceState(newUrl) // TODO: Look into making this a directive for tabs
   }
 
-
-  protected readonly TabID = TabID;
-  protected readonly window = window;
-
   protected readonly backgroundImage = computed(() => {
     const m = this.memberInfo();
     if (!m) return '';
@@ -156,4 +158,9 @@ export class ProfileComponent {
       return '';
     }
   });
+
+
+  protected readonly TabID = TabID;
+  protected readonly window = window;
+
 }

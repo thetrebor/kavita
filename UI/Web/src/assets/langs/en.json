@@ -2839,7 +2839,8 @@
         "user-possessive-your": "your",
         "user-possessive": "{{name}}'s",
         "total-reads-badge": "{{reads}} Reads",
-        "k+-badge": "K+ Subscriber"
+        "k+-badge": "K+ Subscriber",
+        "filter-label": "Filter"
     },
 
     "profile-image": {
