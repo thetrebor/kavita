@@ -37,7 +37,11 @@
           {{t('name-label')}}
         </ng-template>
         <ng-template let-item="row" ngx-datatable-cell-template>
-          {{ t(item.name) }}
+          @if (item.provider === AuthKeyProvider.System) {
+            {{ t(item.name) }}
+          } @else {
+            {{ item.name }}
+          }
         </ng-template>
       </ngx-datatable-column>
 

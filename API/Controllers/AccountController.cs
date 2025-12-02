@@ -16,6 +16,7 @@ using API.Entities.Enums.User;
 using API.Entities.User;
 using API.Errors;
 using API.Extensions;
+using API.Helpers;
 using API.Helpers.Builders;
 using API.Middleware;
 using API.Services;
@@ -1231,6 +1232,18 @@ public class AccountController : BaseApiController
             return BadRequest(await _localizationService.Translate(UserId, "auth-key-unique"));
         }
 
-        //
+        var newKey = new AppUserAuthKey()
+        {
+            Name = dto.Name,
+            Key = AuthKeyHelper.GenerateKey(dto.KeyLength),
+            AppUserId = UserId,
+            CreatedAtUtc = DateTime.UtcNow,
+            ExpiresAtUtc = string.IsNullOrEmpty(dto?.ExpiresUtc) ? null : DateTime.Parse(dto.ExpiresUtc),
+            Provider = AuthKeyProvider.User,
+        };
+        _unitOfWork.UserRepository.Add(newKey);
+        await _unitOfWork.CommitAsync();
+
+        return Ok(_mapper.Map<AuthKeyDto>(newKey));
     }
 }

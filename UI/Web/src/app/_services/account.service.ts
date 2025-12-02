@@ -461,6 +461,10 @@ export class AccountService {
     return httpResource<AuthKey[]>(() => this.baseUrl + `account/auth-keys`).asReadonly();
   }
 
+  createAuthKey(data: {keyLength: number, name: string, expiresUtc: string | null}) {
+    return this.httpClient.post(this.baseUrl + 'account/create-auth-key', data);
+  }
+
 
   refreshAccount() {
     if (this.currentUser === null || this.currentUser === undefined) return of();

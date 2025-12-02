@@ -50,6 +50,7 @@ public enum AppUserIncludes
 
 public interface IUserRepository
 {
+    void Add(AppUserAuthKey key);
     void Add(AppUserBookmark bookmark);
     void Add(AppUser bookmark);
     void Update(AppUser user);
@@ -144,6 +145,11 @@ public class UserRepository : IUserRepository
         _context = context;
         _userManager = userManager;
         _mapper = mapper;
+    }
+
+    public void Add(AppUserAuthKey key)
+    {
+        _context.AppUserAuthKey.Add(key);
     }
 
     public void Add(AppUserBookmark bookmark)
