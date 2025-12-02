@@ -115,13 +115,18 @@
             @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
               @if (reviewsResource.hasValue()) {
                 <div class="row mx-2">
-                  @for(review of reviewsResource.value(); track review) {
-                    <div class="col-md-12">
-                      <app-review-list-item [review]="review" />
-                      <div class="setting-section-break"></div>
-                    </div>
-                  } @empty {
+                  @if (reviewsResource.value().length === 0) {
                     {{t('no-reviews')}}
+                  } @else {
+                    <virtual-scroller #scroll [items]="reviewsResource.value()" [childHeight]="2"
+                                       [parentScroll]="scroll.window" [bufferAmount]="10">
+                      @for (review of scroll.viewPortItems; track review) {
+                        <div class="col-md-12">
+                          <app-review-list-item [review]="review" />
+                          <div class="setting-section-break"></div>
+                        </div>
+                      }
+                    </virtual-scroller>
                   }
                 </div>
               }

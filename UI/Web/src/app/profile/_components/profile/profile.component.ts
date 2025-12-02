@@ -38,6 +38,7 @@ import {StatsFilter} from "../../../statistics/_models/stats-filter";
 import {LicenseService} from "../../../_services/license.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {ReadsByMonthComponent} from "../../../statistics/_components/reads-by-month/reads-by-month.component";
+import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -69,7 +70,8 @@ enum TabID {
     FavouriteAuthorsComponent,
     LibraryAndTimeSelectorComponent,
     LoadingComponent,
-    ReadsByMonthComponent
+    ReadsByMonthComponent,
+    VirtualScrollerModule
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -143,6 +145,7 @@ export class ProfileComponent {
 
 
   protected readonly TabID = TabID;
+  protected readonly window = window;
 
   protected readonly backgroundImage = computed(() => {
     const m = this.memberInfo();
