@@ -19,11 +19,11 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     : BaseApiController
 {
     /// <summary>
-    /// Authenticate with the Server given an apiKey. This will log you in by returning the user object and the JWT token.
+    /// Authenticate with the Server given an auth key. This will log you in by returning the user object and the JWT token.
     /// </summary>
     /// <remarks>This API is not fully built out and may require more information in later releases</remarks>
     /// <remarks>This will log unauthorized requests to Security log</remarks>
-    /// <param name="apiKey">API key which will be used to authenticate and return a valid user token back</param>
+    /// <param name="apiKey">Auth key which will be used to authenticate and return a valid user token back</param>
     /// <param name="pluginName">Name of the Plugin</param>
     /// <returns></returns>
     [AllowAnonymous]
@@ -34,7 +34,8 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
         // Should log into the access table so we can tell the user
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
         var userAgent = HttpContext.Request.Headers.UserAgent;
-        var userId = await unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+
+        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         if (userId <= 0)
         {
             logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {@Information}", pluginName.Replace(Environment.NewLine, string.Empty), new
@@ -53,7 +54,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
             Username = user.UserName!,
             Token = await tokenService.CreateToken(user),
             RefreshToken = await tokenService.CreateRefreshToken(user),
-            ApiKey = user.ApiKey,
+            ApiKey = apiKey,
             KavitaVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }

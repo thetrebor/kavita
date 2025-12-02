@@ -15,6 +15,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {Device} from "../../_models/device/device";
 import {CreateAuthKeyComponent} from "../_modals/create-auth-key/create-auth-key.component";
+import {Clipboard} from "@angular/cdk/clipboard";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -37,6 +38,7 @@ export class ManageAuthKeysComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly modalService = inject(NgbModal);
+  private readonly clipboard = inject(Clipboard);
 
 
   user: User | undefined = undefined;
@@ -75,6 +77,10 @@ export class ManageAuthKeysComponent {
       return;
     }
     // TODO
+  }
+
+  copy(data: string) {
+    this.clipboard.copy(data);
   }
 
   protected readonly ColumnMode = ColumnMode;

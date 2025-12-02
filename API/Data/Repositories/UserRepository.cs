@@ -68,7 +68,9 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<IList<string>> GetRoles(int userId);
+    [Obsolete("Use GetRolesByAuthKey")]
     Task<IList<string>> GetRolesByApiKey(string? apiKey);
+    Task<IList<string>> GetRolesByAuthKey(string? apiKey);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
     Task<AppUserChapterRating?> GetUserChapterRatingAsync(int userId, int chapterId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
@@ -81,8 +83,10 @@ public interface IUserRepository
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int imageOffset, int userId);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId);
+    [Obsolete("Use GetUserDtoByAuthKeyAsync")]
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
     Task<UserDto?> GetUserDtoByAuthKeyAsync(string authKey);
+    Task<int> GetUserIdByAuthKeyAsync(string authKey);
     Task<UserDto?> GetUserDtoById(int userId);
     Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
@@ -760,6 +764,30 @@ public class UserRepository : IUserRepository
         return await _userManager.GetRolesAsync(user);
     }
 
+    public async Task<IList<string>> GetRolesByAuthKey(string? apiKey)
+    {
+        if (string.IsNullOrEmpty(apiKey)) return ArraySegment<string>.Empty;
+
+        var user = await _context.AppUserAuthKey
+            .Where(k => k.Key == apiKey)
+            .IsNotExpired()
+            .Select(k => k.AppUser)
+            .FirstOrDefaultAsync();
+        if (user == null) return ArraySegment<string>.Empty;
+
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (_userManager == null)
+        {
+            // userManager is null on Unit Tests only
+            return await _context.UserRoles
+                .Where(ur => ur.User.AuthKeys.Any(k => k.Key == apiKey && (k.ExpiresAtUtc == null || k.ExpiresAtUtc < DateTime.UtcNow)))
+                .Select(ur => ur.Role.Name)
+                .ToListAsync();
+        }
+
+        return await _userManager.GetRolesAsync(user);
+    }
+
     public async Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId)
     {
         return await _context.AppUserRating
@@ -954,8 +982,20 @@ public class UserRepository : IUserRepository
 
         return await _context.AppUserAuthKey
             .Where(k => k.Key == authKey)
+            .IsNotExpired()
             .Select(k => k.AppUser)
             .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<int> GetUserIdByAuthKeyAsync(string authKey)
+    {
+        if (string.IsNullOrEmpty(authKey)) return 0;
+
+        return await _context.AppUserAuthKey
+            .Where(k => k.Key == authKey)
+            .IsNotExpired()
+            .Select(k => k.AppUserId)
             .FirstOrDefaultAsync();
     }
 

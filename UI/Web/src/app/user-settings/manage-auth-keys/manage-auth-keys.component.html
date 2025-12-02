@@ -52,6 +52,9 @@
         </ng-template>
         <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
           <span [appToggleVisibility]="item.key"></span>
+          <button class="btn btn-icon ms-1" (click)="copy(item.key)">
+            <i class="fa-solid fa-copy" aria-hidden="true"></i>
+          </button>
         </ng-template>
       </ngx-datatable-column>
 
