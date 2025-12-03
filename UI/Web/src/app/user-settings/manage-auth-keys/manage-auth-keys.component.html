@@ -63,7 +63,7 @@
           {{t('expires-label')}}
         </ng-template>
         <ng-template let-item="row" ngx-datatable-cell-template>
-          {{ item.expiresAtUtc | utcToLocaleDate | defaultDate }}
+          {{ item.expiresAtUtc | utcToLocaleDate | date:'mediumDate' | defaultDate }}
         </ng-template>
       </ngx-datatable-column>
 

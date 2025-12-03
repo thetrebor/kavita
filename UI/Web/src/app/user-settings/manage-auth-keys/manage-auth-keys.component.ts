@@ -13,9 +13,9 @@ import {ToggleVisibilityDirective} from "../../_directives/toggle-visibility.dir
 import {ConfirmService} from "../../shared/confirm.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
-import {Device} from "../../_models/device/device";
 import {CreateAuthKeyComponent} from "../_modals/create-auth-key/create-auth-key.component";
 import {Clipboard} from "@angular/cdk/clipboard";
+import {DatePipe} from "@angular/common";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -26,6 +26,7 @@ import {Clipboard} from "@angular/cdk/clipboard";
     UtcToLocaleDatePipe,
     DefaultDatePipe,
     ToggleVisibilityDirective,
+    DatePipe,
 
   ],
   templateUrl: './manage-auth-keys.component.html',
@@ -60,11 +61,9 @@ export class ManageAuthKeysComponent {
   createAuthKey() {
     const ref = this.modalService.open(CreateAuthKeyComponent, DefaultModalOptions);
 
-    ref.closed.subscribe((result: Device | null) => {
+    ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
-
-      //this.authKeysResource.
-      //this.loadDevices();
+      this.authKeysResource.reload();
     });
   }
 

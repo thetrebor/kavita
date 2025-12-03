@@ -458,7 +458,7 @@ export class AccountService {
   }
 
   getAuthKeysResource() {
-    return httpResource<AuthKey[]>(() => this.baseUrl + `account/auth-keys`).asReadonly();
+    return httpResource<AuthKey[]>(() => this.baseUrl + `account/auth-keys`);
   }
 
   createAuthKey(data: {keyLength: number, name: string, expiresUtc: string | null}) {
