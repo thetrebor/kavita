@@ -126,7 +126,7 @@ public interface IUserRepository
     Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
     Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
     Task UpdateUserAsActive(int userId);
-    Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
+    Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences, string? query = null, float? ratingFilter = null);
     Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
     Task<string?> GetPersonCoverImageAsync(int personId);
     Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId);
@@ -662,7 +662,7 @@ public class UserRepository : IUserRepository
                 .SetProperty(u => u.LastActive, DateTime.Now));
     }
 
-    public async Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences)
+    public async Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences, string? query = null, float? ratingFilter = null)
     {
         if (!bypassPreferences)
         {
@@ -677,12 +677,14 @@ public class UserRepository : IUserRepository
 
         // Get series-level reviews
         var seriesReviews = await _context.AppUserRating
+            .WhereIf(ratingFilter != null, r => r.HasBeenRated && r.Rating >= ratingFilter!.Value)
             .Include(r => r.AppUser)
             .Include(r => r.Series)
             .ThenInclude(s => s.Metadata)
             .ThenInclude(sm => sm.People)
             .ThenInclude(smp => smp.Person)
             .Where(r => r.AppUserId == userId && !string.IsNullOrEmpty(r.Review))
+            .WhereIf(string.IsNullOrWhiteSpace(query), r => EF.Functions.Like(r.Series.Name, "%"+query+"%"))
             .OrderBy(r => r.SeriesId)
             .AsSplitQuery()
             .ProjectTo<UserReviewExtendedDto>(_mapper.ConfigurationProvider)

@@ -1,20 +1,25 @@
 <ng-container *transloco="let t; prefix: 'profile-review-list'">
-  @if (reviewsResource.hasValue()) {
+  @if (true) {
     <div class="row mx-2">
-      @if (reviewsResource.value().length === 0) {
+      @if (reviews().length === 0) {
         {{t('no-reviews')}}
       } @else {
-        <div class="row">
-          <div class="col-9">
-            <input class="form-control" type="text" [placeholder]="t('filter-label')"/>
+        <form [formGroup]="formGroup">
+          <div class="row">
+            <div class="col-9">
+              <input class="form-control" type="text" [placeholder]="t('filter-label')" formControlName="query"/>
+            </div>
+            <div class="col-3 d-flex">
+              <ngx-stars [size]="1"
+                         [maxStars]="5" [color]="starColor" (ratingOutput)="updateRating($event)"/>
+              <button class="btn btn-icon ms-1" (click)="resetRating()" style="padding: 0; padding-bottom: 12px;">
+                <i class="fas fa-ban" style="font-size: 0.8rem; color: var(--primary-color)" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
-          <div class="col-3">
-            <ngx-stars (ratingOutput)="updateFilter('rating', $event)" [size]="1"
-                       [maxStars]="5" [color]="starColor" />
-          </div>
-        </div>
+        </form>
 
-        <virtual-scroller #scroll [items]="reviewsResource.value()" [childHeight]="2"
+        <virtual-scroller #scroll [items]="reviews()" [childHeight]="2"
                           [parentScroll]="scroll.window" [bufferAmount]="10">
           @for (review of scroll.viewPortItems; track review) {
             <div class="col-md-12">

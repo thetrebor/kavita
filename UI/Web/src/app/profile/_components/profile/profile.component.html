@@ -9,7 +9,7 @@
           [style.--profile-bg]="backgroundImage() ? 'url(' + backgroundImage() + ')' : null">
       <div class="row mb-0 mb-xl-3 info-container align-items-center justify-content-center justify-content-lg-start">
         <div class="col-auto d-flex justify-content-center justify-content-lg-start">
-          <app-profile-image [userId]="userId()" />
+          <app-profile-image [userId]="user.id" />
         </div>
 
         <div class="col-xl-7 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2 text-center text-lg-start">
@@ -113,7 +113,7 @@
           <a ngbNavLink>{{t(TabID.Reviews)}}</a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
-              <app-profile-review-list [memberInfo]="memberInfo()" />
+              <app-profile-review-list [memberInfo]="user" />
             }
           </ng-template>
         </li>

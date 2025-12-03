@@ -62,7 +62,6 @@ enum TabID {
     NgbNavLink,
     NgbNavItem,
     NgbNavOutlet,
-    ReviewListItemComponent,
     PreferredFormatComponent,
     TitleCasePipe,
     StringBreakdownComponent,
@@ -128,6 +127,16 @@ export class ProfileComponent {
     return this.totalReadsResource.value();
   });
 
+  protected readonly backgroundImage = computed(() => {
+    const m = this.memberInfo();
+    if (!m) return '';
+    try {
+      return this.imageService.getUserCoverImage(this.userId());
+    } catch {
+      return '';
+    }
+  });
+
   constructor() {
     this.route.fragment.pipe(tap(frag => {
       const fragId = frag as TabID;
@@ -149,15 +158,7 @@ export class ProfileComponent {
     this.location.replaceState(newUrl) // TODO: Look into making this a directive for tabs
   }
 
-  protected readonly backgroundImage = computed(() => {
-    const m = this.memberInfo();
-    if (!m) return '';
-    try {
-      return this.imageService.getUserCoverImage(this.userId());
-    } catch {
-      return '';
-    }
-  });
+
 
 
   protected readonly TabID = TabID;
