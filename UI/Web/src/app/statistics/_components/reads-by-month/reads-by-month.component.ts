@@ -22,7 +22,7 @@ export class ReadsByMonthComponent {
   highestRead = computed(() => {
     if (!this.readsByMonthResource().hasValue()) return undefined;
 
-    const mostRead = this.readsByMonthResource().value()!.reduce((prev, cur) =>
+    const mostRead = (this.readsByMonthResource().value() || []).reduce((prev, cur) =>
       cur.count > prev.count ? cur : prev);
 
     const monthLabelPipe = new MonthLabelPipe();

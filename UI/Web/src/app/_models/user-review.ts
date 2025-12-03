@@ -22,6 +22,7 @@ export interface UserReview {
 }
 
 export interface UserReviewExtended {
+  id: number;
   /**
    * The main review
    */

@@ -39,7 +39,7 @@
     </div>
 
     <div class="carousel-tabs-container mb-2">
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="true" (navChange)="onNavChange($event)">
 
         <li [ngbNavItem]="TabID.Overview">
           <a ngbNavLink>{{t(TabID.Overview)}}</a>

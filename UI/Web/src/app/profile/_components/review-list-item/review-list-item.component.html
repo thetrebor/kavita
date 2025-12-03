@@ -21,7 +21,7 @@
               <span class="me-1">{{t('by-label')}}</span>
             }
 
-            @for(writer of item.writers; track writer; let last = $last) {
+            @for(writer of item.writers; track writer.name; let last = $last) {
               <a href="/person/{{writer.name}}" aria-label="View {{writer.name}}">{{writer.name}}</a>@if (!last) {, }
             }
           </div>

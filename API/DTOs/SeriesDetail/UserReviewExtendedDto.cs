@@ -8,6 +8,7 @@ namespace API.DTOs.SeriesDetail;
 
 public sealed record UserReviewExtendedDto
 {
+    public int Id { get; set; }
     /// <summary>
     /// The main review
     /// </summary>
