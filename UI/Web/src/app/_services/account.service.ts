@@ -466,6 +466,11 @@ export class AccountService {
   }
 
 
+  deleteAuthKey(id: number) {
+    return this.httpClient.delete(this.baseUrl + `account/auth-key?authKeyId=${id}`);
+  }
+
+
   refreshAccount() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
     return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {

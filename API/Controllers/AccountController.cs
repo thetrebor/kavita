@@ -1222,6 +1222,11 @@ public class AccountController : BaseApiController
     //     // Get the Auth Key
     // }
 
+    /// <summary>
+    /// Creates a new Auth Key for a user.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("create-auth-key")]
     public async Task<ActionResult<AuthKeyDto>> CreateAuthKey(RotateAuthKeyRequestDto dto)
     {
@@ -1245,5 +1250,17 @@ public class AccountController : BaseApiController
         await _unitOfWork.CommitAsync();
 
         return Ok(_mapper.Map<AuthKeyDto>(newKey));
+    }
+
+    [HttpDelete("auth-key")]
+    public async Task<ActionResult> DeleteAuthKey(int authKeyId)
+    {
+        var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
+        if (authKey?.AppUserId != UserId) return BadRequest();
+        if (authKey.Provider != AuthKeyProvider.User) return BadRequest();
+
+        _unitOfWork.UserRepository.Delete(authKey);
+        await _unitOfWork.CommitAsync();
+        return Ok();
     }
 }

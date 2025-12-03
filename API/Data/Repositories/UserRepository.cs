@@ -59,6 +59,7 @@ public interface IUserRepository
     void Update(AppUserDashboardStream stream);
     void Update(AppUserSideNavStream stream);
     void Delete(AppUser? user);
+    void Delete(AppUserAuthKey? key);
     void Delete(AppUserBookmark bookmark);
     void Delete(IEnumerable<AppUserDashboardStream> streams);
     void Delete(AppUserDashboardStream stream);
@@ -135,7 +136,7 @@ public interface IUserRepository
     Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
     Task<string?> GetPersonCoverImageAsync(int personId);
     Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId);
-
+    Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId);
 }
 
 public class UserRepository : IUserRepository
@@ -195,6 +196,12 @@ public class UserRepository : IUserRepository
     {
         if (user == null) return;
         _context.AppUser.Remove(user);
+    }
+
+    public void Delete(AppUserAuthKey? key)
+    {
+        if (key == null) return;
+        _context.AppUserAuthKey.Remove(key);
     }
 
     public void Delete(AppUserBookmark bookmark)
@@ -1084,5 +1091,12 @@ public class UserRepository : IUserRepository
             .Where(k => k.AppUserId == userId)
             .ProjectTo<AuthKeyDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId)
+    {
+        return await _context.AppUserAuthKey
+            .Where(k => k.Id == authKeyId)
+            .FirstOrDefaultAsync();
     }
 }

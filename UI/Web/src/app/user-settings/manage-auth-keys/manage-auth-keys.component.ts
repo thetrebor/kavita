@@ -75,7 +75,9 @@ export class ManageAuthKeysComponent {
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-auth-key'))) {
       return;
     }
-    // TODO
+    this.accountService.deleteAuthKey(authKey.id).subscribe(res => {
+      this.authKeysResource.reload();
+    })
   }
 
   copy(data: string) {
