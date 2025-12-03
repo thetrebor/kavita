@@ -88,7 +88,8 @@
     },
 
     "create-auth-key": {
-        "title": "Create Auth Key",
+        "create-title": "Create Auth Key",
+        "rotate-title": "Rotate Auth Key",
         "name-label": "Name",
         "key-length-label": "Key Length",
         "expiration-label": "Expiration",

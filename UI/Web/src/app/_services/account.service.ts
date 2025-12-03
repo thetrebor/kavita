@@ -465,6 +465,10 @@ export class AccountService {
     return this.httpClient.post(this.baseUrl + 'account/create-auth-key', data);
   }
 
+  rotateAuthKey(id: number, data: {keyLength: number, name: string, expiresUtc: string | null}) {
+    return this.httpClient.post(this.baseUrl + `account/rotate-auth-key?authKeyId=${id}`, data);
+  }
+
 
   deleteAuthKey(id: number) {
     return this.httpClient.delete(this.baseUrl + `account/auth-key?authKeyId=${id}`);

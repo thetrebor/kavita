@@ -68,7 +68,13 @@ export class ManageAuthKeysComponent {
   }
 
   rotate(authKey: AuthKey) {
-    // TODO
+    const ref = this.modalService.open(CreateAuthKeyComponent, DefaultModalOptions);
+    ref.componentInstance.authKey.set(authKey);
+
+    ref.closed.subscribe((result: AuthKey | null) => {
+      if (result === null) return;
+      this.authKeysResource.reload();
+    });
   }
 
   async delete(authKey: AuthKey) {

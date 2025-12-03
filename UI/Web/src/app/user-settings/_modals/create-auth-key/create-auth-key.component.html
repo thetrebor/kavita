@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix:'create-auth-key'">
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <h4 class="modal-title" id="modal-basic-title">{{t(isRotateFlow() ? 'rotate-title' : 'create-title')}}</h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body scrollable-modal">
@@ -48,7 +48,7 @@
           <app-setting-item [title]="t('expiration-label')" [canEdit]="true"
                             [control]="formControl" labelId="expiration">
             <ng-template #view>
-              @if (formControl.value === '') {
+              @if (formControl.value === '' || formControl.value === null) {
                 {{t('never')}}
               } @else {
                 {{formControl.value | date}}

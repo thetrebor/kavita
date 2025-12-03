@@ -1216,11 +1216,25 @@ public class AccountController : BaseApiController
         return Ok(await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId));
     }
 
-    // [HttpPost("rotate-auth-key")]
-    // public async Task<ActionResult<AuthKeyDto>> RotateAuthKey([FromQuery] int authKeyId, RotateAuthKeyRequestDto dto)
-    // {
-    //     // Get the Auth Key
-    // }
+    [HttpPost("rotate-auth-key")]
+    public async Task<ActionResult<AuthKeyDto>> RotateAuthKey([FromQuery] int authKeyId, RotateAuthKeyRequestDto dto)
+    {
+        var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
+        if (authKey?.AppUserId != UserId) return BadRequest();
+        if (authKey.Provider != AuthKeyProvider.User) return BadRequest();
+
+        // Get original expiresAt - createdAt for offset to reset expiresAt
+        if (authKey.ExpiresAtUtc != null)
+        {
+            var originalDuration = authKey.ExpiresAtUtc.Value - authKey.CreatedAtUtc;
+            authKey.ExpiresAtUtc = DateTime.UtcNow.Add(originalDuration);
+        }
+        authKey.Key = AuthKeyHelper.GenerateKey(dto.KeyLength);
+
+        await _unitOfWork.CommitAsync();
+
+        return Ok(_mapper.Map<AuthKeyDto>(authKey));
+    }
 
     /// <summary>
     /// Creates a new Auth Key for a user.
