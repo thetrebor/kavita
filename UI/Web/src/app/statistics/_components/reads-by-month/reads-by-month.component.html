@@ -9,14 +9,12 @@
       <span>{{t('sub-title', {username: userName(), year: mostReadValue.year, month: mostReadValue.month, reads: mostReadValue.count})}}</span>
     }
 
-    @if (readsByMonthResource().hasValue()) {
-      <app-line-chart
-        [axisLabels]="axisLabels()"
-        [data]="data()"
-        [legendLabels]="legendLabels()"
-        [showLegend]="false"
-      />
-    }
+    <app-line-chart
+      [axisLabels]="axisLabels()"
+      [data]="data()"
+      [legendLabels]="legendLabels()"
+      [showLegend]="false"
+    />
   </div>
 
 </ng-container>

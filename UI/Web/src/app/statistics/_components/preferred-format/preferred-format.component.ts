@@ -26,7 +26,7 @@ export class PreferredFormatComponent {
     .getPreferredFormatResource(() => this.accountService.currentUserSignal()!.id);
 
   options = computed<ECOption>(() => {
-    const data = this.formatsResource.value();
+    const data = this.formatsResource.hasValue() ?  this.formatsResource.value() : [];
     const pipe = new MangaFormatPipe();
 
     const source = [
