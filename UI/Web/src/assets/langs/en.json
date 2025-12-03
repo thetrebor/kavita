@@ -2839,8 +2839,14 @@
         "user-possessive-your": "your",
         "user-possessive": "{{name}}'s",
         "total-reads-badge": "{{reads}} Reads",
-        "k+-badge": "K+ Subscriber",
-        "filter-label": "Filter"
+        "k+-badge": "K+ Subscriber"
+    },
+
+    "profile-review-list": {
+        "no-data": "No Reviews",
+        "filter-label": "Filter by Series",
+        "rating-alt": "Filter by Rating",
+        "clear-rating-alt": "Clear Rating Filter"
     },
 
     "profile-image": {

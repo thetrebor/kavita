@@ -2,7 +2,7 @@
   @if (true) {
     <div class="row mx-2">
       @if (reviews().length === 0) {
-        {{t('no-reviews')}}
+        {{t('no-data')}}
       } @else {
         <form [formGroup]="formGroup">
           <div class="row">
@@ -12,8 +12,9 @@
             <div class="col-3 d-flex">
               <ngx-stars [size]="1"
                          [maxStars]="5" [color]="starColor" (ratingOutput)="updateRating($event)"/>
-              <button class="btn btn-icon ms-1" (click)="resetRating()" style="padding: 0; padding-bottom: 12px;">
+              <button class="btn btn-icon ms-1" (click)="resetRating()" style="padding: 0 0 12px;">
                 <i class="fas fa-ban" style="font-size: 0.8rem; color: var(--primary-color)" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('clear-rating-alt')}}</span>
               </button>
             </div>
           </div>
