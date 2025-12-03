@@ -6,8 +6,8 @@ import {
   effect,
   inject,
   input,
-  model,
-  Resource, ViewChild
+  model, OnInit,
+  Resource, signal, untracked, ViewChild
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgxStarsComponent, NgxStarsModule} from "ngx-stars";
@@ -18,8 +18,8 @@ import {MemberInfo} from "../../../_models/user/member-info";
 import {ReviewService} from "../../../_services/review.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {UserReviewExtended} from "../../../_models/user-review";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged, tap} from "rxjs";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
 
 @Component({
   selector: 'app-profile-review-list',
@@ -34,7 +34,7 @@ import {debounceTime, distinctUntilChanged, tap} from "rxjs";
   styleUrl: './profile-review-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProfileReviewListComponent {
+export class ProfileReviewListComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   private readonly reviewService = inject(ReviewService);
   private readonly destroyRef = inject(DestroyRef);
@@ -43,10 +43,7 @@ export class ProfileReviewListComponent {
 
   memberInfo = input.required<MemberInfo>();
 
-  reviews = model<UserReviewExtended[]>([]);
-  rating = model<number>(0);
-  nameFilter = model<string>('');
-
+  reviews = signal<UserReviewExtended[]>([]);
 
   starColor = this.themeService.getCssVariable('--rating-star-color');
   formGroup = new FormGroup({
@@ -57,6 +54,7 @@ export class ProfileReviewListComponent {
   trackByReview = (_index: number, review: UserReviewExtended): string => {
     return `${review.id}-${review.seriesId}-${review.chapterId || review.createdUtc}`;
   };
+
   compareReviews = (item1: UserReviewExtended, item2: UserReviewExtended): boolean => {
     if (!item1 && !item2) return true;
     if (!item1 || !item2) return false;
@@ -65,31 +63,22 @@ export class ProfileReviewListComponent {
     return this.trackByReview(0, item1) === this.trackByReview(0, item2);
   };
 
-  constructor() {
+  ngOnInit() {
+    this.reviewService.getReviewsByUser(this.memberInfo().id, null, null).pipe(
+      tap(reviews => this.reviews.set(reviews)),
+    ).subscribe();
 
-    // BUG: This is triggering (likely from virtual scroller) on every resize
-    effect(() => {
-      const userId = this.memberInfo().id;
-      const query = this.nameFilter();
-      const ratingFilter = this.rating();
-
-      console.log('userId/query/rating: ', userId, '/', query, '/', ratingFilter);
-
-      this.reviewService.getReviewsByUser(userId, query, ratingFilter).subscribe(res => {
-        this.reviews.set(res);
-      });
-    });
-
-    this.formGroup.get('query')?.valueChanges.pipe(
+    this.formGroup.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
       debounceTime(300),
       distinctUntilChanged(),
-      tap(val => this.nameFilter.set(val ?? '')),
-      takeUntilDestroyed(this.destroyRef)
+      switchMap(v => this.reviewService.getReviewsByUser(this.memberInfo().id, v.query ?? null, v.rating ?? null)),
+      tap(reviews => this.reviews.set(reviews)),
     ).subscribe();
   }
 
   updateRating(rating: number) {
-    this.rating.set(rating);
+    this.formGroup.get('rating')!.setValue(rating);
   }
 
   resetRating() {
