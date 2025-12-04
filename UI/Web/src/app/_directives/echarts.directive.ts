@@ -50,6 +50,7 @@ export class EChartsDirective implements OnInit, OnDestroy {
 
   readonly options = input<ECOption | null>(null);
   readonly initOptions = input<EChartsInitOpts | undefined>(undefined);
+  readonly ignoreFirstResize = input(true);
 
   echart?: EChartsType;
 
@@ -113,7 +114,10 @@ export class EChartsDirective implements OnInit, OnDestroy {
             if (entry.target === this.el.nativeElement) {
               if (!this.resizeObserverHasFired) {
                 this.resizeObserverHasFired = true;
-                return; // Ignore first fire on insertion, no resize actually happened
+
+                if (this.ignoreFirstResize()) {
+                  return;
+                }
               }
 
               this.animationFrameID = window.requestAnimationFrame(() => {

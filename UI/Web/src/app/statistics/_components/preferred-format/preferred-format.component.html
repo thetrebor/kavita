@@ -1,7 +1,11 @@
 <ng-container *transloco="let t; prefix: 'preferred-format'">
 
   <div class="card p-4">
-    <div style="height: 300px; width: 100%" appECharts [options]="options()"></div>
+    <div style="height: 300px; width: 100%"
+         appECharts
+         [options]="options()"
+         [ignoreFirstResize]="false"
+    ></div>
   </div>
 
 </ng-container>
