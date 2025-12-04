@@ -1,0 +1,24 @@
+<ng-container *transloco="let t; prefix: 'profile-stat-bar'">
+  <div class="row g-0 mt-4 mb-3 d-flex justify-content-around">
+    <ng-container>
+      <div class="col-auto mb-2">
+        <app-icon-and-title [label]="t('total-series-label')" [clickable]="false"
+                            fontClasses="fa-solid fa-book-open"
+                            [title]="t('total-series-tooltip', {count: 0 | number})">
+          {{t('series-count', {num: 0 | number})}}
+        </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
+    </ng-container>
+
+    @if (dataResource.hasValue()) {
+      
+    }
+    Books Read
+    Comics Read
+    Pages Read
+    Words Read
+    Authors Read
+    Reviews
+  </div>
+</ng-container>

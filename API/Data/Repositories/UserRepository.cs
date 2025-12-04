@@ -662,6 +662,14 @@ public class UserRepository : IUserRepository
                 .SetProperty(u => u.LastActive, DateTime.Now));
     }
 
+    /// <summary>
+    /// Retrieve all reviews (series and chapter) for a given user, respecting profile privacy settings and age restrictions.
+    /// </summary>
+    /// <param name="userId">UserId of source user</param>
+    /// <param name="requestingUserId">Viewer UserId</param>
+    /// <param name="query">Search text to match against Series name</param>
+    /// <param name="ratingFilter">Rating, only applies to series/chapters rated. Will show everything greater or equal to</param>
+    /// <returns></returns>
     public async Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, int requestingUserId, string? query = null, float? ratingFilter = null)
     {
         var bypassPreferences = userId == requestingUserId;

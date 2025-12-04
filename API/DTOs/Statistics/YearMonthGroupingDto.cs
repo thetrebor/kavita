@@ -1,6 +1,6 @@
 namespace API.DTOs.Statistics;
 
-public class YearMonthGroupingDto
+public sealed record YearMonthGroupingDto
 {
     public int Year { get; set; }
     public int Month { get; set; }

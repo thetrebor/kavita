@@ -51,6 +51,7 @@ public interface IStatisticService
     Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId, int requestingUserId);
     Task<int> GetTotalReads(int userId, int requestingUserId);
     Task<IList<StatCount<int>>> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId);
+    Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId);
 }
 
 /// <summary>
@@ -1131,6 +1132,102 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 Count = hourStats.GetValueOrDefault(hour, 0),
             })
             .ToList();
+    }
+
+    public async Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId)
+    {
+        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        if (!socialPreferences.ShareProfile) return new ProfileStatBarDto();
+
+        var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
+        var fullyReadChapters = await context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .Where(d => d.PagesRead >= d.TotalPages) // Ensure fully read
+            .Select(d => new {
+                d.ChapterId,
+                d.SeriesId,
+                d.LibraryId,
+                LibraryType = d.Chapter.Volume.Series.Library.Type,
+                d.PagesRead,
+                d.WordsRead
+            })
+            .Distinct()
+            .ToListAsync();
+
+        var booksRead = fullyReadChapters
+            .Where(x => x.LibraryType is LibraryType.Book or LibraryType.LightNovel)
+            .Select(x => x.ChapterId)
+            .Distinct()
+            .Count();
+
+        var comicsRead = fullyReadChapters
+            .Where(x => x.LibraryType is LibraryType.Comic or LibraryType.Manga)
+            .Select(x => x.ChapterId)
+            .Distinct()
+            .Count();
+
+        var pagesRead = fullyReadChapters.Sum(x => x.PagesRead);
+        var wordsRead = fullyReadChapters.Sum(x => x.WordsRead);
+
+        var chapterIds = fullyReadChapters.Select(x => x.ChapterId).Distinct().ToList();
+        var authorsRead = await context.ChapterPeople
+            .Where(cp => cp.Role == PersonRole.Writer)
+            .Where(cp => chapterIds.Contains(cp.ChapterId))
+            .Select(cp => cp.PersonId)
+            .Distinct()
+            .CountAsync();
+
+        var reviews = await context.AppUserRating
+            .Where(r => r.AppUserId == userId)
+            .Where(r => !string.IsNullOrEmpty(r.Review))
+            .WhereIf(filter.Libraries is { Count: > 0 },
+                r => filter.Libraries.Contains(r.Series.LibraryId))
+            .WhereIf(filter.StartDate != null,
+                r => r.CreatedUtc >= filter.StartDate.Value.ToUniversalTime())
+            .WhereIf(filter.EndDate != null,
+                r => r.CreatedUtc <= filter.EndDate.Value.ToUniversalTime())
+            // Apply social preferences if viewing someone else's profile
+            .WhereIf(socialPreferences.SocialLibraries.Count > 0,
+                r => socialPreferences.SocialLibraries.Contains(r.Series.LibraryId))
+            .WhereIf(socialPreferences.SocialMaxAgeRating != AgeRating.NotApplicable,
+                r => (socialPreferences.SocialMaxAgeRating >= r.Series.Metadata.AgeRating &&
+                      r.Series.Metadata.AgeRating != AgeRating.Unknown) ||
+                     (socialPreferences.SocialIncludeUnknowns &&
+                      r.Series.Metadata.AgeRating == AgeRating.Unknown))
+            .CountAsync();
+
+        var ratings = await context.AppUserRating
+            .Where(r => r.AppUserId == userId)
+            .Where(r => r.HasBeenRated)
+            .WhereIf(filter.Libraries is { Count: > 0 },
+                r => filter.Libraries.Contains(r.Series.LibraryId))
+            .WhereIf(filter.StartDate != null,
+                r => r.CreatedUtc >= filter.StartDate.Value.ToUniversalTime())
+            .WhereIf(filter.EndDate != null,
+                r => r.CreatedUtc <= filter.EndDate.Value.ToUniversalTime())
+            // Apply social preferences
+            .WhereIf(socialPreferences.SocialLibraries.Count > 0,
+                r => socialPreferences.SocialLibraries.Contains(r.Series.LibraryId))
+            .WhereIf(socialPreferences.SocialMaxAgeRating != AgeRating.NotApplicable,
+                r => (socialPreferences.SocialMaxAgeRating >= r.Series.Metadata.AgeRating &&
+                      r.Series.Metadata.AgeRating != AgeRating.Unknown) ||
+                     (socialPreferences.SocialIncludeUnknowns &&
+                      r.Series.Metadata.AgeRating == AgeRating.Unknown))
+            .CountAsync();
+
+        return new ProfileStatBarDto
+        {
+            BooksRead = booksRead,
+            ComicsRead = comicsRead,
+            PagesRead = pagesRead,
+            WordsRead = wordsRead,
+            AuthorsRead = authorsRead,
+            Reviews = reviews,
+            Ratings = ratings
+        };
+
+        throw new NotImplementedException();
     }
 
     public async Task<IList<StatCount<YearMonthGroupingDto>>> GetReadsPerMonth(StatsFilterDto filter, int userId, int requestingUserId)

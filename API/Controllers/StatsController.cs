@@ -251,7 +251,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadingActivityGraphData(filter, userId, year, User.GetUserId()));
+        return Ok(await statService.GetReadingActivityGraphData(filter, userId, year, UserId));
     }
 
     #endregion
@@ -293,9 +293,9 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<BreakDownDto<string>>> GetGenreBreakdown([FromQuery] StatsFilterDto filter, int userId)
     {
-        await CleanStatsFilter(filter, User.GetUserId());
+        await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetGenreBreakdownForUser(filter, userId, User.GetUserId()));
+        return Ok(await statService.GetGenreBreakdownForUser(filter, userId, UserId));
     }
 
     /// <summary>
@@ -311,7 +311,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetTagBreakdownForUser(filter, userId, User.GetUserId()));
+        return Ok(await statService.GetTagBreakdownForUser(filter, userId, UserId));
     }
 
 
@@ -322,7 +322,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetPageSpreadForUser(filter, userId, User.GetUserId()));
+        return Ok(await statService.GetPageSpreadForUser(filter, userId, UserId));
     }
 
     [ProfilePrivacy]
@@ -332,7 +332,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetWordSpreadForUser(filter, userId, User.GetUserId()));
+        return Ok(await statService.GetWordSpreadForUser(filter, userId, UserId));
     }
 
     [ProfilePrivacy]
@@ -342,7 +342,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetMostReadAuthors(filter, userId, User.GetUserId()));
+        return Ok(await statService.GetMostReadAuthors(filter, userId, UserId));
     }
 
     /// <summary>
@@ -356,7 +356,7 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IList<StatCount<int>>>> GetAverageTimePerHour([FromQuery] StatsFilterDto filter, int userId)
     {
-        return Ok(await statService.GetTimeReadingByHour(filter, userId, User.GetUserId()));
+        return Ok(await statService.GetTimeReadingByHour(filter, userId, UserId));
     }
 
     /// <summary>
@@ -372,7 +372,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadsPerMonth(filter, userId, User.GetUserId()));
+        return Ok(await statService.GetReadsPerMonth(filter, userId, UserId));
     }
 
     /// <summary>
@@ -385,7 +385,16 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<int>> GetTotalReads(int userId)
     {
-        return Ok(await statService.GetTotalReads(userId, User.GetUserId()));
+        return Ok(await statService.GetTotalReads(userId, UserId));
+    }
+
+    [ProfilePrivacy]
+    [HttpGet("user-stats")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<ProfileStatBarDto>> GetStatsForUserBar([FromQuery] StatsFilterDto filter, int userId)
+    {
+        await CleanStatsFilter(filter, userId);
+        return Ok(await statService.GetUserStatBar(filter, userId, UserId));
     }
 
     // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?

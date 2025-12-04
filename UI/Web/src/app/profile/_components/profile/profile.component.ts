@@ -45,6 +45,7 @@ import {ProfileReviewListComponent} from "../profile-review-list/profile-review-
 import {
   AvgTimeSpendReadingByHourComponent
 } from "../../../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
+import {ProfileStatBarComponent} from "../profile-stat-bar/profile-stat-bar.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -79,7 +80,8 @@ enum TabID {
     VirtualScrollerModule,
     NgxStarsModule,
     ProfileReviewListComponent,
-    AvgTimeSpendReadingByHourComponent
+    AvgTimeSpendReadingByHourComponent,
+    ProfileStatBarComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

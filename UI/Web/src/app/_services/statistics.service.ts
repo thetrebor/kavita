@@ -243,6 +243,10 @@ export class StatisticsService {
     return this.filterResource<StatCount<number>[]>(statsFilter, userId, 'avg-time-by-hour');
   }
 
+  getUserOverallStats(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<number>[]>(statsFilter, userId, 'user-stats');
+  }
+
   getTotalReads(userId: () => number) {
     return httpResource<number>(() => this.baseUrl + `stats/total-reads?userId=${userId()}`).asReadonly();
   }
