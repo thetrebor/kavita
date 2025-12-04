@@ -25,6 +25,7 @@ import {Breakdown} from "../statistics/_models/breakdown";
 import {SpreadStats} from "../statistics/_models/stats/spread-stats";
 import {FavouriteAuthor} from "../statistics/_models/favourite-author";
 import {StatsFilter} from "../statistics/_models/stats-filter";
+import {ProfileStatBar} from "../profile/_components/profile-stat-bar/profile-stat-bar.component";
 
 export enum DayOfWeek
 {
@@ -244,7 +245,7 @@ export class StatisticsService {
   }
 
   getUserOverallStats(statsFilter: () => StatsFilter | undefined, userId: () => number) {
-    return this.filterResource<StatCount<number>[]>(statsFilter, userId, 'user-stats');
+    return this.filterResource<ProfileStatBar>(statsFilter, userId, 'user-stats');
   }
 
   getTotalReads(userId: () => number) {

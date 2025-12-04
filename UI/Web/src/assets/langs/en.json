@@ -2849,6 +2849,23 @@
         "clear-rating-alt": "Clear Rating Filter"
     },
 
+    "profile-stat-bar": {
+        "books-read-label": "Books Read",
+        "books-read-tooltip": "Books Read: {{count}}",
+        "comics-read-label": "Comics Read",
+        "comics-read-tooltip": "Comics Read: {{count}}",
+        "pages-read-label": "Pages Read",
+        "pages-read-tooltip": "Pages Read: {{count}}",
+        "words-read-label": "Words Read",
+        "words-read-tooltip": "Words Read: {{count}}",
+        "authors-read-label": "Authors Read",
+        "authors-read-tooltip": "Authors Read: {{count}}",
+        "reviews-label": "Reviews",
+        "reviews-tooltip": "Reviews: {{count}}",
+        "ratings-label": "Ratings",
+        "ratings-tooltip": "Ratings: {{count}}"
+    },
+
     "profile-image": {
         "edit-image-alt": "Edit Image"
     },
