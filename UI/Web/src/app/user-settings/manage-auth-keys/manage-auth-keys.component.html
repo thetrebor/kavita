@@ -10,7 +10,7 @@
 
     @if (opdsEnabled && opdsUrl) {
       <div class="mt-4">
-        <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true" [showRefresh]="false"
+        <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true"
                      [transform]="makeUrl" />
       </div>
     }

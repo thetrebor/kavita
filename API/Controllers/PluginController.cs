@@ -70,7 +70,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     [HttpGet("version")]
     public async Task<ActionResult<string>> GetVersion([Required] string apiKey)
     {
-        var userId = await unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         if (userId <= 0) throw new KavitaUnauthenticatedUserException();
         return Ok((await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value);
     }

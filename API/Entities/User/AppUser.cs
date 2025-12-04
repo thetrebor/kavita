@@ -2,11 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Progress;
 using API.Entities.Scrobble;
 using API.Entities.User;
+using API.Helpers;
 using Microsoft.AspNetCore.Identity;
 
 
@@ -155,6 +157,16 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     {
         PrimaryColor = string.Empty;
         SecondaryColor = string.Empty;
+    }
+
+    public string GetOpdsAuthKey()
+    {
+        if (AuthKeys == null || AuthKeys.Count == 0)
+        {
+            throw new ArgumentNullException("AuthKeys not loaded");
+        }
+
+        return AuthKeys.Where(k => k.Name == AuthKeyHelper.OpdsKeyName).Select(k => k.Key).First();
     }
 
 }

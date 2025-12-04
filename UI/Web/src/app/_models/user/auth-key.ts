@@ -13,3 +13,6 @@ export enum AuthKeyProvider {
   System = 1
 }
 
+export const ImageOnlyName = 'image-only';
+export const OpdsName = 'opds';
+

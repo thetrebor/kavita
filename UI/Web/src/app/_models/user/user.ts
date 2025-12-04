@@ -11,7 +11,8 @@ export interface User extends IHasCover {
   refreshToken: string;
   roles: string[];
   preferences: Preferences;
-  apiKey: string;
+  // ApiKey is deprecated in favor of AuthKeys
+  //apiKey: string;
   email: string;
   ageRestriction: AgeRestriction;
   hasRunScrobbleEventGeneration: boolean;

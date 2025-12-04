@@ -447,7 +447,7 @@ public class LibraryController : BaseApiController
     [HttpPost("scan-folder")]
     public async Task<ActionResult> ScanFolder(ScanFolderDto dto)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(dto.ApiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(dto.ApiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
 

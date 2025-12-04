@@ -293,7 +293,8 @@
 
     "multi-check-box-form": {
         "select-all": "Select all",
-        "deselect-all": "Deselect all"
+        "deselect-all": "Deselect all",
+        "no-data": "{{typeahead.no-data}}"
     },
 
     "user-holds": {
@@ -470,10 +471,7 @@
         "show": "Show",
         "hide": "Hide",
         "regen-warning": "Regenerating your API key will invalidate any existing clients.",
-        "no-key": "ERROR - KEY NOT SET",
-        "confirm-reset": "This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?",
-        "key-reset": "API Key reset",
-        "reset": "Reset"
+        "no-key": "ERROR - KEY NOT SET"
     },
 
     "scrobbling-providers": {

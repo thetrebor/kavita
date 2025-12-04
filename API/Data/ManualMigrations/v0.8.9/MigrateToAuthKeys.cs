@@ -30,7 +30,7 @@ public class MigrateToAuthKeys : ManualMigration
         {
             var key = new AppUserAuthKey()
             {
-                Name = "opds",
+                Name = AuthKeyHelper.OpdsKeyName,
                 Key = user.ApiKey,
                 CreatedAtUtc = DateTime.UtcNow,
                 ExpiresAtUtc = null,
@@ -41,7 +41,7 @@ public class MigrateToAuthKeys : ManualMigration
 
             var imageKey = new AppUserAuthKey()
             {
-                Name = "image-only",
+                Name = AuthKeyHelper.ImageOnlyKeyName,
                 Key = AuthKeyHelper.GenerateKey(16),
                 CreatedAtUtc = DateTime.UtcNow,
                 ExpiresAtUtc = null,

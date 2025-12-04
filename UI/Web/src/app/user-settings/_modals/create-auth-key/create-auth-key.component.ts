@@ -56,7 +56,6 @@ export class CreateAuthKeyComponent implements OnInit {
     }
 
     if (this.isRotateFlow()) {
-
       this.accountService.rotateAuthKey(this.authKey()!.id, {...data, name: this.authKey()!.name}).subscribe(res => {
         this.modalRef.close(res);
       });

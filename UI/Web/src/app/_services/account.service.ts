@@ -17,7 +17,7 @@ import {Action} from "./action-factory.service";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
-import {AuthKey} from "../_models/user/auth-key";
+import {AuthKey, OpdsName} from "../_models/user/auth-key";
 
 export enum Role {
   Admin = 'Admin',
@@ -70,6 +70,7 @@ export class AccountService {
 
   public readonly currentUserSignal = toSignal(this.currentUser$);
   public readonly userId = computed(() => this.currentUserSignal()?.id);
+  public readonly currentUserGenericApiKey = computed(() => this.currentUserSignal()?.authKeys.filter(k => k.name === OpdsName)[0].key);
   public readonly isReadOnly = computed(() => this.currentUserSignal()?.roles.includes(Role.ReadOnly) ?? true);
 
   /**
@@ -436,21 +437,6 @@ export class AccountService {
     }
 
     return undefined;
-  }
-
-  resetApiKey() {
-    return this.httpClient.post<string>(this.baseUrl + 'account/reset-api-key', {}, TextResonse).pipe(map(key => {
-      const user = this.getUserFromLocalStorage();
-      if (user) {
-        user.apiKey = key;
-
-        localStorage.setItem(this.userKey, JSON.stringify(user));
-
-        this.currentUserSource.next(user);
-        this.currentUser = user;
-      }
-      return key;
-    }));
   }
 
   getOpdsUrl() {

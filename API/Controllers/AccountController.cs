@@ -214,7 +214,7 @@ public class AccountController : BaseApiController
                 Email = user.Email,
                 Token = await _tokenService.CreateToken(user),
                 RefreshToken = await _tokenService.CreateRefreshToken(user),
-                ApiKey = user.ApiKey,
+                ApiKey = user.GetOpdsAuthKey(),
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
                 KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
             };
@@ -246,8 +246,9 @@ public class AccountController : BaseApiController
         {
             user = await _userManager.Users
                 .Include(u => u.UserPreferences)
+                .Include(u => u.AuthKeys)
                 .AsSplitQuery()
-                .SingleOrDefaultAsync(x => x.ApiKey == loginDto.ApiKey);
+                .SingleOrDefaultAsync(x => x.GetOpdsAuthKey() == loginDto.ApiKey);
         }
         else
         {
@@ -389,30 +390,6 @@ public class AccountController : BaseApiController
             .Where(f => f.FieldType == typeof(string))
             .ToDictionary(f => f.Name,
                 f => (string) f.GetValue(null)!).Values.ToList();
-    }
-
-
-    /// <summary>
-    /// Resets the API Key assigned with a user
-    /// </summary>
-    /// <remarks>This will log unauthorized requests to Security log</remarks>
-    /// <returns></returns>
-    [HttpPost("reset-api-key")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult<string>> ResetApiKey()
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!) ?? throw new KavitaUnauthenticatedUserException();
-        user.ApiKey = HashUtil.ApiKey();
-
-        if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
-        {
-            await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
-                MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
-            return Ok(user.ApiKey);
-        }
-
-        await _unitOfWork.RollbackAsync();
-        return BadRequest(await _localizationService.Translate(UserId, "unable-to-reset-key"));
     }
 
 
@@ -896,7 +873,7 @@ public class AccountController : BaseApiController
 
 
         user = (await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
-            AppUserIncludes.UserPreferences))!;
+            AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys))!;
 
         // Perform Login code
         return new UserDto
@@ -905,7 +882,7 @@ public class AccountController : BaseApiController
             Email = user.Email!,
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
             KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
         };
@@ -1061,7 +1038,7 @@ public class AccountController : BaseApiController
         await _unitOfWork.CommitAsync();
 
         user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName!,
-            AppUserIncludes.UserPreferences);
+            AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys);
 
         // Perform Login code
         return new UserDto
@@ -1070,7 +1047,8 @@ public class AccountController : BaseApiController
             Email = user.Email!,
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
+            AuthKeys = _mapper.Map<IList<AuthKeyDto>>(user.AuthKeys),
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
             KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
         };
@@ -1183,7 +1161,7 @@ public class AccountController : BaseApiController
         }
 
         var opdsAuthKey = (await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId))
-            .Where(k => k.Name == "opds" && k.Provider == AuthKeyProvider.System)
+            .Where(k => k is {Name: AuthKeyHelper.OpdsKeyName, Provider: AuthKeyProvider.System})
             .Select(k => k.Key)
             .FirstOrDefault();
 
