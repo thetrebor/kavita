@@ -42,6 +42,9 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {ProfileReviewListComponent} from "../profile-review-list/profile-review-list.component";
+import {
+  AvgTimeSpendReadingByHourComponent
+} from "../../../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -75,7 +78,8 @@ enum TabID {
     ReadsByMonthComponent,
     VirtualScrollerModule,
     NgxStarsModule,
-    ProfileReviewListComponent
+    ProfileReviewListComponent,
+    AvgTimeSpendReadingByHourComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -101,6 +105,7 @@ export class ProfileComponent {
   protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.filter(), () => this.userId());
   protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.filter(), () => this.userId());
   protected readonly readsByMonth = this.statsService.getReadsByMonths(() => this.filter(), () => this.userId());
+  protected readonly avgTimeSpendReadingByHour = this.statsService.getAvgTimeSpendReadingByHour(() => this.filter(), () => this.userId());
   protected readonly totalReadsResource = this.statsService.getTotalReads(() => this.userId());
 
   activeTabId = TabID.Overview;

@@ -16,6 +16,7 @@ using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
@@ -49,13 +50,14 @@ public interface IStatisticService
     Task<IList<StatCount<YearMonthGroupingDto>>> GetReadsPerMonth(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId, int requestingUserId);
     Task<int> GetTotalReads(int userId, int requestingUserId);
+    Task<IList<StatCount<int>>> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId);
 }
 
 /// <summary>
 /// Responsible for computing statistics for the server
 /// </summary>
 /// <remarks>This performs raw queries and does not use a repository</remarks>
-public class StatisticService(DataContext context, IMapper mapper, IUnitOfWork unitOfWork): IStatisticService
+public class StatisticService(ILogger<StatisticService> logger, DataContext context, IMapper mapper, IUnitOfWork unitOfWork): IStatisticService
 {
 
     private static readonly (int Start, int? End)[] PageBuckets =
@@ -1083,6 +1085,52 @@ public class StatisticService(DataContext context, IMapper mapper, IUnitOfWork u
             TotalCount = totalCount,
         };
 
+    }
+
+    public async Task<IList<StatCount<int>>> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId)
+    {
+        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
+        var sessions = await context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ToListAsync();
+
+        logger.LogInformation("Found {Count} session to check", sessions.Count);
+
+        var hourStats = sessions
+            .SelectMany(session =>
+            {
+                var hours = new List<(int hour, TimeSpan timeSpent)>();
+                var current = session.StartTime;
+
+                while (current < session.EndTime)
+                {
+                    var hourEnd = current.AddHours(1);
+                    var sessionEnd = session.EndTime ?? current;
+                    var endOfPeriod = new[] { hourEnd, sessionEnd }.Min();
+
+                    var timeSpent = endOfPeriod - current;
+                    hours.Add((current.Hour, timeSpent));
+
+                    current = endOfPeriod;
+                }
+
+                return hours;
+            })
+            .GroupBy(x => x.hour)
+            .ToDictionary(
+                g => g.Key,
+                g => (long)g.Average(x => x.timeSpent.TotalMinutes)
+            );
+
+        return Enumerable.Range(0, 24)
+            .Select(hour => new StatCount<int>
+            {
+                Value = hour,
+                Count = hourStats.GetValueOrDefault(hour, 0),
+            })
+            .ToList();
     }
 
     public async Task<IList<StatCount<YearMonthGroupingDto>>> GetReadsPerMonth(StatsFilterDto filter, int userId, int requestingUserId)

@@ -31,7 +31,7 @@ export class ReadsByMonthComponent {
       month: monthLabelPipe.transform(mostRead.value.month + 1, false),
       count: mostRead.count,
     }
-  })
+  });
 
   legendLabels = computed(() => {
     if (!this.readsByMonthResource().hasValue()) return [];

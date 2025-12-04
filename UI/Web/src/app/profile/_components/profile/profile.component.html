@@ -72,6 +72,12 @@
                 </div>
 
                 <div class="row mt-4">
+                  <div class="col-md-12">
+                    <app-avg-time-spend-reading-by-hour [userName]="username" [timeByHourResource]="avgTimeSpendReadingByHour" />
+                  </div>
+                </div>
+
+                <div class="row mt-4">
                   <div class="col-md-6">
                     <app-reading-pace [userId]="user.id" [year]="year()" [userName]="username"  [filter]="filterValue" />
                   </div>

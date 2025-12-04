@@ -239,6 +239,10 @@ export class StatisticsService {
     return this.filterResource<StatCount<{year: number, month: number}>[]>(statsFilter, userId, 'reads-by-month');
   }
 
+  getAvgTimeSpendReadingByHour(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<number>[]>(statsFilter, userId, 'avg-time-by-hour');
+  }
+
   getTotalReads(userId: () => number) {
     return httpResource<number>(() => this.baseUrl + `stats/total-reads?userId=${userId()}`).asReadonly();
   }

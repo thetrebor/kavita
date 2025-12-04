@@ -1,0 +1,30 @@
+<ng-container *transloco="let t; prefix: 'avg-time-reading-by-hour'">
+
+  <div class="card p-4">
+
+    <h4>{{t('title')}}</h4>
+
+    @let mostTimeSpendReadingValue = mostTimeSpendReading();
+    @if (mostTimeSpendReadingValue != null) {
+      <span>{{t('most-time-spend-reading', {
+        name: userName(),
+        startHour: mostTimeSpendReadingValue.value,
+        endHour: (mostTimeSpendReadingValue.value + 1) % 24,
+        amount: mostTimeSpendReadingValue.count
+      })}}</span>
+    }
+
+
+
+    <app-bar-chart
+      [axisLabels]="axisLabels()"
+      [data]="data()"
+      [yAxisMax]="60"
+      [showLabels]="false"
+      [toolTipFormatter]="labelFormatter"
+      [showToolTips]="true"
+      labelPosition="insideTop"
+    />
+  </div>
+
+</ng-container>

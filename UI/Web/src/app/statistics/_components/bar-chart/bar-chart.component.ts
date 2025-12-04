@@ -101,6 +101,7 @@ export class BarChartComponent {
    * @default false
    */
   htmlToolTip = input(false);
+  yAxisMax = input<number | undefined>(undefined);
 
   processedData = computed(() => {
     const data = this.data();
@@ -182,7 +183,8 @@ export class BarChartComponent {
       data: isHorizontal ? this.axisLabels() : undefined,
       position: 'left' as const,
       axisLine: { show: false },
-      axisLabel: { rotate: 0 }
+      axisLabel: { rotate: 0 },
+      max: this.yAxisMax(),
     };
 
     if (!isHorizontal || !this.axisLabelsOther()) {
@@ -194,7 +196,8 @@ export class BarChartComponent {
       data: this.axisLabelsOther(),
       position: 'right' as const,
       axisLine: { show: false },
-      axisTick: { show: false }
+      axisTick: { show: false },
+      max: this.yAxisMax(),
     };
 
     return [leftYAxis, rightYAxis];
@@ -207,7 +210,7 @@ export class BarChartComponent {
       label: {
         show: this.showLabels(),
         position: this.labelPosition(),
-        formatter: this.seriesLabelFormatter()
+        formatter: this.seriesLabelFormatter(),
       },
       itemStyle: {
         borderRadius: this.horizontal() ? 5 : [5, 5, 0, 0],
