@@ -2843,7 +2843,7 @@
     },
 
     "profile-review-list": {
-        "no-data": "No Reviews",
+        "no-data": "No Reviews or Reviews aren't being shared",
         "filter-label": "Filter by Series",
         "rating-alt": "Filter by Rating",
         "clear-rating-alt": "Clear Rating Filter"
