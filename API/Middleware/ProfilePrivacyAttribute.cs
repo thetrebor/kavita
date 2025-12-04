@@ -18,7 +18,7 @@ namespace API.Middleware;
 /// </summary>
 /// <param name="queryKey">Defaults to userId</param>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class ProfilePrivacyAttribute(string queryKey = "userId") : Attribute, IAsyncAuthorizationFilter
+public class ProfilePrivacyAttribute(string queryKey = "userId", bool allowMissingUserId = false) : Attribute, IAsyncAuthorizationFilter
 {
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -26,6 +26,11 @@ public class ProfilePrivacyAttribute(string queryKey = "userId") : Attribute, IA
         var userIdString = context.HttpContext.Request.Query[queryKey].FirstOrDefault();
         if (string.IsNullOrEmpty(userIdString))
         {
+            if (allowMissingUserId)
+            {
+                return;
+            }
+
             context.Result = new ContentResult
             {
                 StatusCode = StatusCodes.Status400BadRequest,

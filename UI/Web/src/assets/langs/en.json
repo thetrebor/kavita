@@ -2902,6 +2902,11 @@
         "most-time-spend-reading": "{{name}} spends most of their time reading between {{startHour}} and {{endHour}} with an average of {{amount}} minutes"
     },
 
+    "profile-overview": {
+        "currently-reading": "Currently Reading",
+        "want-to-read": "{{side-nav.want-to-read}}"
+    },
+
     "activity-graph": {
         "title": "Reading Activity",
         "day-of-week-alt": "Day of the Week",
