@@ -28,7 +28,18 @@ export class AvgTimeSpendReadingByHourComponent {
   })
 
   axisLabels = computed(() => {
-    return Array.from({length: 24}, (_, i) => i + 'h');
+    const locale = navigator.language;
+    const use12Hours = Intl.DateTimeFormat(locale,  { hour: 'numeric' }).resolvedOptions().hour12 ?? false;
+
+    return Array.from({length: 24}, (_, i) => {
+      if (use12Hours) {
+        const hour = i % 12 || 12;
+        const period = i < 12 ? 'am' : 'pm';
+        return `${hour}${period}`;
+      }
+
+      return `${i}h`;
+    });
   });
 
   labelFormatter = (input: any) => {
