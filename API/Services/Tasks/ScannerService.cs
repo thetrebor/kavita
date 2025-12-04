@@ -350,8 +350,8 @@ public class ScannerService : IScannerService
         }
 
         // Tell UI that this series is done
-        await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
-            MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
         await _metadataService.RemoveAbandonedMetadataKeys();
 
@@ -811,7 +811,7 @@ public class ScannerService : IScannerService
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent(string.Empty, libraryName, ProgressEventType.Ended));
+            MessageFactory.LibraryScanProgressEvent(string.Empty, libraryName, ProgressEventType.Ended));
 
         _logger.LogDebug("[ScannerService] Finished writing metadata for {Count} series in {Elapsed}ms", toProcess.Count, sw.ElapsedMilliseconds);
 
