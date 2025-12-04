@@ -298,22 +298,6 @@ public class AccountController : BaseApiController
             }
         }
 
-        // Update LastActive on account
-        try
-        {
-            await _unitOfWork.UserRepository.UpdateUserAsActive(user.Id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
-        }
-
-        // NOTE: This can likely be removed
-        user.UserPreferences ??= new AppUserPreferences
-        {
-            Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
-        };
-
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
 

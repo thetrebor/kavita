@@ -318,6 +318,7 @@ public class Startup
         app.UseMiddleware<UserContextMiddleware>();
         app.UseMiddleware<ClientInfoMiddleware>();
         app.UseMiddleware<DeviceTrackingMiddleware>(); // This must be after ClientInfo and Authorization
+        app.UseMiddleware<UpdateUserAsActiveMiddleware>(); // This must be LAST
 
         app.UseDefaultFiles();
 
