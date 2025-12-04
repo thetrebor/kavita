@@ -217,6 +217,9 @@ public class ScannerService : IScannerService
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null) return; // This can occur when UI deletes a series but doesn't update and user re-requests update
 
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
         var existingChapterIdsToClean = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
 
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
@@ -225,8 +228,6 @@ public class ScannerService : IScannerService
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
         if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
         {
-            var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-
             BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(serverSettings, series.LibraryId, seriesId, false, false));
             BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, bypassFolderOptimizationChecks));
             return;
@@ -316,10 +317,37 @@ public class ScannerService : IScannerService
             key.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
             .ToList();
 
-        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
-
         var toProcessList = toProcess.Select(k => parsedSeries[k]).ToList();
-        await ProcessParserInfo(settings, toProcessList, library, bypassFolderOptimizationChecks);
+        var totalCount = toProcessList.Count;
+        var current = 0;
+
+        foreach (var pSeries in toProcessList)
+        {
+            current++;
+
+            using var scope = _scopeFactory.CreateScope();
+            var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+            var scopedLibrary = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
+
+            var processedSeriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
+            {
+                Library = scopedLibrary,
+                LeftToProcess = totalCount - current,
+                TotalToProcess = totalCount,
+                ForceUpdate = bypassFolderOptimizationChecks,
+            });
+
+            if (processedSeriesId != null)
+            {
+                var metadataService = scope.ServiceProvider.GetRequiredService<IMetadataService>();
+                var wordCountAnalyzerService = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
+
+                await metadataService.GenerateCoversForSeries(serverSettings, scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks, false);
+                await wordCountAnalyzerService.ScanSeries(scopedLibrary.Id, processedSeriesId.Value, bypassFolderOptimizationChecks);
+            }
+        }
 
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
