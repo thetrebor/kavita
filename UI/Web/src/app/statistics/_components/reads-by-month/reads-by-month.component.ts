@@ -30,7 +30,7 @@ export class ReadsByMonthComponent {
     const monthLabelPipe = new MonthLabelPipe();
     return {
       year: mostRead.value.year,
-      month: monthLabelPipe.transform(mostRead.value.month + 1, false),
+      month: monthLabelPipe.transform(mostRead.value.month, false),
       count: mostRead.count,
     }
   });

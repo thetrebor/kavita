@@ -9,7 +9,7 @@
         <app-icon-and-title [label]="t('books-read-label')" [clickable]="false"
                             fontClasses="fa-solid fa-book-open"
                             [title]="t('books-read-tooltip', {count: data?.booksRead | number})">
-          {{t('series-count', {num: data?.booksRead | number})}}
+          {{data?.booksRead | number}}
         </app-icon-and-title>
       </div>
       <div class="vr d-none d-lg-block m-2"></div>
@@ -18,7 +18,7 @@
         <app-icon-and-title [label]="t('comics-read-label')" [clickable]="false"
                             fontClasses="fa-solid fa-book-open"
                             [title]="t('comics-read-tooltip', {count: data?.comicsRead | number})">
-          {{t('series-count', {num: data?.comicsRead | number})}}
+          {{data?.comicsRead | number}}
         </app-icon-and-title>
       </div>
       <div class="vr d-none d-lg-block m-2"></div>
@@ -27,7 +27,7 @@
         <app-icon-and-title [label]="t('pages-read-label')" [clickable]="false"
                             fontClasses="fa-solid fa-book-open"
                             [title]="t('pages-read-tooltip', {count: data?.pagesRead | number})">
-          {{t('series-count', {num: data?.pagesRead | number})}}
+          {{data?.pagesRead | number}}
         </app-icon-and-title>
       </div>
       <div class="vr d-none d-lg-block m-2"></div>
@@ -36,7 +36,7 @@
         <app-icon-and-title [label]="t('words-read-label')" [clickable]="false"
                             fontClasses="fa-solid fa-book-open"
                             [title]="t('words-read-tooltip', {count: data?.wordsRead | number})">
-          {{t('series-count', {num: data?.wordsRead | number})}}
+          {{data?.wordsRead | number}}
         </app-icon-and-title>
       </div>
       <div class="vr d-none d-lg-block m-2"></div>
@@ -45,7 +45,7 @@
         <app-icon-and-title [label]="t('authors-read-label')" [clickable]="false"
                             fontClasses="fa-solid fa-book-open"
                             [title]="t('authors-read-tooltip', {count: data?.authorsRead | number})">
-          {{t('series-count', {num: data?.authorsRead | number})}}
+          {{data?.authorsRead | number}}
         </app-icon-and-title>
       </div>
       <div class="vr d-none d-lg-block m-2"></div>
@@ -54,7 +54,7 @@
         <app-icon-and-title [label]="t('reviews-label')" [clickable]="false"
                             fontClasses="fa-solid fa-book-open"
                             [title]="t('reviews-tooltip', {count: data?.reviews | number})">
-          {{t('series-count', {num: data?.reviews | number})}}
+          {{data?.reviews | number}}
         </app-icon-and-title>
       </div>
       <div class="vr d-none d-lg-block m-2"></div>
@@ -63,7 +63,7 @@
         <app-icon-and-title [label]="t('ratings-label')" [clickable]="false"
                             fontClasses="fa-solid fa-book-open"
                             [title]="t('ratings-tooltip', {count: data?.ratings | number})">
-          {{t('series-count', {num: data?.ratings | number})}}
+          {{data?.ratings | number}}
         </app-icon-and-title>
       </div>
       <div class="vr d-none d-lg-block m-2"></div>
