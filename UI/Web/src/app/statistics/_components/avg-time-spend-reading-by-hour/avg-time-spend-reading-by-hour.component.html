@@ -5,7 +5,7 @@
     <h4>{{t('title')}}</h4>
 
     @let mostTimeSpendReadingValue = mostTimeSpendReading();
-    @if (mostTimeSpendReadingValue != null) {
+    @if (mostTimeSpendReadingValue !== null) {
       <span>{{t('most-time-spend-reading', {
         name: userName(),
         startHour: mostTimeSpendReadingValue.value,
