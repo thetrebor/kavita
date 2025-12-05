@@ -2870,6 +2870,11 @@
         "edit-image-alt": "Edit Image"
     },
 
+    "preferred-format": {
+        "title": "Preferred format",
+        "sub-title": "Most chapters {{name}} reads are {{format}}(s)"
+    },
+
     "page-spread": {
         "title": "Chapters by Page Count",
         "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages",

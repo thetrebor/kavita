@@ -90,7 +90,7 @@
                     <app-reading-pace [userId]="user.id" [year]="year()" [userName]="username"  [filter]="filterValue" />
                   </div>
                   <div class="col-md-6">
-                    <app-preferred-format />
+                    <app-preferred-format [filter]="filterValue" [userId]="user.id" [userName]="username" />
                   </div>
                 </div>
 
