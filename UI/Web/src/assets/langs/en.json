@@ -84,7 +84,8 @@
         "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
         "opds": "OPDS",
         "image-only": "Images",
-        "add-auth-key": "New"
+        "add-auth-key": "New",
+        "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients."
     },
 
     "create-auth-key": {
@@ -281,10 +282,8 @@
         "include-continue-from-tooltip": "Insert a \"Continue From X\" entry in OPDS fields to avoid finding your last reading point (Emulates Kavita's Continue button)",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
-        "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
-        "clients-api-key-tooltip": "The API key is like a password. Resetting it will invalidate any existing clients.",
+        "clients-opds-description": "All 3rd Party clients will either use the OPDS Auth key or the Connection Url below. These are like passwords, keep it private.",
         "clients-opds-url-label": "OPDS URL",
-        "clients-api-key-label": "API Key",
         "clients-opds-url-tooltip": "See a list of supported OPDS clients: ",
 
         "reset": "{{common.reset}}",

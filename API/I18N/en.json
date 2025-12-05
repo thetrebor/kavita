@@ -248,5 +248,7 @@
     "annotation-export-failed": "Unable to export Annotations, check logs",
     "download-not-allowed": "User does not have download permissions",
     "auth-key-unique": "The Auth Key name must be unique to your account",
-    "read-only": "Cannot perform this action"
+
+
+    "role-restricted": "Access forbidden: Your role does not permit this action"
 }

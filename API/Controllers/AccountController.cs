@@ -535,7 +535,7 @@ public class AccountController : BaseApiController
     /// <returns></returns>
     /// <remarks>Users who's <see cref="AppUser.IdentityProvider"/> is not <see cref="IdentityProvider.Kavita"/> cannot be edited if <see cref="OidcConfigDto.SyncUserSettings"/> is true</remarks>
     [HttpPost("update")]
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
     {
@@ -656,7 +656,7 @@ public class AccountController : BaseApiController
     /// <param name="userId"></param>
     /// <param name="withBaseUrl">Include the "https://ip:port/" in the generated link</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("invite-url")]
     public async Task<ActionResult<string>> GetInviteUrl(int userId, bool withBaseUrl)
     {
@@ -676,7 +676,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("invite")]
     public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
     {
@@ -1174,11 +1174,17 @@ public class AccountController : BaseApiController
     [HttpGet("auth-keys")]
     public async Task<ActionResult<IList<AuthKeyDto>>> GetAuthKeys()
     {
-        // TODO: Make sure the Auth isn't an AuthKey itself
         return Ok(await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId));
     }
 
+    /// <summary>
+    /// Rotate the Auth Key
+    /// </summary>
+    /// <param name="authKeyId"></param>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("rotate-auth-key")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AuthKeyDto>> RotateAuthKey([FromQuery] int authKeyId, RotateAuthKeyRequestDto dto)
     {
         var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
@@ -1204,13 +1210,9 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("create-auth-key")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AuthKeyDto>> CreateAuthKey(RotateAuthKeyRequestDto dto)
     {
-        if ((await _unitOfWork.UserRepository.GetRoles(UserId)).Contains(PolicyConstants.ReadOnlyRole))
-        {
-            return BadRequest(await _localizationService.Translate(UserId, "read-only"));
-        }
-
         // Validate the name doesn't collide
         var authKeys = await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId);
         if (authKeys.Any(k => string.Equals(k.Name, dto.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -1233,14 +1235,15 @@ public class AccountController : BaseApiController
         return Ok(_mapper.Map<AuthKeyDto>(newKey));
     }
 
+    /// <summary>
+    /// Delete the Auth Key
+    /// </summary>
+    /// <param name="authKeyId"></param>
+    /// <returns></returns>
     [HttpDelete("auth-key")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteAuthKey(int authKeyId)
     {
-        if ((await _unitOfWork.UserRepository.GetRoles(UserId)).Contains(PolicyConstants.ReadOnlyRole))
-        {
-            return BadRequest(await _localizationService.Translate(UserId, "read-only"));
-        }
-
         var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
         if (authKey?.AppUserId != UserId) return BadRequest();
         if (authKey.Provider != AuthKeyProvider.User) return BadRequest();
