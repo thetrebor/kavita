@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, model} from '@angular/core';
 import {ApiKeyComponent} from "../api-key/api-key.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
@@ -46,6 +46,7 @@ export class ManageAuthKeysComponent {
 
   opdsUrl = model<string>('');
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl(); };
+  isReadOnly = computed(() => this.accountService.hasReadOnlyRole(this.accountService.currentUserSignal()!));
 
   protected readonly authKeysResource = this.accountService.getAuthKeysResource();
   protected readonly isOpdsEnabledResource = this.settingsService.getOpdsEnabledResource();

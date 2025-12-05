@@ -1206,6 +1206,11 @@ public class AccountController : BaseApiController
     [HttpPost("create-auth-key")]
     public async Task<ActionResult<AuthKeyDto>> CreateAuthKey(RotateAuthKeyRequestDto dto)
     {
+        if ((await _unitOfWork.UserRepository.GetRoles(UserId)).Contains(PolicyConstants.ReadOnlyRole))
+        {
+            return BadRequest(await _localizationService.Translate(UserId, "read-only"));
+        }
+
         // Validate the name doesn't collide
         var authKeys = await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId);
         if (authKeys.Any(k => string.Equals(k.Name, dto.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -1231,6 +1236,11 @@ public class AccountController : BaseApiController
     [HttpDelete("auth-key")]
     public async Task<ActionResult> DeleteAuthKey(int authKeyId)
     {
+        if ((await _unitOfWork.UserRepository.GetRoles(UserId)).Contains(PolicyConstants.ReadOnlyRole))
+        {
+            return BadRequest(await _localizationService.Translate(UserId, "read-only"));
+        }
+
         var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
         if (authKey?.AppUserId != UserId) return BadRequest();
         if (authKey.Provider != AuthKeyProvider.User) return BadRequest();

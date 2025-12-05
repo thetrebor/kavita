@@ -18,10 +18,12 @@
 
   <h4 class="mt-2">
     {{t('auth-keys-title')}}
-    <button class="btn btn-outline-primary" (click)="createAuthKey()">
-      <i class="fa-solid fa-plus" aria-hidden="true"></i>
-      <span class="ms-1">{{t('add-auth-key')}}</span>
-    </button>
+    @if (isReadOnly()) {
+      <button class="btn btn-outline-primary" (click)="createAuthKey()">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        <span class="ms-1">{{t('add-auth-key')}}</span>
+      </button>
+    }
   </h4>
   @if (authKeysResource.hasValue()) {
     <ngx-datatable
