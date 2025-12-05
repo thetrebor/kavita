@@ -113,12 +113,17 @@ export class SeriesService {
     return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {}, {params});
   }
 
-  getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>): Observable<PaginatedResult<Series[]>> {
+  getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, userId: number | null = null): Observable<PaginatedResult<Series[]>> {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};
 
-    return this.httpClient.post<Series[]>(this.baseUrl + 'want-to-read/v2', data, {observe: 'response', params}).pipe(
+    let url = this.baseUrl + 'want-to-read/v2';
+    if (userId) {
+      url += "?userId=" + userId
+    }
+
+    return this.httpClient.post<Series[]>(url, data, {observe: 'response', params}).pipe(
       map(response => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
     }));
@@ -131,12 +136,17 @@ export class SeriesService {
     }));
   }
 
-  getOnDeck(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, libraryId: number = 0) {
+  getOnDeck(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, libraryId: number = 0, userId: number | null = null) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};
 
-    return this.httpClient.post<Series[]>(this.baseUrl + 'series/on-deck?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
+    let url = this.baseUrl + 'series/on-deck?libraryId=' + libraryId;
+    if (userId) {
+      url += "&userId=" + userId;
+    }
+
+    return this.httpClient.post<Series[]>(url, data, {observe: 'response', params}).pipe(
       map(response => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
     }));

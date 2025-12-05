@@ -356,6 +356,8 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IList<StatCount<int>>>> GetAverageTimePerHour([FromQuery] StatsFilterDto filter, int userId)
     {
+        await CleanStatsFilter(filter, UserId);
+
         return Ok(await statService.GetTimeReadingByHour(filter, userId, UserId));
     }
 

@@ -45,7 +45,7 @@
           <a ngbNavLink>{{t(TabID.Overview)}}</a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Overview; prefetch on idle) {
-              Overview Here
+              <app-profile-overview [memberInfo]="memberInfo()" />
             }
           </ng-template>
         </li>

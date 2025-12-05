@@ -17,6 +17,7 @@ using API.Entities.Enums;
 using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using API.Services.Plus;
 using EasyCaching.Core;
@@ -367,15 +368,18 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="userParams"></param>
     /// <param name="libraryId">Default of 0 meaning all libraries</param>
+    /// <param name="userId">Optional user id to request the OnDeck for someone else. They must have profile sharing enabled when doing so</param>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("on-deck")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+    [ProfilePrivacy(allowMissingUserId: true)]
+    [ResponseCache(CacheProfileName = "Instant")]
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0, [FromQuery] int? userId = null)
     {
-        var userId = UserId;
-        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, null);
+        var onDeckForUser = userId ?? UserId;
 
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
+        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(onDeckForUser, libraryId, userParams, null);
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(onDeckForUser, pagedList);
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
