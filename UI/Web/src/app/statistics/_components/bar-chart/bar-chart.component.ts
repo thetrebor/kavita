@@ -1,7 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
 import {LabelFormatterCallback, TopLevelFormatterParams, TooltipOption} from "echarts/types/dist/shared";
 import {BarSeriesOption} from "echarts/charts";
+import {ThemeService} from "../../../_services/theme.service";
 
 // Type copied over from ECharts, as it's not exported
 export type OptionDataValue = string | number | Date | null | undefined;
@@ -24,6 +25,9 @@ type ArrayAble<T> = T | T[];
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BarChartComponent {
+
+  private themeService = inject(ThemeService);
+
   /**
    * Data used for the series
    */
@@ -220,9 +224,8 @@ export class BarChartComponent {
     }];
   });
 
-  // TODO: Update colours, move into theme service?
   private getColorForIndex(index: number): string {
-    const palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452'];
+    const palette = this.themeService.chartsColourPalette();
     return palette[index % palette.length];
   }
 
