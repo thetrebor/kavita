@@ -277,9 +277,11 @@ public class StatsController(
     [ProfilePrivacy]
     [HttpGet("preferred-format")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat(int userId)
+    public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat([FromQuery] StatsFilterDto filter, int userId)
     {
-        return Ok(await statService.GetPreferredFormatForUser(userId));
+        await CleanStatsFilter(filter, UserId);
+
+        return Ok(await statService.GetPreferredFormatForUser(filter, userId, UserId));
     }
 
     /// <summary>

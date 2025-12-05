@@ -179,8 +179,8 @@ export class StatisticsService {
     }).asReadonly();
   }
 
-  getPreferredFormatResource(userId: () => number) {
-    return httpResource<StatCount<MangaFormat>[]>(() => this.baseUrl + `stats/preferred-format?userId=${userId()}`).asReadonly();
+  getPreferredFormatResource(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<MangaFormat>[]>(statsFilter, userId, 'preferred-format')
   }
 
   private filterHttpParams(filter: StatsFilter, userId: number) {

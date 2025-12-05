@@ -20,6 +20,7 @@ namespace API.Data.ManualMigrations;
 public static class MigrateProgressToReadingSessions
 {
     private const int BatchSize = 1000;
+    public const string Name = nameof(MigrateProgressToReadingSessions);
 
     public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
     {

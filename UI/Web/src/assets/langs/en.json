@@ -2870,14 +2870,25 @@
         "edit-image-alt": "Edit Image"
     },
 
+    "preferred-format": {
+        "title": "Preferred format",
+        "sub-title": "Most chapters {{name}} reads are {{format}}(s)"
+    },
+
     "page-spread": {
         "title": "Chapters by Page Count",
-        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages"
+        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages",
+        "data-type": "{{data}} chapters",
+        "data-of": "{{percentage}}% of your chapters",
+        "range": "Page range: {{range}}"
     },
 
     "word-spread": {
         "title": "Chapters by Word Count",
-        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} words"
+        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} words",
+        "data-type": "{{data}} chapters",
+        "data-of": "{{percentage}}% of your chapters",
+        "range": "Word range: {{range}}"
     },
 
     "tag-breakdown": {

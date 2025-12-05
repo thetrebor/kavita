@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.ManualMigrations;
 using API.DTOs;
 using API.DTOs.Statistics;
 using API.DTOs.Stats;
@@ -42,7 +43,7 @@ public interface IStatisticService
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId);
     Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year);
-    Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId);
+    Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId);
@@ -814,12 +815,14 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         };
     }
 
-    public async Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(int userId)
+    public async Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(StatsFilterDto filter, int userId, int requestingUserId)
     {
+        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
-        var query = context.AppUserProgresses
+        var query = context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .AsNoTracking()
-            .Where(p => p.AppUserId == userId)
             .Join(context.Series,
                 p => p.SeriesId,
                 s => s.Id,
@@ -828,7 +831,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Select(g => new StatCount<MangaFormat>
             {
                 Value = g.Key,
-                Count = g.Count()
+                Count = g.Count(),
             })
             .OrderByDescending(s => s.Count);
 
@@ -1093,8 +1096,18 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
+        var sessionRecordedSince = await unitOfWork.DataContext.ManualMigrationHistory
+            .FirstOrDefaultAsync(mm => mm.Name == MigrateProgressToReadingSessions.Name);
+
+        if (sessionRecordedSince == null)
+        {
+            logger.LogWarning("{Migration} never happened? Cannot compute time by hour", MigrateProgressToReadingSessions.Name);
+            return [];
+        }
+
         var sessions = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .Where(session => session.ReadingSession.CreatedUtc > sessionRecordedSince.RanAt)
             .ToListAsync();
 
         logger.LogInformation("Found {Count} session to check", sessions.Count);

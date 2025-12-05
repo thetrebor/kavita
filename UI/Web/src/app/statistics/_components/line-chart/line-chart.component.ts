@@ -1,6 +1,7 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
 import {LineSeriesOption} from "echarts/charts";
+import {ThemeService} from "../../../_services/theme.service";
 
 type ArrayAble<T> = T | T[];
 
@@ -14,6 +15,8 @@ type ArrayAble<T> = T | T[];
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LineChartComponent {
+
+  private themeService = inject(ThemeService);
 
   /**
    * Data used for the series
@@ -48,7 +51,7 @@ export class LineChartComponent {
 
   // TODO: Update colours, move into theme service?
   private getColorForIndex(index: number): string {
-    const palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452'];
+    const palette = this.themeService.chartsColourPalette();
     return palette[index % palette.length];
   }
 
