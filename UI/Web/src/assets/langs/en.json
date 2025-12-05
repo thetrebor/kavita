@@ -2937,7 +2937,8 @@
         "low-activity": "Low Activity",
         "moderate-activity": "Moderate Activity",
         "good-activity": "Good Activity",
-        "high-activity": "High Activity"
+        "high-activity": "High Activity",
+        "all-time": "All Time"
     },
 
     "reading-pace": {

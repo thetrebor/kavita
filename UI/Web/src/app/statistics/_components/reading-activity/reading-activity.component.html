@@ -7,7 +7,7 @@
         </div>
         <div class="col-8">
           <form [formGroup]="formGroup" class="d-inline-flex float-end">
-            @if (isAdmin && !individualUserMode) {
+            @if (isAdmin && !individualUserMode()) {
               <div class="d-flex me-1">
                 <label for="time-select-read-by-day" class="form-check-label"></label>
                 <select id="time-select-read-by-day" class="form-select" formControlName="users"
