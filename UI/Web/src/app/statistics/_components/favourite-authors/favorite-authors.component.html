@@ -1,10 +1,15 @@
-<div class="card p-4" *transloco="let t; prefix: 'favourite-authors'">
+<div class="card p-4" *transloco="let t; prefix: 'favorite-authors'">
 
-  <app-loading [loading]="favouriteAuthors.isLoading()" />
+  <app-loading [loading]="favoriteAuthors.isLoading()" />
 
-  @if (favouriteAuthors.hasValue()) {
+  @if (favoriteAuthors.hasValue()) {
+    <h4>{{t('title')}}</h4>
 
-    @for (fAuthor of favouriteAuthors.value(); track fAuthor.authorName + $index) {
+    @let favAuthors = favoriteAuthors.value();
+
+    <span class="mb-4">{{t('sub-title', {name: userName(), author: mostReadAuthor()?.authorName, count: mostReadCount()})}}</span>
+
+    @for (fAuthor of favAuthors; track fAuthor.authorName + $index) {
 
       <div class="row mb-4 align-items-start">
 
@@ -34,6 +39,7 @@
         <div class="col-12 col-md-8 d-flex flex-wrap gap-2">
 
           @for (chapter of fAuthor.chapters; track chapter.id) {
+            <div [ngbTooltip]="chapter.titleName">
             <app-image
               objectFit="cover"
               [styles]="{ 'object-position': 'top' }"
@@ -42,8 +48,8 @@
               [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
               [errorImage]="imageService.errorImage"
               [classes]="'rounded shadow-sm'"
-              [ngbTooltip]="chapter.titleName"
             ></app-image>
+            </div>
           }
 
         </div>

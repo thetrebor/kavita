@@ -820,22 +820,48 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
-        var query = context.AppUserReadingSessionActivityData
+        var startTime = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
+        var endTime = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
+
+        // Get series IDs from reading history
+        var historyData = await context.AppUserReadingHistory
+            .Where(h => h.AppUserId == userId &&
+                        h.DateUtc >= startTime &&
+                        h.DateUtc <= endTime)
+            .Select(h => h.Data)
+            .ToListAsync();
+
+        var historySeriesIds = historyData
+            .Where(d => d != null)
+            .SelectMany(d => d.SeriesIds ?? Enumerable.Empty<int>())
+            .Distinct()
+            .ToList();
+
+        // Get series IDs from reading sessions
+        var sessionSeriesIds = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .AsNoTracking()
-            .Join(context.Series,
-                p => p.SeriesId,
-                s => s.Id,
-                (progress, series) => new { series.Format, progress.Id })
-            .GroupBy(x => x.Format)
+            .Select(a => a.SeriesId)
+            .Distinct()
+            .ToListAsync();
+
+        var allSeriesIds = historySeriesIds.Union(sessionSeriesIds).Distinct();
+        var seriesFormats = await context.Series
+            .Where(s => allSeriesIds.Contains(s.Id))
+            .Select(s => new { s.Id, s.Format })
+            .ToDictionaryAsync(x => x.Id, x => x.Format);
+
+        var formatCounts = seriesFormats.Values
+            .GroupBy(format => format)
             .Select(g => new StatCount<MangaFormat>
             {
                 Value = g.Key,
-                Count = g.Count(),
+                Count = g.Count()
             })
-            .OrderByDescending(s => s.Count);
+            .OrderByDescending(s => s.Count)
+            .ToList();
 
-        return await query.ToListAsync();
+        return formatCounts;
     }
 
     public async Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId)

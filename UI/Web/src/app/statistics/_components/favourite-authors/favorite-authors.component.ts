@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input, ViewEncapsulation} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, ViewEncapsulation} from '@angular/core';
 import {StatisticsService} from "../../../_services/statistics.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
@@ -22,12 +22,12 @@ import {RouterLink} from "@angular/router";
     NgbTooltip,
     RouterLink
   ],
-  templateUrl: './favourite-authors.component.html',
-  styleUrl: './favourite-authors.component.scss',
+  templateUrl: './favorite-authors.component.html',
+  styleUrl: './favorite-authors.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class FavouriteAuthorsComponent {
+export class FavoriteAuthorsComponent {
 
   private readonly statsService = inject(StatisticsService);
   protected readonly imageService = inject(ImageService);
@@ -36,7 +36,21 @@ export class FavouriteAuthorsComponent {
   userName = input.required<string>();
   statsFilter = input.required<StatsFilter>();
 
-  protected readonly favouriteAuthors = this.statsService.getFavouriteAuthors(
+  mostReadAuthor = computed(() => {
+    const authors = this.favoriteAuthors.value() || [];
+    if (authors.length === 0) return null;
+
+    return authors.reduce((max, author) =>
+      author.totalChaptersRead > max.totalChaptersRead ? author : max
+    );
+  });
+
+  mostReadCount = computed(() => {
+    const author = this.mostReadAuthor();
+    return author?.totalChaptersRead ?? 0;
+  });
+
+  protected readonly favoriteAuthors = this.statsService.getFavouriteAuthors(
     () => this.statsFilter(),
     () => this.userId(),
   );

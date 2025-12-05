@@ -28,7 +28,7 @@ import {
 } from "../../../statistics/_components/bucket-spread-chart/bucket-spread-chart.component";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {ProfileImageComponent} from "../profile-image/profile-image.component";
-import {FavouriteAuthorsComponent} from "../../../statistics/_components/favourite-authors/favourite-authors.component";
+import {FavoriteAuthorsComponent} from "../../../statistics/_components/favourite-authors/favorite-authors.component";
 import {
   LibraryAndTimeFilterGroup,
   LibraryAndTimeSelectorComponent
@@ -74,7 +74,7 @@ enum TabID {
     BucketSpreadChartComponent,
     ReactiveFormsModule,
     ProfileImageComponent,
-    FavouriteAuthorsComponent,
+    FavoriteAuthorsComponent,
     LibraryAndTimeSelectorComponent,
     LoadingComponent,
     ReadsByMonthComponent,

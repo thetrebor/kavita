@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.Progress;
+﻿using System.Collections.Generic;
+
+namespace API.DTOs.Progress;
 
 public class DailyReadingDataDto
 {
@@ -6,4 +8,6 @@ public class DailyReadingDataDto
     public int TotalPagesRead { get; set; }
     public int TotalWordsRead { get; set; }
     public int LongestSessionMinutes { get; set; }
+    public IList<int> SeriesIds { get; set; }
+    public IList<int> ChapterIds { get; set; }
 }

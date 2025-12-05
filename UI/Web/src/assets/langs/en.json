@@ -2875,6 +2875,11 @@
         "sub-title": "Most chapters {{name}} reads are {{format}}(s)"
     },
 
+    "favorite-authors": {
+        "title": "Most Read Authors",
+        "sub-title": "{{name}}'s most read author is {{author}}, with {{count}} total reads"
+    },
+
     "page-spread": {
         "title": "Chapters by Page Count",
         "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages",
