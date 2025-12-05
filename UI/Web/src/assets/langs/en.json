@@ -2243,7 +2243,7 @@
         "unknown": "Unknown",
         "oidc": "OIDC",
         "jwt": "JWT",
-        "api-key": "API Key"
+        "auth-key": "Auth Key"
     },
 
     "client-device-platform-pipe": {

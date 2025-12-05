@@ -15,6 +15,7 @@ namespace API.Controllers;
 
 #nullable enable
 
+[SkipDeviceTracking]
 public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService, ILogger<PluginController> logger)
     : BaseApiController
 {
@@ -66,7 +67,6 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     /// <param name="apiKey">Required for authenticating to get result</param>
     /// <returns></returns>
     [AllowAnonymous]
-    [SkipDeviceTracking]
     [HttpGet("version")]
     public async Task<ActionResult<string>> GetVersion([Required] string apiKey)
     {

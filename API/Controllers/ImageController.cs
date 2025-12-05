@@ -4,14 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Metadata;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MimeTypes;
 
@@ -31,19 +29,17 @@ public class ImageController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly IReadingListService _readingListService;
     private readonly ICoverDbService _coverDbService;
-    private readonly UserManager<AppUser> _userManager;
 
     /// <inheritdoc />
     public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
         ILocalizationService localizationService, IReadingListService readingListService,
-        ICoverDbService coverDbService, UserManager<AppUser> userManager)
+        ICoverDbService coverDbService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _localizationService = localizationService;
         _readingListService = readingListService;
         _coverDbService = coverDbService;
-        _userManager = userManager;
     }
 
     /// <summary>

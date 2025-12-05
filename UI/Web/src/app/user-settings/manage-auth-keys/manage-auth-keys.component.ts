@@ -1,9 +1,8 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, model} from '@angular/core';
 import {ApiKeyComponent} from "../api-key/api-key.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {SettingsService} from "../../admin/settings.service";
-import {User} from "../../_models/user/user";
 import {WikiLink} from "../../_models/wiki";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AuthKey, AuthKeyProvider} from "../../_models/user/auth-key";
@@ -16,6 +15,7 @@ import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {CreateAuthKeyComponent} from "../_modals/create-auth-key/create-auth-key.component";
 import {Clipboard} from "@angular/cdk/clipboard";
 import {DatePipe} from "@angular/common";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -36,25 +36,23 @@ import {DatePipe} from "@angular/common";
 export class ManageAuthKeysComponent {
   private readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly modalService = inject(NgbModal);
   private readonly clipboard = inject(Clipboard);
+  private readonly toastr = inject(ToastrService);
 
 
-  user: User | undefined = undefined;
-  opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
+  protected readonly opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
-  opdsUrl: string = '';
-  makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
+  opdsUrl = model<string>('');
+  makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl(); };
 
   protected readonly authKeysResource = this.accountService.getAuthKeysResource();
   protected readonly isOpdsEnabledResource = this.settingsService.getOpdsEnabledResource();
 
   constructor() {
     this.accountService.getOpdsUrl().subscribe(res => {
-      this.opdsUrl = res;
-      this.cdRef.markForCheck();
+      this.opdsUrl.set(res);
     });
   }
 
@@ -88,6 +86,7 @@ export class ManageAuthKeysComponent {
 
   copy(data: string) {
     this.clipboard.copy(data);
+    this.toastr.success(translate('toasts.copied-to-clipboard'));
   }
 
   protected readonly ColumnMode = ColumnMode;
