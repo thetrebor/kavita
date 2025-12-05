@@ -56,7 +56,7 @@ export class ReadsByMonthComponent {
     this.readsByMonthResource().value()!.forEach(s => {
       const yearIndex = this.legendLabels().indexOf(s.value.year + '');
       if (yearIndex !== -1) {
-        data[yearIndex][s.value.month] = s.count;
+        data[yearIndex][s.value.month-1] = s.count;
       }
     });
 
