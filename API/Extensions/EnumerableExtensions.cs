@@ -102,4 +102,10 @@ public static class EnumerableExtensions
     {
         return source.Count == 0 ? defaultValue : source.Min(selector);
     }
+
+    public static IEnumerable<TSource> WhereNotNull<TSource>(this IEnumerable<TSource?> source)
+    where TSource : class
+    {
+        return source.Where(item => item != null)!;
+    }
 }

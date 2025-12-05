@@ -1,9 +1,19 @@
 <ng-container *transloco="let t; prefix: 'preferred-format'">
 
-  <div class="card p-4">
-    @if (formatsResource.hasValue()) {
-      <div style="height: 300px; width: 100%" appECharts [options]="options()"></div>
+  <div class="stats-card card p-4">
+
+    <h4 class="stats-title">{{t('title')}}</h4>
+
+    @let mostReadFormatValue = mostReadFormat();
+    @if (mostReadFormatValue) {
+      <span class="stats-subtitle mb-4">{{t('sub-title', {name: userName(), format: mostReadFormatValue})}}</span>
     }
+
+    <div style="height: 300px; width: 100%"
+         appECharts
+         [options]="options()"
+         [ignoreFirstResize]="false"
+    ></div>
   </div>
 
 </ng-container>

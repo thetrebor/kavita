@@ -1,7 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
 import {LabelFormatterCallback, TopLevelFormatterParams, TooltipOption} from "echarts/types/dist/shared";
 import {BarSeriesOption} from "echarts/charts";
+import {ThemeService} from "../../../_services/theme.service";
 
 // Type copied over from ECharts, as it's not exported
 export type OptionDataValue = string | number | Date | null | undefined;
@@ -24,6 +25,9 @@ type ArrayAble<T> = T | T[];
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BarChartComponent {
+
+  private themeService = inject(ThemeService);
+
   /**
    * Data used for the series
    */
@@ -101,6 +105,7 @@ export class BarChartComponent {
    * @default false
    */
   htmlToolTip = input(false);
+  yAxisMax = input<number | undefined>(undefined);
 
   processedData = computed(() => {
     const data = this.data();
@@ -182,7 +187,8 @@ export class BarChartComponent {
       data: isHorizontal ? this.axisLabels() : undefined,
       position: 'left' as const,
       axisLine: { show: false },
-      axisLabel: { rotate: 0 }
+      axisLabel: { rotate: 0 },
+      max: this.yAxisMax(),
     };
 
     if (!isHorizontal || !this.axisLabelsOther()) {
@@ -194,7 +200,8 @@ export class BarChartComponent {
       data: this.axisLabelsOther(),
       position: 'right' as const,
       axisLine: { show: false },
-      axisTick: { show: false }
+      axisTick: { show: false },
+      max: this.yAxisMax(),
     };
 
     return [leftYAxis, rightYAxis];
@@ -207,7 +214,7 @@ export class BarChartComponent {
       label: {
         show: this.showLabels(),
         position: this.labelPosition(),
-        formatter: this.seriesLabelFormatter()
+        formatter: this.seriesLabelFormatter(),
       },
       itemStyle: {
         borderRadius: this.horizontal() ? 5 : [5, 5, 0, 0],
@@ -217,9 +224,8 @@ export class BarChartComponent {
     }];
   });
 
-  // TODO: Update colours, move into theme service?
   private getColorForIndex(index: number): string {
-    const palette = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452'];
+    const palette = this.themeService.chartsColourPalette();
     return palette[index % palette.length];
   }
 

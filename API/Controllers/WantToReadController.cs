@@ -10,6 +10,7 @@ using API.DTOs.WantToRead;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using API.Services.Plus;
 using Hangfire;
@@ -62,15 +63,19 @@ public class WantToReadController : BaseApiController
     /// </summary>
     /// <param name="userParams"></param>
     /// <param name="filterDto"></param>
+    /// <param name="userId">Optional user id to request the OnDeck for someone else. They must have profile sharing enabled when doing so</param>
     /// <returns></returns>
     [HttpPost("v2")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToReadV2([FromQuery] UserParams? userParams, FilterV2Dto filterDto)
+    [ProfilePrivacy(allowMissingUserId: true)]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToReadV2([FromQuery] UserParams? userParams, FilterV2Dto filterDto, [FromQuery] int? userId = null)
     {
+        var wantToReadForUser = userId ?? UserId;
         userParams ??= new UserParams();
-        var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(UserId, userParams, filterDto);
+
+        var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(wantToReadForUser, userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(UserId, pagedList);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(wantToReadForUser, pagedList);
 
         return Ok(pagedList);
     }

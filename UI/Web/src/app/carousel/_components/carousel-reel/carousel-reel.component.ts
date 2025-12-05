@@ -22,6 +22,8 @@ import {PaginatedResult} from "../../../_models/pagination";
 
 register();
 
+export type NextPageLoader = (pageNumber: number, pageSize: number) => Observable<any[] | PaginatedResult<any[]>>;
+
 @Component({
   selector: 'app-carousel-reel',
   templateUrl: './carousel-reel.component.html',
@@ -61,7 +63,7 @@ export class CarouselReelComponent {
 
   currentPage = model<number>(1);
   pageSize = input(20);
-  nextPageLoader = input<((pageNumber: number, pageSize: number) => Observable<any[] | PaginatedResult<any[]>>) | null>(null);
+  nextPageLoader = input<NextPageLoader | null>(null);
 
   paginationEnabled = computed(() => this.nextPageLoader() != null);
   loadingNextPage = signal(false);

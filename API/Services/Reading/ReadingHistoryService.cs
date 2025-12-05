@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -83,6 +84,8 @@ public class ReadingHistoryService : IReadingHistoryService
             var totalPages = 0;
             var totalWords = 0;
             var longestSessionMinutes = 0;
+            var seriesIds = new List<int>();
+            var chapterIds = new List<int>();
 
             var devicesUsed = sessions
                 .SelectMany(s => s.ActivityData)
@@ -105,6 +108,8 @@ public class ReadingHistoryService : IReadingHistoryService
                 {
                     totalPages += activity.PagesRead;
                     totalWords += activity.WordsRead;
+                    seriesIds.Add(activity.SeriesId);
+                    chapterIds.Add(activity.ChapterId);
                 }
             }
 
@@ -113,7 +118,9 @@ public class ReadingHistoryService : IReadingHistoryService
                 TotalMinutesRead = totalMinutes,
                 TotalPagesRead = totalPages,
                 TotalWordsRead = totalWords,
-                LongestSessionMinutes = longestSessionMinutes
+                LongestSessionMinutes = longestSessionMinutes,
+                SeriesIds = seriesIds.Distinct().ToList(),
+                ChapterIds = chapterIds.Distinct().ToList()
             };
 
             // Create ReadingHistory record

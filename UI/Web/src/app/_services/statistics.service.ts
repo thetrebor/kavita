@@ -25,6 +25,7 @@ import {Breakdown} from "../statistics/_models/breakdown";
 import {SpreadStats} from "../statistics/_models/stats/spread-stats";
 import {FavouriteAuthor} from "../statistics/_models/favourite-author";
 import {StatsFilter} from "../statistics/_models/stats-filter";
+import {ProfileStatBar} from "../profile/_components/profile-stat-bar/profile-stat-bar.component";
 
 export enum DayOfWeek
 {
@@ -178,8 +179,8 @@ export class StatisticsService {
     }).asReadonly();
   }
 
-  getPreferredFormatResource(userId: () => number) {
-    return httpResource<StatCount<MangaFormat>[]>(() => this.baseUrl + `stats/preferred-format?userId=${userId()}`).asReadonly();
+  getPreferredFormatResource(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<MangaFormat>[]>(statsFilter, userId, 'preferred-format')
   }
 
   private filterHttpParams(filter: StatsFilter, userId: number) {
@@ -233,6 +234,22 @@ export class StatisticsService {
 
   getFavouriteAuthors(statsFilter: () => StatsFilter | undefined, userId: () => number) {
     return this.filterResource<FavouriteAuthor[]>(statsFilter, userId, 'favourite-authors');
+  }
+
+  getReadsByMonths(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<{year: number, month: number}>[]>(statsFilter, userId, 'reads-by-month');
+  }
+
+  getAvgTimeSpendReadingByHour(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<number>[]>(statsFilter, userId, 'avg-time-by-hour');
+  }
+
+  getUserOverallStats(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<ProfileStatBar>(statsFilter, userId, 'user-stats');
+  }
+
+  getTotalReads(userId: () => number) {
+    return httpResource<number>(() => this.baseUrl + `stats/total-reads?userId=${userId()}`).asReadonly();
   }
 
 }

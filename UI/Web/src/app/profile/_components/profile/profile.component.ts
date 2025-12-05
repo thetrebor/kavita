@@ -26,17 +26,27 @@ import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {
   BucketSpreadChartComponent
 } from "../../../statistics/_components/bucket-spread-chart/bucket-spread-chart.component";
-import {LibraryService} from "../../../_services/library.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {UtilityService} from "../../../shared/_services/utility.service";
 import {ProfileImageComponent} from "../profile-image/profile-image.component";
-import {FavouriteAuthorsComponent} from "../../../statistics/_components/favourite-authors/favourite-authors.component";
+import {FavoriteAuthorsComponent} from "../../../statistics/_components/favourite-authors/favorite-authors.component";
 import {
   LibraryAndTimeFilterGroup,
   LibraryAndTimeSelectorComponent
 } from "../../../statistics/_components/library-and-time-selector/library-and-time-selector.component";
 import {map} from "rxjs/operators";
 import {StatsFilter} from "../../../statistics/_models/stats-filter";
+import {LicenseService} from "../../../_services/license.service";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {ReadsByMonthComponent} from "../../../statistics/_components/reads-by-month/reads-by-month.component";
+import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {NgxStarsModule} from "ngx-stars";
+import {ThemeService} from "../../../_services/theme.service";
+import {ProfileReviewListComponent} from "../profile-review-list/profile-review-list.component";
+import {
+  AvgTimeSpendReadingByHourComponent
+} from "../../../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
+import {ProfileStatBarComponent} from "../profile-stat-bar/profile-stat-bar.component";
+import {ProfileOverviewComponent} from "../profile-overview/profile-overview.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -57,7 +67,6 @@ enum TabID {
     NgbNavLink,
     NgbNavItem,
     NgbNavOutlet,
-    ReviewListItemComponent,
     PreferredFormatComponent,
     TitleCasePipe,
     StringBreakdownComponent,
@@ -65,8 +74,16 @@ enum TabID {
     BucketSpreadChartComponent,
     ReactiveFormsModule,
     ProfileImageComponent,
-    FavouriteAuthorsComponent,
-    LibraryAndTimeSelectorComponent
+    FavoriteAuthorsComponent,
+    LibraryAndTimeSelectorComponent,
+    LoadingComponent,
+    ReadsByMonthComponent,
+    VirtualScrollerModule,
+    NgxStarsModule,
+    ProfileReviewListComponent,
+    AvgTimeSpendReadingByHourComponent,
+    ProfileStatBarComponent,
+    ProfileOverviewComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -75,23 +92,25 @@ enum TabID {
 export class ProfileComponent {
 
   private readonly location = inject(Location);
-  private readonly reviewService = inject(ReviewService);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
   private readonly statsService = inject(StatisticsService);
-  private readonly libraryService = inject(LibraryService);
-  private readonly utilityService = inject(UtilityService);
+  protected readonly licenseService = inject(LicenseService);
+
 
   // Set by angular from the resolver
   memberInfo = input.required<MemberInfo>();
   userId = computed(() => this.memberInfo().id);
 
-  protected readonly reviewsResource = this.reviewService.getReviewsByUserResource(() => this.memberInfo().id);
+
   protected readonly genreBreakdown = this.statsService.getGenreBreakDownResource(() => this.filter(), () => this.userId());
   protected readonly tagsBreakdown = this.statsService.getTagBreakDownResource(() => this.filter(), () => this.userId());
   protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.filter(), () => this.userId());
   protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.filter(), () => this.userId());
+  protected readonly readsByMonth = this.statsService.getReadsByMonths(() => this.filter(), () => this.userId());
+  protected readonly avgTimeSpendReadingByHour = this.statsService.getAvgTimeSpendReadingByHour(() => this.filter(), () => this.userId());
+  protected readonly totalReadsResource = this.statsService.getTotalReads(() => this.userId());
 
   activeTabId = TabID.Overview;
 
@@ -108,6 +127,24 @@ export class ProfileComponent {
     map(value => value as StatsFilter),
   ));
   year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
+
+  totalReads = computed(() => {
+    if (!this.totalReadsResource.hasValue()) {
+      return 0;
+    }
+
+    return this.totalReadsResource.value();
+  });
+
+  protected readonly backgroundImage = computed(() => {
+    const m = this.memberInfo();
+    if (!m) return '';
+    try {
+      return this.imageService.getUserCoverImage(this.userId());
+    } catch {
+      return '';
+    }
+  });
 
   constructor() {
     this.route.fragment.pipe(tap(frag => {
@@ -131,5 +168,9 @@ export class ProfileComponent {
   }
 
 
+
+
   protected readonly TabID = TabID;
+  protected readonly window = window;
+
 }

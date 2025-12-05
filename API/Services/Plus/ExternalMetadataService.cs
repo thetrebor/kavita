@@ -405,6 +405,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// Sets a series to Don't Match and removes all previously cached
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="dontMatch"></param>
     public async Task UpdateSeriesDontMatch(int seriesId, bool dontMatch)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.ExternalMetadata);
@@ -690,7 +691,7 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     /// <summary>
-    /// Helper method, calls <see cref="ProcessGenreAndTagLists"/>
+    /// Helper method, calls <see cref="GenerateGenreAndTagLists"/>
     /// </summary>
     /// <param name="externalMetadata"></param>
     /// <param name="settings"></param>
@@ -1918,7 +1919,6 @@ public class ExternalMetadataService : IExternalMetadataService
     /// This is to get series information for the recommendation drawer on Kavita
     /// </summary>
     /// <remarks>This uses a different API that series detail</remarks>
-    /// <param name="license"></param>
     /// <param name="aniListId"></param>
     /// <param name="malId"></param>
     /// <param name="seriesId"></param>

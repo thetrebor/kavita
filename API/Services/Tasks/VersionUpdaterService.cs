@@ -396,6 +396,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
+            // BUG: This can throw an exception due to the file being in-use. Should use a temp file and move it instead.
             var json = JsonSerializer.Serialize(updates, JsonOptions);
             await File.WriteAllTextAsync(_cacheFilePath, json);
         }

@@ -332,7 +332,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
         builder.Entity<AppUserAnnotation>()
             .PrimitiveCollection(a => a.Likes)
-            .HasDefaultValue(new HashSet<int>());
+            .HasDefaultValue(new List<int>());
 
         builder.Entity<AppUserReadingSession>()
             .Property(b => b.IsActive)

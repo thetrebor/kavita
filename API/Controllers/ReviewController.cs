@@ -138,11 +138,13 @@ public class ReviewController : BaseApiController
     /// <summary>
     /// Returns all reviews for the user. If you are authenticated as the user, will always return data, regardless of ShareReviews setting
     /// </summary>
-    /// <param name="userId"></param>
+    /// <param name="userId">User to load, if your own, will bypass RBS and ShareReviews restrictions</param>
+    /// <param name="rating">Null to ignore filtering. >= rating</param>
+    /// <param name="filterQuery">Null to ignore filtering on Series name</param>
     /// <returns></returns>
     [HttpGet("all")]
-    public async Task<ActionResult<IList<UserReviewExtendedDto>>> GetAllReviewsForUser(int userId)
+    public async Task<ActionResult<IList<UserReviewExtendedDto>>> GetAllReviewsForUser(int userId, float? rating = null, string? filterQuery = null)
     {
-        return Ok(await _unitOfWork.UserRepository.GetAllReviewsForUser(userId, userId == UserId));
+        return Ok(await _unitOfWork.UserRepository.GetAllReviewsForUser(userId, UserId, filterQuery, rating));
     }
 }

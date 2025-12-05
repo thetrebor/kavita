@@ -40,7 +40,6 @@ interface WeekRow {
   days: (DayCell | null)[];
 }
 
-
 @Component({
   selector: 'app-activity-graph',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -84,6 +83,13 @@ export class ActivityGraphComponent {
   // Computed values for the grid
   weeks = computed(() => this.generateWeeks());
   months = computed(() => this.generateMonthLabels());
+
+  timeFrameLabel = computed(() => {
+    const filter = this.filter();
+
+    if (filter.timeFilter.startDate == filter.timeFilter.endDate) return translate('activity-graph.all-time');
+    return this.year();
+  })
 
   private generateWeeks(): WeekRow[] {
     const year = this.year();

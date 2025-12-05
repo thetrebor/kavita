@@ -2,8 +2,10 @@ $image-height: 125px;
 $clamp-lines: 3;
 
 .reading-list-item {
-  max-height: 140px;
-  height: 140px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--card-border-color);
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .progress-banner {
@@ -75,4 +77,24 @@ $clamp-lines: 3;
       margin-left: 0 !important;
     }
   }
+}
+
+.review-meta {
+  a { color: var(--link-color); }
+
+  ngx-stars { vertical-align: middle; }
+}
+
+.review-body {
+  margin-top: 4px;
+  color: var(--text-color);
+}
+
+.reading-list-item .actions {
+  display: inline-flex;
+  align-items: center;
+}
+
+.reading-list-item .text-muted small, .reading-list-item .small {
+  font-size: .85rem;
 }

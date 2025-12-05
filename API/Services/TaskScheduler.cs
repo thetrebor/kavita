@@ -35,7 +35,7 @@ public interface ITaskScheduler
     Task ScanLibraries(bool force = false);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true, bool forceColorscape = true);
-    void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false);
+    Task RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false);
     Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void CancelStatsTasks();
@@ -468,7 +468,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, forceUpdate, forceColorscape));
     }
 
-    public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false)
+    public async Task RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false)
     {
         if (HasAlreadyEnqueuedTask(MetadataService.Name,"GenerateCoversForSeries", [libraryId, seriesId, forceUpdate, forceColorscape]))
         {
@@ -476,8 +476,10 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
         _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate, forceColorscape));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(serverSettings, libraryId, seriesId, forceUpdate, forceColorscape));
     }
 
     public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)

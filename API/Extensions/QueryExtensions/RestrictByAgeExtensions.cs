@@ -152,7 +152,7 @@ public static class RestrictByAgeExtensions
         return q;
     }
 
-    private static IQueryable<AppUserRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserRating> queryable, AgeRestriction restriction, int userId)
+    public static IQueryable<AppUserRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserRating> queryable, AgeRestriction restriction, int userId)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
         var q = queryable.Where(r => r.Series.Metadata.AgeRating <= restriction.AgeRating || r.AppUserId == userId);
@@ -165,7 +165,7 @@ public static class RestrictByAgeExtensions
         return q;
     }
 
-    private static IQueryable<AppUserChapterRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserChapterRating> queryable, AgeRestriction restriction, int userId)
+    public static IQueryable<AppUserChapterRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserChapterRating> queryable, AgeRestriction restriction, int userId)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
         var q = queryable.Where(r => r.Series.Metadata.AgeRating <= restriction.AgeRating || r.AppUserId == userId);

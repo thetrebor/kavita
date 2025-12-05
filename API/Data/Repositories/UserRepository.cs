@@ -13,6 +13,7 @@ using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.DTOs.SideNav;
 using API.Entities;
+using API.Entities.Enums.UserPreferences;
 using API.Entities.User;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
@@ -132,11 +133,14 @@ public interface IUserRepository
     Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
     Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
     Task UpdateUserAsActive(int userId);
-    Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences);
+    Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, int requestingUserId, string? query = null, float? ratingFilter = null);
     Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
     Task<string?> GetPersonCoverImageAsync(int personId);
     Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId);
     Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId);
+    Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId);
+    Task<AppUserPreferences> GetPreferencesForUser(int userId);
+
 }
 
 public class UserRepository : IUserRepository
@@ -678,8 +682,17 @@ public class UserRepository : IUserRepository
                 .SetProperty(u => u.LastActive, DateTime.Now));
     }
 
-    public async Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, bool bypassPreferences)
+    /// <summary>
+    /// Retrieve all reviews (series and chapter) for a given user, respecting profile privacy settings and age restrictions.
+    /// </summary>
+    /// <param name="userId">UserId of source user</param>
+    /// <param name="requestingUserId">Viewer UserId</param>
+    /// <param name="query">Search text to match against Series name</param>
+    /// <param name="ratingFilter">Rating, only applies to series/chapters rated. Will show everything greater or equal to</param>
+    /// <returns></returns>
+    public async Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, int requestingUserId, string? query = null, float? ratingFilter = null)
     {
+        var bypassPreferences = userId == requestingUserId;
         if (!bypassPreferences)
         {
             var userPreferences = await _context.AppUserPreferences
@@ -691,14 +704,19 @@ public class UserRepository : IUserRepository
             }
         }
 
+        var userRating = await _context.AppUser.GetUserAgeRestriction(requestingUserId);
+
         // Get series-level reviews
         var seriesReviews = await _context.AppUserRating
+            .WhereIf(ratingFilter is > 0, r => r.HasBeenRated && r.Rating >= ratingFilter!.Value)
             .Include(r => r.AppUser)
             .Include(r => r.Series)
             .ThenInclude(s => s.Metadata)
             .ThenInclude(sm => sm.People)
             .ThenInclude(smp => smp.Person)
             .Where(r => r.AppUserId == userId && !string.IsNullOrEmpty(r.Review))
+            .WhereIf(!string.IsNullOrWhiteSpace(query), r => EF.Functions.Like(r.Series.Name, "%"+query+"%"))
+            .RestrictAgainstAgeRestriction(userRating, requestingUserId)
             .OrderBy(r => r.SeriesId)
             .AsSplitQuery()
             .ProjectTo<UserReviewExtendedDto>(_mapper.ConfigurationProvider)
@@ -711,6 +729,7 @@ public class UserRepository : IUserRepository
             .Include(r => r.Chapter)
             .ThenInclude(c => c.People)
             .Where(r => r.AppUserId == userId && !string.IsNullOrEmpty(r.Review))
+            .RestrictAgainstAgeRestriction(userRating, requestingUserId)
             .OrderBy(r => r.SeriesId)
             .ThenBy(r => r.ChapterId)
             .AsSplitQuery()
@@ -1100,5 +1119,18 @@ public class UserRepository : IUserRepository
         return await _context.AppUserAuthKey
             .Where(k => k.Id == authKeyId)
             .FirstOrDefaultAsync();
+    public async Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId)
+    {
+        return await _context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .Select(p => p.SocialPreferences)
+            .FirstAsync();
+    }
+
+    public async Task<AppUserPreferences> GetPreferencesForUser(int userId)
+    {
+        return await _context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .FirstAsync();
     }
 }

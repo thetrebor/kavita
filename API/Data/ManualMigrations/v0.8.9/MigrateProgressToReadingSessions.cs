@@ -21,6 +21,7 @@ namespace API.Data.ManualMigrations;
 public class MigrateProgressToReadingSessions : ManualMigration
 {
     private const int BatchSize = 1000;
+    public const string Name = nameof(MigrateProgressToReadingSessions);
 
     private static AppUserReadingSessionActivityData CreateSessionActivityDataFromProgress(AppUserProgress progress, Chapter chapter, MangaFormat format)
     {

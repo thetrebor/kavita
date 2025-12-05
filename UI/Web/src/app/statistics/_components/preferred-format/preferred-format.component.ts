@@ -1,11 +1,12 @@
-import {ChangeDetectionStrategy, Component, computed, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {StatisticsService} from "../../../_services/statistics.service";
-import {AccountService} from "../../../_services/account.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
-import {PieChartModule, ScaleType} from "@swimlane/ngx-charts";
-import { EChartsCoreOption } from "echarts/core";
+import {PieChartModule} from "@swimlane/ngx-charts";
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
+import {ThemeService} from "../../../_services/theme.service";
+import {MangaFormat} from "../../../_models/manga-format";
+import {StatsFilter} from "../../_models/stats-filter";
 
 @Component({
   selector: 'app-preferred-format',
@@ -19,23 +20,33 @@ import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PreferredFormatComponent {
+
   private readonly statsService = inject(StatisticsService);
-  private readonly accountService = inject(AccountService);
+  private readonly themeService = inject(ThemeService);
+
+  userName = input.required<string>();
+  userId = input.required<number>();
+  filter = input.required<StatsFilter | undefined>();
 
   formatsResource = this.statsService
-    .getPreferredFormatResource(() => this.accountService.currentUserSignal()!.id);
+    .getPreferredFormatResource(() => this.filter(), () => this.userId());
+
+  mostReadFormat = computed(() => {
+    if (this.formatsResource.hasValue()) {
+      const pipe = new MangaFormatPipe();
+
+      const format = this.formatsResource.value()!.reduce((prev, cur) =>
+        prev.count > cur.count ? prev : cur, {count: -1, value: MangaFormat.UNKNOWN}).value;
+
+      return pipe.transform(format);
+    }
+
+    return null;
+  })
 
   options = computed<ECOption>(() => {
-    const data = this.formatsResource.value();
+    const data = this.formatsResource.hasValue() ?  this.formatsResource.value() : [];
     const pipe = new MangaFormatPipe();
-
-    const source = [
-      ['Format', 'Count'],
-      ...(data ?? []).map(record => [
-        pipe.transform(record.value),
-        record.count,
-      ]),
-    ];
 
     return {
       name: 'Format',
@@ -52,6 +63,7 @@ export class PreferredFormatComponent {
         center: ['50%', '70%'],
         startAngle: 180,
         endAngle: 360,
+        color: this.themeService.chartsColourPalette(),
         data: (data || []).map(r => {
           return {
             value: r.count,

@@ -17,7 +17,6 @@ import {ThemeService} from "../../../_services/theme.service";
     DatePipe,
     ImageComponent,
     ReadMoreComponent,
-    CardActionablesComponent,
     NgbTooltip,
     NgxStarsModule
   ],

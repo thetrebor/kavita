@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, effect, inject, input, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
 
@@ -17,18 +17,9 @@ export class ProfileIconComponent {
   userId = input.required<number>();
   size = input<number>(32);
 
-  currentImageUrl = model<string | null>(null);
-
-  constructor() {
-
-    effect(() => {
-      // Show preview if available, otherwise show existing image
-      const userId = this.userId();
-      const url =  userId && this.imageService.getUserCoverImage(userId) || null;
-
-      this.currentImageUrl.set(url);
-    });
-
-  }
+  currentImageUrl = computed(() => {
+    const userId = this.userId();
+    return this.imageService.getUserCoverImage(userId);
+  });
 
 }

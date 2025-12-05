@@ -251,7 +251,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadingActivityGraphData(filter, userId, year));
+        return Ok(await statService.GetReadingActivityGraphData(filter, userId, year, UserId));
     }
 
     #endregion
@@ -277,9 +277,11 @@ public class StatsController(
     [ProfilePrivacy]
     [HttpGet("preferred-format")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat(int userId)
+    public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat([FromQuery] StatsFilterDto filter, int userId)
     {
-        return Ok(await statService.GetPreferredFormatForUser(userId));
+        await CleanStatsFilter(filter, UserId);
+
+        return Ok(await statService.GetPreferredFormatForUser(filter, userId, UserId));
     }
 
     /// <summary>
@@ -295,7 +297,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetGenreBreakdownForUser(filter, userId));
+        return Ok(await statService.GetGenreBreakdownForUser(filter, userId, UserId));
     }
 
     /// <summary>
@@ -311,7 +313,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetTagBreakdownForUser(filter, userId));
+        return Ok(await statService.GetTagBreakdownForUser(filter, userId, UserId));
     }
 
 
@@ -322,7 +324,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetPageSpreadForUser(filter, userId));
+        return Ok(await statService.GetPageSpreadForUser(filter, userId, UserId));
     }
 
     [ProfilePrivacy]
@@ -332,7 +334,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetWordSpreadForUser(filter, userId));
+        return Ok(await statService.GetWordSpreadForUser(filter, userId, UserId));
     }
 
     [ProfilePrivacy]
@@ -342,9 +344,64 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetMostReadAuthors(filter, userId));
+        return Ok(await statService.GetMostReadAuthors(filter, userId, UserId));
     }
 
+    /// <summary>
+    /// Returns the avg time read by hour in the given filter
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [ProfilePrivacy]
+    [HttpGet("avg-time-by-hour")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<int>>>> GetAverageTimePerHour([FromQuery] StatsFilterDto filter, int userId)
+    {
+        await CleanStatsFilter(filter, UserId);
+
+        return Ok(await statService.GetTimeReadingByHour(filter, userId, UserId));
+    }
+
+    /// <summary>
+    /// Gives the total amount of chapters reads per month, filters start & end date will not apply
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [ProfilePrivacy]
+    [HttpGet("reads-by-month")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<YearMonthGroupingDto>>>> GetReadsPerMonth([FromQuery] StatsFilterDto filter, int userId)
+    {
+        await CleanStatsFilter(filter, UserId);
+
+        return Ok(await statService.GetReadsPerMonth(filter, userId, UserId));
+    }
+
+    /// <summary>
+    /// Returns the total amount reads in the given filter
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [ProfilePrivacy]
+    [HttpGet("total-reads")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<int>> GetTotalReads(int userId)
+    {
+        return Ok(await statService.GetTotalReads(userId, UserId));
+    }
+
+    [ProfilePrivacy]
+    [HttpGet("user-stats")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<ProfileStatBarDto>> GetStatsForUserBar([FromQuery] StatsFilterDto filter, int userId)
+    {
+        await CleanStatsFilter(filter, userId);
+        return Ok(await statService.GetUserStatBar(filter, userId, UserId));
+    }
+
+    // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?
     /// <summary>
     /// Cleans the stats filter to only include valid data. I.e. only requests libraries the user has access to
     /// </summary>

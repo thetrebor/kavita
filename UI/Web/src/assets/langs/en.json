@@ -2185,7 +2185,7 @@
         "users-online-count": "{{num}} Users online",
         "active-events-title": "Active Events:",
         "no-data": "Not much going on here",
-        "left-to-process": "Left to Process: {{leftToProcess}}",
+        "left-to-process": "Left to Process: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} downloads in Queue"
     },
 
@@ -2867,21 +2867,63 @@
         "no-reviews": "No Reviews yet",
         "user-you": "you",
         "user-possessive-your": "your",
-        "user-possessive": "{{name}}'s"
+        "user-possessive": "{{name}}'s",
+        "total-reads-badge": "{{reads}} Reads",
+        "k+-badge": "K+ Subscriber"
+    },
+
+    "profile-review-list": {
+        "no-data": "No Reviews or Reviews aren't being shared",
+        "filter-label": "Filter by Series",
+        "rating-alt": "Filter by Rating",
+        "clear-rating-alt": "Clear Rating Filter"
+    },
+
+    "profile-stat-bar": {
+        "books-read-label": "Books Read",
+        "books-read-tooltip": "Books Read: {{count}}",
+        "comics-read-label": "Comics Read",
+        "comics-read-tooltip": "Comics Read: {{count}}",
+        "pages-read-label": "Pages Read",
+        "pages-read-tooltip": "Pages Read: {{count}}",
+        "words-read-label": "Words Read",
+        "words-read-tooltip": "Words Read: {{count}}",
+        "authors-read-label": "Authors Read",
+        "authors-read-tooltip": "Authors Read: {{count}}",
+        "reviews-label": "Reviews",
+        "reviews-tooltip": "Reviews: {{count}}",
+        "ratings-label": "Ratings",
+        "ratings-tooltip": "Ratings: {{count}}"
     },
 
     "profile-image": {
         "edit-image-alt": "Edit Image"
     },
 
+    "preferred-format": {
+        "title": "Preferred format",
+        "sub-title": "Most chapters {{name}} reads are {{format}}(s)"
+    },
+
+    "favorite-authors": {
+        "title": "Most Read Authors",
+        "sub-title": "{{name}}'s most read author is {{author}}, with {{count}} total reads"
+    },
+
     "page-spread": {
         "title": "Chapters by Page Count",
-        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages"
+        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages",
+        "data-type": "{{data}} chapters",
+        "data-of": "{{percentage}}% of your chapters",
+        "range": "Page range: {{range}}"
     },
 
     "word-spread": {
         "title": "Chapters by Word Count",
-        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} words"
+        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} words",
+        "data-type": "{{data}} chapters",
+        "data-of": "{{percentage}}% of your chapters",
+        "range": "Word range: {{range}}"
     },
 
     "tag-breakdown": {
@@ -2893,6 +2935,22 @@
         "title": "Most read genres",
         "sub-title": "{{name}} most read genre is {{mostUsed}}",
         "missing": "Missing genres for {{amount}} series"
+    },
+
+    "reads-by-month": {
+        "title": "Total reads by month",
+        "sub-title": "{{username}} has read the most in {{month}} {{year}} with {{reads}} chapters read"
+    },
+
+    "avg-time-reading-by-hour": {
+        "title": "Average time spent reading by hour",
+        "minutes": "Minutes",
+        "most-time-spend-reading": "{{name}} spends most of their time reading between {{startHour}} and {{endHour}} with an average of {{amount}} minutes"
+    },
+
+    "profile-overview": {
+        "currently-reading": "Currently Reading",
+        "want-to-read": "{{side-nav.want-to-read}}"
     },
 
     "activity-graph": {
@@ -2909,7 +2967,8 @@
         "low-activity": "Low Activity",
         "moderate-activity": "Moderate Activity",
         "good-activity": "Good Activity",
-        "high-activity": "High Activity"
+        "high-activity": "High Activity",
+        "all-time": "All Time"
     },
 
     "reading-pace": {
