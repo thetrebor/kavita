@@ -7,7 +7,7 @@
 
       <div class="col-auto mb-2">
         <app-icon-and-title [label]="t('books-read-label')" [clickable]="false"
-                            fontClasses="fa-solid fa-book-open"
+                            fontClasses="fa-solid fa-book"
                             [title]="t('books-read-tooltip', {count: data?.booksRead | number})">
           {{data?.booksRead | number}}
         </app-icon-and-title>
@@ -25,7 +25,7 @@
 
       <div class="col-auto mb-2">
         <app-icon-and-title [label]="t('pages-read-label')" [clickable]="false"
-                            fontClasses="fa-solid fa-book-open"
+                            fontClasses="fa-solid fa-file"
                             [title]="t('pages-read-tooltip', {count: data?.pagesRead | number})">
           {{data?.pagesRead | number}}
         </app-icon-and-title>
@@ -34,7 +34,7 @@
 
       <div class="col-auto mb-2">
         <app-icon-and-title [label]="t('words-read-label')" [clickable]="false"
-                            fontClasses="fa-solid fa-book-open"
+                            fontClasses="fa-solid fa-file-lines"
                             [title]="t('words-read-tooltip', {count: data?.wordsRead | number})">
           {{data?.wordsRead | number}}
         </app-icon-and-title>
@@ -43,7 +43,7 @@
 
       <div class="col-auto mb-2">
         <app-icon-and-title [label]="t('authors-read-label')" [clickable]="false"
-                            fontClasses="fa-solid fa-book-open"
+                            fontClasses="fa-solid fa-users"
                             [title]="t('authors-read-tooltip', {count: data?.authorsRead | number})">
           {{data?.authorsRead | number}}
         </app-icon-and-title>
@@ -52,7 +52,7 @@
 
       <div class="col-auto mb-2">
         <app-icon-and-title [label]="t('reviews-label')" [clickable]="false"
-                            fontClasses="fa-solid fa-book-open"
+                            fontClasses="fa-solid fa-file-pen"
                             [title]="t('reviews-tooltip', {count: data?.reviews | number})">
           {{data?.reviews | number}}
         </app-icon-and-title>
@@ -61,13 +61,11 @@
 
       <div class="col-auto mb-2">
         <app-icon-and-title [label]="t('ratings-label')" [clickable]="false"
-                            fontClasses="fa-solid fa-book-open"
+                            fontClasses="fa-solid fa-star"
                             [title]="t('ratings-tooltip', {count: data?.ratings | number})">
           {{data?.ratings | number}}
         </app-icon-and-title>
       </div>
-      <div class="vr d-none d-lg-block m-2"></div>
-
     }
   </div>
 </ng-container>
