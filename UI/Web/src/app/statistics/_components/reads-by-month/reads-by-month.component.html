@@ -1,12 +1,12 @@
 <ng-container *transloco="let t; prefix: 'reads-by-month'">
 
-  <div class="card p-4">
+  <div class="card stats-card p-4">
 
-    <h4>{{t('title')}}</h4>
+    <h4 class="stats-title">{{t('title')}}</h4>
 
     @let mostReadValue = highestRead();
     @if (mostReadValue) {
-      <span>{{t('sub-title', {username: userName(), year: mostReadValue.year, month: mostReadValue.month, reads: mostReadValue.count})}}</span>
+      <span class="stats-subtitle mb-4">{{t('sub-title', {username: userName(), year: mostReadValue.year, month: mostReadValue.month, reads: mostReadValue.count})}}</span>
     }
 
     <app-line-chart

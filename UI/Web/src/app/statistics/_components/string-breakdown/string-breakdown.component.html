@@ -1,10 +1,10 @@
 
 
-<div class="card p-4" *transloco="let t; prefix: translationKey()">
+<div class="card stats-card p-4" *transloco="let t; prefix: translationKey()">
 
-  <span>{{t('title')}}</span>
+  <h4 class="stats-title">{{t('title')}}</h4>
 
-  <h4>{{t('sub-title', {name: userName(), mostUsed: mostUsed()?.value})}}</h4>
+  <span class="stats-subtitle mb-4">{{t('sub-title', {name: userName(), mostUsed: mostUsed()?.value})}}</span>
 
   <app-loading [loading]="breakDown().isLoading()" />
 

@@ -1,13 +1,13 @@
-<div class="card p-4" *transloco="let t; prefix: 'favorite-authors'">
+<div class="stats-card card p-4" *transloco="let t; prefix: 'favorite-authors'">
 
   <app-loading [loading]="favoriteAuthors.isLoading()" />
 
   @if (favoriteAuthors.hasValue()) {
-    <h4>{{t('title')}}</h4>
+    <h4 class="stats-title">{{t('title')}}</h4>
 
     @let favAuthors = favoriteAuthors.value();
 
-    <span class="mb-4">{{t('sub-title', {name: userName(), author: mostReadAuthor()?.authorName, count: mostReadCount()})}}</span>
+    <span class="stats-subtitle mb-4">{{t('sub-title', {name: userName(), author: mostReadAuthor()?.authorName, count: mostReadCount()})}}</span>
 
     @for (fAuthor of favAuthors; track fAuthor.authorName + $index) {
 

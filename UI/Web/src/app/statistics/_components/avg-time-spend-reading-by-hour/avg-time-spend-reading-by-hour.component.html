@@ -1,12 +1,12 @@
 <ng-container *transloco="let t; prefix: 'avg-time-reading-by-hour'">
 
-  <div class="card p-4">
+  <div class="card stats-card p-4">
 
-    <h4>{{t('title')}}</h4>
+    <h4 class="stats-title">{{t('title')}}</h4>
 
     @let mostTimeSpendReadingValue = mostTimeSpendReading();
     @if (mostTimeSpendReadingValue !== null) {
-      <span>{{t('most-time-spend-reading', {
+      <span class="stats-subtitle mb-4">{{t('most-time-spend-reading', {
         name: userName(),
         startHour: mostTimeSpendReadingValue.value,
         endHour: (mostTimeSpendReadingValue.value + 1) % 24,
