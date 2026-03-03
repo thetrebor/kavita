@@ -3,7 +3,7 @@ name: Validate PR Body
 on:
     pull_request:
         branches: [ main, develop, canary ]
-        types: [opened, synchronize]
+        types: [opened, synchronize, edited]
 
 jobs:
     check_pr:
@@ -18,7 +18,12 @@ jobs:
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   script: |
-                    const body = context.payload.pull_request.body || '';
+                    const { data: pr } = await github.rest.pulls.get({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.payload.pull_request.number
+                    });
+                    const body = pr.body || '';
                     if (/["`]/.test(body)) {
                       core.setFailed(
                         'PR body must not contain double-quotes or backticks.'
