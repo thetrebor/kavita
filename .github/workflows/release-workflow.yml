@@ -25,13 +25,21 @@ jobs:
         id: get-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 1. Map the input to an environment variable safely
+          PR_NUMBER_INPUT: ${{ inputs.pr_number }}
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             # Securely extract the PR body without shell interpolation
             RAW_BODY=$(jq -r '.pull_request.body // empty' "$GITHUB_EVENT_PATH")
-          elif [[ -n "${{ inputs.pr_number }}" ]]; then
-            # Fetch via GitHub CLI if manually triggered
-            RAW_BODY=$(gh pr view ${{ inputs.pr_number }} --repo ${{ github.repository }} --json body --jq '.body')
+          elif [[ -n "$PR_NUMBER_INPUT" ]]; then
+            # 2. Validate that the input is strictly numeric
+            if ! [[ "$PR_NUMBER_INPUT" =~ ^[0-9]+$ ]]; then
+              echo "Error: pr_number input must be purely numeric."
+              exit 1
+            fi
+
+            # 3. Fetch via GitHub CLI using the validated and quoted variable
+            RAW_BODY=$(gh pr view "$PR_NUMBER_INPUT" --repo "${{ github.repository }}" --json body --jq '.body')
           else
             RAW_BODY="Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
           fi
