@@ -15,6 +15,9 @@ jobs:
   check-release:
     name: Validate Release & Fetch Notes
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')) ||
       (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/')))
