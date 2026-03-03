@@ -15,24 +15,8 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Not Contains Release: ${{ !contains(github.head_ref, 'release') }}"
           echo "Matches Develop: ${{ github.ref == 'refs/heads/develop' }}"
-  build:
-    name: Upload Kavita.Common for Version Bump
-    runs-on: ubuntu-24.04
-    if: github.ref == 'refs/heads/develop'
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: csproj
-          path: Kavita.Common/Kavita.Common.csproj
-
   version:
     name: Bump version
-    needs: [ build ]
     runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/develop'
     steps:
@@ -45,6 +29,14 @@ jobs:
         with:
             dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Bump versions
         uses: majora2007/dotnet-bump-version@v0.0.10
         with:
@@ -54,7 +46,7 @@ jobs:
 
   develop:
     name: Build Nightly Docker
-    needs: [ build, version ]
+    needs: [ version ]
     runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/develop'
     permissions:
@@ -97,6 +89,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: UI/Web/package-lock.json
       - run: |
           cd UI/Web || exit
           echo 'Installing web dependencies'
@@ -129,6 +123,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Install Swashbuckle CLI
         run: dotnet tool install -g Swashbuckle.AspNetCore.Cli

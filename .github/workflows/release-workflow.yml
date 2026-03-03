@@ -18,30 +18,8 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Not Contains Release: ${{ !contains(github.head_ref, 'release') }}"
           echo "Matches Develop: ${{ github.ref == 'refs/heads/develop' }}"
-  if_merged:
-    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
-    runs-on: ubuntu-24.04
-    steps:
-      - run: |
-          echo The PR was merged
-  build:
-    name: Upload Kavita.Common for Version Bump
-    runs-on: ubuntu-24.04
-    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: csproj
-          path: Kavita.Common/Kavita.Common.csproj
-
   stable:
     name: Build Stable and Nightly Docker if Release
-    needs: [ build ]
     if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
     runs-on: ubuntu-24.04
     permissions:
@@ -72,6 +50,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: UI/Web/package-lock.json
       - run: |
 
           cd UI/Web || exit
@@ -107,6 +87,15 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Install Swashbuckle CLI
         run: dotnet tool install -g Swashbuckle.AspNetCore.Cli
 
