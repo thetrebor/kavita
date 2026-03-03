@@ -20,6 +20,35 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/')))
     outputs:
       pr_body: ${{ steps.get-notes.outputs.BODY }}
+    steps:
+      - name: Fetch PR Notes
+        id: get-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER_INPUT: ${{ inputs.pr_number }}
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Securely extract the PR body without shell interpolation
+            RAW_BODY=$(jq -r '.pull_request.body // empty' "$GITHUB_EVENT_PATH")
+          elif [[ -n "$PR_NUMBER_INPUT" ]]; then
+            # Validate that the input is strictly numeric
+            if ! [[ "$PR_NUMBER_INPUT" =~ ^[0-9]+$ ]]; then
+              echo "Error: pr_number input must be purely numeric."
+              exit 1
+            fi
+            # Fetch via GitHub CLI using the validated and quoted variable
+            RAW_BODY=$(gh pr view "$PR_NUMBER_INPUT" --repo "${{ github.repository }}" --json body --jq '.body')
+          else
+            RAW_BODY="Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
+          fi
+
+          # Generate a random delimiter to prevent multiline EOF injection
+          DELIMITER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+
+          # Safely write the multiline string to GITHUB_OUTPUT
+          echo "BODY<<$DELIMITER" >> "$GITHUB_OUTPUT"
+          echo "$RAW_BODY" >> "$GITHUB_OUTPUT"
+          echo "$DELIMITER" >> "$GITHUB_OUTPUT"
 
   stable:
     name: Build Stable and Nightly Docker
@@ -30,34 +59,34 @@ jobs:
       contents: read
     steps:
       - name: Parse PR body
-          id: parse-body
-          env:
-            RAW_BODY: ${{ needs.check-release.outputs.pr_body }}
-            PR_NUMBER: ${{ inputs.pr_number || github.event.pull_request.number }}
-          run: |
-            body="$RAW_BODY"
+        id: parse-body
+        env:
+          RAW_BODY: ${{ needs.check-release.outputs.pr_body }}
+          PR_NUMBER: ${{ inputs.pr_number || github.event.pull_request.number }}
+        run: |
+          body="$RAW_BODY"
 
-            if [[ -n "$PR_NUMBER" ]]; then
-              LINK="https://github.com/Kareadita/Kavita/pull/$PR_NUMBER"
-            else
-              LINK="https://github.com/Kareadita/Kavita/releases/latest"
-            fi
+          if [[ -n "$PR_NUMBER" ]]; then
+            LINK="https://github.com/Kareadita/Kavita/pull/$PR_NUMBER"
+          else
+            LINK="https://github.com/Kareadita/Kavita/releases/latest"
+          fi
 
-            if [[ ${#body} -gt 1870 ]] ; then
-              body=${body:0:1870}
-              body="${body}...and much more.
+          if [[ ${#body} -gt 1870 ]] ; then
+            body=${body:0:1870}
+            body="${body}...and much more.
 
-              Read full changelog: $LINK"
-            fi
+            Read full changelog: $LINK"
+          fi
 
-            body=${body//\'/}
-            body=${body//'%'/'%25'}
-            body=${body//$'\n'/'%0A'}
-            body=${body//$'\r'/'%0D'}
-            body=${body//$'`'/'%60'}
-            body=${body//$'>'/'%3E'}
+          body=${body//\'/}
+          body=${body//'%'/'%25'}
+          body=${body//$'\n'/'%0A'}
+          body=${body//$'\r'/'%0D'}
+          body=${body//$'`'/'%60'}
+          body=${body//$'>'/'%3E'}
 
-            echo "BODY=$body" >> "$GITHUB_OUTPUT"
+          echo "BODY=$body" >> "$GITHUB_OUTPUT"
 
       - name: Check Out Repo
         uses: actions/checkout@v4
@@ -94,12 +123,12 @@ jobs:
         run: echo "${{steps.get-version.outputs.assembly-version}}"
 
       - name: Parse Version
+        id: parse-version
         run: |
           version='${{steps.get-version.outputs.assembly-version}}'
           newVersion=${version%.*}
           echo $newVersion
-          echo "VERSION=$newVersion" >> $GITHUB_OUTPUT
-        id: parse-version
+          echo "VERSION=$newVersion" >> "$GITHUB_OUTPUT"
 
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v4
@@ -142,7 +171,6 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
 
-      # Consolidate ALL tags into a single metadata block to prevent building twice
       - name: Extract metadata (tags, labels) for Docker
         id: docker_meta
         uses: docker/metadata-action@v5
@@ -156,7 +184,6 @@ jobs:
             name=jvmilazz0/kavita,enable=${{ github.repository_owner == 'Kareadita' }}
             name=ghcr.io/${{ github.repository }}
 
-      # Push all 4 tags in a single execution
       - name: Build and push combined tags
         id: docker_build
         uses: docker/build-push-action@v6
