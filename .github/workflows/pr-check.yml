@@ -14,7 +14,13 @@ jobs:
               run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
               id: extract_branch
             - name: Check PR Body
-              uses: JJ/github-pr-contains-action@releases/v14.1
+              uses: actions/github-script@v7
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
-                  bodyDoesNotContain: "[\"|`]"
+                  script: |
+                    const body = context.payload.pull_request.body || '';
+                    if (/["`]/.test(body)) {
+                      core.setFailed(
+                        'PR body must not contain double-quotes or backticks.'
+                      );
+                    }
