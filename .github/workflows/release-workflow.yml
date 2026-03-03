@@ -15,7 +15,6 @@ jobs:
   check-release:
     name: Validate Release & Fetch Notes
     runs-on: ubuntu-24.04
-    # Only run if a release PR was merged OR if it's a manual trigger
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')) ||
       github.event_name == 'workflow_dispatch'
@@ -28,19 +27,22 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # Grab directly from event payload on merge
-            RAW_BODY="${{ github.event.pull_request.body }}"
+            # Securely extract the PR body without shell interpolation
+            RAW_BODY=$(jq -r '.pull_request.body // empty' "$GITHUB_EVENT_PATH")
           elif [[ -n "${{ inputs.pr_number }}" ]]; then
-            # Fetch via GitHub CLI if manually triggered with a PR number
+            # Fetch via GitHub CLI if manually triggered
             RAW_BODY=$(gh pr view ${{ inputs.pr_number }} --repo ${{ github.repository }} --json body --jq '.body')
           else
             RAW_BODY="Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
           fi
 
-          # Multiline output handling for GHA
-          echo "BODY<<EOF" >> $GITHUB_OUTPUT
-          echo "$RAW_BODY" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Generate a random delimiter to prevent multiline EOF injection
+          DELIMITER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+
+          # Safely write the multiline string to GITHUB_OUTPUT
+          echo "BODY<<$DELIMITER" >> "$GITHUB_OUTPUT"
+          echo "$RAW_BODY" >> "$GITHUB_OUTPUT"
+          echo "$DELIMITER" >> "$GITHUB_OUTPUT"
 
   stable:
     name: Build Stable and Nightly Docker
