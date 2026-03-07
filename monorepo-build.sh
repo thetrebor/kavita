@@ -58,6 +58,7 @@ Package()
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
 
 	echo "Copying appsettings.json"
+	mkdir $lOutputFolder/config
     cp config/appsettings.json $lOutputFolder/config/appsettings-init.json
 
     echo "Renaming Kavita.Server -> Kavita"
