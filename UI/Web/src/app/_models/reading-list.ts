@@ -4,8 +4,17 @@ import {IHasCover} from "./common/i-has-cover";
 import {AgeRating} from "./metadata/age-rating";
 import {IHasReadingTime} from "./common/i-has-reading-time";
 import {IHasCast} from "./common/i-has-cast";
+import {IHasDisplayTitle} from "./common/i-has-display-title";
 
-export interface ReadingListItem {
+export interface ReadingListItem extends IHasDisplayTitle{
+  /**
+   * Pre-computed display designation, e.g. "Chapter 5", "Issue #5"
+   */
+  displayNumber: string;
+  /**
+   * Pre-computed full display title
+   */
+  displayTitle: string;
   pagesRead: number;
   pagesTotal: number;
   seriesName: string;

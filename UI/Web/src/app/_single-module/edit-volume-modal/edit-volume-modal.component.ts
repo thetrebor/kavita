@@ -4,7 +4,6 @@ import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOut
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgClass} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
@@ -52,7 +51,6 @@ enum TabID {
     NgbNavItem,
     SettingItemComponent,
     NgClass,
-    EntityTitleComponent,
     SettingButtonComponent,
     CoverImageChooserComponent,
     CompactNumberPipe,

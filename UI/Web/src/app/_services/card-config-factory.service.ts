@@ -7,7 +7,6 @@ import {Router} from "@angular/router";
 import {RelationshipPipe} from "../_pipes/relationship.pipe";
 import {Series} from "../_models/series";
 import {CardEntity, ChapterCardEntity, RelatedSeriesCardEntity, SeriesCardEntity} from "../_models/card/card-entity";
-import {EntityTitleService} from "./entity-title.service";
 import {
   ActionableCardConfiguration,
   BaseCardConfiguration,
@@ -69,7 +68,6 @@ export class CardConfigFactory {
   private readonly downloadService = inject(DownloadService);
   private readonly router = inject(Router);
   private readonly relationshipPipe = new RelationshipPipe();
-  private readonly entityTitleService = inject(EntityTitleService);
 
   /**
    * Creates configuration for Series cards
@@ -204,15 +202,16 @@ export class CardConfigFactory {
       suppressArchiveWarning: false,
 
       coverFunc: (c) => this.imageService.getChapterCoverImage(c.id),
-      titleFunc: (c) => this.entityTitleService.computeTitle(c, params.libraryType, { prioritizeTitleName: false }),
+      titleFunc: (c) => c.displayNumber,
       titleRouteFunc: (c) => `/library/${params.libraryId}/series/${params.seriesId}/chapter/${c.id}`,
       metaTitleFunc: (c, wrapper) => {
-        if (c.isSpecial) {
-          return c.title || c.range;
-        }
-        return c.titleName || '';
+        // if (c.isSpecial) {
+        //   return c.title || c.range;
+        // }
+        // return c.titleName || '';
+        return c.displayTitle
       },
-      tooltipFunc: (c) => c.titleName || c.title || (c.range === (LooseLeafOrDefaultNumber + '') ? '' : c.range),
+      tooltipFunc: (c) => c.displayNumber,
       progressFunc: (c) => ({ pages: c.pages, pagesRead: c.pagesRead }),
       titleTemplate: params?.titleRef,
       metaTitleTemplate: params?.metaTitleRef,
@@ -223,7 +222,7 @@ export class CardConfigFactory {
         const wrapper = params?.overrides as unknown as ChapterCardEntity;
         return c.pages === 0 && !wrapper?.suppressArchiveWarning;
       },
-      ariaLabelFunc: (c) => c.titleName || c.title || (c.range === (LooseLeafOrDefaultNumber + '') ? '' : c.range),
+      ariaLabelFunc: (c) => c.displayTitle,
 
       actionableFunc: (c) => this.actionFactory.getChapterActions(params.seriesId, params.libraryId, params.libraryType, params?.shouldRenderAction),
       readFunc: (c) => this.readerService.readChapter(params.libraryId, params.seriesId, c, false),
@@ -255,7 +254,7 @@ export class CardConfigFactory {
       suppressArchiveWarning: false,
 
       coverFunc: (v) => this.imageService.getVolumeCoverImage(v.id),
-      titleFunc: (v) => v.name,
+      titleFunc: (v) => v.displayNumber || v.name,
       titleRouteFunc: (v) => `/library/${params.libraryId}/series/${params.seriesId}/volume/${v.id}`,
       metaTitleFunc: (v) => {
         if (params.libraryType === LibraryType.Images) return '';

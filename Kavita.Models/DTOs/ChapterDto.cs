@@ -15,8 +15,12 @@ namespace Kavita.Models.DTOs;
 /// A Chapter is the lowest grouping of a reading medium. A Chapter contains a set of MangaFiles which represents the underlying
 /// file (abstracted from type).
 /// </summary>
-public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
+public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage, IHasDisplayTitle
 {
+    /// <inheritdoc cref="IHasDisplayTitle.DisplayNumber"/>
+    public string DisplayNumber { get; set; } = string.Empty;
+    /// <inheritdoc cref="IHasDisplayTitle.DisplayTitle"/>
+    public string DisplayTitle { get; set; } = string.Empty;
     /// <inheritdoc cref="Chapter.Id"/>
     public int Id { get; init; }
     /// <inheritdoc cref="Chapter.Range"/>
@@ -81,6 +85,7 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     /// Formatted Volume title ie) Volume 2.
     /// </summary>
     /// <remarks>Only available when fetched from Series Detail API</remarks>
+    [Obsolete("Use the parent VolumeDto.DisplayNumber instead")]
     public string VolumeTitle { get; set; } = string.Empty;
     /// <inheritdoc cref="IHasReadTimeEstimate.MinHoursToRead"/>
     public int MinHoursToRead { get; set; }

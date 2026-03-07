@@ -749,6 +749,7 @@ public class OpdsService(
 
         var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId, ct);
         var namingContext = await LocalizedNamingContext.CreateAsync( namingService, localizationService, userId, libraryType);
+        namingContext.ApplyNaming(new[] { volume });
 
         var feed = CreateFeed($"{series.Name} - Volume {volume.Name}",
             $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
@@ -806,6 +807,7 @@ public class OpdsService(
         }
 
         var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType);
+        namingContext.ApplyNaming(new[] { volume });
         var chapterName = namingContext.FormatChapterTitle(chapter);
 
         var feed = CreateFeed( $"{series.Name} - Volume {volume.Name} - {chapterName} {chapterId}",

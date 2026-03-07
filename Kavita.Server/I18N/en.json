@@ -205,6 +205,7 @@
     "book-num": "Book {0}",
     "issue-num": "Issue {0}{1}",
     "chapter-num": "Chapter {0}",
+    "single-volume": "Single Volume",
     "check-updates": "Check Updates",
     "license-check": "License Check",
     "process-scrobbling-events": "Process Scrobbling Events",

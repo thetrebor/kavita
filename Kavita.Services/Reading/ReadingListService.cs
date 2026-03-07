@@ -840,7 +840,12 @@ public class ReadingListService(
         // Add the title
         foreach (var item in items)
         {
-            item.Title = namingService.FormatReadingListItemTitle(item);
+            var title = namingService.FormatReadingListItemTitle(item);
+            item.DisplayTitle = title;
+            item.DisplayNumber = title;
+#pragma warning disable CS0618 // Type or member is obsolete
+            item.Title = title;
+#pragma warning restore CS0618
         }
 
         return items;
@@ -849,7 +854,15 @@ public class ReadingListService(
     public async Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId)
     {
         var item = await unitOfWork.ReadingListRepository.GetContinueReadingPoint(readingListId, userId);
-        item?.Title = namingService.FormatReadingListItemTitle(item);
+        if (item != null)
+        {
+            var title = namingService.FormatReadingListItemTitle(item);
+            item.DisplayTitle = title;
+            item.DisplayNumber = title;
+#pragma warning disable CS0618 // Type or member is obsolete
+            item.Title = title;
+#pragma warning restore CS0618
+        }
 
         return item;
     }

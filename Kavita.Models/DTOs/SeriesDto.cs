@@ -7,24 +7,24 @@ namespace Kavita.Models.DTOs;
 
 public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
 {
-    /// <inheritdoc cref="API.Entities.Series.Id"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.Id"/>
     public int Id { get; init; }
-    /// <inheritdoc cref="API.Entities.Series.Name"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.Name"/>
     public string? Name { get; init; }
-    /// <inheritdoc cref="API.Entities.Series.OriginalName"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.OriginalName"/>
     public string? OriginalName { get; init; }
-    /// <inheritdoc cref="API.Entities.Series.LocalizedName"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.LocalizedName"/>
     public string? LocalizedName { get; init; }
-    /// <inheritdoc cref="API.Entities.Series.SortName"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.SortName"/>
     public string? SortName { get; init; }
-    /// <inheritdoc cref="API.Entities.Series.Pages"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.Pages"/>
     public int Pages { get; init; }
-    /// <inheritdoc cref="API.Entities.Series.CoverImageLocked"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.CoverImageLocked"/>
     public bool CoverImageLocked { get; set; }
 
-    /// <inheritdoc cref="API.Entities.Series.LastChapterAdded"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.LastChapterAdded"/>
     public DateTime LastChapterAdded { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.LastChapterAddedUtc"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.LastChapterAddedUtc"/>
     public DateTime LastChapterAddedUtc { get; set; }
 
 
@@ -57,19 +57,19 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     #endregion
 
 
-    /// <inheritdoc cref="API.Entities.Series.Format"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.Format"/>
     public MangaFormat Format { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.Created"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.Created"/>
     public DateTime Created { get; set; }
 
-    /// <inheritdoc cref="API.Entities.Series.SortNameLocked"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.SortNameLocked"/>
     public bool SortNameLocked { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.LocalizedNameLocked"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.LocalizedNameLocked"/>
     public bool LocalizedNameLocked { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.WordCount"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.WordCount"/>
     public long WordCount { get; set; }
 
-    /// <inheritdoc cref="API.Entities.Series.LibraryId"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.LibraryId"/>
     public int LibraryId { get; set; }
     public string LibraryName { get; set; } = default!;
     /// <inheritdoc cref="IHasReadTimeEstimate.MinHoursToRead"/>
@@ -78,25 +78,25 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
     public float AvgHoursToRead { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.FolderPath"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.FolderPath"/>
     public string FolderPath { get; set; } = default!;
-    /// <inheritdoc cref="API.Entities.Series.LowestFolderPath"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.LowestFolderPath"/>
     public string? LowestFolderPath { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.LastFolderScanned"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.LastFolderScanned"/>
     public DateTime LastFolderScanned { get; set; }
     #region KavitaPlus
-    /// <inheritdoc cref="API.Entities.Series.DontMatch"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.DontMatch"/>
     public bool DontMatch { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.IsBlacklisted"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.IsBlacklisted"/>
     public bool IsBlacklisted { get; set; }
     #endregion
 
     #region ColorScape
-    /// <inheritdoc cref="API.Entities.Series.CoverImage"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.CoverImage"/>
     public string? CoverImage { get; set; }
-    /// <inheritdoc cref="API.Entities.Series.PrimaryColor"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.PrimaryColor"/>
     public string? PrimaryColor { get; set; } = string.Empty;
-    /// <inheritdoc cref="API.Entities.Series.SecondaryColor"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.SecondaryColor"/>
     public string? SecondaryColor { get; set; } = string.Empty;
     #endregion
 

@@ -513,6 +513,9 @@ public class SeriesService(
         var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType);
         var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
 
+        // Populate DisplayNumber/DisplayTitle on all volumes and chapters
+        namingContext.ApplyNaming(volumes);
+
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
         foreach (var volume in volumes)
@@ -536,13 +539,14 @@ public class SeriesService(
         }
 
         var specials = new List<ChapterDto>();
-        // Why isn't this doing a check if chapter is not special as it wont get included
         var chapters = volumes
             .SelectMany(v => v.Chapters
                 .Select(c =>
                 {
                     if (v.IsLooseLeaf() || v.IsSpecial()) return c;
+#pragma warning disable CS0618 // Type or member is obsolete
                     c.VolumeTitle = v.Name;
+#pragma warning restore CS0618
                     return c;
                 })
                 .OrderBy(c => c.SortOrder))

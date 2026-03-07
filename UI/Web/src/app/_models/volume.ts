@@ -1,11 +1,20 @@
-import { Chapter } from './chapter';
-import { HourEstimateRange } from './series-detail/hour-estimate-range';
+import {Chapter} from './chapter';
+import {HourEstimateRange} from './series-detail/hour-estimate-range';
 import {IHasCover} from "./common/i-has-cover";
 import {IHasReadingTime} from "./common/i-has-reading-time";
 import {IHasProgress} from "./common/i-has-progress";
+import {IHasDisplayTitle} from "./common/i-has-display-title";
 
-export interface Volume extends IHasCover, IHasReadingTime, IHasProgress {
+export interface Volume extends IHasCover, IHasReadingTime, IHasProgress, IHasDisplayTitle {
     id: number;
+    /**
+     * Pre-computed display designation, e.g. "Volume 2", "Volume 1-4"
+     */
+    displayNumber: string;
+    /**
+     * Pre-computed full display title, e.g. "Volume 2 - The Battle Begins"
+     */
+    displayTitle: string;
     minNumber: number;
     maxNumber: number;
     name: string;

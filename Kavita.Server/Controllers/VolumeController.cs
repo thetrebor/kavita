@@ -12,7 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
-public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub)
+public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService localizationService,
+    IEntityNamingService namingService, IEventHub eventHub)
     : BaseApiController
 {
     /// <summary>
@@ -24,7 +25,15 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
     [HttpGet]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
-        return Ok(await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId));
+        var volume = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId);
+        if (volume != null)
+        {
+            var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(volume.SeriesId);
+            var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
+            namingContext.ApplyNaming([volume]);
+        }
+
+        return Ok(volume);
     }
 
     [HttpDelete]

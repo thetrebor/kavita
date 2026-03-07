@@ -48,7 +48,6 @@ import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.com
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {Person} from "../_models/metadata/person";
 import {IHasCast} from "../_models/common/i-has-cast";
-import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UtilityService} from "../shared/_services/utility.service";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
@@ -141,7 +140,6 @@ interface VolumeCast extends IHasCast {
     NgbDropdownMenu,
     NgbDropdown,
     NgbDropdownToggle,
-    EntityTitleComponent,
     RouterLink,
     NgbTooltip,
     NgStyle,

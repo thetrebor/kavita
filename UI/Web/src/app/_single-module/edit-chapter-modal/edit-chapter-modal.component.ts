@@ -31,7 +31,6 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {concat, forkJoin, Observable, of, tap} from "rxjs";
 import {map} from "rxjs/operators";
-import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -78,7 +77,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     NgTemplateOutlet,
     NgClass,
     TypeaheadComponent,
-    EntityTitleComponent,
     TitleCasePipe,
     SettingButtonComponent,
     CoverImageChooserComponent,

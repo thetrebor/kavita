@@ -8,12 +8,21 @@ import {IHasCast} from "./common/i-has-cast";
 import {IHasReadingTime} from "./common/i-has-reading-time";
 import {IHasCover} from "./common/i-has-cover";
 import {IHasProgress} from "./common/i-has-progress";
+import {IHasDisplayTitle} from "./common/i-has-display-title";
 
 export const LooseLeafOrDefaultNumber = -100000;
 export const SpecialVolumeNumber = 100000;
 
-export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgress {
+export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgress, IHasDisplayTitle {
   id: number;
+  /**
+   * Pre-computed display designation, e.g. "Chapter 5", "Issue #5"
+   */
+  displayNumber: string;
+  /**
+   * Pre-computed full display title, e.g. "Chapter 5 - The Battle Begins"
+   */
+  displayTitle: string;
   range: string;
   /**
    * @deprecated Use minNumber/maxNumber

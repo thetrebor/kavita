@@ -1,11 +1,16 @@
 ﻿using System;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.DTOs.ReadingLists;
 #nullable enable
 
-public sealed record ReadingListItemDto
+public sealed record ReadingListItemDto : IHasDisplayTitle
 {
+    /// <inheritdoc cref="IHasDisplayTitle.DisplayNumber"/>
+    public string DisplayNumber { get; set; } = string.Empty;
+    /// <inheritdoc cref="IHasDisplayTitle.DisplayTitle"/>
+    public string DisplayTitle { get; set; } = string.Empty;
     public int Id { get; init; }
     public int Order { get; init; }
     public int ChapterId { get; init; }
@@ -20,6 +25,7 @@ public sealed record ReadingListItemDto
     public string? ChapterTitleName { get; set; }
     public int VolumeId { get; set; }
     public int LibraryId { get; set; }
+    [Obsolete("Use DisplayTitle")]
     public string? Title { get; set; }
     public LibraryType LibraryType { get; set; }
     public string? LibraryName { get; set; }

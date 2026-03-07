@@ -37,6 +37,7 @@ public class SeriesController(
     ILicenseService licenseService,
     IEasyCachingProviderFactory cachingProviderFactory,
     ILocalizationService localizationService,
+    IEntityNamingService namingService,
     IExternalMetadataService externalMetadataService,
     IHostEnvironment environment)
     : BaseApiController
@@ -121,7 +122,12 @@ public class SeriesController(
     [HttpGet("volumes")]
     public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
     {
-        return Ok(await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, UserId));
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, UserId);
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
+        var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
+        namingContext.ApplyNaming(volumes);
+
+        return Ok(volumes);
     }
 
     /// <summary>
@@ -135,6 +141,11 @@ public class SeriesController(
     {
         var vol = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId);
         if (vol == null) return NoContent();
+
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(vol.SeriesId);
+        var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
+        namingContext.ApplyNaming(new[] { vol });
+
         return Ok(vol);
     }
 
@@ -149,6 +160,15 @@ public class SeriesController(
     {
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
         if (chapter == null) return NoContent();
+
+        var volume = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, UserId);
+        if (volume != null)
+        {
+            var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(volume.SeriesId);
+            var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
+            chapter.DisplayNumber = namingContext.FormatChapterTitle(chapter);
+            chapter.DisplayTitle = namingContext.BuildChapterTitle(volume, chapter);
+        }
 
         return Ok(chapter);
     }

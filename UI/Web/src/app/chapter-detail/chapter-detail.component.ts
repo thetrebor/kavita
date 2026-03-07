@@ -42,7 +42,6 @@ import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
-import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
@@ -108,7 +107,6 @@ enum TabID {
     NgbNavOutlet,
     DetailsTabComponent,
     RouterLink,
-    EntityTitleComponent,
     RelatedTabComponent,
     BadgeExpanderComponent,
     MetadataDetailRowComponent,

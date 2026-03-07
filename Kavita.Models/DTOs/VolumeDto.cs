@@ -4,15 +4,19 @@ using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.DTOs;
 
-public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage
+public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage, IHasDisplayTitle
 {
-    /// <inheritdoc cref="API.Entities.Volume.Id"/>
+    /// <inheritdoc cref="IHasDisplayTitle.DisplayNumber"/>
+    public string DisplayNumber { get; set; } = string.Empty;
+    /// <inheritdoc cref="IHasDisplayTitle.DisplayTitle"/>
+    public string DisplayTitle { get; set; } = string.Empty;
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.Id"/>
     public int Id { get; set; }
-    /// <inheritdoc cref="API.Entities.Volume.MinNumber"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.MinNumber"/>
     public float MinNumber { get; set; }
-    /// <inheritdoc cref="API.Entities.Volume.MaxNumber"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.MaxNumber"/>
     public float MaxNumber { get; set; }
-    /// <inheritdoc cref="API.Entities.Volume.Name"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.Name"/>
     public string Name { get; set; } = default!;
     /// <summary>
     /// This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14
@@ -21,21 +25,21 @@ public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage
     public int Number { get; set; }
     public int Pages { get; set; }
     public int PagesRead { get; set; }
-    /// <inheritdoc cref="API.Entities.Volume.LastModifiedUtc"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.LastModifiedUtc"/>
     public DateTime LastModifiedUtc { get; set; }
-    /// <inheritdoc cref="API.Entities.Volume.CreatedUtc"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.CreatedUtc"/>
     public DateTime CreatedUtc { get; set; }
     /// <summary>
     /// When chapter was created in local server time
     /// </summary>
     /// <remarks>This is required for Tachiyomi Extension</remarks>
-    /// <inheritdoc cref="API.Entities.Volume.Created"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.Created"/>
     public DateTime Created { get; set; }
     /// <summary>
     /// When chapter was last modified in local server time
     /// </summary>
     /// <remarks>This is required for Tachiyomi Extension</remarks>
-    /// <inheritdoc cref="API.Entities.Volume.LastModified"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.LastModified"/>
     public DateTime LastModified { get; set; }
     public int SeriesId { get; set; }
     public ICollection<ChapterDto> Chapters { get; set; } = new List<ChapterDto>();
@@ -47,13 +51,13 @@ public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage
     public float AvgHoursToRead { get; set; }
     public long WordCount { get; set; }
 
-    /// <inheritdoc cref="API.Entities.Volume.CoverImage"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.CoverImage"/>
     public string CoverImage { get; set; }
-    /// <inheritdoc cref="API.Entities.Volume.CoverImageLocked"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.CoverImageLocked"/>
     private bool CoverImageLocked { get; set; }
-    /// <inheritdoc cref="API.Entities.Volume.PrimaryColor"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.PrimaryColor"/>
     public string? PrimaryColor { get; set; } = string.Empty;
-    /// <inheritdoc cref="API.Entities.Volume.SecondaryColor"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.Volume.SecondaryColor"/>
     public string? SecondaryColor { get; set; } = string.Empty;
 
     public void ResetColorScape()

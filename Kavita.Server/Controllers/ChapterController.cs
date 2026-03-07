@@ -25,6 +25,7 @@ namespace Kavita.Server.Controllers;
 public class ChapterController(
     IUnitOfWork unitOfWork,
     ILocalizationService localizationService,
+    IEntityNamingService namingService,
     IEventHub eventHub,
     ILogger<ChapterController> logger)
     : BaseApiController
@@ -40,6 +41,17 @@ public class ChapterController(
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
+        if (chapter != null)
+        {
+            var volume = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, UserId);
+            if (volume != null)
+            {
+                var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(volume.SeriesId);
+                var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
+                chapter.DisplayNumber = namingContext.FormatChapterTitle(chapter);
+                chapter.DisplayTitle = namingContext.BuildChapterTitle(volume, chapter);
+            }
+        }
 
         return Ok(chapter);
     }

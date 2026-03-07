@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Kavita.Common.Extensions;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities.Enums;
@@ -58,6 +61,7 @@ public sealed class LocalizedNamingContext
     public string ChapterLabel { get; }
     public string IssueLabel { get; }
     public string BookLabel { get; }
+    public string SingleVolumeLabel { get; }
 
     private readonly IEntityNamingService _namingService;
 
@@ -67,7 +71,8 @@ public sealed class LocalizedNamingContext
         string volumeLabel,
         string chapterLabel,
         string issueLabel,
-        string bookLabel)
+        string bookLabel,
+        string singleVolumeLabel)
     {
         _namingService = namingService;
         LibraryType = libraryType;
@@ -75,6 +80,7 @@ public sealed class LocalizedNamingContext
         ChapterLabel = chapterLabel;
         IssueLabel = issueLabel;
         BookLabel = bookLabel;
+        SingleVolumeLabel = singleVolumeLabel;
     }
 
     public static async Task<LocalizedNamingContext> CreateAsync(
@@ -87,9 +93,10 @@ public sealed class LocalizedNamingContext
         var chapterTask = localizationService.Translate(userId, "chapter-num");
         var issueTask = localizationService.Translate(userId, "issue-num");
         var bookTask = localizationService.Translate(userId, "book-num");
+        var singleVolumeTask = localizationService.Translate(userId, "single-volume");
 
 
-        await Task.WhenAll(volumeTask, chapterTask, issueTask, bookTask);
+        await Task.WhenAll(volumeTask, chapterTask, issueTask, bookTask, singleVolumeTask);
 
         return new LocalizedNamingContext(
             namingService,
@@ -97,7 +104,8 @@ public sealed class LocalizedNamingContext
             (await volumeTask).Trim(),
             (await chapterTask).Trim(),
             (await issueTask).Trim(),
-            (await bookTask).Trim());
+            (await bookTask).Trim(),
+            await singleVolumeTask);
     }
 
     public string FormatChapterTitle(ChapterDto chapter)
@@ -133,5 +141,44 @@ public sealed class LocalizedNamingContext
             ChapterLabel,
             IssueLabel,
             BookLabel);
+    }
+
+    /// <summary>
+    /// Populates DisplayNumber and DisplayTitle on all volumes and their chapters.
+    /// </summary>
+    public void ApplyNaming(IList<VolumeDto> volumes)
+    {
+        foreach (var volume in volumes)
+        {
+            volume.DisplayNumber = FormatVolumeName(volume) ?? volume.Name;
+            volume.DisplayTitle = volume.DisplayNumber;
+
+            foreach (var chapter in volume.Chapters)
+            {
+                // Default chapters (-100000) have no meaningful number to display, so send back "Single Volume"
+                if (chapter.MinNumber.Is(ParserConstants.DefaultChapterNumber) && !chapter.IsSpecial)
+                {
+                    chapter.DisplayNumber = SingleVolumeLabel;
+                }
+                else
+                {
+                    chapter.DisplayNumber = FormatChapterTitle(chapter);
+                }
+                chapter.DisplayTitle = BuildChapterTitle(volume, chapter);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Populates DisplayNumber and DisplayTitle on a reading list item.
+    /// </summary>
+    public void ApplyReadingListNaming(ReadingListItemDto item)
+    {
+        var title = FormatReadingListItemTitle(item);
+        item.DisplayTitle = title;
+        item.DisplayNumber = title;
+#pragma warning disable CS0618 // Type or member is obsolete
+        item.Title = title;
+#pragma warning restore CS0618
     }
 }
