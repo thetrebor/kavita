@@ -45,7 +45,7 @@ public class DownloadController(
     [HttpGet("volume-size")]
     public async Task<ActionResult<long>> GetVolumeSize(int volumeId)
     {
-        return Ok(await unitOfWork.VolumeRepository.GetFilesizeForVolumeAsync(volumeId));
+        return Ok(await unitOfWork.VolumeRepository.GetFilesizeAsync(volumeId));
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class DownloadController(
     [HttpPost("bulk-volume-size")]
     public async Task<ActionResult<Dictionary<int, long>>> GetBulkVolumeSize([FromBody] IList<int> volumeIds)
     {
-        return Ok(await unitOfWork.VolumeRepository.GetFilesizeForVolumesAsync(volumeIds));
+        return Ok(await unitOfWork.VolumeRepository.GetFilesizesAsync(volumeIds));
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ public class DownloadController(
     [HttpGet("chapter-size")]
     public async Task<ActionResult<long>> GetChapterSize(int chapterId)
     {
-        return Ok(await unitOfWork.ChapterRepository.GetFilesizeForChapterAsync(chapterId));
+        return Ok(await unitOfWork.ChapterRepository.GetFilesizeAsync(chapterId));
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public class DownloadController(
     public async Task<ActionResult<Dictionary<int, long>>> GetChapterSizeInBulk([FromBody] IList<int> chapterIds)
     {
         // If there are more than 50 chapterIds, we need to break up into multiple calls
-        return Ok(await unitOfWork.ChapterRepository.GetFilesizeForChaptersAsync(chapterIds));
+        return Ok(await unitOfWork.ChapterRepository.GetFilesizesAsync(chapterIds));
     }
 
     /// <summary>
@@ -92,7 +92,31 @@ public class DownloadController(
     [HttpGet("series-size")]
     public async Task<ActionResult<long>> GetSeriesSize(int seriesId)
     {
-        return Ok(await unitOfWork.SeriesRepository.GetFilesizeForSeriesAsync(seriesId));
+        return Ok(await unitOfWork.SeriesRepository.GetFilesizeAsync(seriesId));
+    }
+
+    /// <summary>
+    /// Returns the filesize for all items of a reading list that the requesting user has access to
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
+    [ReadingListAccess]
+    [HttpGet("readinglist-size")]
+    public async Task<ActionResult<long>> GetReadingListSize(int readingListId)
+    {
+        return Ok(await unitOfWork.ReadingListRepository.GetFilesizeAsync(readingListId, UserId));
+    }
+
+    /// <summary>
+    /// Returns the mapping of readinglist -> size
+    /// </summary>
+    /// <param name="readingListIds"></param>
+    /// <returns></returns>
+    [ReadingListAccess]
+    [HttpGet("bulk-readinglist-size")]
+    public async Task<ActionResult<Dictionary<int, long>>> GetBulkReadingListSize([FromBody] IList<int> readingListIds)
+    {
+        return Ok(await unitOfWork.ReadingListRepository.GetFilesizesAsync(readingListIds, UserId));
     }
 
     /// <summary>
@@ -103,7 +127,7 @@ public class DownloadController(
     [HttpPost("bulk-series-size")]
     public async Task<ActionResult<Dictionary<int, long>>> GetBulkSeriesSize([FromBody] IList<int> seriesIds)
     {
-        return Ok(await unitOfWork.SeriesRepository.GetFilesizeForMultipleSeriesAsync(seriesIds));
+        return Ok(await unitOfWork.SeriesRepository.GetFilesizesAsync(seriesIds));
     }
 
 
