@@ -20,4 +20,11 @@ public interface IHasDisplayTitle
     /// The "best" single string when you only have one slot.
     /// </summary>
     string DisplayTitle { get; set; }
+
+    /// <summary>
+    /// Content subtitle from metadata. For volumes: first chapter's title or volume name.
+    /// For chapters: the chapter's TitleName. For reading list items: same as DisplayTitle.
+    /// Empty string when not applicable (e.g., Image libraries).
+    /// </summary>
+    string MetaTitle { get; set; }
 }

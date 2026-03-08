@@ -7,4 +7,8 @@ export interface IHasDisplayTitle {
    * Pre-computed full display title, e.g. "Chapter 5 - The Battle Begins"
    */
   displayTitle: string;
+  /**
+   * Pre-computed content subtitle from metadata
+   */
+  metaTitle: string;
 }

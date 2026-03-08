@@ -15,6 +15,10 @@ export interface ReadingListItem extends IHasDisplayTitle{
    * Pre-computed full display title
    */
   displayTitle: string;
+  /**
+   * Pre-computed content subtitle from metadata
+   */
+  metaTitle: string;
   pagesRead: number;
   pagesTotal: number;
   seriesName: string;

@@ -15,6 +15,10 @@ export interface Volume extends IHasCover, IHasReadingTime, IHasProgress, IHasDi
      * Pre-computed full display title, e.g. "Volume 2 - The Battle Begins"
      */
     displayTitle: string;
+    /**
+     * Pre-computed content subtitle from metadata
+     */
+    metaTitle: string;
     minNumber: number;
     maxNumber: number;
     name: string;

@@ -10,6 +10,8 @@ public sealed record VolumeDto : IHasReadTimeEstimate, IHasCoverImage, IHasDispl
     public string DisplayNumber { get; set; } = string.Empty;
     /// <inheritdoc cref="IHasDisplayTitle.DisplayTitle"/>
     public string DisplayTitle { get; set; } = string.Empty;
+    /// <inheritdoc cref="IHasDisplayTitle.MetaTitle"/>
+    public string MetaTitle { get; set; } = string.Empty;
     /// <inheritdoc cref="Kavita.Models.Entities.Volume.Id"/>
     public int Id { get; set; }
     /// <inheritdoc cref="Kavita.Models.Entities.Volume.MinNumber"/>

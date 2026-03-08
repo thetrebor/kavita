@@ -18,7 +18,6 @@ import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
 import {ReadingList} from "../_models/reading-list";
-import {LibraryType} from "../_models/library/library";
 import {MangaFormat} from "../_models/manga-format";
 import {User} from "../_models/user/user";
 import {PageBookmark} from "../_models/readers/page-bookmark";
@@ -204,13 +203,7 @@ export class CardConfigFactory {
       coverFunc: (c) => this.imageService.getChapterCoverImage(c.id),
       titleFunc: (c) => c.displayNumber,
       titleRouteFunc: (c) => `/library/${params.libraryId}/series/${params.seriesId}/chapter/${c.id}`,
-      metaTitleFunc: (c, wrapper) => {
-        // if (c.isSpecial) {
-        //   return c.title || c.range;
-        // }
-        // return c.titleName || '';
-        return c.displayTitle
-      },
+      metaTitleFunc: (c) => c.metaTitle,
       tooltipFunc: (c) => c.displayNumber,
       progressFunc: (c) => ({ pages: c.pages, pagesRead: c.pagesRead }),
       titleTemplate: params?.titleRef,
@@ -256,17 +249,7 @@ export class CardConfigFactory {
       coverFunc: (v) => this.imageService.getVolumeCoverImage(v.id),
       titleFunc: (v) => v.displayNumber || v.name,
       titleRouteFunc: (v) => `/library/${params.libraryId}/series/${params.seriesId}/volume/${v.id}`,
-      metaTitleFunc: (v) => {
-        if (params.libraryType === LibraryType.Images) return '';
-        if ([LibraryType.LightNovel || LibraryType.Book].includes(params.libraryType)) {
-          return v.name;
-        }
-        if (v.hasOwnProperty('chapters') && v.chapters.length > 0 && v.chapters[0].titleName) {
-          v.chapters[0].titleName
-        }
-
-        return v.name;
-      },
+      metaTitleFunc: (v) => v.metaTitle,
       tooltipFunc: (v) => v.name,
       progressFunc: (v) => ({ pages: v.pages, pagesRead: v.pagesRead }),
 

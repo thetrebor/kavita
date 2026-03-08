@@ -552,7 +552,11 @@ public class ReaderController(ICacheService cacheService,
     [HttpGet("continue-point")]
     public async Task<ActionResult<ChapterDto>> GetContinuePoint(int seriesId)
     {
-        return Ok(await readerService.GetContinuePoint(seriesId, UserId));
+        var chapter = await readerService.GetContinuePoint(seriesId, UserId);
+        // I don't think it's worth continuing this.
+        // var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
+        // namingContext.ApplyChapterNaming(volume, chapter);
+        return Ok();
     }
 
     /// <summary>

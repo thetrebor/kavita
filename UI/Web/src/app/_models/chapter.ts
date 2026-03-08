@@ -23,6 +23,10 @@ export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgr
    * Pre-computed full display title, e.g. "Chapter 5 - The Battle Begins"
    */
   displayTitle: string;
+  /**
+   * Pre-computed content subtitle from metadata
+   */
+  metaTitle: string;
   range: string;
   /**
    * @deprecated Use minNumber/maxNumber

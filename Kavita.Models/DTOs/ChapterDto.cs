@@ -21,6 +21,8 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage, IHasDisplayTitle
     public string DisplayNumber { get; set; } = string.Empty;
     /// <inheritdoc cref="IHasDisplayTitle.DisplayTitle"/>
     public string DisplayTitle { get; set; } = string.Empty;
+    /// <inheritdoc cref="IHasDisplayTitle.MetaTitle"/>
+    public string MetaTitle { get; set; } = string.Empty;
     /// <inheritdoc cref="Chapter.Id"/>
     public int Id { get; init; }
     /// <inheritdoc cref="Chapter.Range"/>

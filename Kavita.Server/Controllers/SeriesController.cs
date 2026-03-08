@@ -166,8 +166,7 @@ public class SeriesController(
         {
             var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(volume.SeriesId);
             var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
-            chapter.DisplayNumber = namingContext.FormatChapterTitle(chapter);
-            chapter.DisplayTitle = namingContext.BuildChapterTitle(volume, chapter);
+            namingContext.ApplyChapterNaming(volume, chapter);
         }
 
         return Ok(chapter);

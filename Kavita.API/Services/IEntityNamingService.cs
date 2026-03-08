@@ -39,6 +39,17 @@ public interface IEntityNamingService
     /// </summary>
     string BuildChapterTitle(LibraryType libraryType, VolumeDto volume, ChapterDto chapter, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);
     /// <summary>
+    /// Builds the content subtitle for a volume.
+    /// For Image libraries: empty. Otherwise: first chapter's TitleName, or the volume name.
+    /// </summary>
+    string BuildVolumeMetaTitle(LibraryType libraryType, VolumeDto volume);
+
+    /// <summary>
+    /// Builds the content subtitle for a chapter (its TitleName).
+    /// </summary>
+    string BuildChapterMetaTitle(ChapterDto chapter);
+
+    /// <summary>
     /// Formats a reading list item title based on the item's metadata.
     /// Handles the unique naming conventions for reading list display.
     /// </summary>
@@ -56,12 +67,12 @@ public interface IEntityNamingService
 /// </summary>
 public sealed class LocalizedNamingContext
 {
-    public LibraryType LibraryType { get; }
-    public string VolumeLabel { get; }
-    public string ChapterLabel { get; }
-    public string IssueLabel { get; }
-    public string BookLabel { get; }
-    public string SingleVolumeLabel { get; }
+    private LibraryType LibraryType { get; }
+    private string VolumeLabel { get; }
+    private string ChapterLabel { get; }
+    private string IssueLabel { get; }
+    private string BookLabel { get; }
+    private string SingleVolumeLabel { get; }
 
     private readonly IEntityNamingService _namingService;
 
@@ -124,10 +135,31 @@ public sealed class LocalizedNamingContext
             VolumeLabel, ChapterLabel, IssueLabel, BookLabel);
     }
 
-    public string BuildChapterTitle(VolumeDto volume, ChapterDto chapter)
+    public string BuildChapterDisplayTitle(VolumeDto volume, ChapterDto chapter)
     {
         return _namingService.BuildChapterTitle(LibraryType, volume, chapter,
             VolumeLabel, ChapterLabel, IssueLabel, BookLabel);
+    }
+
+    private string BuildChapterDisplayNumber(ChapterDto chapter)
+    {
+        // Default chapters (-100000) have no meaningful number to display, so send back "Single Volume"
+        if (chapter.MinNumber.Is(ParserConstants.DefaultChapterNumber) && !chapter.IsSpecial)
+        {
+            return SingleVolumeLabel;
+        }
+
+        return FormatChapterTitle(chapter);
+    }
+
+    private string BuildVolumeMetaTitle(VolumeDto volume)
+    {
+        return _namingService.BuildVolumeMetaTitle(LibraryType, volume);
+    }
+
+    private string BuildChapterMetaTitle(ChapterDto chapter)
+    {
+        return _namingService.BuildChapterMetaTitle(chapter);
     }
 
     /// <summary>
@@ -144,29 +176,37 @@ public sealed class LocalizedNamingContext
     }
 
     /// <summary>
+    /// Populates DisplayNumber, DisplayTitle, and MetaTitle on a standalone chapter.
+    /// Use when the chapter is returned outside ApplyNaming (not nested in a volume list).
+    /// </summary>
+    public void ApplyChapterNaming(VolumeDto volume, ChapterDto chapter)
+    {
+        chapter.DisplayNumber = BuildChapterDisplayNumber(chapter);
+        chapter.DisplayTitle = BuildChapterDisplayTitle(volume, chapter);
+        chapter.MetaTitle = BuildChapterMetaTitle(chapter);
+    }
+
+    /// <summary>
     /// Populates DisplayNumber and DisplayTitle on all volumes and their chapters.
     /// </summary>
     public void ApplyNaming(IList<VolumeDto> volumes)
     {
         foreach (var volume in volumes)
         {
-            volume.DisplayNumber = FormatVolumeName(volume) ?? volume.Name;
-            volume.DisplayTitle = volume.DisplayNumber;
+            ApplyVolumeNaming(volume);
 
             foreach (var chapter in volume.Chapters)
             {
-                // Default chapters (-100000) have no meaningful number to display, so send back "Single Volume"
-                if (chapter.MinNumber.Is(ParserConstants.DefaultChapterNumber) && !chapter.IsSpecial)
-                {
-                    chapter.DisplayNumber = SingleVolumeLabel;
-                }
-                else
-                {
-                    chapter.DisplayNumber = FormatChapterTitle(chapter);
-                }
-                chapter.DisplayTitle = BuildChapterTitle(volume, chapter);
+                ApplyChapterNaming(volume, chapter);
             }
         }
+    }
+
+    private void ApplyVolumeNaming(VolumeDto volume)
+    {
+        volume.DisplayNumber = FormatVolumeName(volume) ?? volume.Name;
+        volume.DisplayTitle = volume.DisplayNumber;
+        volume.MetaTitle = BuildVolumeMetaTitle(volume);
     }
 
     /// <summary>
@@ -174,9 +214,11 @@ public sealed class LocalizedNamingContext
     /// </summary>
     public void ApplyReadingListNaming(ReadingListItemDto item)
     {
+        // TODO: Implement support on this (Requires reworking ReadingListService/Controllers)
         var title = FormatReadingListItemTitle(item);
         item.DisplayTitle = title;
         item.DisplayNumber = title;
+        item.MetaTitle = title;
 #pragma warning disable CS0618 // Type or member is obsolete
         item.Title = title;
 #pragma warning restore CS0618

@@ -36,7 +36,7 @@ import {tap} from "rxjs";
 import {AgeRating} from "../_models/metadata/age-rating";
 import {LibraryType} from "../_models/library/library";
 import {ThemeService} from "../_services/theme.service";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
@@ -199,6 +199,17 @@ export class ChapterDetailComponent implements OnInit {
 
   chapterActions = computed(() => this.actionFactoryService.getChapterActions(this.seriesId(), this.libraryId(), this.libraryType()));
   totalReviewCount = computed(() => this.userReviews().length + this.plusReviews().length);
+
+  chapterSubtitle = computed(() => {
+    const displayTitle = this.chapter().displayTitle;
+    const metaTitle = this.chapter().metaTitle.trim();
+
+    if (metaTitle) {
+      return translate('series-detail.subtitle', {displayTitle, metaTitle});
+    }
+
+    return displayTitle;
+  })
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock() === undefined) return 'calc(var(--vh)*100)';

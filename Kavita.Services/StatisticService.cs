@@ -1758,7 +1758,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
                     return new ReadingHistoryChapterItemDto
                     {
                         ChapterId = s.ChapterId,
-                        Label = namingContext.BuildChapterTitle(volumeDto, chapterDto),
+                        Label = namingContext.BuildChapterDisplayTitle(volumeDto, chapterDto),
                         StartTimeUtc = s.StartTimeUtc,
                         EndTimeUtc = s.EndTimeUtc,
                         DurationSeconds = (int)(s.EndTimeUtc - s.StartTimeUtc).TotalSeconds,

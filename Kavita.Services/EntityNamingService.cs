@@ -146,8 +146,7 @@ public partial class EntityNamingService : IEntityNamingService
         }
 
         // Multiple chapters in volume - include both volume and chapter
-        var volName = FormatVolumeName(libraryType, volume, volumeLabel)
-                      ?? FormatStandardVolumeName(volume.Name, volumeLabel);
+        var volName = FormatVolumeName(libraryType, volume, volumeLabel) ?? FormatStandardVolumeName(volume.Name, volumeLabel);
         var chapTitle = FormatChapterTitle(libraryType, chapter, chapterLabel, issueLabel, bookLabel);
 
         if (string.IsNullOrEmpty(volName))
@@ -156,6 +155,28 @@ public partial class EntityNamingService : IEntityNamingService
         }
 
         return $"{volName} - {chapTitle}";
+    }
+
+    public string BuildVolumeMetaTitle(LibraryType libraryType, VolumeDto volume)
+    {
+        if (libraryType == LibraryType.Image) return string.Empty;
+
+        if (volume.Chapters.Count > 0 && !string.IsNullOrEmpty(volume.Chapters.First().TitleName))
+        {
+            return volume.Chapters.First().TitleName;
+        }
+
+        return volume.Name;
+    }
+
+    public string BuildChapterMetaTitle(ChapterDto chapter)
+    {
+        if (chapter.IsSpecial)
+        {
+            return string.IsNullOrEmpty(chapter.Title) ? chapter.Range : chapter.Title;
+        }
+
+        return chapter.TitleName;
     }
 
     public string FormatReadingListItemTitle(ReadingListItemDto item,

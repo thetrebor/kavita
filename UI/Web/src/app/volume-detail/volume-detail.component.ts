@@ -34,10 +34,9 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
-import {LibraryType} from "../_models/library/library";
 import {tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from '../_models/metadata/v2/filter-field';
 import {AgeRating} from '../_models/metadata/age-rating';
@@ -255,37 +254,20 @@ export class VolumeDetailComponent implements OnInit {
   });
 
   continuePoint = computed(() => {
-    const libraryType = this.libraryType();
     const currentlyReadingChapter = this.currentlyReadingChapter();
     const hasOneChapter = this.volume().chapters.length <= 1;
 
     if (currentlyReadingChapter === null || hasOneChapter) return '';
 
     if (currentlyReadingChapter.isSpecial) {
-      return currentlyReadingChapter.title;
-    }
-
-    let chapterLocaleKey = 'common.chapter-num-shorthand';
-    switch (libraryType) {
-      case LibraryType.ComicVine:
-      case LibraryType.Comic:
-        chapterLocaleKey = 'common.issue-num-shorthand';
-        break;
-      case LibraryType.Book:
-      case LibraryType.LightNovel:
-        chapterLocaleKey = 'common.book-num-shorthand';
-        break;
-      case LibraryType.Manga:
-      case LibraryType.Images:
-        chapterLocaleKey = 'common.chapter-num-shorthand';
-        break;
+      return currentlyReadingChapter.displayTitle;
     }
 
     if (currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
-      return translate(chapterLocaleKey, {num: this.volume().chapters[0].minNumber});
+      return this.volume().chapters[0].displayTitle;
     }
 
-    return translate(chapterLocaleKey, {num: currentlyReadingChapter.minNumber});
+    return this.volume().chapters[0].displayTitle;
   })
 
   volumeCast = computed<VolumeCast>(() => {

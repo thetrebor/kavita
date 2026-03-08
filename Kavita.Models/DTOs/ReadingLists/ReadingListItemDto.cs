@@ -11,6 +11,8 @@ public sealed record ReadingListItemDto : IHasDisplayTitle
     public string DisplayNumber { get; set; } = string.Empty;
     /// <inheritdoc cref="IHasDisplayTitle.DisplayTitle"/>
     public string DisplayTitle { get; set; } = string.Empty;
+    /// <inheritdoc cref="IHasDisplayTitle.MetaTitle"/>
+    public string MetaTitle { get; set; } = string.Empty;
     public int Id { get; init; }
     public int Order { get; init; }
     public int ChapterId { get; init; }

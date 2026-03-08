@@ -253,10 +253,11 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   currentlyReadingChapter = signal<Chapter | null>(null);
   continueReadingTitle = computed(() => {
     const currentlyReadingChp = this.currentlyReadingChapter();
+    const volumes = this.volumes();
     if (currentlyReadingChp === null || !this.hasReadingProgress()) return '';
 
     if (!currentlyReadingChp.isSpecial) {
-      const vol = this.volumes().filter(v => v.id === currentlyReadingChp.volumeId);
+      const vol = volumes.filter(v => v.id === currentlyReadingChp.volumeId);
 
       let chapterLocaleKey = 'common.chapter-num-shorthand';
       let volumeLocaleKey = 'common.volume-num-shorthand';
@@ -277,18 +278,25 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
       // This is a lone chapter
       if (vol.length === 0) {
-        if (currentlyReadingChp.minNumber === LooseLeafOrDefaultNumber) {
-          return currentlyReadingChp.titleName;
-        }
-        return translate(chapterLocaleKey, {num: currentlyReadingChp.minNumber});
+        return currentlyReadingChp.displayTitle;
+        // if (currentlyReadingChp.minNumber === LooseLeafOrDefaultNumber) {
+        //   return currentlyReadingChp.titleName;
+        // }
+        // return translate(chapterLocaleKey, {num: currentlyReadingChp.minNumber});
+
       }
 
-      if (currentlyReadingChp.minNumber === LooseLeafOrDefaultNumber) {
-        return translate(volumeLocaleKey, {num: vol[0].minNumber});
-      }
+      return currentlyReadingChp.displayTitle;
 
-      return translate(volumeLocaleKey, {num: vol[0].minNumber})
-        + ' ' + translate(chapterLocaleKey, {num: currentlyReadingChp.minNumber});
+      // if (currentlyReadingChp.minNumber === LooseLeafOrDefaultNumber) {
+      //   return currentlyReadingChp.displayTitle;
+      //   //return translate(volumeLocaleKey, {num: vol[0].minNumber});
+      // }
+      //
+      //
+      //
+      // return translate(volumeLocaleKey, {num: vol[0].minNumber})
+      //   + ' ' + translate(chapterLocaleKey, {num: currentlyReadingChp.minNumber});
     }
 
     return currentlyReadingChp.title;
@@ -409,7 +417,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   });
 
   trackStoryLineIdentity = (index: number, item: StoryLineItem) => item.isChapter ? `${item.chapter!.data.id}_ch_storyline` : `${item.volume!.data.id}_vol_storyline`;
-  
+
   /**
    * Related Series. Sorted by backend
    */

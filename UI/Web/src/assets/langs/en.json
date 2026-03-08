@@ -1204,7 +1204,8 @@
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
         "loading": "{{common.loading}}",
-        "read-count-tooltip": "Total Reads"
+        "read-count-tooltip": "Total Reads",
+        "subtitle": "{{displayTitle}} - {{metaTitle}}"
     },
 
     "reading-progress-status-pipe": {
