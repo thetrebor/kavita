@@ -248,7 +248,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
   libraryAllowsScrobbling  = signal<boolean>(false);
   isScrobbling = signal<boolean>(true);
-  showScrobbleControls = computed(() => this.licenseService.hasValidLicenseSignal() && this.libraryAllowsScrobbling());
+  showScrobbleControls = computed(() => this.licenseService.hasValidLicense() && this.libraryAllowsScrobbling());
 
   currentlyReadingChapter = signal<Chapter | null>(null);
   continueReadingTitle = computed(() => {
@@ -324,7 +324,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   unreadCount = signal(0);
   totalCount = signal(0);
   seriesActions = computed(() => {
-    const hasLicense = this.licenseService.hasValidLicenseSignal();
+    const hasLicense = this.licenseService.hasValidLicense();
     let actions = this.actionFactoryService.getSeriesActions()
       .filter(action => action.action !== Action.Edit);
     if (!hasLicense) {
@@ -409,7 +409,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   });
 
   trackStoryLineIdentity = (index: number, item: StoryLineItem) => item.isChapter ? `${item.chapter!.data.id}_ch_storyline` : `${item.volume!.data.id}_vol_storyline`;
-  
+
   /**
    * Related Series. Sorted by backend
    */

@@ -276,7 +276,7 @@ export class AccountService {
       if (!isSameUser) {
         this.messageHub.stopHubConnection();
         this.messageHub.createHubConnection(user);
-        this.licenseService.hasValidLicense().subscribe();
+        this.licenseService.checkForValidLicense().subscribe();
       }
       if (user.token) {
         this.startRefreshTokenTimer();

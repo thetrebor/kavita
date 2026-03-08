@@ -14,6 +14,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Metadata.Browse.Requests;
 using Kavita.Models.DTOs.Person;
+using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
@@ -218,6 +219,20 @@ public class PersonController(
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetKnownSeries(int personId)
     {
         return Ok(await unitOfWork.PersonRepository.GetSeriesKnownFor(personId, UserId));
+    }
+
+    /// <summary>
+    /// Return external Series the person is an artist/author of. Requires Admin due to age rating restrictions.
+    /// </summary>
+    /// <param name="personId"></param>
+    /// <returns></returns>
+    [PersonAccess]
+    [KPlus]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("external-series")]
+    public async Task<ActionResult<IEnumerable<ExternalSeriesDto>>> GetExternalSeries(int personId)
+    {
+        return Ok(await unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesForPerson(personId, UserId));
     }
 
     /// <summary>
