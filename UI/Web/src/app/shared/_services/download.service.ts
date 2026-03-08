@@ -449,17 +449,6 @@ export class DownloadService {
   }
 
   /**
-   * Returns an observable of the queue item for the given entity, or null if none.
-   * Emits on every queue change. Use this for card download indicators.
-   */
-  getEntityDownload$(entity: Series | Volume | Chapter | PageBookmark[]): Observable<DownloadQueueItem | null> {
-    if (!entity.hasOwnProperty('id')) return of(null);
-    return this.activeQueue$.pipe(
-      map(() => this.getItemForEntity(entity))
-    );
-  }
-
-  /**
    * Download the given data as a JSON file
    */
   downloadObjectAsJson(data: any, title: string) {
@@ -473,29 +462,32 @@ export class DownloadService {
     URL.revokeObjectURL(url);
   }
 
+  private getEntityDownloadSize(entityType: 'series' | 'volume' | 'chapter' | 'readinglist', id: number) {
+    return this.httpClient.get<number>(this.baseUrl + `download/${entityType}-size?${entityType}Id=${id}`);
+  }
+
+  private getBulkEntityDownloadSize(entityType: 'series' | 'volume' | 'chapter' | 'readinglist', ids: number[]) {
+    const data = {} as any;
+    data[entityType + 'Ids'] = ids;
+    return this.httpClient.post<Record<number, number>>(this.baseUrl + `download/bulk-${entityType}-size`, data);
+  }
+
   private downloadSeriesSize(seriesId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'download/series-size?seriesId=' + seriesId);
+    return this.getEntityDownloadSize('series', seriesId);
   }
 
   private downloadBulkVolumeSizes(volumeIds: number[]) {
-    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-volume-size', volumeIds);
+    return this.getBulkEntityDownloadSize('volume', volumeIds);
   }
 
   private downloadBulkChapterSizes(chapterIds: number[]) {
-    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-chapter-size', chapterIds);
-  }
-
-  private downloadBulkSeriesSize(seriesIds: number[]) {
-    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-series-size', seriesIds);
+    return this.getBulkEntityDownloadSize('chapter', chapterIds);
   }
 
   private downloadVolumeSize(volumeId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'download/volume-size?volumeId=' + volumeId);
+    return this.getEntityDownloadSize('volume', volumeId);
   }
 
-  private downloadChapterSize(chapterId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'download/chapter-size?chapterId=' + chapterId);
-  }
 
   private downloadVolume(volume: Volume, libraryId: number, seriesId: number) {
     this.debugLog('downloadVolume()', volume.minNumber);
@@ -609,7 +601,7 @@ export class DownloadService {
     }
     try {
       const series = await firstValueFrom(this.seriesService.getSeries(seriesId));
-      // Evict oldest if at capacity
+      // Evict oldest, if at capacity
       if (this._seriesNameCache.size >= this.SERIES_NAME_CACHE_MAX) {
         const oldest = this._seriesNameCache.keys().next().value!;
         this._seriesNameCache.delete(oldest);
