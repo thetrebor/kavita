@@ -249,7 +249,7 @@ export class DownloadService {
         this.downloadSeries(entity as Series);
         break;
       case 'volume':
-        this.enqueueSingle(entity as Volume, 'volume', '', libraryId, seriesId);
+        this.downloadVolume(entity as Volume, libraryId, seriesId);
         break;
       case 'chapter':
         this.enqueueSingle(entity as Chapter, 'chapter', '', libraryId, seriesId);
@@ -487,6 +487,41 @@ export class DownloadService {
 
   private downloadBulkSeriesSize(seriesIds: number[]) {
     return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-series-size', seriesIds);
+  }
+
+  private downloadVolumeSize(volumeId: number) {
+    return this.httpClient.get<number>(this.baseUrl + 'download/volume-size?volumeId=' + volumeId);
+  }
+
+  private downloadChapterSize(chapterId: number) {
+    return this.httpClient.get<number>(this.baseUrl + 'download/chapter-size?chapterId=' + chapterId);
+  }
+
+  private downloadVolume(volume: Volume, libraryId: number, seriesId: number) {
+    this.debugLog('downloadVolume()', volume.minNumber);
+
+    // Volumes can be either a bunch of chapters or just 1
+    if (volume.chapters.length === 1) {
+      this.enqueueSingle(volume, 'volume', '', libraryId, seriesId);
+      return;
+    }
+    this.debugLog(`downloadVolume() decomposed into ${volume.chapters.length} items`);
+
+    const items = volume.chapters.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const }));
+
+    const userPrefs = this.accountService.userPreferences();
+    if (userPrefs?.promptForDownloadSize && items.length > 0) {
+      // Single size call for the whole series, single confirm dialog
+      this.downloadVolumeSize(volume.id).pipe(
+        switchMap(async size => this.confirmSize(size, 'volume')),
+        filter(confirmed => confirmed),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => this.enqueueItems(items, '', libraryId, seriesId));
+    } else {
+      this.enqueueItems(items, '', libraryId, seriesId);
+    }
+
+
   }
 
   private downloadSeries(series: Series) {

@@ -134,7 +134,7 @@ export class DashboardComponent {
       }
     });
 
-    this.licenseService.checkForValidLicense()
+    this.licenseService.hasAnyLicense()
       .pipe(
         filter((hasLic: boolean) => hasLic),
         switchMap(_ => this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList)),

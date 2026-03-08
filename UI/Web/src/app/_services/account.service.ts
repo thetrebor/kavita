@@ -272,15 +272,14 @@ export class AccountService {
 
     this.stopRefreshTokenTimer();
 
-    if (user) {
-      if (!isSameUser) {
-        this.messageHub.stopHubConnection();
-        this.messageHub.createHubConnection(user);
-        this.licenseService.checkForValidLicense().subscribe();
-      }
-      if (user.token) {
-        this.startRefreshTokenTimer();
-      }
+    if (user && !isSameUser) {
+      this.messageHub.stopHubConnection();
+      this.messageHub.createHubConnection(user);
+      this.licenseService.checkForValidLicense().subscribe();
+    }
+
+    if (user?.token) {
+      this.startRefreshTokenTimer();
     }
   }
 
@@ -447,7 +446,10 @@ export class AccountService {
   refreshAccount(): Observable<null | User> {
     if (!this._currentUser()) return of(null);
     return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {
-      if (user) this.setCurrentUser({ ...user });
+      if (user) {
+        this.setCurrentUser({...user});
+        this.licenseService.checkForValidLicense().subscribe();
+      }
       return user;
     }));
   }
