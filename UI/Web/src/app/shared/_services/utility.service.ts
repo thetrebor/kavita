@@ -101,6 +101,10 @@ export class UtilityService {
     return d != null && d.hasOwnProperty('originalName');
   }
 
+  isReadingList(d: any) {
+     return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('itemCount');
+  }
+
   asVolume(d: any) {
     return <Volume>d;
   }
