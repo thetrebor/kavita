@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
 
+
 /// <summary>
 /// All APIs related to downloading entities from the system. Requires Download Role or Admin Role.
 /// </summary>
@@ -51,12 +52,12 @@ public class DownloadController(
     /// <summary>
     /// For a set of volumes, return the size in bytes
     /// </summary>
-    /// <param name="volumeIds"></param>
+    /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("bulk-volume-size")]
-    public async Task<ActionResult<Dictionary<int, long>>> GetBulkVolumeSize([FromBody] IList<int> volumeIds)
+    public async Task<ActionResult<Dictionary<int, long>>> GetBulkVolumeSize(BulkVolumeSizeRequest request)
     {
-        return Ok(await unitOfWork.VolumeRepository.GetFilesizesAsync(volumeIds));
+        return Ok(await unitOfWork.VolumeRepository.GetFilesizesAsync(request.VolumeIds));
     }
 
     /// <summary>
@@ -71,16 +72,16 @@ public class DownloadController(
         return Ok(await unitOfWork.ChapterRepository.GetFilesizeAsync(chapterId));
     }
 
+
     /// <summary>
     /// For a set of chapters, return the size in bytes
     /// </summary>
-    /// <param name="chapterIds"></param>
+    /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("bulk-chapter-size")]
-    public async Task<ActionResult<Dictionary<int, long>>> GetChapterSizeInBulk([FromBody] IList<int> chapterIds)
+    public async Task<ActionResult<Dictionary<int, long>>> GetChapterSizeInBulk(BulkChapterSizeRequest request)
     {
-        // If there are more than 50 chapterIds, we need to break up into multiple calls
-        return Ok(await unitOfWork.ChapterRepository.GetFilesizesAsync(chapterIds));
+        return Ok(await unitOfWork.ChapterRepository.GetFilesizesAsync(request.ChapterIds));
     }
 
     /// <summary>
@@ -110,24 +111,24 @@ public class DownloadController(
     /// <summary>
     /// Returns the mapping of readinglist -> size
     /// </summary>
-    /// <param name="readingListIds"></param>
+    /// <param name="request"></param>
     /// <returns></returns>
     [ReadingListAccess]
     [HttpGet("bulk-readinglist-size")]
-    public async Task<ActionResult<Dictionary<int, long>>> GetBulkReadingListSize([FromBody] IList<int> readingListIds)
+    public async Task<ActionResult<Dictionary<int, long>>> GetBulkReadingListSize(BulkReadingListSizeRequest request)
     {
-        return Ok(await unitOfWork.ReadingListRepository.GetFilesizesAsync(readingListIds, UserId));
+        return Ok(await unitOfWork.ReadingListRepository.GetFilesizesAsync(request.ReadingListIds, UserId));
     }
 
     /// <summary>
     /// For a set of series, return the size in bytes
     /// </summary>
-    /// <param name="seriesIds"></param>
+    /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("bulk-series-size")]
-    public async Task<ActionResult<Dictionary<int, long>>> GetBulkSeriesSize([FromBody] IList<int> seriesIds)
+    public async Task<ActionResult<Dictionary<int, long>>> GetBulkSeriesSize(BulkSeriesSizeRequest request)
     {
-        return Ok(await unitOfWork.SeriesRepository.GetFilesizesAsync(seriesIds));
+        return Ok(await unitOfWork.SeriesRepository.GetFilesizesAsync(request.SeriesIds));
     }
 
 
@@ -191,6 +192,7 @@ public class DownloadController(
             return BadRequest(ex.Message);
         }
     }
+
 
     private async Task<ActionResult> DownloadFiles(ICollection<MangaFile> files, string tempFolder, string downloadName, string? correlationId = null)
     {

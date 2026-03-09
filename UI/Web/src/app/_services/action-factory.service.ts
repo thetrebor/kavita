@@ -925,6 +925,17 @@ export class ActionFactoryService {
         children: [],
       },
       {
+        action: Action.Download,
+        title: 'download',
+        description: 'download-tooltip',
+
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+
+        requiredRoles: [Role.Download],
+        children: [],
+      },
+      {
         action: Action.Delete,
         title: 'delete',
         description: 'delete-tooltip',

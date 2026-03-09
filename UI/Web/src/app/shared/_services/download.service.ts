@@ -5,7 +5,7 @@ import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../confirm.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {Volume} from 'src/app/_models/volume';
-import {asyncScheduler, filter, firstValueFrom, forkJoin, Observable, of, tap} from 'rxjs';
+import {asyncScheduler, filter, firstValueFrom, forkJoin, of, tap} from 'rxjs';
 import {download} from '../_models/download';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {map, switchMap, throttleTime} from 'rxjs/operators';
@@ -23,6 +23,8 @@ import {SeriesService} from "../../_services/series.service";
 import {DownloadQueueItem, DownloadQueueStatus} from '../_models/download-queue-item';
 import {DownloadStorageService} from './download-storage.service';
 import {normalizeTimestamp} from "../../../libs/download-timestamp";
+import {ReadingList, ReadingListItem} from "../../_models/reading-list";
+import {ReadingListService} from "../../_services/reading-list.service";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -31,11 +33,11 @@ const bytesPipe = new BytesPipe();
 /**
  * Valid entity types for downloading
  */
-export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 'logs';
+export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 'logs' | 'readinglist';
 /**
  * Valid entities for downloading. Undefined exclusively for logs.
  */
-export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | undefined;
+export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | ReadingList | undefined;
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +51,7 @@ export class DownloadService {
   private readonly utilityService = inject(UtilityService);
   private readonly messageHub = inject(MessageHubService);
   private readonly seriesService = inject(SeriesService);
+  private readonly readingListService = inject(ReadingListService);
   private readonly storage = inject(DownloadStorageService);
   private readonly translocoService = inject(TranslocoService);
   private readonly save = inject(SAVER);
@@ -259,6 +262,9 @@ export class DownloadService {
         break;
       case 'logs':
         this.downloadLogsBlob();
+        break;
+      case 'readinglist':
+        this.downloadReadingList(entity as ReadingList);
         break;
     }
   }
@@ -512,8 +518,21 @@ export class DownloadService {
     } else {
       this.enqueueItems(items, '', libraryId, seriesId);
     }
+  }
 
+  private downloadReadingList(readingList: ReadingList) {
+    this.debugLog('downloadReadingList()', readingList.title);
 
+    // We need to check if this instance has items or not
+    let items$ = readingList.hasOwnProperty('items') ?
+      of(readingList.items ?? []) :
+      this.readingListService.getListItems(readingList.id);
+
+    items$.subscribe((items: ReadingListItem[]) => {
+      // Now we have items, but we actually either need the chapter OR we need a backend ability to download an item (proxy to chapter)
+      const chapterItems = items.map(item => ({ entity: {id: item.chapterId, minNumber: parseFloat(item.chapterNumber) || 0} as Chapter, entityType: 'chapter' as const }))
+      this.enqueueItems(chapterItems, readingList.title, 0, 0);
+    });
   }
 
   private downloadSeries(series: Series) {
@@ -549,10 +568,10 @@ export class DownloadService {
     const chapterItems = items.filter(i => i.entityType === 'chapter');
 
     const volSizes$ = volumeItems.length > 0
-      ? this.downloadBulkVolumeSizes(volumeItems.map(i => i.entity.id))
+      ? this.getBulkEntityDownloadSize('volume', volumeItems.map(i => i.entity.id))
       : of({} as Record<number, number>);
     const chSizes$ = chapterItems.length > 0
-      ? this.downloadBulkChapterSizes(chapterItems.map(i => i.entity.id))
+      ? this.getBulkEntityDownloadSize('chapter', chapterItems.map(i => i.entity.id))
       : of({} as Record<number, number>);
 
     forkJoin([volSizes$, chSizes$]).pipe(

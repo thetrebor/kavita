@@ -650,6 +650,10 @@ export class ActionService {
           map(() => this.fromAction(action, readingList, 'remove'))
         );
 
+      case Action.Download:
+        this.downloadService.download('readinglist', readingList, 0, 0);
+        return of(this.fromAction(action, readingList, 'none'));
+
       case Action.Edit:
         const ref = this.modalService.open(EditReadingListModalComponent, editModal());
         ref.componentInstance.readingList = readingList;
@@ -1227,6 +1231,10 @@ export class ActionService {
           tap(() => this.toastr.success(translate('toasts.reading-lists-deleted'))),
           map(() => this.fromAction(action, readingLists, 'remove'))
         );
+
+      case Action.Download:
+        for (const rl of readingLists) { this.downloadService.download('readinglist', rl, 0, 0); }
+        return of(this.fromAction(action, readingLists, 'none'));
 
       default:
         return of(this.fromAction(action, readingLists, 'none'));
