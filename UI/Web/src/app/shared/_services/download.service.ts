@@ -25,6 +25,10 @@ import {DownloadStorageService} from './download-storage.service';
 import {normalizeTimestamp} from "../../../libs/download-timestamp";
 import {ReadingList, ReadingListItem} from "../../_models/reading-list";
 import {ReadingListService} from "../../_services/reading-list.service";
+import {UserCollection} from "../../_models/collection-tag";
+import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
+import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -33,11 +37,11 @@ const bytesPipe = new BytesPipe();
 /**
  * Valid entity types for downloading
  */
-export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 'logs' | 'readinglist' | 'readinglist-item';
+export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 'logs' | 'readinglist' | 'readinglist-item' | 'collection';
 /**
  * Valid entities for downloading. Undefined exclusively for logs.
  */
-export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | ReadingList | ReadingListItem | undefined;
+export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | ReadingList | ReadingListItem | UserCollection | undefined;
 
 @Injectable({
   providedIn: 'root'
@@ -70,7 +74,7 @@ export class DownloadService {
   private IOS_SIZE_WARNING = 209_715_200;
 
   /** Set to true to enable verbose download queue logging in the browser console. */
-  private readonly debug = false;
+  private readonly debug = true;
 
   private debugLog(...args: any[]) {
     if (this.debug) console.log('[DownloadService]', ...args);
@@ -184,7 +188,7 @@ export class DownloadService {
    */
   restoreQueue() {
     this.storage.open().then(items => {
-      const startOfDayIso = DateTime.utc().startOf('day').toISO()!;
+      const startOfDayIso = this.getStartOfDay();
 
       // Mark interrupted items as failed
       const processed = items.map(i =>
@@ -267,6 +271,9 @@ export class DownloadService {
       case 'readinglist':
         this.downloadReadingList(entity as ReadingList);
         break;
+      case 'collection':
+        this.downloadCollection(entity as UserCollection);
+        break;
     }
   }
 
@@ -307,9 +314,12 @@ export class DownloadService {
   }
 
   clearCompleted() {
-    const ids = this.completedToday().map(i => i.id);
+    const items = this.completedToday();
     this.completedToday.set([]);
-    ids.forEach(id => this.storage.delete(id));
+    for (const item of items) {
+      this._completedEntityIds.delete(this._indexKey(item.entityType, item.entityId));
+      this.storage.delete(item.id);
+    }
   }
 
   clearCompletedByIds(ids: number[]) {
@@ -326,21 +336,30 @@ export class DownloadService {
   loadOlderCompleted() {
     if (this._olderLoaded) return;
     this._olderLoaded = true;
-    const startOfDayIso = DateTime.utc().startOf('day').toISO()!;
+    const startOfDayIso = this.getStartOfDay();
     this.storage.getCompletedBefore(startOfDayIso).then(items => {
       this._olderItems.set(items.sort((a, b) => normalizeTimestamp(b.completedAt).localeCompare(normalizeTimestamp(a.completedAt))));
     });
   }
 
   clearOlderCompleted() {
-    const items = this._olderItems();
+    // Clear in-memory state (this may not be loaded as it's lazy-loaded)
+    const loadedItems = this._olderItems();
     this._olderItems.set([]);
     this._olderCompletedCount.set(0);
     this._olderLoaded = false;
-    for (const item of items) {
-      this.storage.delete(item.id);
+    for (const item of loadedItems) {
       this._completedEntityIds.delete(this._indexKey(item.entityType, item.entityId));
     }
+
+    // Delete from storage directly in case _olderItems wasn't loaded yet
+    const startOfDayIso = this.getStartOfDay();
+    this.storage.getCompletedBefore(startOfDayIso).then(items => {
+      for (const item of items) {
+        this.storage.delete(item.id);
+        this._completedEntityIds.delete(this._indexKey(item.entityType, item.entityId));
+      }
+    });
   }
 
   retryDownload(itemId: number) {
@@ -424,6 +443,17 @@ export class DownloadService {
 
       if (includeCompleted) {
         items.push(...ct.filter(i => i.readingListId === rlId));
+      }
+      return this._aggregateSeriesItems(items);
+    }
+
+    if (this.utilityService.isUserCollection(entity)) {
+      const cId = (entity as UserCollection).id;
+
+      const items = aq.filter(i => ['queued', 'preparing', 'downloading'].includes(i.status) && i.collectionId === cId);
+
+      if (includeCompleted) {
+        items.push(...ct.filter(i => i.collectionId === cId));
       }
       return this._aggregateSeriesItems(items);
     }
@@ -535,6 +565,39 @@ export class DownloadService {
     }
   }
 
+  private downloadCollection(collection: UserCollection) {
+    this.debugLog('downloadCollection()', collection.title);
+
+    const userPrefs = this.accountService.userPreferences();
+
+    // A collection is just a set of series, so we can just call down
+    this.seriesService.getAllSeriesV2(0, 0, {
+      statements: [{field: FilterField.CollectionTags, value: collection.id + '', comparison: FilterComparison.Equal}],
+      combination: FilterCombination.And,
+      limitTo: 0
+    }).subscribe(collectionSeries => {
+
+
+      if (userPrefs?.promptForDownloadSize && collectionSeries.result.length > 0) {
+        const seriesIds = collectionSeries.result.map(s => s.id);
+        this.getBulkEntityDownloadSize('series', seriesIds).pipe(
+          map(r => Object.values(r).reduce((acc, curr) => acc + curr, 0)),
+          switchMap(async size => this.confirmSize(size, 'series')),
+          filter(confirmed => confirmed),
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe(() => {
+
+          collectionSeries.result.forEach(s => {
+            this.downloadSeries(s, collection.id);
+          });
+        });
+      } else {
+        collectionSeries.result.forEach(s => {
+          this.downloadSeries(s, collection.id);
+        });
+      }
+    });
+  }
   private downloadReadingList(readingList: ReadingList) {
     this.debugLog('downloadReadingList()', readingList.title);
 
@@ -549,7 +612,7 @@ export class DownloadService {
     });
   }
 
-  private downloadSeries(series: Series) {
+  private downloadSeries(series: Series, collectionId = 0) {
     this.debugLog('downloadSeries()', series.name);
     this.seriesService.getSeriesDetail(series.id).pipe(
       takeUntilDestroyed(this.destroyRef)
@@ -568,14 +631,14 @@ export class DownloadService {
           switchMap(async size => this.confirmSize(size, 'series')),
           filter(confirmed => confirmed),
           takeUntilDestroyed(this.destroyRef)
-        ).subscribe(() => this.enqueueItems(items, series.name, series.libraryId, series.id));
+        ).subscribe(() => this.enqueueItems(items, series.name, series.libraryId, series.id, 0, collectionId));
       } else {
-        this.enqueueItems(items, series.name, series.libraryId, series.id);
+        this.enqueueItems(items, series.name, series.libraryId, series.id, 0, collectionId);
       }
     });
   }
 
-  private enqueueItems(items: Array<{ entity: Volume | Chapter | ReadingListItem; entityType: 'volume' | 'chapter' | 'readinglist-item' }>, seriesName: string, libraryId: number, seriesId = 0, readingListId = 0) {
+  private enqueueItems(items: Array<{ entity: Volume | Chapter | ReadingListItem; entityType: 'volume' | 'chapter' | 'readinglist-item' }>, seriesName: string, libraryId: number, seriesId = 0, readingListId = 0, collectionId = 0) {
     this.debugLog(`enqueueItems() adding ${items.length} items for series "${seriesName}"`);
 
     const volumeItems = items.filter(i => i.entityType === 'volume');
@@ -598,20 +661,26 @@ export class DownloadService {
     ).subscribe(async ([volMap, chMap, rlMap]) => {
       for (const item of items) {
         let size: number;
-        if (item.entityType === 'volume') {
-          size = volMap[item.entity.id] ?? 0;
-        } else if (item.entityType === 'readinglist-item') {
-          size = rlMap[(item.entity as ReadingListItem).chapterId] ?? 0;
-        } else {
-          size = chMap[item.entity.id] ?? 0;
+
+        switch (item.entityType) {
+          case "volume":
+            size = volMap[item.entity.id] ?? 0;
+            break;
+          case "chapter":
+            size = chMap[item.entity.id] ?? 0;
+            break;
+          case "readinglist-item":
+            size = rlMap[(item.entity as ReadingListItem).chapterId] ?? 0;
+            break;
         }
-        await this.addToQueue(item.entity, item.entityType, seriesName, libraryId, size, seriesId, readingListId, true);
+
+        await this.addToQueue(item.entity, item.entityType, seriesName, libraryId, size, seriesId, readingListId, collectionId, true);
       }
       this.processQueue();
     });
   }
 
-  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, seriesId = 0, readingListId = 0) {
+  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, seriesId = 0, readingListId = 0, collectionId = 0) {
     const user = this.accountService.currentUser();
     const sizeCall$ = entityType === 'volume'
       ? this.downloadBulkVolumeSizes([entity.id]).pipe(map(m => m[entity.id] ?? 0))
@@ -627,7 +696,7 @@ export class DownloadService {
       filter(result => result.confirmed),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(async ({ size }) => {
-      await this.addToQueue(entity, entityType, seriesName, libraryId, size, seriesId, readingListId);
+      await this.addToQueue(entity, entityType, seriesName, libraryId, size, seriesId, readingListId, collectionId);
       this.processQueue();
     });
   }
@@ -656,7 +725,7 @@ export class DownloadService {
     }
   }
 
-  private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: 'volume' | 'chapter' | 'readinglist-item', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0, skipRedownloadPrompt = false) {
+  private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: 'volume' | 'chapter' | 'readinglist-item', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0, collectionId = 0, skipRedownloadPrompt = false) {
     seriesName = await this.resolveSeriesName(seriesName, seriesId);
     const entityId = entity.id;
     const key = this._indexKey(entityType, entityId);
@@ -736,6 +805,7 @@ export class DownloadService {
       entity,
       downloadName,
       readingListId,
+      collectionId,
       ...(chapterId !== undefined ? { chapterId } : {}),
     };
 
@@ -1009,5 +1079,9 @@ export class DownloadService {
       await this.confirmService.confirm(translate('toasts.confirm-download-size',
         { entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size) })
         + (!showIosWarning ? '' : '<br/><br/>' + translate('toasts.confirm-download-size-ios'))));
+  }
+
+  private getStartOfDay() {
+    return DateTime.utc().startOf('day').toISO()!;
   }
 }

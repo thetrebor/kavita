@@ -215,7 +215,7 @@ export class BulkSelectionService {
     }
 
     if (this.hasDataSource('collection')) {
-      const actions = this.applyFilterToList(this.actionFactory.getCollectionTagActions(shouldRender), [Action.Promote, Action.UnPromote, Action.Delete]);
+      const actions = this.applyFilterToList(this.actionFactory.getCollectionTagActions(shouldRender), [Action.Promote, Action.UnPromote, Action.Delete, Action.Download]);
       return this.wireBulkCallback(actions, (action) => {
         const collections = this.resolveEntities<UserCollection>('collection');
         return this.actionService.handleBulkCollectionAction(action, collections);

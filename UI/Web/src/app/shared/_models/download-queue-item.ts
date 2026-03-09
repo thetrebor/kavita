@@ -39,4 +39,6 @@ export interface DownloadQueueItem {
   completedAt?: string | number;
   /** The reading list id if invoked from a reading list */
   readingListId?: number;
+  /** The collection id if invoked from a collection */
+  collectionId?: number;
 }

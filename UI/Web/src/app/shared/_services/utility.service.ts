@@ -101,8 +101,13 @@ export class UtilityService {
     return d != null && d.hasOwnProperty('originalName');
   }
 
+  // TODO: We need a better way
   isReadingList(d: any) {
-     return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('itemCount');
+     return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('startingYear');
+  }
+
+  isUserCollection(d: any) {
+     return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('itemCount') && !d.hasOwnProperty('startingYear');
   }
 
   asVolume(d: any) {

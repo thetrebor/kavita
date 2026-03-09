@@ -704,6 +704,9 @@ export class ActionService {
           tap(() => this.toastr.success(translate('toasts.collections-unpromoted'))),
           map(() => this.fromAction(action, {...collection, promoted: false}, 'update'))
         );
+      case Action.Download:
+        this.downloadService.download('collection', collection, 0, 0);
+        return of(this.fromAction(action, collection, 'none'));
 
       default:
         return of(this.fromAction(action, collection, 'none'));
@@ -1204,6 +1207,10 @@ export class ActionService {
           tap(() => this.toastr.success(translate('toasts.collections-deleted'))),
           map(() => this.fromAction(action, collections, 'remove'))
         );
+
+      case Action.Download:
+        for (let c of collections) this.downloadService.download('collection', c, 0, 0);
+        return of(this.fromAction(action, collections, 'none'));
 
       default:
         return of(this.fromAction(action, collections, 'none'));
