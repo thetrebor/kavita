@@ -1,10 +1,19 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  HostListener,
+  inject,
+  OnInit
+} from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {shareReplay, take} from 'rxjs/operators';
 import {AccountService} from './_services/account.service';
 import {LibraryService} from './_services/library.service';
 import {NavService} from './_services/nav.service';
-import {NgbModal, NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbOffcanvas, NgbOffcanvasConfig} from '@ng-bootstrap/ng-bootstrap';
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
 import {filter} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
@@ -44,10 +53,21 @@ export class AppComponent implements OnInit {
   private readonly breakpointService = inject(BreakpointService); // Needs to be injected to run background job
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
+  private readonly ngbCanvasConfig = inject(NgbOffcanvasConfig);
   transitionState = computed(() => this.accountService.userPreferences()?.noTransitions ?? false);
 
 
   constructor() {
+
+    effect(() => {
+      const animationsDisabled = this.transitionState();
+      if (animationsDisabled) {
+        console.log('User has animations off, disabling ngbBootstrap')
+        this.ngbCanvasConfig.animation = false;
+        document.documentElement.classList.add('no-animations', 'animate-disabled');
+      }
+    })
+
     // Close any open modals when a route change occurs
     this.router.events
       .pipe(
