@@ -492,10 +492,19 @@ export class DownloadService {
       ?? items.find(i => i.status === 'queued')
       ?? items[0];
 
+    // When between sequential downloads (some completed, rest queued), use 'preparing'
+    // instead of 'queued' to prevent the indicator from flashing between active/queued states
+    let aggregateStatus = representative.status;
+    if (allCompleted) {
+      aggregateStatus = 'completed';
+    } else if (representative.status === 'queued' && items.some(i => i.status === 'completed')) {
+      aggregateStatus = 'preparing';
+    }
+
     return {
       ...representative,
       progress: Math.round(totalProgress / items.length),
-      status: allCompleted ? 'completed' : representative.status,
+      status: aggregateStatus,
     };
   }
 
