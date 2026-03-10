@@ -136,7 +136,7 @@ public class ParsingTests
     [InlineData("Magic Knight Rayearth {Omnibus Version}", false, "Magic Knight Rayearth { Version}")]
     public void CleanTitleTest(string input, bool isComic, string expected)
     {
-        Assert.Equal(expected, CleanTitle(input, isComic));
+        Assert.Equal(expected, CleanTitle(input));
     }
 
     [Theory]

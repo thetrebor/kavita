@@ -307,14 +307,14 @@ public class MangaParsingTests
     [InlineData("VanDread-v01-c001[MD].zip", "1")]
     [InlineData("Goblin Slayer Side Story - Year One 025.5", "25.5")]
     [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "1")]
-    [InlineData("To Love Ru v11 Uncensored (Ch.089-097+Omake)", "89-97")]
-    [InlineData("To Love Ru v18 Uncensored (Ch.153-162.5)", "153-162.5")]
+    [InlineData("To Love Ru v11 Uncensored Ch.089-097+Omake", "89-97")]
+    [InlineData("To Love Ru v18 Uncensored Ch.153-162.5", "153-162.5")]
+    [InlineData("To Love Ru v09 Uncensored Ch.071-079.cbz", "71-79")]
     [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "1")]
     [InlineData("Beelzebub_Side_Story_02_RHS.zip", "2")]
     [InlineData("[PROzess]Kimi_ha_midara_na_Boku_no_Joou_-_Ch01", "1")]
     [InlineData("Fullmetal Alchemist chapters 101-108.cbz", "101-108")]
     [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", "2")]
-    [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "71-79")]
     [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", Parser.DefaultChapter)]
     [InlineData("Beelzebub_153b_RHS.zip", "153.5")]
     [InlineData("Beelzebub_150-153b_RHS.zip", "150-153.5")]
@@ -361,6 +361,7 @@ public class MangaParsingTests
     [InlineData("Monster #8 Ch. 001", "1")]
     [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "1")]
     [InlineData("Naruto v2.5", Parser.DefaultChapter)]
+    [InlineData("To Love Ru v18 Uncensored (Ch.153-162.5)", Parser.DefaultChapter)]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));

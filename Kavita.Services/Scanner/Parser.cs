@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Kavita.Common.Constants;
 using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.Entities.Enums;
@@ -769,7 +768,7 @@ public static partial class Parser
             var group = matches
                 .Select(match => match.Groups["Series"])
                 .FirstOrDefault(group => group.Success && group != Match.Empty);
-            if (group != null) return CleanTitle(group.Value, true);
+            if (group != null) return CleanTitle(group.Value);
         }
 
         return string.Empty;
@@ -865,14 +864,15 @@ public static partial class Parser
 
     public static string ParseChapter(string filename, LibraryType type)
     {
+        var cleanedFilename = CleanTitle(filename, false);
         return type switch
         {
-            LibraryType.Manga => ParseMangaChapter(filename),
-            LibraryType.Comic => ParseComicChapter(filename),
-            LibraryType.Book => ParseMangaChapter(filename),
-            LibraryType.Image => ParseMangaChapter(filename),
-            LibraryType.LightNovel => ParseMangaChapter(filename),
-            LibraryType.ComicVine => ParseComicChapter(filename),
+            LibraryType.Manga => ParseMangaChapter(cleanedFilename),
+            LibraryType.Comic => ParseComicChapter(cleanedFilename),
+            LibraryType.Book => ParseMangaChapter(cleanedFilename),
+            LibraryType.Image => ParseMangaChapter(cleanedFilename),
+            LibraryType.LightNovel => ParseMangaChapter(cleanedFilename),
+            LibraryType.ComicVine => ParseComicChapter(cleanedFilename),
             _ => DefaultChapter
         };
     }
@@ -943,17 +943,19 @@ public static partial class Parser
     /// </example>
     /// </summary>
     /// <param name="title"></param>
-    /// <param name="isComic"></param>
+    /// <param name="cleanSeparators">Clean out spaces and separators around text (don't use for Chapter/Volume Parsing)</param>
     /// <returns></returns>
-
-    public static string CleanTitle(string title, bool isComic = false)
+    public static string CleanTitle(string title, bool cleanSeparators = true)
     {
 
         title = ReplaceUnderscores(title);
 
         title = RemoveEditionTagHolders(title);
 
-        title = title.Trim(SpacesAndSeparators);
+        if (cleanSeparators)
+        {
+            title = title.Trim(SpacesAndSeparators);
+        }
 
         title = EmptySpaceRegex.Replace(title, " ");
 
@@ -1264,7 +1266,7 @@ public static partial class Parser
      */
     public static string PrettifyFileName(string name)
     {
-        return Regex.Replace(name, "[^a-zA-Z0-9]", " ");
+        return NonAlphanumericalRegex().Replace(name, " ");
     }
 
     /// <summary>
@@ -1309,7 +1311,7 @@ public static partial class Parser
     public static bool IsLikelyValidAsin(string? asin)
     {
         if (string.IsNullOrEmpty(asin)) return false;
-        return AsinRegex.Match(asin).Success;
+        return AsinRegex.IsMatch(asin);
     }
 
 
@@ -1317,6 +1319,12 @@ public static partial class Parser
     private static partial Regex SupportedExtensionsRegex();
     [GeneratedRegex(@"\d-{1}\d")]
     private static partial Regex NumberRangeRegex();
+    /// <summary>
+    /// A range of numbers, includes support for b/c suffix (parts)
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex(@"\d+(\.\d+)?(-\d+(\.\d+)?[bc]?|[bc])?")]
+    private static partial Regex NumberRangeWithPartRegex();
 
     public static bool IsDefaultChapter(string? chapterNumber)
     {
@@ -1328,4 +1336,7 @@ public static partial class Parser
     {
         return !string.IsNullOrEmpty(volumeNumber) && (volumeNumber.Equals(LooseLeafVolume) || volumeNumber.Equals(LooseLeafVolume + ".0"));
     }
+
+    [GeneratedRegex("[^a-zA-Z0-9]")]
+    private static partial Regex NonAlphanumericalRegex();
 }

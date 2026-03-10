@@ -45,7 +45,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         var edition = Scanner.Parser.ParseEdition(fileName);
         if (!string.IsNullOrEmpty(edition))
         {
-            ret.Series = Scanner.Parser.CleanTitle(ret.Series.Replace(edition, string.Empty), type is LibraryType.Comic);
+            ret.Series = Scanner.Parser.CleanTitle(ret.Series.Replace(edition, string.Empty));
             ret.Edition = edition;
         }
 
@@ -92,7 +92,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
 
         if (string.IsNullOrEmpty(ret.Series))
         {
-            ret.Series = Scanner.Parser.CleanTitle(fileName, type is LibraryType.Comic);
+            ret.Series = Scanner.Parser.CleanTitle(fileName);
         }
 
         // Pdfs may have .pdf in the series name, remove that
