@@ -61,6 +61,7 @@ import {NavService} from "./nav.service";
 import {ModalResult} from "../_models/modal/modal-result";
 import {addToModal, editModal} from "../_models/modal/modal-options";
 import {ModalService, TypedModalRef} from "./modal.service";
+import {FilterService} from "src/app/_services/filter.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -98,8 +99,9 @@ export class ActionService {
   private readonly router = inject(Router);
   private readonly annotationsService = inject(AnnotationService);
   private readonly sideNavService = inject(NavService);
+  private readonly filterService = inject(FilterService);
 
-  private readingListModalRef: TypedModalRef<ListSelectModalComponent<ReadingList>> | null = null;
+  private readingListModalRef: TypedModalRef<BulkSetReadingProfileModalComponent> |  TypedModalRef<ListSelectModalComponent<ReadingList>> | null = null;
   private collectionModalRef: TypedModalRef<ListSelectModalComponent<UserCollection>> | null = null;
 
 
@@ -810,7 +812,7 @@ export class ActionService {
       case Action.Delete:
         return from(this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))).pipe(
           filter(confirmed => confirmed),
-          switchMap(() => this.collectionService.deleteTag(smartFilter.id)),
+          switchMap(() => this.filterService.deleteFilter(smartFilter.id)),
           tap(() => this.toastr.success(translate('toasts.smart-filter-deleted'))),
           map(() => this.fromAction(action, smartFilter, 'remove'))
         );
@@ -904,7 +906,7 @@ export class ActionService {
 
       case Action.AddToReadingList: {
         if (this.readingListModalRef != null) return EMPTY;
-        const rlRef = this.modalService.open(ListSelectModalComponent, addToModal()) as TypedModalRef<ListSelectModalComponent<ReadingList>>;
+        const rlRef = this.modalService.open(ListSelectModalComponent<ReadingList>, addToModal());
         this.readingListModalRef = rlRef;
 
         const bulkSeriesIds = series.map(s => s.id);

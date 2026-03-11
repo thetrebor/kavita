@@ -3186,7 +3186,8 @@
         "edit-smart-filter": "Edit {{name}}",
         "name-label": "Name",
         "required-field": "Smart Filters need a name",
-        "filter-name-unique": "Smart Filter names must be unique"
+        "filter-name-unique": "Smart Filter names must be unique",
+        "no-content": "This smart filter has no results on the dashboard"
     },
 
     "edit-external-source-item": {
@@ -3607,6 +3608,13 @@
         "mobile": "Mobile",
         "tablet": "Tablet",
         "desktop": "Desktop"
+    },
+
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "Remove OIDC link",
+        "confirm-unlink": "Are you sure you want to remove your OIDC link?",
+        "confirm-unlink-extra": "If you are currently authenticated with the OIDC account, you will be logged out. You can link again via email at any time."
     },
 
     "manage-reading-profiles": {
