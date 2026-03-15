@@ -478,7 +478,7 @@ export class ActionFactoryService {
           {
             action: Action.RemoveFromWantToReadList,
             title: 'remove-from-want-to-read',
-            description: 'remove-to-want-to-read-tooltip',
+            description: 'remove-from-want-to-read-tooltip',
 
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
@@ -980,6 +980,38 @@ export class ActionFactoryService {
         requiredRoles: [],
         children: [],
       },
+      {
+        action: Action.Submenu,
+        title: 'export',
+        description: 'export-tooltip',
+
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+
+        requiredRoles: [],
+        children: [
+          {
+            action: Action.ExportAsV1,
+            title: 'export-v1',
+            description: 'export-v1-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+            requiredRoles: [],
+            children: [],
+          },
+          {
+            action: Action.ExportAsV2,
+            title: 'export-v2',
+            description: 'export-v2-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+            requiredRoles: [],
+            children: [],
+          }
+        ],
+      }
     ];
 
     this.personActions = [

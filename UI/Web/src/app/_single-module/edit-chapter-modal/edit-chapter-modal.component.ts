@@ -51,16 +51,12 @@ import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
+import {Tabs} from "../../_models/tabs";
+import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
+import {
+  EditExternalMetadataFormComponent
+} from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 
-enum TabID {
-  General = 'general-tab',
-  CoverImage = 'cover-image-tab',
-  Info = 'info-tab',
-  People = 'people-tab',
-  Tasks = 'tasks-tab',
-  Tags = 'tags-tab',
-  Weblinks = 'weblinks-tab', // TODO: Weblinks are not implemented
-}
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
@@ -90,6 +86,8 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     ImageComponent,
     SafeHtmlPipe,
     ReadTimePipe,
+    TabTitlePipe,
+    EditExternalMetadataFormComponent,
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',
@@ -116,7 +114,7 @@ export class EditChapterModalComponent implements OnInit {
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) seriesId!: number;
 
-  activeId = TabID.General;
+  activeId = Tabs.General;
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
@@ -147,7 +145,7 @@ export class EditChapterModalComponent implements OnInit {
   constructor() {
     effect(() => {
       if (!this.accountService.hasAdminRole()) {
-        this.activeId = TabID.Info;
+        this.activeId = Tabs.Info;
         this.cdRef.markForCheck();
       }
     });
@@ -233,7 +231,7 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   save() {
-    const model = this.editForm.value;
+    const model = this.editForm.getRawValue();
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     // Patch in data from the model that is not typeahead (as those are updated during setting)
@@ -508,7 +506,7 @@ export class EditChapterModalComponent implements OnInit {
     return this.peopleSettings[role];
   }
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;
   protected readonly MangaFormat = MangaFormat;

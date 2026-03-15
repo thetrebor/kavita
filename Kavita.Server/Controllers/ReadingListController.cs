@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Kavita.API.Attributes;
@@ -6,6 +7,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
+using Kavita.API.Services.ReadingLists;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
@@ -15,6 +17,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Reading;
+using Kavita.Services.ReadingLists;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +27,8 @@ namespace Kavita.Server.Controllers;
 public class ReadingListController(
     IUnitOfWork unitOfWork,
     IReadingListService readingListService,
-    ILocalizationService localizationService)
+    ILocalizationService localizationService,
+    ICblExportService  cblExportService)
     : BaseApiController
 {
     /// <summary>
@@ -609,5 +613,22 @@ public class ReadingListController(
         result.MaxHoursToRead = timeEstimate.MaxHours;
 
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Export a Reading List to CBL format
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <param name="asV2"></param>
+    /// <returns></returns>
+    [ReadingListAccess]
+    [HttpPost("export-as-cbl")]
+    public async Task<ActionResult> ExportAsCbl([FromQuery] int readingListId, [FromQuery] bool asV2 = false)
+    {
+        var filepath = await cblExportService.ExportReadingList(readingListId, UserId,  asV2);
+        if (string.IsNullOrEmpty(filepath)) return BadRequest(localizationService.Translate(UserId, "cbl-export-failed"));
+
+        var contentType = asV2 ? "application/json" : "application/xml";
+        return PhysicalFile(filepath, contentType, Path.GetFileName(filepath));
     }
 }

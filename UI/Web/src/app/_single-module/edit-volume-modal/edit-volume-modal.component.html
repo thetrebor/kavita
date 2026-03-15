@@ -8,9 +8,20 @@
       <form [formGroup]="editForm">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
+          <!--External Metadata Ids-->
+          @if (accountService.hasAdminRole()) {
+            <li [ngbNavItem]="Tabs.ExternalMetadataIds">
+              <a ngbNavLink>{{Tabs.ExternalMetadataIds | tabTitle}}</a>
+              <ng-template ngbNavContent>
+                <app-edit-external-metadata-form [form]="editForm" [entity]="volume"/>
+              </ng-template>
+            </li>
+          }
+
+
           <!-- Info Tab -->
-          <li [ngbNavItem]="TabID.Info">
-            <a ngbNavLink>{{t(TabID.Info)}}</a>
+          <li [ngbNavItem]="Tabs.Info">
+            <a ngbNavLink>{{t(Tabs.Info)}}</a>
             <ng-template ngbNavContent>
               <div class="row">
                 <div class="col-lg-6 col-md-12 pe-2">
@@ -93,8 +104,8 @@
 
           <!-- Cover Tab -->
           @if (accountService.hasAdminRole()) {
-            <li [ngbNavItem]="TabID.CoverImage">
-              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+            <li [ngbNavItem]="Tabs.CoverImage">
+              <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <p class="alert alert-warning" role="alert">
                   {{t('cover-image-description')}}
@@ -106,8 +117,8 @@
           }
 
           <!-- Tasks Tab -->
-          <li [ngbNavItem]="TabID.Tasks">
-            <a ngbNavLink>{{t(TabID.Tasks)}}</a>
+          <li [ngbNavItem]="Tabs.Tasks">
+            <a ngbNavLink>{{Tabs.Tasks | tabTitle}}</a>
             <ng-template ngbNavContent>
               @for(task of tasks; track task.action) {
                 @if (accountService.canCurrentUserInvokeAction(task.action)) {

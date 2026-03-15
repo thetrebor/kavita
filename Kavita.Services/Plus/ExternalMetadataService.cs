@@ -9,6 +9,7 @@ using Flurl.Http;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
+using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
@@ -177,8 +178,8 @@ public class ExternalMetadataService : IExternalMetadataService
             SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library, ct);
         if (series == null) return [];
 
-        var potentialAnilistId = ScrobblingHelper.ExtractId<int?>(dto.Query, ScrobblingService.AniListWeblinkWebsite);
-        var potentialMalId = ScrobblingHelper.ExtractId<long?>(dto.Query, ScrobblingService.MalWeblinkWebsite);
+        var potentialAnilistId = WeblinkParser.GetAniListId(dto.Query);
+        var potentialMalId = WeblinkParser.GetMalId(dto.Query);
 
         var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
         var otherNames = ExtractAlternativeNames(series);
@@ -412,7 +413,6 @@ public class ExternalMetadataService : IExternalMetadataService
                 return _defaultReturn;
             }
 
-
             // Clear out existing results
             var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
@@ -547,6 +547,7 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = UpdateReleaseYear(series, settings, externalMetadata) || madeModification;
         madeModification = UpdateLocalizedName(series, settings, externalMetadata) || madeModification;
         madeModification = await UpdatePublicationStatus(series, settings, externalMetadata) || madeModification;
+        madeModification = UpdateExternalIds(series, settings, externalMetadata) || madeModification;
 
         // Apply field mappings
         GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
@@ -565,6 +566,8 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
 
         madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
+
+
 
         return madeModification;
     }
@@ -776,7 +779,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Select(w => new PersonDto()
             {
                 Name = w.Name.Trim(),
-                AniListId = ScrobblingHelper.ExtractId<int>(w.Url, ScrobblingService.AniListCharacterWebsite),
+                AniListId = WeblinkParser.GetAniListCharacterId(w.Url),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
@@ -818,7 +821,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         foreach (var character in externalCharacters)
         {
-            var aniListId = ScrobblingHelper.ExtractId<int>(character.Url, ScrobblingService.AniListCharacterWebsite);
+            var aniListId = WeblinkParser.GetAniListCharacterId(character.Url);
             if (aniListId <= 0) continue;
             var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
             if (person != null && !string.IsNullOrEmpty(character.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
@@ -857,7 +860,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Select(w => new PersonDto()
             {
                 Name = w.Name.Trim(),
-                AniListId = ScrobblingHelper.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
+                AniListId = WeblinkParser.GetAniListStaffId(w.Url),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
@@ -914,7 +917,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Select(w => new PersonDto()
             {
                 Name = w.Name.Trim(),
-                AniListId = ScrobblingHelper.ExtractId<int>(w.Url, ScrobblingService.AniListStaffWebsite),
+                AniListId = WeblinkParser.GetAniListStaffId(w.Url),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
@@ -1093,6 +1096,24 @@ public class ExternalMetadataService : IExternalMetadataService
         return false;
     }
 
+    private static bool UpdateExternalIds(Series series, MetadataSettingsDto _, ExternalSeriesDetailDto externalMetadata)
+    {
+        var madeModification = false;
+        if (externalMetadata.AniListId is > 0)
+        {
+            series.AniListId = externalMetadata.AniListId.Value;
+            madeModification = true;
+        }
+
+        if (externalMetadata.MALId is > 0)
+        {
+            series.MalId = externalMetadata.MALId.Value;
+            madeModification = true;
+        }
+
+        return madeModification;
+    }
+
 
     private async Task<bool> UpdateChapters(Series series, MetadataSettingsDto settings,
         ExternalSeriesDetailDto externalMetadata)
@@ -1110,7 +1131,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 externalMetadata.ChapterDtos,
                 chapter => chapter.Range,
                 dto => dto.IssueNumber,
-                (chapter, dto) => (chapter, dto) // Create a tuple of matched pairs
+                (chapter, dto) => (chapter, dto)
             )
             .ToList();
 
@@ -1540,9 +1561,9 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         foreach (var staff in people)
         {
-            var aniListId = ScrobblingHelper.ExtractId<int?>(staff.Url, ScrobblingService.AniListStaffWebsite);
-            if (aniListId is null or <= 0) continue;
-            var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId.Value);
+            var aniListId = WeblinkParser.GetAniListStaffId(staff.Url);
+            if (aniListId <= 0) continue;
+            var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
             if (person == null || string.IsNullOrEmpty(staff.ImageUrl) ||
                 !string.IsNullOrEmpty(person.CoverImage) || staff.ImageUrl.EndsWith("default.jpg")) continue;
 
@@ -1864,11 +1885,11 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 if (payload.AniListId <= 0)
                 {
-                    payload.AniListId = ScrobblingHelper.ExtractId<int>(series.Metadata.WebLinks, ScrobblingService.AniListWeblinkWebsite);
+                    payload.AniListId = WeblinkParser.GetAniListId(series.Metadata.WebLinks);
                 }
                 if (payload.MalId <= 0)
                 {
-                    payload.MalId = ScrobblingHelper.ExtractId<long>(series.Metadata.WebLinks, ScrobblingService.MalWeblinkWebsite);
+                    payload.MalId = WeblinkParser.GetMalId(series.Metadata.WebLinks);
                 }
                 payload.SeriesName = series.Name;
                 payload.LocalizedSeriesName = series.LocalizedName;

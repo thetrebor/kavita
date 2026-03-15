@@ -34,6 +34,8 @@ import {UserCollection} from "../../_models/collection-tag";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
+import {EntityTitleService} from "../../_services/entity-title.service";
+import {LibraryService} from "../../_services/library.service";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -58,6 +60,8 @@ export class DownloadService {
   private readonly storage = inject(DownloadStorageService);
   private readonly translocoService = inject(TranslocoService);
   private readonly save = inject(SAVER);
+  private readonly entityTitleService = inject(EntityTitleService);
+  private readonly libraryService = inject(LibraryService);
 
   private readonly SERIES_NAME_CACHE_MAX = 50;
   private _seriesNameCache = new Map<number, string>();
@@ -521,7 +525,27 @@ export class DownloadService {
     URL.revokeObjectURL(url);
   }
 
-  private getEntityDownloadSize(entityType: DownloadEntityType.Series | DownloadEntityType.Volume | DownloadEntityType.Chapter, id: number) {
+
+  exportReadingList(readingListId: number, readingListName: string, asV2 = false) {
+    return this.httpClient.post(
+      this.baseUrl + `readinglist/export-as-cbl?readingListId=${readingListId}&asV2=${asV2}`, {},
+      { observe: 'response', responseType: 'blob' }
+    ).pipe(
+      tap((response) => {
+        const disposition = response.headers.get('Content-Disposition') ?? '';
+        const filename = this.parseContentDisposition(disposition, `${readingListName}.${asV2 ? 'json' : 'cbl'}`);
+        const url = URL.createObjectURL(response.body!);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    );
+  }
+
+  private getEntityDownloadSize(entityType: DownloadEntityType, id: number) {
     return this.httpClient.get<number>(this.baseUrl + `download/${entityType}-size?${entityType}Id=${id}`);
   }
 
@@ -625,11 +649,30 @@ export class DownloadService {
     this.seriesService.getSeriesDetail(series.id).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(detail => {
+
+      // Ensure that virtual volumes aren't downloaded
+      const chapterIdsInRealVolumes = new Set<number>(
+        detail.volumes
+          .filter(v => v.chapters.length === 1)
+          .flatMap(v => v.chapters.map(c => c.id))
+      );
+
       const items: Array<{ entity: Volume | Chapter; entityType: DownloadEntityType.Volume | DownloadEntityType.Chapter }> = [
-        ...detail.volumes.map(v => ({ entity: v as Volume, entityType: DownloadEntityType.Volume as const })),
-        ...detail.chapters.map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
-        ...detail.specials.map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
+        // Real volumes (single-chapter) — download as volume
+        ...detail.volumes
+          .filter(v => v.chapters.length === 1)
+          .map(v => ({ entity: v as Volume, entityType: DownloadEntityType.Volume as const })),
+        // Chapters not already covered by a real volume
+        ...detail.chapters
+          .filter(c => !chapterIdsInRealVolumes.has(c.id))
+          .map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
+        // Specials — no overlap
+        ...detail.specials.map(c => ({
+          entity: c as Chapter,
+          entityType: DownloadEntityType.Chapter as const,
+        })),
       ];
+
       this.debugLog(`downloadSeries() decomposed into ${items.length} items (${detail.volumes.length} vols, ${detail.chapters.length + detail.specials.length} chapters)`);
 
       const userPrefs = this.accountService.userPreferences();
@@ -733,7 +776,9 @@ export class DownloadService {
     }
   }
 
-  private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: DistilledDownloadEntityType, seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0, collectionId = 0, skipRedownloadPrompt = false) {
+  private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: DistilledDownloadEntityType,
+                           seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0,
+                           collectionId = 0, skipRedownloadPrompt = false) {
     seriesName = await this.resolveSeriesName(seriesName, seriesId);
     const entityId = entity.id;
     const key = this._indexKey(entityType, entityId);
@@ -772,25 +817,32 @@ export class DownloadService {
     const id = this._nextId++;
     this.debugLog(`addToQueue() id=${id} type=${entityType} entityId=${entityId} series="${seriesName}"`);
 
+    // Resolve ReadingListItem overrides BEFORE fetching libType
+    let chapterId: number | undefined;
+    if (entityType === DownloadEntityType.ReadingListItem) {
+      const rli = entity as ReadingListItem;
+      chapterId = rli.chapterId;
+      libraryId = rli.libraryId;
+      seriesId = rli.seriesId;
+    }
+
     let subLabel: string;
     let downloadName: string;
-    let chapterId: number | undefined;
 
+    const libType = await firstValueFrom(this.libraryService.getLibraryType(libraryId));
     if (entityType === DownloadEntityType.Volume) {
       const vol = entity as Volume;
       subLabel = vol.minNumber + '';
-      downloadName = seriesName ? `${seriesName} - Volume ${vol.name}` : `Volume ${vol.name}`;
+      downloadName = this.entityTitleService.computeTitle(vol, libType, {includeVolume: true});
     } else if (entityType === DownloadEntityType.ReadingListItem) {
       const rli = entity as ReadingListItem;
       subLabel = rli.title;
       downloadName = seriesName ? `${seriesName} - ${rli.title}` : rli.title;
-      chapterId = rli.chapterId;
-      libraryId = rli.libraryId;
-      seriesId = rli.seriesId;
     } else {
       const ch = entity as Chapter;
       subLabel = ch.minNumber + '';
-      downloadName = seriesName ? `${seriesName} - Chapter ${ch.minNumber}` : `Chapter ${ch.minNumber}`;
+      const chName = this.entityTitleService.computeTitle(ch, libType, {prioritizeTitleName: false});
+      downloadName = seriesName ? `${seriesName} - ${chName}` : chName;
     }
 
     const label = downloadName;

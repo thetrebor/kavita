@@ -56,23 +56,18 @@ import {Volume} from "../../../_models/volume";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../../_services/license.service";
-import {AsyncPipe, DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
+import {
+  EditExternalMetadataFormComponent
+} from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 
-enum TabID {
-  General = 0,
-  Metadata = 1,
-  People = 2,
-  WebLinks = 3,
-  CoverImage = 4,
-  Related = 5,
-  Info = 6,
-  Tasks = 7
-}
 
 @Component({
   selector: 'app-edit-series-modal',
@@ -101,9 +96,10 @@ enum TabID {
     SettingButtonComponent,
     SettingItemComponent,
     NgTemplateOutlet,
-    AsyncPipe,
     DecimalPipe,
     TitleCasePipe,
+    TabTitlePipe,
+    EditExternalMetadataFormComponent,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -126,7 +122,7 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly PersonRole = PersonRole;
   protected readonly Action = Action;
 
@@ -142,8 +138,7 @@ export class EditSeriesModalComponent implements OnInit {
   tasks = this.actionFactoryService.getActionablesForSettingsPage(
     this.actionFactoryService.getSeriesActions(), this.blacklist);
   volumeCollapsed: any = {};
-  tabs = ['general-tab', 'metadata-tab', 'people-tab', 'web-links-tab', 'cover-image-tab', 'related-tab', 'info-tab', 'tasks-tab'];
-  active = this.tabs[0];
+  active = Tabs.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
@@ -499,7 +494,7 @@ export class EditSeriesModalComponent implements OnInit {
 
 
   save() {
-    const model = this.editSeriesForm.value;
+    const model = this.editSeriesForm.getRawValue();
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
 
     const apis = [
@@ -517,20 +512,15 @@ export class EditSeriesModalComponent implements OnInit {
       model.sortNameLocked = this.series.sortNameLocked;
       model.localizedNameLocked = this.series.localizedNameLocked;
       model.language = this.metadata.language;
-      apis.push(this.seriesService.updateSeries(model).pipe(
-        tap(result => updatedSeries = result)
-      ));
-    } else {
-      // We need to ensure we at least update or get the series to return it to action service
-      apis.push(this.seriesService.getSeries(this.series.id).pipe(
-        tap(result => updatedSeries = result)
-      ));
     }
-
 
     if (selectedIndex > 0 || this.coverImageReset) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
     }
+
+    apis.push(this.seriesService.updateSeries(model).pipe(
+      tap(result => updatedSeries = result)
+    ));
 
     this.saveNestedComponents.emit();
 
