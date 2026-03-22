@@ -1,0 +1,22 @@
+.col-key {
+  width: 30%;
+}
+
+.col-value {
+  width: 35%;
+}
+
+.key-cell code {
+  font-size: 0.85em;
+  word-break: break-all;
+}
+
+.ref-chain {
+  font-size: 0.8em;
+  line-height: 1.6;
+
+  .ref-step {
+    font-size: 0.9em;
+    padding: 1px 4px;
+  }
+}

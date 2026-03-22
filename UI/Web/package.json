@@ -15,7 +15,8 @@
     "prod": "npm run cache-locale-prime && ng build --configuration production && npm run minify-langs && npm run cache-locale",
     "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "audit-i18n": "node audit-i18n.js"
   },
   "private": true,
   "dependencies": {

@@ -15,15 +15,16 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
-## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-~~Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).~~
-
-Run `npx playwright test --reporter=line` or `npx playwright test` to run e2e tests. 
+## Localization Scripts
+- audit-i18n.js (ran via `npm run audit-i18n`)
+  - Performs Duplicate key detection
+  - Cross-Reference Validation ({common.roles}}, {{common.copy}}, {{common.required-field}} don't exist in en.json)
+  - Dead Keys - Potentially finds dead keys. Some dynamically created keys may be false-positive, use `i18n-dynamic-keys.json` to whitelist prefixes
+  - Locale Sync - Shows missing/empty/extra key counts per locale.
+  - Outputs to i18n-audit-report.json
+- /locale-preview
+  - An authenticated page to let any authenticated user see locales and ensure their target language has all necessary keys
 
 ## Connecting to your dev server via your phone or any other compatible client on local network
 

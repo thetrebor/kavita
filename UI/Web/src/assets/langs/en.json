@@ -3923,6 +3923,31 @@
         "bookmark-text-tab": "Text"
     },
 
+    "locale-preview": {
+        "title": "Locale Preview",
+        "locale-label": "Locale",
+        "key-column": "Key",
+        "english-column": "English",
+        "current-locale-column": "Current Locale",
+        "stats-total": "Total Keys",
+        "stats-resolved": "Resolved",
+        "stats-missing": "Missing",
+        "stats-empty": "Empty",
+        "stats-broken": "Broken Refs",
+        "filter-hide-resolved": "Hide Resolved",
+        "filter-show-missing": "Show Only Missing",
+        "filter-show-empty": "Show Only Empty",
+        "filter-show-broken": "Show Only Broken Refs",
+        "search-placeholder": "Search keys or values…",
+        "showing-count": "Showing {{count}} of {{total}} keys",
+        "loading": "{{common.loading}}",
+        "missing-label": "Missing",
+        "empty-label": "Empty",
+        "broken-ref-label": "Broken Ref",
+        "not-present": "Not present in locale",
+        "empty-string": "Empty string"
+    },
+
     "common": {
         "reset-to-default": "Reset to Default",
         "close": "Close",

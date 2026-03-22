@@ -1,0 +1,151 @@
+<ng-container *transloco="let t; prefix: 'locale-preview'">
+  <div class="container-fluid mt-3">
+    <h2>{{t('title')}}</h2>
+
+    <!-- Locale selector -->
+    <div class="row mb-3">
+      <div class="col-auto">
+        <label class="form-label" for="locale-select">{{t('locale-label')}}</label>
+        <select class="form-select" id="locale-select"
+                [ngModel]="activeLang()"
+                (ngModelChange)="onLocaleChange($event)">
+          @for (locale of languages(); track locale) {
+            <option [value]="locale.fileName">{{locale.renderName}}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-3 g-2">
+      <div class="col-auto">
+        <span class="badge text-bg-secondary">{{t('stats-total')}}: {{stats().total | number}}</span>
+      </div>
+      <div class="col-auto">
+        <span class="badge text-bg-success">{{t('stats-resolved')}}: {{stats().resolved | number}}</span>
+      </div>
+      <div class="col-auto">
+        <span class="badge text-bg-warning">{{t('stats-missing')}}: {{stats().missing | number}}</span>
+      </div>
+      <div class="col-auto">
+        <span class="badge text-bg-info">{{t('stats-empty')}}: {{stats().empty | number}}</span>
+      </div>
+      <div class="col-auto">
+        <span class="badge text-bg-danger">{{t('stats-broken')}}: {{stats().broken | number}}</span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-3 g-2 align-items-end">
+      <div class="col-auto">
+        <input type="text" class="form-control" [placeholder]="t('search-placeholder')"
+               [ngModel]="searchQuery()"
+               (ngModelChange)="searchQuery.set($event)">
+      </div>
+      <div class="col-auto">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="hide-resolved"
+                 [ngModel]="hideResolved()"
+                 (ngModelChange)="hideResolved.set($event)">
+          <label class="form-check-label" for="hide-resolved">{{t('filter-hide-resolved')}}</label>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="show-missing"
+                 [ngModel]="showOnlyMissing()"
+                 (ngModelChange)="showOnlyMissing.set($event)">
+          <label class="form-check-label" for="show-missing">{{t('filter-show-missing')}}</label>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="show-empty"
+                 [ngModel]="showOnlyEmpty()"
+                 (ngModelChange)="showOnlyEmpty.set($event)">
+          <label class="form-check-label" for="show-empty">{{t('filter-show-empty')}}</label>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="show-broken"
+                 [ngModel]="showOnlyBroken()"
+                 (ngModelChange)="showOnlyBroken.set($event)">
+          <label class="form-check-label" for="show-broken">{{t('filter-show-broken')}}</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-2 text-body-secondary">
+      {{t('showing-count', {count: filteredEntries().length, total: stats().total})}}
+    </div>
+
+    @if (loading()) {
+      <div class="d-flex justify-content-center my-5">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">{{t('loading')}}</span>
+        </div>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered align-top">
+          <thead class="table-dark sticky-top">
+            <tr>
+              <th class="col-key">{{t('key-column')}}</th>
+              <th class="col-value">{{t('english-column')}}</th>
+              <th class="col-value">{{t('current-locale-column')}} ({{activeLang()}})</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of filteredEntries(); track entry.key) {
+              <tr>
+                <td class="key-cell">
+                  <code>{{entry.key}}</code>
+                  @if (entry.status !== 'resolved') {
+                    <span class="badge ms-1" [class]="getBadgeClass(entry.status)">
+                      {{t(entry.status + '-label')}}
+                    </span>
+                  }
+                </td>
+                <td>
+
+                  @if (entry.enChain.length > 0) {
+                    <div class="ref-chain mt-1">
+                      @for (step of entry.enChain; track $index) {
+                        @if (!$first) {
+                          <i class="fa fa-arrow-right mx-1" aria-hidden="true"></i>
+                        }
+                        <code class="ref-step">{{step}}</code>
+                      }
+                    </div>
+                  } @else {
+                    <span>{{entry.enResolved}}</span>
+                  }
+                </td>
+                <td>
+                  @if (entry.localeValue === null) {
+                    <span class="text-body-secondary fst-italic">{{t('not-present')}}</span>
+                  } @else if (entry.localeValue === '') {
+                    <span class="text-body-secondary fst-italic">{{t('empty-string')}}</span>
+                  } @else {
+                    <span>{{entry.localeResolved}}</span>
+                    @if (entry.localeChain.length > 0) {
+                      <div class="ref-chain mt-1">
+                        @for (step of entry.localeChain; track $index) {
+                          @if (!$first) {
+                            <i class="fa fa-arrow-right mx-1" aria-hidden="true"></i>
+                          }
+                          <code class="ref-step">{{step}}</code>
+                        }
+                      </div>
+                    }
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</ng-container>

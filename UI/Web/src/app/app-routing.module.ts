@@ -62,6 +62,11 @@ export const routes: Routes = [
         loadChildren: () => import('./_routes/profile-routing.module').then(m => m.routes)
       },
       {
+        path: 'locale-preview',
+        title: 'locale-preview.title',
+        loadComponent: () => import('./locale-preview/locale-preview.component').then(c => c.LocalePreviewComponent)
+      },
+      {
         path: 'lists',
         pathMatch: 'full',
         title: 'title.reading-lists',

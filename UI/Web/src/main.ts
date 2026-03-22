@@ -66,7 +66,7 @@ function transformLanguageCodes(arr: Array<string>) {
 }
 
 // All Languages Kavita will support: http://www.lingoes.net/en/translator/langcode.htm
-const languageCodes = [
+export const languageCodes = [
   'af', 'af_ZA', 'ar', 'ar_AE', 'ar_BH', 'ar_DZ', 'ar_EG', 'ar_IQ', 'ar_JO', 'ar_KW',
   'ar_LB', 'ar_LY', 'ar_MA', 'ar_OM', 'ar_QA', 'ar_SA', 'ar_SY', 'ar_TN', 'ar_YE',
   'az', 'az_AZ', 'az_AZ', 'be', 'be_BY', 'bg', 'bg_BG', 'bs_BA', 'ca', 'ca_ES', 'cs',
