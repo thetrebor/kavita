@@ -7,6 +7,7 @@ using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
+using Kavita.Services.Filtering;
 using Kavita.Services.Helpers;
 using Kavita.Services.HostedServices;
 using Kavita.Services.Metadata;
@@ -57,6 +58,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFontService, FontService>();
         services.AddScoped<IAnnotationService, AnnotationService>();
         services.AddScoped<IOpdsService, OpdsService>();
+        services.AddScoped<IFilterV3Service, FilterV3Service>();
 
         services.AddScoped<ICblExportService, CblExportService>();
         services.AddScoped<ICblGithubService, CblGithubService>();
