@@ -2,19 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Kavita.API.Services.Filtering;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Filtering.v2;
 
 namespace Kavita.Services.Filtering;
-
-public interface IFilterField<TEntity>
-{
-    IQueryable<TEntity> Apply(IQueryable<TEntity> query, FilterComparison comparison, FilterContext<string> context);
-    IReadOnlySet<FilterComparison> SupportedComparisons { get; }
-}
-
-public delegate Expression<Func<TEntity, bool>> FilterExpression<TEntity, TValue>(FilterContext<TValue> ctx);
-public delegate IQueryable<TEntity> FilterFunc<TEntity, TValue>(FilterContext<TValue> ctx, IQueryable<TEntity> query);
 
 public class FilterFieldBuilder<TEntity, TValue>(Func<string, TValue> convertor)
 where TEntity: class
@@ -65,21 +57,18 @@ where TEntity: class
     {
         public IQueryable<TEntity> Apply(IQueryable<TEntity> query, FilterComparison comparison, FilterContext<string> context)
         {
+            var value = converter(context.Value);
+            var newContext = new FilterContext<TValue> { Value = value, UserId = context.UserId };
+
+            if (guard != null && !guard(newContext)) return query;
+
             if (comparisons.TryGetValue(comparison, out var expression))
             {
-                var value = converter(context.Value);
-                var newContext = new FilterContext<TValue> { Value = value, UserId = context.UserId };
-                if (guard != null && !guard(newContext)) return query;
-
                 return query.Where(expression(newContext));
             }
 
             if (funcComparisons.TryGetValue(comparison, out var func))
             {
-                var value = converter(context.Value);
-                var newContext = new FilterContext<TValue> { Value = value, UserId = context.UserId };
-                if (guard != null && !guard(newContext)) return query;
-
                 return func(newContext, query);
             }
 

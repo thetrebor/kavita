@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Kavita.API.Services.Filtering;
 using Kavita.Common.Extensions;
 using Kavita.Database.Extensions;
 using Kavita.Database.Extensions.Filters;
@@ -80,4 +81,27 @@ public class ChapterComparisonField : IFilterField<Chapter>
         FilterComparison.GreaterThan, FilterComparison.GreaterThanEqual,
         FilterComparison.LessThan, FilterComparison.LessThanEqual
     ]));
+}
+
+public class NopComparisionField<TEntity> : IFilterField<TEntity>
+{
+
+    private readonly HashSet<FilterComparison> _filterComparisons = [];
+
+    public IQueryable<TEntity> Apply(IQueryable<TEntity> query, FilterComparison comparison, FilterContext<string> context)
+    {
+        return query;
+    }
+
+    public NopComparisionField<TEntity> WithComparisons(params FilterComparison[] comparisons)
+    {
+        foreach (var comparison in comparisons)
+        {
+            _filterComparisons.Add(comparison);
+        }
+
+        return this;
+    }
+
+    public IReadOnlySet<FilterComparison> SupportedComparisons => _filterComparisons.AsReadOnly();
 }

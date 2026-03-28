@@ -1,24 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Kavita.API.Services.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v3;
 
 namespace Kavita.Services.Filtering;
 
-public interface IFilterEntity<TEntity>
-{
-    IQueryable<TEntity> Apply(IQueryable<TEntity> query, FilterV3StatementDto statement, FilterContext<string> context);
-
-    IReadOnlyDictionary<FilterFieldV3, IReadOnlySet<FilterComparison>> SupportedComparisons { get; }
-}
-
 public class FilterEntityBuilder<TEntity>
 {
 
-    private readonly Dictionary<FilterFieldV3, IFilterField<TEntity>> _fields = [];
+    private readonly Dictionary<EntityFilterField, IFilterField<TEntity>> _fields = [];
 
-    public FilterEntityBuilder<TEntity> WithField(FilterFieldV3 field, IFilterField<TEntity> filterField)
+    public FilterEntityBuilder<TEntity> WithField(EntityFilterField field, IFilterField<TEntity> filterField)
     {
         if (!_fields.TryAdd(field, filterField))
             throw new ArgumentException("Cannot register for the same field twice", nameof(field));
@@ -31,9 +25,9 @@ public class FilterEntityBuilder<TEntity>
         return new FilterEntity(_fields);
     }
 
-    private sealed class FilterEntity(Dictionary<FilterFieldV3, IFilterField<TEntity>> fields): IFilterEntity<TEntity>
+    private sealed class FilterEntity(Dictionary<EntityFilterField, IFilterField<TEntity>> fields): IFilterEntity<TEntity>
     {
-        public IQueryable<TEntity> Apply(IQueryable<TEntity> query, FilterV3StatementDto statement, FilterContext<string> context)
+        public IQueryable<TEntity> Apply(IQueryable<TEntity> query, EntityFilterStatementDto statement, FilterContext<string> context)
         {
             if (fields.TryGetValue(statement.Field, out var field))
             {
@@ -43,7 +37,7 @@ public class FilterEntityBuilder<TEntity>
             return query;
         }
 
-        public IReadOnlyDictionary<FilterFieldV3, IReadOnlySet<FilterComparison>> SupportedComparisons { get; } =
+        public IReadOnlyDictionary<EntityFilterField, IReadOnlySet<FilterComparison>> SupportedComparisons { get; } =
             fields.ToDictionary(kv => kv.Key, kv => kv.Value.SupportedComparisons).AsReadOnly();
     }
 

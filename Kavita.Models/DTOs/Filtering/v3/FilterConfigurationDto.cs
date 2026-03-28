@@ -19,6 +19,6 @@ public sealed record FilterEntityConfigurationDto
 
 public sealed record FilterFieldConfigurationDto
 {
-    public FilterFieldV3 Field { get; set; }
+    public EntityFilterField Field { get; set; }
     public List<FilterComparison> Comparisons { get; set; } = [];
 }

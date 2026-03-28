@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Kavita.API.Services;
+using Kavita.API.Services.Filtering;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Plus;
@@ -58,7 +59,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFontService, FontService>();
         services.AddScoped<IAnnotationService, AnnotationService>();
         services.AddScoped<IOpdsService, OpdsService>();
-        services.AddScoped<IFilterV3Service, FilterV3Service>();
+        services.AddScoped<IFilterService, FilterService>();
 
         services.AddScoped<ICblExportService, CblExportService>();
         services.AddScoped<ICblGithubService, CblGithubService>();

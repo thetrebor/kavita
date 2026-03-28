@@ -1,25 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Kavita.API.Services.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v3;
 
 namespace Kavita.Services.Filtering;
-
-public interface IFilterPipeline<TEntity>
-{
-    IQueryable<TEntity> Apply(IQueryable<TEntity> query, FilterV3Dto filter, int userId);
-
-    IReadOnlyDictionary<FilterEntity, IReadOnlyDictionary<FilterFieldV3, IReadOnlySet<FilterComparison>>> SupportedEntities { get; }
-
-    List<FilterEntityConfigurationDto> Configuration();
-}
-
-public class FilterContext<TValue>
-{
-    public required int UserId { get; init; }
-    public required TValue Value { get; init; }
-}
 
 public class FilterPipelineBuilder<TEntity>
 {
@@ -41,20 +27,20 @@ public class FilterPipelineBuilder<TEntity>
 
     private sealed class FilterPipeline(Dictionary<FilterEntity, IFilterEntity<TEntity>> entities): IFilterPipeline<TEntity>
     {
-        public IQueryable<TEntity> Apply(IQueryable<TEntity> query, FilterV3Dto filter, int userId)
+        public IQueryable<TEntity> Apply(IQueryable<TEntity> query, EntityFilterDto entityFilter, int userId)
         {
-            var groups = filter.Groups
+            var groups = entityFilter.Groups
                 .Select(group => ApplyGroup(query, group, userId))
                 .ToList();
 
             if (groups.Count == 0) return query; // Return everything if no filters
 
-            return filter.Combination == FilterCombination.And
+            return entityFilter.Combination == FilterCombination.And
                 ? groups.Aggregate((current, next) => current.Intersect(next))
                 : groups.Aggregate((current, next) => current.Union(next));
         }
 
-        public IReadOnlyDictionary<FilterEntity, IReadOnlyDictionary<FilterFieldV3, IReadOnlySet<FilterComparison>>> SupportedEntities { get; } =
+        public IReadOnlyDictionary<FilterEntity, IReadOnlyDictionary<EntityFilterField, IReadOnlySet<FilterComparison>>> SupportedEntities { get; } =
             entities.ToDictionary(kv => kv.Key, kv => kv.Value.SupportedComparisons).AsReadOnly();
 
         public List<FilterEntityConfigurationDto> Configuration()
@@ -70,7 +56,7 @@ public class FilterPipelineBuilder<TEntity>
             }).ToList();
         }
 
-        private IQueryable<TEntity> ApplyGroup(IQueryable<TEntity> query, FilterV3GroupDto group, int userId)
+        private IQueryable<TEntity> ApplyGroup(IQueryable<TEntity> query, EntityFilterGroupDto group, int userId)
         {
             var statements = group.Statements
                 .Select(statement => ApplyEntity(query, statement, new FilterContext<string> { UserId = userId, Value = statement.Value }))
@@ -84,7 +70,7 @@ public class FilterPipelineBuilder<TEntity>
         }
 
 
-        private IQueryable<TEntity> ApplyEntity(IQueryable<TEntity> query, FilterV3StatementDto statement, FilterContext<string> context)
+        private IQueryable<TEntity> ApplyEntity(IQueryable<TEntity> query, EntityFilterStatementDto statement, FilterContext<string> context)
         {
             if (entities.TryGetValue(statement.Entity, out var entity))
             {
