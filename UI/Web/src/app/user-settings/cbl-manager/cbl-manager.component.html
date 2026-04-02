@@ -3,7 +3,7 @@
   <div class="position-relative">
     @if (!accountService.hasReadOnlyRole()) {
       <div class="position-absolute custom-position d-flex gap-2">
-        <button class="btn btn-outline-primary" (click)="selectedList.set(undefined)" [title]="t('add')">
+        <button class="btn btn-outline-primary" [disabled]="selectedList() === undefined" (click)="selectedList.set(undefined)" [title]="t('add')">
           <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
         </button>
         <button class="btn btn-outline-primary" (click)="openBrowseModal()" [title]="t('browse-repo')">
@@ -60,7 +60,6 @@
     </div>
 
     <div class="col-lg-7 col-md-6 col-sm-4 col-xs-4 ps-3">
-      <form [formGroup]="form">
       <div class="card p-3">
 
         @let selectedItem = selectedList();
@@ -79,54 +78,14 @@
           @if (files && files.length > 0) {
             <app-loading [loading]="isUploadingCbl()" />
           } @else if (!accountService.hasReadOnlyRole()) {
-            <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
-                           dropZoneClassName="file-upload" contentClassName="file-upload-zone">
-
-              <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-                @switch (uploadMode()) {
-                  @case ('all') {
-                    <div class="row g-0 mt-3 pb-3">
-                      <div class="mx-auto">
-                        <div class="row g-0 mb-3">
-                          <i class="fa fa-file-upload mx-auto" style="font-size: 1.5rem; width: 1.25rem;" aria-hidden="true"></i>
-                        </div>
-
-                        <div class="d-flex justify-content-center">
-                          <div class="d-flex justify-content-evenly">
-                            <a href="javascript:void(0)" (click)="uploadMode.set('url')">
-                              <span class="d-none d-md-inline">{{t('enter-an-url-pre-title', {url: ''})}}</span>{{t('url')}}
-                            </a>
-                            <span class="ps-1 pe-1">•</span>
-                            <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
-                            <span class="ps-1 pe-1">•</span>
-                            <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  @case ('url') {
-                    <div class="row g-0 mt-3 pb-3 ms-md-2 me-md-2">
-                      <div class="input-group col-auto me-md-2" style="width: 83%">
-                        <label class="input-group-text" for="load-url">{{t('url-label')}}</label>
-                        <input type="text" autofocus autocomplete="off" class="form-control" formControlName="cblUrl"
-                               placeholder="https://" id="load-url">
-                        <button class="btn btn-outline-secondary" type="button"
-                                (click)="uploadFromUrl(); uploadMode.set('all')"
-                                [disabled]="(form.get('cblUrl')?.value || '').length === 0">
-                          {{t('load')}}
-                        </button>
-                      </div>
-                      <button class="btn btn-secondary col-auto" (click)="uploadMode.set('all')">
-                        <i class="fas fa-share" aria-hidden="true" style="transform: rotateY(180deg)"></i>&nbsp;
-                        <span class="phone-hidden">{{t('back')}}</span>
-                      </button>
-                    </div>
-                  }
-                }
-              </ng-template>
-
-            </ngx-file-drop>
+            <app-file-drag-and-drop-upload
+              (dropped)="dropped($event)"
+              (urlSubmitted)="uploadFromUrl($event)"
+              [showUrlUpload]="true"
+              [uploadText]="t('upload-continued')"
+              [urlText]="t('url')"
+              [acceptableExtensions]="acceptableExtensions"
+            />
           }
         } @else if(selectedItem) {
 
@@ -149,7 +108,7 @@
               </div>
 
               @if (selectedItem.canSync) {
-                <span class="pill p-1 me-1 provider">{{selectedItem.provider | readingListProvider}}</span>
+                <span class="pill p-1 me-1 provider">{{t('can-sync')}}</span>
               }
 
               <div class="text-muted mt-1" style="font-size: 0.9rem;">
@@ -160,7 +119,7 @@
                   @if (selectedItem.ageRating) {
                     <span> · </span>
                   }
-                  <span>{{selectedItem.startingMonth}}/{{selectedItem.startingYear}} – {{selectedItem.endingMonth}}/{{selectedItem.endingYear}}</span>
+                  <span>{{selectedItem.startingYear}} – {{selectedItem.endingYear}}</span>
                 }
                 @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
                   <span> · </span>
@@ -192,10 +151,9 @@
           }
 
         } @else {
-          <p>You lack the ability to interact with this content.</p>
+          <p>{{t('not-authorized')}}</p>
         }
       </div>
-      </form>
     </div>
   </div>
 

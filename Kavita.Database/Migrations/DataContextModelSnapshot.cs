@@ -3054,6 +3054,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue("[]");
 
+                    b.Property<bool>("BookReaderDisableBookmarkIcon")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("DisableWidthOverride")
                         .HasColumnType("INTEGER");
 

@@ -31,7 +31,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, debounceTime, of, ReplaySubject, tap} from 'rxjs';
+import {catchError, debounceTime, EMPTY, of, ReplaySubject, tap} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
@@ -119,12 +119,18 @@ import {ExternalSeries} from "../../../_models/series-detail/external-series";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {EntityTitleService} from "../../../_services/entity-title.service";
+import {ReadingHistoryItem} from "src/app/_models/stats/reading-history-item";
+import {StatisticsService} from "src/app/_services/statistics.service";
+import {Pagination} from "src/app/_models/pagination";
+import {ReadingHistoryViewerComponent} from "src/app/shared/reading-history-viewer/reading-history-viewer.component";
 
 interface StoryLineItem {
   chapter?: ChapterCardEntity;
   volume?: VolumeCardEntity;
   isChapter: boolean;
 }
+
+const READING_HISTORY_PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-series-detail',
@@ -138,7 +144,7 @@ interface StoryLineItem {
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, DetailsTabComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
     PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent,
-    AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe, EntityCardComponent, TabTitlePipe]
+    AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe, EntityCardComponent, TabTitlePipe, ReadingHistoryViewerComponent]
 })
 class SeriesDetailComponent implements OnInit, AfterViewInit {
 
@@ -173,6 +179,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   private readonly document = inject(DOCUMENT);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly entityTitleService = inject(EntityTitleService);
+  private readonly statisticsService = inject(StatisticsService);
 
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
 
@@ -226,6 +233,11 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     return items;
   });
 
+  protected readonly readingHistory = signal<ReadingHistoryItem[]>([]);
+  protected readonly hasReadingHistory = computed(() => this.readingHistory().length > 0);
+  protected readonly readingHistoryPagination = signal<Pagination | null>(null);
+  protected readonly isLoadingReadingHistory = signal(false);
+  protected readonly readingHistoryCurrentPage = signal(1);
 
   isAdmin = computed(() => {
     return this.accountService.hasAdminRole();
@@ -566,6 +578,8 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       this.series.set(series);
     });
 
+    this.loadReadingHistory(this.readingHistoryCurrentPage(), READING_HISTORY_PAGE_SIZE);
+
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata.set({...metadata});
 
@@ -608,11 +622,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     if (loadExternal) {
       this.loadPlusMetadata(this.seriesId(), this.library().type);
     }
-
-
-
-
-
 
     this.seriesService.getSeriesDetail(this.seriesId()).pipe(catchError(_ => {
       this.router.navigateByUrl('/home');
@@ -663,6 +672,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     });
 
   }
+
   private loadRelatedSeries(seriesId: number) {
     this.seriesService.getRelatedForSeries(seriesId).subscribe((relations: RelatedSeries) => {
       this.relations.set([
@@ -718,6 +728,22 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     return {series, relation} as RelatedSeriesPair;
   }
 
+  loadReadingHistory(page: number, pageSize: number) {
+    this.isLoadingReadingHistory.set(true);
+
+    this.statisticsService.getReadingHistoryForSeries(this.seriesId(), page, pageSize).pipe(
+      tap(result => {
+        this.readingHistory.set(result.result);
+        this.readingHistoryPagination.set(result.pagination);
+        this.readingHistoryCurrentPage.set(page);
+        this.isLoadingReadingHistory.set(false);
+      }),
+      catchError(() => {
+        this.isLoadingReadingHistory.set(false);
+        return EMPTY;
+      }),
+    ).subscribe();
+  }
 
 
   /**
@@ -905,6 +931,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly AgeRating = AgeRating;
   protected readonly encodeURIComponent = encodeURIComponent;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly READING_HISTORY_PAGE_SIZE = READING_HISTORY_PAGE_SIZE;
 }
 
 export default SeriesDetailComponent

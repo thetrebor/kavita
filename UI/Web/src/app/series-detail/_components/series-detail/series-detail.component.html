@@ -373,6 +373,26 @@
             </li>
           }
 
+          @if (hasReadingHistory()) {
+            <li [ngbNavItem]="Tabs.Activity" id="activity-tab">
+              <a ngbNavLink>{{Tabs.Activity | tabTitle}}</a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId == Tabs.Activity; prefetch on idle) {
+                  <div class="pb-3">
+                    <app-reading-history-viewer
+                      [currentEntries]="readingHistory()"
+                      [pagination]="readingHistoryPagination()"
+                      [currentPage]="readingHistoryCurrentPage()"
+                      [isLoading]="isLoadingReadingHistory()"
+                      [pageSize]="READING_HISTORY_PAGE_SIZE"
+                      (pageChange)="loadReadingHistory($event.page, $event.pageSize)"
+                    />
+                  </div>
+                }
+              </ng-template>
+            </li>
+          }
+
         </ul>
       </div>
       <div [ngbNavOutlet]="nav" style="min-height: 18.75rem"></div>
