@@ -7,5 +7,6 @@ export const environment = {
   apiUrl: `${BASE_URL}api/`,
   hubUrl:`${BASE_URL}hubs/`,
   buyLink: 'https://buy.stripe.com/00gcOQanFajG0hi5ko?prefilled_promo_code=FIRSTTIME',
-  manageLink: 'https://billing.stripe.com/p/login/28oaFRa3HdHWb5ecMM'
+  manageLink: 'https://billing.stripe.com/p/login/28oaFRa3HdHWb5ecMM',
+  hardcoverReferral: 'https://hardcover.app/join?referrer_id=5371',
 };
