@@ -1589,10 +1589,12 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
+            var volumes = externalMetadata.Volumes ?? 0;
+            var externChapters = externalMetadata.Chapters ?? 0;
             // Determine the expected total count based on local metadata
             series.Metadata.TotalCount = Math.Max(
                 chapters.Max(chapter => chapter.TotalCount),
-                externalMetadata.Volumes > 0 ? externalMetadata.Volumes : externalMetadata.Chapters
+                volumes > 0 ? volumes : externChapters
             );
 
             // The actual number of count's defined across all chapter's metadata

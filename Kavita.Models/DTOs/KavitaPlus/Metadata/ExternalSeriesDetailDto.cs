@@ -16,7 +16,11 @@ public sealed record ExternalSeriesDetailDto
     public int? AniListId { get; set; }
     public long? MALId { get; set; }
     public int? CbrId { get; set; }
+    public int? HardcoverId { get; set; }
+
     public IList<string> Synonyms { get; set; } = [];
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
     public PlusMediaFormat PlusMediaFormat { get; set; }
     public string? SiteUrl { get; set; }
     public string? CoverUrl { get; set; }
@@ -24,17 +28,25 @@ public sealed record ExternalSeriesDetailDto
     public IList<SeriesStaffDto> Staff { get; set; }
     public IList<MetadataTagDto> Tags { get; set; }
     public string? Summary { get; set; }
-    public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-    public int AverageScore { get; set; }
+    public int? VolumeCount { get; set; }
+    public int? ChapterCount { get; set; }
     /// <remarks>AniList returns the total count of unique chapters, includes 1.1 for example</remarks>
-    public int Chapters { get; set; }
+    public int? Chapters { get; set; }
     /// <remarks>AniList returns the total count of unique volumes, includes 1.1 for example</remarks>
-    public int Volumes { get; set; }
-    public IList<SeriesRelationship>? Relations { get; set; } = [];
+    public int? Volumes { get; set; }
+    public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
     public IList<SeriesCharacter>? Characters { get; set; } = [];
+    public IList<SeriesRelationship>? Relations { get; set; } = [];
+    public int AverageScore { get; set; }
+    /// <summary>
+    /// Only applies to Manga
+    /// </summary>
+    public int MeanScore { get; set; }
+    public string? BannerUrl { get; set; }
+
+
+
 
     #region Comic Only
     public string? Publisher { get; set; }
