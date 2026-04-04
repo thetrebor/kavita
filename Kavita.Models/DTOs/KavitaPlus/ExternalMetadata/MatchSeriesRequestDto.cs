@@ -18,4 +18,8 @@ public sealed record MatchSeriesRequestDto
     public string? HardcoverId { get; set; }
     public int? CbrId { get; set; }
     public PlusMediaFormat Format { get; set; }
+    /// <summary>
+    /// Is there only a single chapter
+    /// </summary>
+    public bool IsStandAlone { get; set; }
 }

@@ -194,6 +194,11 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
+        // TODO: We need to calculate if there is only 1 chapter (improve this logic)
+        var chapters = await _unitOfWork.ChapterRepository.GetAllChaptersForSeries(series.Id, ct);
+        var isStandalone = chapters.Count == 1;
+
+        // TODO: We need to first feed ids from ExternalMetadataIds then weblink parsing
         var matchRequest = new MatchSeriesRequestDto()
         {
             Format = format,
@@ -202,7 +207,8 @@ public class ExternalMetadataService : IExternalMetadataService
             AlternativeNames = otherNames,
             Year = year,
             AniListId = potentialAnilistId ?? ScrobblingHelper.GetAniListId(series),
-            MalId = potentialMalId ?? ScrobblingHelper.GetMalId(series)
+            MalId = potentialMalId ?? ScrobblingHelper.GetMalId(series),
+            IsStandAlone = isStandalone
         };
 
         try
