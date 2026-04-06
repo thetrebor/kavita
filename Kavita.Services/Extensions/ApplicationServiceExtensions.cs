@@ -61,6 +61,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IOpdsService, OpdsService>();
         services.AddScoped<IFilterService, FilterService>();
 
+        services.AddScoped<IUrlValidationService, UrlValidationService>();
+
         services.AddScoped<ICblExportService, CblExportService>();
         services.AddScoped<ICblGithubService, CblGithubService>();
         services.AddScoped<ICblImportService, CblImportService>();
