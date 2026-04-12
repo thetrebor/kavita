@@ -108,6 +108,7 @@ public interface ISeriesRepository
     Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId, CancellationToken ct = default);
     Task<Chunk> GetChunkInfo(int libraryId = 0, CancellationToken ct = default);
     Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams, CancellationToken ct = default);
+    Task<IList<RecentlyUpdatedItemDto>> GetRecentlyUpdatedItems(int userId, UserParams? userParams, CancellationToken ct = default);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId, CancellationToken ct = default);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);

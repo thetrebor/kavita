@@ -1367,6 +1367,49 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return seriesMap.Values.ToList();
     }
 
+    /// <summary>
+    /// Returns a page of recently updated items for the dashboard stream, mixing Series (chapter additions)
+    /// and Reading Lists (last CBL sync). Each side is fetched independently for pageSize items, then merged
+    /// and sorted by UpdatedUtc desc, taking pageSize from the union.
+    /// </summary>
+    public async Task<IList<RecentlyUpdatedItemDto>> GetRecentlyUpdatedItems(int userId, UserParams? userParams,
+        CancellationToken ct = default)
+    {
+        userParams ??= UserParams.Default;
+
+        var seriesGroups = await GetRecentlyUpdatedSeries(userId, userParams, ct);
+        var seriesItems = seriesGroups.Select(s => new RecentlyUpdatedItemDto
+        {
+            Kind = EntityKind.Series,
+            UpdatedUtc = s.Created,
+            Series = s
+        });
+
+        var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+        var readingLists = await context.ReadingList
+            .Where(l => l.AppUserId == userId || l.Promoted)
+            .RestrictAgainstAgeRestriction(ageRestriction)
+            .ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
+            .Where(l => l.LastSyncedUtc != null)
+            .OrderByDescending(l => l.LastSyncedUtc)
+            .Take(userParams.PageSize)
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        var readingListItems = readingLists.Select(rl => new RecentlyUpdatedItemDto
+        {
+            Kind = EntityKind.ReadingList,
+            UpdatedUtc = rl.LastSyncedUtc!.Value,
+            ReadingList = rl
+        });
+
+        return seriesItems
+            .Concat(readingListItems)
+            .OrderByDescending(x => x.UpdatedUtc)
+            .Take(userParams.PageSize)
+            .ToList();
+    }
+
     public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind,
         CancellationToken ct = default)
     {

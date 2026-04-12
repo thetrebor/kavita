@@ -88,6 +88,10 @@ public sealed record ReadingListDto : IHasCoverImage
     /// </summary>
     public DateTime? LastSyncedUtc { get; set; }
     /// <summary>
+    /// Last time any modification happened to the Reading List
+    /// </summary>
+    public DateTime LastModifiedUtc { get; set; }
+    /// <summary>
     /// Total items at CBL Import, this helps track missing items. CBL Sync will update to the latest.
     /// </summary>
     public int TotalItemsAtImport { get; set; }

@@ -80,6 +80,7 @@ export interface ReadingList extends IHasCover {
   endingYear: number;
   endingMonth: number;
   itemCount: number;
+  LastModifiedUtc: string;
   totalItemsAtImport: number;
   ageRating: AgeRating;
   tags: ReadingListTag[];
