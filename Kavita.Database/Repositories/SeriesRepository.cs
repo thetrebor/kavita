@@ -1390,8 +1390,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Where(l => l.AppUserId == userId || l.Promoted)
             .RestrictAgainstAgeRestriction(ageRestriction)
             .ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
-            .Where(l => l.LastSyncedUtc != null)
-            .OrderByDescending(l => l.LastSyncedUtc)
+            .OrderByDescending(l => l.LastModifiedUtc)
             .Take(userParams.PageSize)
             .AsNoTracking()
             .ToListAsync(ct);
@@ -1399,7 +1398,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var readingListItems = readingLists.Select(rl => new RecentlyUpdatedItemDto
         {
             Kind = EntityKind.ReadingList,
-            UpdatedUtc = rl.LastSyncedUtc!.Value,
+            UpdatedUtc = rl.LastModifiedUtc,
             ReadingList = rl
         });
 

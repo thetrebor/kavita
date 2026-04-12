@@ -43,8 +43,11 @@ import {QueryContext} from "../../_models/metadata/v2/query-context";
 import {LicenseService} from "../../_services/license.service";
 import {EntityCardComponent} from "../../cards/entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
-import {CardEntityFactory} from "../../_models/card/card-entity";
+import {CardEntity, CardEntityFactory, CardEntityGuards} from "../../_models/card/card-entity";
 import {BulkSelectionService} from "../../cards/bulk-selection.service";
+import {BaseCardConfiguration} from "../../_models/card/card-configuration";
+import {RecentlyUpdatedItem} from "../../_models/dashboard/recently-updated-item";
+import {EntityKind} from "../../_models/dashboard/entity-kind.enum";
 
 enum StreamId {
   OnDeck,
@@ -99,6 +102,23 @@ export class DashboardComponent {
       readFunc: this.handleRecentlyAddedChapterRead.bind(this)
     }
   }));
+  readingListConfig = computed(() => this.cardConfigFactory.forReadingList());
+
+  resolveRecentlyUpdatedConfig = (entity: CardEntity): BaseCardConfiguration<any> => {
+    if (CardEntityGuards.isReadingList(entity)) return this.readingListConfig();
+    return this.recentlyUpdatedConfig();
+  };
+
+  private mapRecentlyUpdatedItem(item: RecentlyUpdatedItem): CardEntity | null {
+    switch (item.kind) {
+      case EntityKind.Series:
+        return item.series ? CardEntityFactory.recentlyUpdatedSeries(item.series) : null;
+      case EntityKind.ReadingList:
+        return item.readingList ? CardEntityFactory.readingList(item.readingList) : null;
+      default:
+        return null;
+    }
+  }
 
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
@@ -166,7 +186,9 @@ export class DashboardComponent {
 
   onRecentlyUpdatedNextPage(stream: DashboardStream) {
     return (pageNum: number, pageSize: number) => {
-      return this.seriesService.getRecentlyUpdatedSeries(pageNum, pageSize).pipe(map(d => d.map(series => CardEntityFactory.recentlyUpdatedSeries(series))));
+      return this.dashboardService.getRecentlyUpdatedItems(pageNum, pageSize).pipe(
+        map(items => items.map(i => this.mapRecentlyUpdatedItem(i)).filter((e): e is CardEntity => e !== null))
+      );
     }
   }
 
@@ -200,9 +222,9 @@ export class DashboardComponent {
                 );
             break;
           case StreamType.RecentlyUpdated:
-            s.api = this.seriesService.getRecentlyUpdatedSeries(1, 20)
+            s.api = this.dashboardService.getRecentlyUpdatedItems(1, 20)
               .pipe(
-                map(d => d.map(series => CardEntityFactory.recentlyUpdatedSeries(series))),
+                map(items => items.map(i => this.mapRecentlyUpdatedItem(i)).filter((e): e is CardEntity => e !== null)),
                 tap(() => this.increment()),
                 takeUntilDestroyed(this.destroyRef),
                 shareReplay({bufferSize: 1, refCount: true})

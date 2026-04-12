@@ -81,7 +81,7 @@
             (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)"
           >
             <ng-template #carouselItem let-item>
-              <app-entity-card [entity]="item" [config]="recentlyUpdatedConfig()" />
+              <app-entity-card [entity]="item" [config]="resolveRecentlyUpdatedConfig(item)" />
             </ng-template>
           </app-carousel-reel>
         }
