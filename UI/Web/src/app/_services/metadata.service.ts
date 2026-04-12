@@ -11,7 +11,7 @@ import {allPeopleRoles, Person, PersonRole} from '../_models/metadata/person';
 import {Tag} from '../_models/tag';
 import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
 import {FilterField} from '../_models/metadata/v2/filter-field';
-import {mangaFormatFilters, SortField} from "../_models/metadata/series-filter";
+import {mangaFormatFilters, SeriesSortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {FilterStatement} from "../_models/metadata/v2/filter-statement";
@@ -33,12 +33,14 @@ import {ValidFilterEntity} from "../metadata-filter/filter-settings";
 import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
 import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
-import {AnnotationsFilterField} from "../_models/metadata/v2/annotations-filter";
+import {AnnotationsFilterField, AnnotationsSortField} from "../_models/metadata/v2/annotations-filter";
 import {AccountService} from "./account.service";
 import {MemberService} from "./member.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 import {SeriesService} from "./series.service";
 import {ReadingListTag} from "../_models/reading-list/reading-list-tag";
+import {ReadingListSortField} from "../_models/metadata/v2/reading-list-sort-field";
+import {ReadingListFilterField} from "../_models/metadata/v2/reading-list-filter-field";
 
 @Injectable({
   providedIn: 'root'
@@ -64,10 +66,6 @@ export class MetadataService {
 
   getSeriesMetadataFromPlus(seriesId: number, libraryType: LibraryType) {
     return this.httpClient.get<SeriesDetailPlus | null>(this.baseUrl + 'metadata/series-detail-plus?seriesId=' + seriesId + '&libraryType=' + libraryType);
-  }
-
-  forceRefreshFromPlus(seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'metadata/force-refresh?seriesId=' + seriesId, {});
   }
 
   getAllAgeRatings(libraries?: Array<number>) {
@@ -175,10 +173,24 @@ export class MetadataService {
       limitTo: 0,
       sortOptions: {
         isAscending: true,
-        sortField: (entityType === 'series' ? SortField.SortName : PersonSortField.Name) as TSort
+        sortField: this.getDefaultSortField(entityType) as TSort
       }
     };
   }
+
+  private getDefaultSortField(entityType: ValidFilterEntity) {
+    switch (entityType) {
+      case 'series':
+        return SeriesSortField.SortName;
+      case 'person':
+        return PersonSortField.Name;
+      case 'annotation':
+        return AnnotationsSortField.Owner;
+      case 'readinglist':
+        return ReadingListSortField.Title;
+    }
+  }
+
 
   createDefaultFilterStatement(entityType: ValidFilterEntity) {
     switch (entityType) {
@@ -192,6 +204,8 @@ export class MetadataService {
         return this.createFilterStatement(FilterField.SeriesName);
       case 'person':
         return this.createFilterStatement(PersonFilterField.Role, FilterComparison.Contains, `${PersonRole.CoverArtist},${PersonRole.Writer}`);
+      case 'readinglist':
+        return this.createFilterStatement(ReadingListFilterField.Title);
     }
   }
 
@@ -268,6 +282,8 @@ export class MetadataService {
         return this.getSeriesOptionsForFilterField(filterField as FilterField);
       case 'person':
         return this.getPersonOptionsForFilterField(filterField as PersonFilterField);
+      case 'readinglist':
+        return this.getReadingListOptionsForFilterField(filterField as ReadingListFilterField);
     }
   }
 
@@ -283,7 +299,7 @@ export class MetadataService {
           return {value: lib.id, label: lib.name};
         })));
       case AnnotationsFilterField.HighlightSlots:
-        return of(this.highlightSlots().map((slot, idx) => {
+        return of(this.highlightSlots().map((slot, _) => {
           return {value: slot.slotNumber, label: translate('highlight-bar.slot-label', {slot: slot.slotNumber + 1}), color: slot.color}; // Slots start at 0
         }));
       case AnnotationsFilterField.Series:
@@ -350,6 +366,21 @@ export class MetadataService {
       case FilterField.Location: return this.getPersonOptions(PersonRole.Location);
       case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
       case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
+    }
+
+    return of([]);
+  }
+
+  private getReadingListOptionsForFilterField(field: ReadingListFilterField) {
+    switch (field) {
+      case ReadingListFilterField.Tags:
+        return this.getAllReadingListTags().pipe(map(tags => tags.map(tag => {
+          return {value: tag.id, label: tag.title}
+        })));
+      case ReadingListFilterField.Writer:
+        return this.getPersonOptions(PersonRole.Writer)
+      case ReadingListFilterField.Artist:
+        return this.getPersonOptions(PersonRole.CoverArtist)
     }
 
     return of([]);

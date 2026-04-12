@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 using Kavita.API.Repositories;
 using Kavita.Models.DTOs.Annotations;
 using Kavita.Models.DTOs.Filtering;
+using Kavita.Models.DTOs.Filtering.v2.SortFields;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.DTOs.KavitaPlus.Manage;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Person;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
@@ -303,7 +306,7 @@ public static class QueryableExtensions
         };
     }
 
-    public static IQueryable<Person> SortBy(this IQueryable<Person> query, PersonSortOptions? sort)
+    public static IQueryable<Person> SortBy(this IQueryable<Person> query, PersonSortOptionDto? sort)
     {
         if (sort == null)
         {
@@ -322,7 +325,28 @@ public static class QueryableExtensions
         };
     }
 
-    public static IQueryable<AppUserAnnotation> SortBy(this IQueryable<AppUserAnnotation> query, AnnotationSortOptions? sort)
+    public static IQueryable<ReadingList> SortBy(this IQueryable<ReadingList> query, ReadingListSortOptionDto? sort)
+    {
+        if (sort == null)
+        {
+            return query.OrderBy(p => p.Title);
+        }
+
+        return sort.SortField switch
+        {
+            ReadingListSortField.Title when sort.IsAscending => query.OrderBy(p => p.Title),
+            ReadingListSortField.Title  => query.OrderByDescending(p => p.Title),
+            ReadingListSortField.ReleaseYearStart when sort.IsAscending => query.OrderBy(r => r.StartingYear),
+            ReadingListSortField.ReleaseYearStart => query.OrderByDescending(r => r.StartingYear),
+            ReadingListSortField.ReleaseYearEnd when sort.IsAscending => query.OrderBy(r => r.EndingYear),
+            ReadingListSortField.ReleaseYearEnd => query.OrderByDescending(r => r.EndingYear),
+            ReadingListSortField.ItemCount when sort.IsAscending => query.OrderBy(r => r.Items.Count),
+            ReadingListSortField.ItemCount =>  query.OrderByDescending(r => r.Items.Count),
+            _ => query.OrderBy(p => p.Title),
+        };
+    }
+
+    public static IQueryable<AppUserAnnotation> SortBy(this IQueryable<AppUserAnnotation> query, AnnotationSortOptionDto? sort)
     {
         if (sort == null)
         {
@@ -348,11 +372,11 @@ public static class QueryableExtensions
     /// </summary>
     /// <param name="query"></param>
     /// <param name="keySelector"></param>
-    /// <param name="sortOptions"></param>
+    /// <param name="sortOptionDto"></param>
     /// <returns></returns>
-    public static IOrderedQueryable<T> DoOrderBy<T, TKey>(this IQueryable<T> query, Expression<Func<T, TKey>> keySelector, SortOptions sortOptions)
+    public static IOrderedQueryable<T> DoOrderBy<T, TKey>(this IQueryable<T> query, Expression<Func<T, TKey>> keySelector, SeriesSortOptionDto sortOptionDto)
     {
-        return sortOptions.IsAscending ? query.OrderBy(keySelector) : query.OrderByDescending(keySelector);
+        return sortOptionDto.IsAscending ? query.OrderBy(keySelector) : query.OrderByDescending(keySelector);
     }
 
     public static IQueryable<Series> FilterMatchState(this IQueryable<Series> query, MatchStateOption stateOption)

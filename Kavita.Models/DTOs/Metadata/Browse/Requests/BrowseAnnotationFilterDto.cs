@@ -1,11 +1,11 @@
 #nullable enable
 using System.Collections.Generic;
-using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
 namespace Kavita.Models.DTOs.Metadata.Browse.Requests;
 
-public class BrowseAnnotationFilterDto
+public class BrowseAnnotationFilterDto : IFilterDto<AnnotationFilterStatementDto>
 {
     /// <summary>
     /// Not used - For parity with Series Filter
@@ -17,7 +17,7 @@ public class BrowseAnnotationFilterDto
     public string? Name { get; set; }
     public ICollection<AnnotationFilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
-    public AnnotationSortOptions? SortOptions { get; set; }
+    public AnnotationSortOptionDto? SortOptions { get; set; }
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)

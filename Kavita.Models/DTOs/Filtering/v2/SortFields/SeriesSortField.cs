@@ -1,6 +1,6 @@
-namespace Kavita.Models.DTOs.Filtering;
+namespace Kavita.Models.DTOs.Filtering.v2.SortFields;
 
-public enum SortField
+public enum SeriesSortField
 {
     /// <summary>
     /// Sort Name of Series
@@ -45,10 +45,4 @@ public enum SortField
 
 }
 
-public enum AnnotationSortField
-{
-    Owner = 1,
-    Created = 2,
-    LastModified = 3,
-    Color = 4,
-}
+

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
-using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
@@ -16,6 +15,8 @@ using Kavita.Models.Builders;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.SortFields;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.DTOs.SignalR;
@@ -915,34 +916,37 @@ public class SeriesService(
         var filter = new FilterV2Dto
         {
             Combination = FilterCombination.And,
-            SortOptions = new SortOptions
+            SortOptions = new SeriesSortOptionDto
             {
-                SortField = SortField.ReadProgress,
+                SortField = SeriesSortField.ReadProgress,
                 IsAscending = false,
             },
             Statements = [
                 new FilterStatementDto
                 {
                   Comparison = FilterComparison.GreaterThan,
-                  Field = FilterField.ReadLast,
+                  Field = SeriesFilterField.ReadLast,
                   Value = serverSettings.OnDeckProgressDays.ToString(),
                 },
                 new FilterStatementDto
                 {
                     Comparison = FilterComparison.LessThan,
-                    Field = FilterField.ReadProgress,
+                    Field = SeriesFilterField.ReadProgress,
                     Value = "100",
                 },
                 new FilterStatementDto
                 {
                     Comparison = FilterComparison.GreaterThan,
-                    Field = FilterField.ReadProgress,
+                    Field = SeriesFilterField.ReadProgress,
                     Value = "0",
                 },
             ],
         };
 
-        filter.Statements.AddRange(await GetProfilePrivacyStatements(userId, requestingUserId, ct));
+        foreach (var stmt in await GetProfilePrivacyStatements(userId, requestingUserId, ct))
+        {
+            filter.Statements.Add(stmt);
+        }
 
         return await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter, ct: ct);
     }
@@ -974,7 +978,7 @@ public class SeriesService(
             new()
             {
                 Comparison = FilterComparison.Contains,
-                Field = FilterField.Libraries,
+                Field = SeriesFilterField.Libraries,
                 Value = string.Join(',', libraries),
             }
 
@@ -985,7 +989,7 @@ public class SeriesService(
             filters.Add(new FilterStatementDto
             {
                 Comparison = FilterComparison.NotEqual,
-                Field = FilterField.AgeRating,
+                Field = SeriesFilterField.AgeRating,
                 Value = nameof(AgeRating.Unknown),
             });
         }
@@ -995,7 +999,7 @@ public class SeriesService(
             filters.Add(new FilterStatementDto
             {
                 Comparison = FilterComparison.LessThanEqual,
-                Field = FilterField.AgeRating,
+                Field = SeriesFilterField.AgeRating,
                 Value = ageRating.ToString(),
             });
         }
