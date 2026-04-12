@@ -1335,7 +1335,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         {
             if (seriesMap.Keys.Count == userParams.PageSize) break;
 
-            if (item.SeriesName == null) continue;
+            if (item.SeriesName == null || skipped.Contains(item.SeriesId)) continue;
 
             if (skipped.Count < toSkip)
             {
@@ -1378,10 +1378,20 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         userParams ??= UserParams.Default;
 
         var seriesGroups = await GetRecentlyUpdatedSeries(userId, userParams, ct);
+
+        // GroupedSeriesDto.Created is sourced from Chapter.Created (local time), which would make
+        // the merge sort mix local + UTC timestamps. Pull the UTC series-level timestamp instead.
+        // This is done separate to not break the old API
+        var seriesIds = seriesGroups.Select(s => s.SeriesId).ToList();
+        var seriesUpdatedMap = await context.Series
+            .Where(s => seriesIds.Contains(s.Id))
+            .Select(s => new { s.Id, s.LastChapterAddedUtc })
+            .ToDictionaryAsync(x => x.Id, x => x.LastChapterAddedUtc, ct);
+
         var seriesItems = seriesGroups.Select(s => new RecentlyUpdatedItemDto
         {
             Kind = EntityKind.Series,
-            UpdatedUtc = s.Created,
+            UpdatedUtc = seriesUpdatedMap.TryGetValue(s.SeriesId, out var u) ? u : s.Created,
             Series = s
         });
 
@@ -1391,6 +1401,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .RestrictAgainstAgeRestriction(ageRestriction)
             .ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
             .OrderByDescending(l => l.LastModifiedUtc)
+            .Skip((userParams.PageNumber - 1) * userParams.PageSize)
             .Take(userParams.PageSize)
             .AsNoTracking()
             .ToListAsync(ct);

@@ -233,6 +233,7 @@ public class SeriesController(
     /// <param name="userParams">Page size and offset</param>
     /// <returns></returns>
     [HttpPost("recently-updated-series")]
+    [Obsolete("Use dashboard/recently-updated-items instead")]
     public async Task<ActionResult<IList<GroupedSeriesDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
