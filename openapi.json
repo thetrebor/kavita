@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.36",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.38",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.36"
+    "version": "0.8.9.38"
   },
   "servers": [
     {
@@ -12106,6 +12106,83 @@
         }
       }
     },
+    "/api/ReadingList/all": {
+      "post": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Returns reading lists (paginated) for a given user.",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowseReadingListFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowseReadingListFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowseReadingListFilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ReadingList/lists-for-series": {
       "get": {
         "tags": [
@@ -21704,7 +21781,7 @@
         },
         "additionalProperties": false
       },
-      "AnnotationSortOptions": {
+      "AnnotationSortOptionDto": {
         "type": "object",
         "properties": {
           "sortField": {
@@ -22215,7 +22292,7 @@
             "format": "int32"
           },
           "sortOptions": {
-            "$ref": "#/components/schemas/AnnotationSortOptions"
+            "$ref": "#/components/schemas/AnnotationSortOptionDto"
           },
           "limitTo": {
             "type": "integer",
@@ -22374,7 +22451,43 @@
             "format": "int32"
           },
           "sortOptions": {
-            "$ref": "#/components/schemas/PersonSortOptions"
+            "$ref": "#/components/schemas/PersonSortOptionDto"
+          },
+          "limitTo": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BrowseReadingListFilterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingListFilterStatementDto"
+            },
+            "nullable": true
+          },
+          "combination": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/ReadingListSortOptionDto"
           },
           "limitTo": {
             "type": "integer",
@@ -24928,7 +25041,7 @@
             "format": "int32"
           },
           "sortOptions": {
-            "$ref": "#/components/schemas/SortOptions"
+            "$ref": "#/components/schemas/SeriesSortOptionDto"
           },
           "ageRating": {
             "type": "array",
@@ -25088,7 +25201,7 @@
             "format": "int32"
           },
           "sortOptions": {
-            "$ref": "#/components/schemas/SortOptions"
+            "$ref": "#/components/schemas/SeriesSortOptionDto"
           },
           "limitTo": {
             "type": "integer",
@@ -26814,7 +26927,7 @@
         },
         "additionalProperties": false
       },
-      "PersonSortOptions": {
+      "PersonSortOptionDto": {
         "type": "object",
         "properties": {
           "sortField": {
@@ -27477,6 +27590,51 @@
         },
         "additionalProperties": false
       },
+      "ReadingListFilterStatementDto": {
+        "type": "object",
+        "properties": {
+          "comparison": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "field": {
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ReadingListInfoDto": {
         "type": "object",
         "properties": {
@@ -27719,6 +27877,25 @@
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReadingListSortOptionDto": {
+        "type": "object",
+        "properties": {
+          "sortField": {
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "isAscending": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -29145,6 +29322,31 @@
         },
         "additionalProperties": false
       },
+      "SeriesSortOptionDto": {
+        "type": "object",
+        "properties": {
+          "sortField": {
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "isAscending": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "SeriesStaffDto": {
         "required": [
           "name",
@@ -29579,31 +29781,6 @@
             "format": "int32"
           },
           "customizedTemplates": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "SortOptions": {
-        "type": "object",
-        "properties": {
-          "sortField": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "isAscending": {
             "type": "boolean"
           }
         },
