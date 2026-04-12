@@ -1372,8 +1372,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// and Reading Lists (last CBL sync). Each side is fetched independently for pageSize items, then merged
     /// and sorted by UpdatedUtc desc, taking pageSize from the union.
     /// </summary>
-    public async Task<IList<RecentlyUpdatedItemDto>> GetRecentlyUpdatedItems(int userId, UserParams? userParams,
-        CancellationToken ct = default)
+    public async Task<IList<RecentlyUpdatedItemDto>> GetRecentlyUpdatedItems(int userId, UserParams? userParams, CancellationToken ct = default)
     {
         userParams ??= UserParams.Default;
 
@@ -1420,8 +1419,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .ToList();
     }
 
-    public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind,
-        CancellationToken ct = default)
+    public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
         var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);

@@ -18,6 +18,6 @@ public class DashboardController(IUnitOfWork unitOfWork) : BaseApiController
     public async Task<ActionResult<IList<RecentlyUpdatedItemDto>>> GetRecentlyUpdatedItems([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
-        return Ok(await unitOfWork.SeriesRepository.GetRecentlyUpdatedItems(UserId, userParams));
+        return Ok(await unitOfWork.SeriesRepository.GetRecentlyUpdatedItems(UserId, userParams, HttpContext.RequestAborted));
     }
 }

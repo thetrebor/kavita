@@ -237,7 +237,7 @@ public class SeriesController(
     public async Task<ActionResult<IList<GroupedSeriesDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
-        return Ok(await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(UserId, userParams));
+        return Ok(await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(UserId, userParams, HttpContext.RequestAborted));
     }
 
     /// <summary>
