@@ -120,13 +120,13 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             userProgress?.MarkModified();
 
             await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
+                MessageFactory.UserProgressUpdateEvent(user.Id, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
 
             // Send out volume events for each distinct volume
             if (seenVolume.TryAdd(chapter.VolumeId, true))
             {
                 await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, seriesId,
                         chapter.VolumeId, 0, chapters.Where(c => c.VolumeId == chapter.VolumeId).Sum(c => c.Pages)));
             }
         }
@@ -155,13 +155,13 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             userProgress.MarkModified();
 
             await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
+                MessageFactory.UserProgressUpdateEvent(user.Id, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
 
             // Send out volume events for each distinct volume
             if (seenVolume.TryAdd(chapter.VolumeId, true))
             {
                 await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, seriesId,
                         chapter.VolumeId, 0, 0));
             }
         }
@@ -223,11 +223,11 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         try
         {
             var userProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
-
-            // Don't create an empty progress record if there isn't any progress. This prevents Last Read date from being updated when
-            // opening a chapter
+            // Don't create an empty progress record if there isn't any progress. This prevents Last Read date from being updated when opening a chapter
             if (userProgress == null && progressDto.PageNum == 0) return true;
+            if (userProgress?.PagesRead == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId) return true;
 
+            logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);
             if (userProgress == null)
             {
                 // Create a user object
@@ -257,29 +257,25 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
-            logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);
-            userProgress.MarkModified();
-
             if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync())
             {
-
                 if (saveToReadingSession)
                 {
-                    BackgroundJob.Enqueue(() => readingSessionService.UpdateProgress(userId, progressDto, clientInfoAccessor.Current, clientInfoAccessor.CurrentDeviceId));
+                    BackgroundJob.Enqueue(() => readingSessionService.UpdateProgress(userId, progressDto,
+                        clientInfoAccessor.Current, clientInfoAccessor.CurrentDeviceId));
                 }
 
-                var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
                 await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
+                    MessageFactory.UserProgressUpdateEvent(userId, progressDto.SeriesId,
                         progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
 
                 if (progressDto.PageNum >= totalPages)
                 {
                     // Inform Scrobble service that a chapter is read
-                    BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, progressDto.SeriesId));
+                    BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(userId, progressDto.SeriesId));
                 }
 
-                BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(progressDto.SeriesId, userId));
+                BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(progressDto.SeriesId, userId));
 
                 return true;
             }
@@ -629,7 +625,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
         if (series == null || chapter == null)
-            throw new KavitaException(await localizationService.Translate(userId, "generic-error"));
+            throw new KavitaException(await localizationService.TranslateAsync(userId, "generic-error"));
 
         if (series.Format == MangaFormat.Epub)
         {
@@ -656,7 +652,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
         if (series == null || chapter == null)
-            throw new KavitaException(await localizationService.Translate(userId, "generic-error"));
+            throw new KavitaException(await localizationService.TranslateAsync(userId, "generic-error"));
 
         if (page == chapter.PagesRead) return new HourEstimateRangeDto();
 

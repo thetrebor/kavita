@@ -147,9 +147,9 @@ public class ProcessSeries(
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it
             var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
-            if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
+            if (!series.LocalizedNameLocked)
             {
-                series.LocalizedName = localizedSeries;
+                series.LocalizedName = localizedSeries ?? string.Empty;
                 series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
             }
 
@@ -240,7 +240,7 @@ public class ProcessSeries(
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
-        var seriesCollisions = await unitOfWork.SeriesRepository.GetAllSeriesByAnyName(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format);
+        var seriesCollisions = await unitOfWork.SeriesRepository.GetAllSeriesByAnyNameAsync(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format);
 
         seriesCollisions = seriesCollisions.Where(collision =>
             collision.Name != firstInfo.Series || collision.LocalizedName != firstInfo.LocalizedSeries).ToList();
@@ -337,9 +337,9 @@ public class ProcessSeries(
 
         DeterminePublicationStatus(series, chapters);
 
-        if (!string.IsNullOrEmpty(firstChapter?.Summary) && !series.Metadata.SummaryLocked)
+        if (!series.Metadata.SummaryLocked)
         {
-            series.Metadata.Summary = firstChapter.Summary;
+            series.Metadata.Summary = firstChapter?.Summary ?? string.Empty;
         }
 
         if (!series.Metadata.LanguageLocked)
@@ -369,7 +369,7 @@ public class ProcessSeries(
 
         #region PeopleAndTagsAndGenres
 
-        foreach (var personRole in Enum.GetValues<PersonRole>().Where(r => r != PersonRole.Other))
+        foreach (var personRole in Enum.GetValues<PersonRole>())
         {
             if (series.Metadata.IsPersonRoleLocked(personRole)) continue;
 
@@ -854,57 +854,46 @@ public class ProcessSeries(
             chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
         }
 
-        if (!chapter.TitleNameLocked && !string.IsNullOrEmpty(comicInfo.Title))
+        if (!chapter.TitleNameLocked)
         {
             chapter.TitleName = comicInfo.Title.Trim();
         }
 
-        if (!chapter.SummaryLocked && !string.IsNullOrEmpty(comicInfo.Summary))
+        if (!chapter.SummaryLocked)
         {
             chapter.Summary = comicInfo.Summary;
         }
 
-        if (!chapter.LanguageLocked && !string.IsNullOrEmpty(comicInfo.LanguageISO))
+        if (!chapter.LanguageLocked)
         {
             chapter.Language = comicInfo.LanguageISO;
         }
 
-        if (!string.IsNullOrEmpty(comicInfo.SeriesGroup))
-        {
-            chapter.SeriesGroup = comicInfo.SeriesGroup;
-        }
+        chapter.SeriesGroup = comicInfo.SeriesGroup;
+        chapter.StoryArc = comicInfo.StoryArc;
+        chapter.AlternateSeries = comicInfo.AlternateSeries;
+        chapter.AlternateNumber = comicInfo.AlternateNumber;
+        chapter.StoryArcNumber = comicInfo.StoryArcNumber;
+        chapter.AlternateCount = comicInfo.AlternateCount;
 
-        if (!string.IsNullOrEmpty(comicInfo.StoryArc))
-        {
-            chapter.StoryArc = comicInfo.StoryArc;
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.AlternateSeries))
-        {
-            chapter.AlternateSeries = comicInfo.AlternateSeries;
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.AlternateNumber))
-        {
-            chapter.AlternateNumber = comicInfo.AlternateNumber;
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.StoryArcNumber))
-        {
-            chapter.StoryArcNumber = comicInfo.StoryArcNumber;
-        }
-
-        if (comicInfo.AlternateCount > 0)
-        {
-            chapter.AlternateCount = comicInfo.AlternateCount;
-        }
 
         if (!string.IsNullOrEmpty(comicInfo.Web))
         {
-            chapter.WebLinks = string.Join(",", comicInfo.Web.SplitBy(','));
+            if (comicInfo.Web.Contains(','))
+            {
+                chapter.WebLinks = string.Join(",", comicInfo.Web.SplitBy(','));
+            }
+            else
+            {
+                chapter.WebLinks = string.Join(",", comicInfo.Web.SplitBy(' '));
+            }
+        }
+        else
+        {
+            chapter.WebLinks = string.Empty;
         }
 
-        if (!chapter.ISBNLocked && !string.IsNullOrEmpty(comicInfo.Isbn))
+        if (!chapter.ISBNLocked)
         {
             chapter.ISBN = comicInfo.Isbn;
         }
@@ -916,7 +905,7 @@ public class ProcessSeries(
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
-        foreach (var personRole in Enum.GetValues<PersonRole>().Where(r => r != PersonRole.Other))
+        foreach (var personRole in Enum.GetValues<PersonRole>())
         {
             if (chapter.IsPersonRoleLocked(personRole)) continue;
 

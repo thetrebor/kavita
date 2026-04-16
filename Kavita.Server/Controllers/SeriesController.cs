@@ -46,7 +46,6 @@ public class SeriesController(
     private const string CacheKey = "externalSeriesData_";
     private const string MatchSeriesCacheKey = "matchSeries_";
 
-
     /// <summary>
     /// Gets series with the applied Filter
     /// </summary>
@@ -57,7 +56,8 @@ public class SeriesController(
     public async Task<ActionResult<PagedList<SeriesDto>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
     {
         var userId = UserId;
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
+        var ct = HttpContext.RequestAborted;
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, userParams, filterDto, ct: ct);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -74,7 +74,8 @@ public class SeriesController(
     [HttpGet("{seriesId:int}")]
     public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, UserId);
+        var ct = HttpContext.RequestAborted;
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, UserId, ct);
         if (series == null) return NoContent();
         return Ok(series);
     }
@@ -89,9 +90,10 @@ public class SeriesController(
     public async Task<ActionResult<bool>> DeleteSeries(int seriesId)
     {
         var username = Username!;
-        logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
+        var ct = HttpContext.RequestAborted;
+        logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username.Sanitize());
 
-        return Ok(await seriesService.DeleteMultipleSeries([seriesId]));
+        return Ok(await seriesService.DeleteMultipleSeries([seriesId], ct));
     }
 
     /// <summary>
@@ -104,11 +106,12 @@ public class SeriesController(
     public async Task<ActionResult> DeleteMultipleSeries(DeleteSeriesDto dto)
     {
         var username = Username!;
-        logger.LogInformation("Series {@SeriesId} is being deleted by {UserName}", dto.SeriesIds, username);
+        var ct = HttpContext.RequestAborted;
+        logger.LogInformation("Series {@SeriesId} is being deleted by {UserName}", dto.SeriesIds, username.Sanitize());
 
-        if (await seriesService.DeleteMultipleSeries(dto.SeriesIds)) return Ok(true);
+        if (await seriesService.DeleteMultipleSeries(dto.SeriesIds, ct)) return Ok(true);
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-series-delete"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-series-delete"));
     }
 
     /// <summary>
@@ -120,7 +123,8 @@ public class SeriesController(
     [HttpGet("volumes")]
     public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
     {
-        return Ok(await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, UserId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, UserId, ct: ct));
     }
 
     /// <summary>
@@ -132,7 +136,8 @@ public class SeriesController(
     [HttpGet("volume")]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
-        var vol = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId);
+        var ct = HttpContext.RequestAborted;
+        var vol = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId, ct);
         if (vol == null) return NoContent();
         return Ok(vol);
     }
@@ -146,7 +151,8 @@ public class SeriesController(
     [HttpGet("chapter")]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
-        var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
+        var ct = HttpContext.RequestAborted;
+        var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId, ct);
         if (chapter == null) return NoContent();
 
         return Ok(chapter);
@@ -161,9 +167,10 @@ public class SeriesController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<SeriesDto>> UpdateSeries(UpdateSeriesDto updateSeries)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
+        var ct = HttpContext.RequestAborted;
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id, ct: ct);
         if (series == null)
-            return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
         series.NormalizedName = series.Name.ToNormalized();
         if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
@@ -196,9 +203,9 @@ public class SeriesController(
 
         unitOfWork.SeriesRepository.Update(series);
 
-        if (!await unitOfWork.CommitAsync())
+        if (!await unitOfWork.CommitAsync(ct))
         {
-            return BadRequest(await localizationService.Translate(UserId, "generic-series-update"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "generic-series-update"));
         }
 
         if (needsRefreshMetadata)
@@ -206,7 +213,7 @@ public class SeriesController(
             await taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
         }
 
-        return Ok(await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(series.Id, UserId));
+        return Ok(await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(series.Id, UserId, ct));
     }
 
     /// <summary>
@@ -219,8 +226,9 @@ public class SeriesController(
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAddedV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams)
     {
         var userId = UserId;
+        var ct = HttpContext.RequestAborted;
         var series =
-            await unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, userParams, filterDto);
+            await unitOfWork.SeriesRepository.GetRecentlyAddedAsync(userId, userParams, filterDto, ct);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -237,7 +245,8 @@ public class SeriesController(
     public async Task<ActionResult<IList<GroupedSeriesDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
-        return Ok(await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(UserId, userParams, HttpContext.RequestAborted));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeriesAsync(UserId, userParams, ct));
     }
 
     /// <summary>
@@ -246,22 +255,22 @@ public class SeriesController(
     /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
     /// <param name="userId">Optional user id to request the OnDeck for someone else. They must have profile sharing enabled when doing so</param>
-    /// <param name="libraryId">This is not in use</param>
     /// <param name="context"></param>
     /// <returns></returns>
     [HttpPost("all-v2")]
     [ProfilePrivacy(allowMissingUserId: true)]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams,
-        [FromQuery] int? userId = null, [FromQuery] int libraryId = 0, [FromQuery] QueryContext context = QueryContext.None)
+        [FromQuery] int? userId = null, [FromQuery] QueryContext context = QueryContext.None)
     {
+        var ct = HttpContext.RequestAborted;
         var seriesForUser = userId ?? UserId;
 
-        foreach (var stmt in await seriesService.GetProfilePrivacyStatements(seriesForUser, UserId))
+        foreach (var stmt in await seriesService.GetProfilePrivacyStatements(seriesForUser, UserId, ct))
         {
             filterDto.Statements.Add(stmt);
         }
 
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(seriesForUser, userParams, filterDto, context);
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(seriesForUser, userParams, filterDto, context, ct);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -278,7 +287,8 @@ public class SeriesController(
     [HttpPost("on-deck")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var pagedList = await unitOfWork.SeriesRepository.GetOnDeck(UserId, libraryId, userParams, null);
+        var ct = HttpContext.RequestAborted;
+        var pagedList = await unitOfWork.SeriesRepository.GetOnDeckAsync(UserId, libraryId, userParams, ct);
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
@@ -294,7 +304,8 @@ public class SeriesController(
     [HttpPost("remove-from-on-deck")]
     public async Task<ActionResult> RemoveFromOnDeck([FromQuery] int seriesId)
     {
-        await unitOfWork.SeriesRepository.RemoveFromOnDeck(seriesId, UserId);
+        var ct = HttpContext.RequestAborted;
+        await unitOfWork.SeriesRepository.RemoveFromOnDeckAsync(seriesId, UserId, ct);
         return Ok();
     }
 
@@ -308,7 +319,8 @@ public class SeriesController(
     [HttpGet("currently-reading")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetCurrentlyReadingForUser([FromQuery] UserParams userParams, [FromQuery] int userId)
     {
-        var pagedList = await seriesService.GetCurrentlyReading(userId, UserId, userParams);
+        var ct = HttpContext.RequestAborted;
+        var pagedList = await seriesService.GetCurrentlyReading(userId, UserId, userParams, ct);
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
@@ -364,7 +376,8 @@ public class SeriesController(
     [HttpGet("metadata")]
     public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
     {
-        return Ok(await unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.SeriesRepository.GetSeriesMetadataAsync(seriesId, ct));
     }
 
     /// <summary>
@@ -376,10 +389,11 @@ public class SeriesController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
     {
-        if (!await seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
-            return BadRequest(await localizationService.Translate(UserId, "update-metadata-fail"));
+        var ct = HttpContext.RequestAborted;
+        if (!await seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto, ct))
+            return BadRequest(await localizationService.TranslateAsync(UserId, "update-metadata-fail"));
 
-        return Ok(await localizationService.Translate(UserId, "series-updated"));
+        return Ok(await localizationService.TranslateAsync(UserId, "series-updated"));
 
     }
 
@@ -392,9 +406,10 @@ public class SeriesController(
     [HttpGet("series-by-collection")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetSeriesByCollectionTag(int collectionId, [FromQuery] UserParams userParams)
     {
+        var ct = HttpContext.RequestAborted;
         var userId = UserId;
         var series =
-            await unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, userParams);
+            await unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, userParams, ct);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -409,8 +424,9 @@ public class SeriesController(
     [HttpPost("series-by-ids")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
     {
-        if (dto.SeriesIds == null) return BadRequest(await localizationService.Translate(UserId, "invalid-payload"));
-        return Ok(await unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, UserId));
+        var ct = HttpContext.RequestAborted;
+        if (dto.SeriesIds == null) return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-payload"));
+        return Ok(await unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, UserId, ct));
     }
 
     /// <summary>
@@ -422,9 +438,10 @@ public class SeriesController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["ageRating"])]
     public async Task<ActionResult<string>> GetAgeRating(int ageRating)
     {
+        var ct = HttpContext.RequestAborted;
         var val = (AgeRating) ageRating;
         if (val == AgeRating.NotApplicable)
-            return await localizationService.Translate(UserId, "age-restriction-not-applicable");
+            return await localizationService.TranslateAsync(UserId, "age-restriction-not-applicable");
 
         return Ok(val.ToDescription());
     }
@@ -439,13 +456,14 @@ public class SeriesController(
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            return await seriesService.GetSeriesDetail(seriesId, UserId);
+            return await seriesService.GetSeriesDetail(seriesId, UserId, ct);
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
     }
 
@@ -461,7 +479,8 @@ public class SeriesController(
     [HttpGet("related")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRelatedSeries(int seriesId, RelationKind relation)
     {
-        return Ok(await unitOfWork.SeriesRepository.GetSeriesForRelationKind(UserId, seriesId, relation));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.SeriesRepository.GetSeriesForRelationKindAsync(UserId, seriesId, relation, ct));
     }
 
     /// <summary>
@@ -473,7 +492,8 @@ public class SeriesController(
     [HttpGet("all-related")]
     public async Task<ActionResult<RelatedSeriesDto>> GetAllRelatedSeries(int seriesId)
     {
-        return Ok(await seriesService.GetRelatedSeries(UserId, seriesId));
+        var ct = HttpContext.RequestAborted;
+        return Ok(await seriesService.GetRelatedSeries(UserId, seriesId, ct));
     }
 
 
@@ -486,12 +506,13 @@ public class SeriesController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
     {
-        if (await seriesService.UpdateRelatedSeries(dto))
+        var ct = HttpContext.RequestAborted;
+        if (await seriesService.UpdateRelatedSeries(dto, ct))
         {
             return Ok();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-relationship"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-relationship"));
     }
 
     [KPlus]
@@ -499,8 +520,9 @@ public class SeriesController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? seriesId)
     {
+        var ct = HttpContext.RequestAborted;
         var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{seriesId ?? 0}";
-        var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey);
+        var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey, ct);
         if (results.HasValue)
         {
             return Ok(results.Value);
@@ -508,8 +530,8 @@ public class SeriesController(
 
         try
         {
-            var ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, seriesId);
-            await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15));
+            var ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, seriesId, ct);
+            await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15), ct);
             return Ok(ret);
         }
         catch (Exception)
@@ -529,8 +551,9 @@ public class SeriesController(
     public async Task<ActionResult<NextExpectedChapterDto>> GetNextExpectedChapter(int seriesId)
     {
         var userId = UserId;
+        var ct = HttpContext.RequestAborted;
 
-        return Ok(await seriesService.GetEstimatedChapterCreationDate(seriesId, userId));
+        return Ok(await seriesService.GetEstimatedChapterCreationDate(seriesId, userId, ct));
     }
 
     /// <summary>
@@ -543,15 +566,16 @@ public class SeriesController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}";
-        var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey);
+        var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey, ct);
         if (results.HasValue && !environment.IsDevelopment())
         {
             return Ok(results.Value);
         }
 
-        var ret = await externalMetadataService.MatchSeries(dto);
-        await _matchSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(1));
+        var ret = await externalMetadataService.MatchSeries(dto, ct);
+        await _matchSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(1), ct);
 
         return Ok(ret);
     }
@@ -586,7 +610,8 @@ public class SeriesController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateDontMatch([FromQuery] int seriesId, [FromQuery] bool dontMatch)
     {
-        await externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch);
+        var ct = HttpContext.RequestAborted;
+        await externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch, ct);
         return Ok();
     }
 
@@ -597,8 +622,8 @@ public class SeriesController(
     [HttpGet("series-with-annotations")]
     public async Task<ActionResult<IList<SeriesDto>>> GetSeriesWithAnnotations()
     {
-        var data = await unitOfWork.AnnotationRepository.GetSeriesWithAnnotations(UserId);
-        return Ok(data);
+        var ct = HttpContext.RequestAborted;
+        return Ok(await unitOfWork.AnnotationRepository.GetSeriesWithAnnotations(UserId, ct));
     }
 
 

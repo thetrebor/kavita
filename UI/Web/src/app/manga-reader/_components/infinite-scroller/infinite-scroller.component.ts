@@ -19,7 +19,7 @@ import {
   SimpleChanges
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, Subject, tap} from 'rxjs';
-import {debounceTime} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {ReaderService} from '../../../_services/reader.service';
 import {PAGING_DIRECTION} from '../../_models/reader-enums';
 import {WebtoonImage} from '../../_models/webtoon-image';
@@ -55,6 +55,8 @@ const MAX_FAILED_IMG_RETRIES = 3;
  * How long to wait for an image load/error event before treating it as a failure
  */
 const IMAGE_RETRY_TIMEOUT_MS = 10_000;
+/** Time to wait between progress events **/
+const PROGRESS_SAVE_TIMEOUT_MS = 200;
 /**
  * Bitwise enums for configuring how much debug information we want
  */
@@ -228,7 +230,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.pageChangeSubject.pipe(
-      debounceTime(300),
+      distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef),
       tap(page => this.pageNumberChange.emit(page)),
     ).subscribe();

@@ -440,7 +440,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake
         new Regex(
-            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+((Vol(ume)?|tome)\.?(\s|_)?)(?<Volume>\d+(\.\d+)?)(.+?|$)",
+            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+((Vol(ume)?|tome)\.?(\s|_)?)(?<Volume>\d+(\.\d+)?(\-\d+(\.\d+)?)?)(.+?|$)",
             MatchOptions, RegexTimeout),
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
         new Regex(
@@ -475,9 +475,9 @@ public static partial class Parser
         new Regex(
             @"(卷|册)(?<Volume>\d+)",
             MatchOptions, RegexTimeout),
-        // Korean Volume: 제n화|회|장 -> Volume n, n화|권|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
+        // Korean Volume: 제n회|장 -> Volume n, n권|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
         new Regex(
-            @"제?(?<Volume>\d+(\.\d+)?)(권|화|장)",
+            @"제?(?<Volume>\d+(\.\d+)?)(권|장)",
             MatchOptions, RegexTimeout),
         // Korean Season: 시즌n -> Season n,
         new Regex(

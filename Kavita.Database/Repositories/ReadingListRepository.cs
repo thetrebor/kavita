@@ -38,19 +38,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         context.Add(list);
     }
 
-    public async Task<int> Count(CancellationToken ct = default)
-    {
-        return await context.ReadingList.CountAsync(ct);
-    }
-
-    public async Task<string?> GetCoverImageAsync(int readingListId, CancellationToken ct = default)
-    {
-        return await context.ReadingList
-            .Where(c => c.Id == readingListId)
-            .Select(c => c.CoverImage)
-            .FirstOrDefaultAsync(ct);
-    }
-
     public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
     {
         return (await context.ReadingList
@@ -82,13 +69,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         return await context.ReadingList
             .WhereIf(readingListId != null, x => x.Id != readingListId)
             .AnyAsync(x => normalized.Equals(x.NormalizedTitle), ct);
-    }
-
-    public async Task<bool> ReadingListExistsForUser(string name, int userId, CancellationToken ct = default)
-    {
-        var normalized = name.ToNormalized();
-        return await context.ReadingList
-            .AnyAsync(x => normalized.Equals(x.NormalizedTitle) && x.AppUserId == userId, ct);
     }
 
     public IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role,
@@ -167,8 +147,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
                     break;
                 case PersonRole.Location:
                     cast.Locations = people;
-                    break;
-                case PersonRole.Other:
                     break;
             }
         }
@@ -277,7 +255,7 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
             .RestrictAgainstAgeRestriction(user.GetAgeRestriction());
 
-        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.Title);
+        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.Title.ToUpper());
 
        var finalQuery = query.ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
             .AsNoTracking();

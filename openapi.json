@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.38",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.8.9.42",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.38"
+    "version": "0.8.9.42"
   },
   "servers": [
     {
@@ -315,38 +315,49 @@
         }
       }
     },
-    "/api/Account/roles": {
-      "get": {
+    "/api/Account/update/username": {
+      "post": {
         "tags": [
           "Account"
         ],
-        "summary": "Get All Roles back. See Kavita.Models.Constants.PolicyConstants",
+        "summary": "Initiates the flow to update a user's username.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUsernameRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUsernameRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUsernameRequestDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/InviteUserResponse"
                 }
               }
             }
@@ -2758,6 +2769,16 @@
           {
             "name": "ownedOnly",
             "in": "query",
+            "description": "Exclude Promoted",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "sortByLastModified",
+            "in": "query",
+            "description": "Order by Last Modified rather than on Title",
             "schema": {
               "type": "boolean",
               "default": false
@@ -3334,1137 +3355,6 @@
             }
           }
         }
-      }
-    },
-    "/api/want-to-read": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Return all Series that are in the current logged-in user's Want to Read list, filtered (deprecated, use v2)",
-        "description": "This will be removed in v0.9.0",
-        "parameters": [
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      },
-      "get": {
-        "tags": [
-          "WantToRead"
-        ],
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/series/chapter-metadata": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "All chapter entities will load this data by default. Will not be maintained as of v0.8.1",
-        "parameters": [
-          {
-            "name": "chapterId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChapterMetadataDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChapterMetadataDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChapterMetadataDto"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/series": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Gets series with the applied Filter",
-        "description": "This is considered v1 and no longer used by Kavita, but will be supported for sometime. See series/v2",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/series/recently-added": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Gets all recently added series. Obsolete, use recently-added-v2",
-        "parameters": [
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/series/all": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Returns all series for the library. Obsolete, use all-v2",
-        "parameters": [
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/upload/reset-chapter-lock": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.",
-        "requestBody": {
-          "description": "Does not use Url property",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadCoverFileDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadCoverFileDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadCoverFileDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/stats/user/reading-history": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReadHistoryEvent"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReadHistoryEvent"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReadHistoryEvent"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/stats/server/top/years": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/stats/reading-count-by-day": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Returns reading history events for a give or all users, broken up by day, and format",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "description": "If 0, defaults to all users, else just userId",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "days",
-            "in": "query",
-            "description": "If 0, defaults to all time, else just those days asked for",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DateTimeStatCountWithFormat"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DateTimeStatCountWithFormat"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DateTimeStatCountWithFormat"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/server/count/year": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/stats/server/top/users": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Returns users with the top reads in the server",
-        "parameters": [
-          {
-            "name": "days",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TopReadDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TopReadDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TopReadDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/reader/all-chapter-progress": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Get all progress events for a given chapter",
-        "parameters": [
-          {
-            "name": "chapterId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullProgressDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullProgressDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullProgressDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/quick-reads": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/quick-catchup-reads": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Quick Catchup Reads are series that should be readable in less than 10 in total and are Ongoing in release.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/highly-rated": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Highly Rated based on other users ratings. Will pull series with ratings > 4.0, weighted by count of other users.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/more-in": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Chooses a random genre and shows series that are in that without reading progress",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "genreId",
-            "in": "query",
-            "description": "Genre Id",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/rediscover": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Series that are fully read by the user in no particular order",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/users/myself": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
       }
     },
     "/api/Device/create": {
@@ -7259,44 +6149,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "enum": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5
-                  ],
-                  "type": "integer",
-                  "format": "int32"
+                  "$ref": "#/components/schemas/LibraryType"
                 }
               },
               "application/json": {
                 "schema": {
-                  "enum": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5
-                  ],
-                  "type": "integer",
-                  "format": "int32"
+                  "$ref": "#/components/schemas/LibraryType"
                 }
               },
               "text/json": {
                 "schema": {
-                  "enum": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5
-                  ],
-                  "type": "integer",
-                  "format": "int32"
+                  "$ref": "#/components/schemas/LibraryType"
                 }
               }
             }
@@ -7658,15 +6521,7 @@
             "in": "query",
             "description": "Context from which this API was invoked",
             "schema": {
-              "enum": [
-                1,
-                2,
-                3,
-                4
-              ],
-              "type": "integer",
-              "format": "int32",
-              "default": 1
+              "$ref": "#/components/schemas/QueryContext"
             }
           }
         ],
@@ -7773,24 +6628,7 @@
             "in": "query",
             "description": "role",
             "schema": {
-              "enum": [
-                1,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/PersonRole"
             }
           }
         ],
@@ -8273,16 +7111,7 @@
             "in": "query",
             "description": "Library Type",
             "schema": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/LibraryType"
             }
           }
         ],
@@ -8747,49 +7576,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "pageNumber",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Opds/{apiKey}/more-in-genre": {
-      "get": {
-        "tags": [
-          "Opds"
-        ],
-        "summary": "Returns More In a Genre (Dashboard Feed) - Supports Pagination",
-        "parameters": [
-          {
-            "name": "apiKey",
-            "in": "path",
-            "description": "",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "genreId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
             }
           },
           {
@@ -9431,24 +8217,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "enum": [
-                      1,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                      8,
-                      9,
-                      10,
-                      11,
-                      12,
-                      13,
-                      14,
-                      15
-                    ],
-                    "type": "integer",
-                    "format": "int32"
+                    "$ref": "#/components/schemas/PersonRole"
                   }
                 }
               },
@@ -9456,24 +8225,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "enum": [
-                      1,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                      8,
-                      9,
-                      10,
-                      11,
-                      12,
-                      13,
-                      14,
-                      15
-                    ],
-                    "type": "integer",
-                    "format": "int32"
+                    "$ref": "#/components/schemas/PersonRole"
                   }
                 }
               },
@@ -9481,24 +8233,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "enum": [
-                      1,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                      8,
-                      9,
-                      10,
-                      11,
-                      12,
-                      13,
-                      14,
-                      15
-                    ],
-                    "type": "integer",
-                    "format": "int32"
+                    "$ref": "#/components/schemas/PersonRole"
                   }
                 }
               }
@@ -9746,24 +8481,7 @@
             "in": "query",
             "description": "",
             "schema": {
-              "enum": [
-                1,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/PersonRole"
             }
           }
         ],
@@ -10046,16 +8764,7 @@
             "in": "query",
             "description": "Determines the set of pattern matching to use",
             "schema": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/LibraryType"
             }
           }
         ],
@@ -12706,24 +11415,7 @@
             "in": "query",
             "description": "PersonRole",
             "schema": {
-              "enum": [
-                1,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/PersonRole"
             }
           }
         ],
@@ -14277,16 +12969,7 @@
             "in": "query",
             "description": "",
             "schema": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/ScrobbleProvider"
             }
           }
         ],
@@ -15409,29 +14092,11 @@
             }
           },
           {
-            "name": "libraryId",
-            "in": "query",
-            "description": "This is not in use",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
             "name": "context",
             "in": "query",
             "description": "",
             "schema": {
-              "enum": [
-                1,
-                2,
-                3,
-                4
-              ],
-              "type": "integer",
-              "format": "int32",
-              "default": 1
+              "$ref": "#/components/schemas/QueryContext"
             }
           }
         ],
@@ -16044,24 +14709,7 @@
             "in": "query",
             "description": "Type of Relationship to pull back",
             "schema": {
-              "enum": [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/RelationKind"
             }
           }
         ],
@@ -17469,41 +16117,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "enum": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4
-                  ],
-                  "type": "integer",
-                  "format": "int32"
+                  "$ref": "#/components/schemas/AuthorityValidationResult"
                 }
               },
               "application/json": {
                 "schema": {
-                  "enum": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4
-                  ],
-                  "type": "integer",
-                  "format": "int32"
+                  "$ref": "#/components/schemas/AuthorityValidationResult"
                 }
               },
               "text/json": {
                 "schema": {
-                  "enum": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4
-                  ],
-                  "type": "integer",
-                  "format": "int32"
+                  "$ref": "#/components/schemas/AuthorityValidationResult"
                 }
               }
             }
@@ -17854,25 +16478,9 @@
           {
             "name": "role",
             "in": "query",
+            "description": "Members:\n- `3` — Writer\n- `4` — Penciller\n- `5` — Inker\n- `6` — Colorist\n- `7` — Letterer\n- `8` — CoverArtist\n- `9` — Editor\n- `10` — Publisher\n- `11` — Character\n- `12` — Translator\n- `13` — Imprint\n- `14` — Team\n- `15` — Location",
             "schema": {
-              "enum": [
-                1,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/PersonRole"
             }
           }
         ],
@@ -21427,6 +20035,45 @@
         }
       }
     },
+    "/api/want-to-read": {
+      "get": {
+        "tags": [
+          "WantToRead"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/want-to-read/add-series": {
       "post": {
         "tags": [
@@ -21518,6 +20165,65 @@
         },
         "additionalProperties": false
       },
+      "AgeRating": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          -1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Rating Pending (RatingPending)\n- `2` — Early Childhood (EarlyChildhood)\n- `3` — Everyone\n- `4` — G\n- `5` — Everyone 10+ (Everyone10Plus)\n- `6` — PG\n- `7` — Kids to Adults (KidsToAdults)\n- `8` — Teen\n- `9` — MA15+ (Mature15Plus)\n- `10` — Mature 17+ (Mature17Plus)\n- `11` — M (Mature)\n- `12` — R18+ (R18Plus)\n- `13` — Adults Only 18+ (AdultsOnly)\n- `14` — X18+ (X18Plus)\n- `-1` — Not Applicable (NotApplicable)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Unknown",
+          "RatingPending",
+          "EarlyChildhood",
+          "Everyone",
+          "G",
+          "Everyone10Plus",
+          "PG",
+          "KidsToAdults",
+          "Teen",
+          "Mature15Plus",
+          "Mature17Plus",
+          "Mature",
+          "R18Plus",
+          "AdultsOnly",
+          "X18Plus",
+          "NotApplicable"
+        ],
+        "x-enum-descriptions": [
+          "Unknown",
+          "Rating Pending",
+          "Early Childhood",
+          "Everyone",
+          "G",
+          "Everyone 10+",
+          "PG",
+          "Kids to Adults",
+          "Teen",
+          "MA15+",
+          "Mature 17+",
+          "M",
+          "R18+",
+          "Adults Only 18+",
+          "X18+",
+          "Not Applicable"
+        ]
+      },
       "AgeRatingDto": {
         "required": [
           "title"
@@ -21525,26 +20231,7 @@
         "type": "object",
         "properties": {
           "value": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "title": {
             "type": "string",
@@ -21561,26 +20248,7 @@
         "type": "object",
         "properties": {
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "includeUnknowns": {
             "type": "boolean"
@@ -21701,26 +20369,7 @@
             "nullable": true
           },
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "createdUtc": {
             "type": "string",
@@ -21733,46 +20382,52 @@
         },
         "additionalProperties": false
       },
+      "AnnotationFilterField": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Owner\n- `2` — Library\n- `3` — Spoiler\n- `4` — HighlightSlot\n- `5` — Selection\n- `6` — Comment\n- `7` — Series\n- `8` — Likes\n- `9` — LikedBy",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Owner",
+          "Library",
+          "Spoiler",
+          "HighlightSlot",
+          "Selection",
+          "Comment",
+          "Series",
+          "Likes",
+          "LikedBy"
+        ],
+        "x-enum-descriptions": [
+          "Owner",
+          "Library",
+          "Spoiler",
+          "HighlightSlot",
+          "Selection",
+          "Comment",
+          "Series",
+          "Likes",
+          "LikedBy"
+        ]
+      },
       "AnnotationFilterStatementDto": {
         "type": "object",
         "properties": {
           "comparison": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              15,
-              16
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FilterComparison"
           },
           "field": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AnnotationFilterField"
           },
           "value": {
             "type": "string",
@@ -21781,18 +20436,34 @@
         },
         "additionalProperties": false
       },
+      "AnnotationSortField": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Owner\n- `2` — Created\n- `3` — LastModified\n- `4` — Color",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Owner",
+          "Created",
+          "LastModified",
+          "Color"
+        ],
+        "x-enum-descriptions": [
+          "Owner",
+          "Created",
+          "LastModified",
+          "Color"
+        ]
+      },
       "AnnotationSortOptionDto": {
         "type": "object",
         "properties": {
           "sortField": {
-            "enum": [
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AnnotationSortField"
           },
           "isAscending": {
             "type": "boolean"
@@ -21819,26 +20490,7 @@
             "type": "boolean"
           },
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "coverImage": {
             "type": "string",
@@ -21868,16 +20520,7 @@
             "format": "date-time"
           },
           "source": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScrobbleProvider"
           },
           "sourceUrl": {
             "type": "string",
@@ -21927,26 +20570,7 @@
             "nullable": true
           },
           "socialMaxAgeRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "socialIncludeUnknowns": {
             "type": "boolean"
@@ -21991,12 +20615,7 @@
             "nullable": true
           },
           "provider": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AuthKeyProvider"
           }
         },
         "additionalProperties": false
@@ -22014,6 +20633,46 @@
           }
         },
         "additionalProperties": false
+      },
+      "AuthKeyProvider": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — User\n- `1` — System",
+        "format": "int32",
+        "x-enum-varnames": [
+          "User",
+          "System"
+        ],
+        "x-enum-descriptions": [
+          "User",
+          "System"
+        ]
+      },
+      "AuthenticationType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Unknown\n- `1` — JWT\n- `2` — AuthKey\n- `3` — OIDC",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Unknown",
+          "JWT",
+          "AuthKey",
+          "OIDC"
+        ],
+        "x-enum-descriptions": [
+          "Unknown",
+          "JWT",
+          "AuthKey",
+          "OIDC"
+        ]
       },
       "AuthorChapterDto": {
         "type": "object",
@@ -22046,6 +20705,32 @@
           }
         },
         "additionalProperties": false
+      },
+      "AuthorityValidationResult": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Success\n- `1` — InvalidAuthority\n- `2` — Failure\n- `3` — NotApplicable\n- `4` — MissingHttps",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Success",
+          "InvalidAuthority",
+          "Failure",
+          "NotApplicable",
+          "MissingHttps"
+        ],
+        "x-enum-descriptions": [
+          "Success",
+          "InvalidAuthority",
+          "Failure",
+          "NotApplicable",
+          "MissingHttps"
+        ]
       },
       "BookChapterItem": {
         "type": "object",
@@ -22088,15 +20773,7 @@
             "format": "int32"
           },
           "seriesFormat": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "seriesName": {
             "type": "string",
@@ -22127,6 +20804,26 @@
           }
         },
         "additionalProperties": false
+      },
+      "BookPageLayoutMode": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Default\n- `1` — 1 Column (Column1)\n- `2` — 2 Column (Column2)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Default",
+          "Column1",
+          "Column2"
+        ],
+        "x-enum-descriptions": [
+          "Default",
+          "1 Column",
+          "2 Column"
+        ]
       },
       "BookmarkDto": {
         "required": [
@@ -22183,15 +20880,7 @@
             "nullable": true
           },
           "seriesFormat": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "seriesId": {
             "type": "integer",
@@ -22202,16 +20891,7 @@
             "format": "int32"
           },
           "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "pages": {
             "type": "integer",
@@ -22265,6 +20945,29 @@
         },
         "additionalProperties": false
       },
+      "BreakPoint": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Never\n- `1` — Mobile\n- `2` — Tablet\n- `3` — Desktop",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Never",
+          "Mobile",
+          "Tablet",
+          "Desktop"
+        ],
+        "x-enum-descriptions": [
+          "Never",
+          "Mobile",
+          "Tablet",
+          "Desktop"
+        ]
+      },
       "BrowseAnnotationFilterDto": {
         "type": "object",
         "properties": {
@@ -22284,12 +20987,7 @@
             "nullable": true
           },
           "combination": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FilterCombination"
           },
           "sortOptions": {
             "$ref": "#/components/schemas/AnnotationSortOptionDto"
@@ -22392,24 +21090,7 @@
           "roles": {
             "type": "array",
             "items": {
-              "enum": [
-                1,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/PersonRole"
             },
             "nullable": true
           },
@@ -22443,12 +21124,7 @@
             "nullable": true
           },
           "combination": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FilterCombination"
           },
           "sortOptions": {
             "$ref": "#/components/schemas/PersonSortOptionDto"
@@ -22479,12 +21155,7 @@
             "nullable": true
           },
           "combination": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FilterCombination"
           },
           "sortOptions": {
             "$ref": "#/components/schemas/ReadingListSortOptionDto"
@@ -22684,36 +21355,10 @@
             "nullable": true
           },
           "reason": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/CblImportReason"
           },
           "matchTier": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
+            "$ref": "#/components/schemas/CblMatchTier"
           },
           "chapterId": {
             "type": "integer",
@@ -22728,16 +21373,7 @@
             "nullable": true
           },
           "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "chapterNumber": {
             "type": "string",
@@ -22764,13 +21400,7 @@
             "$ref": "#/components/schemas/CblImportDecisions"
           },
           "provider": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReadingListProvider"
           },
           "repoPath": {
             "type": "string",
@@ -22803,6 +21433,67 @@
         },
         "additionalProperties": false
       },
+      "CblImportReason": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Chapter missing (ChapterMissing)\n- `1` — Volume missing (VolumeMissing)\n- `2` — Series missing (SeriesMissing)\n- `3` — Name Conflict (NameConflict)\n- `4` — All Series Missing (AllSeriesMissing)\n- `5` — Empty File (EmptyFile)\n- `6` — Series Collision (SeriesCollision)\n- `7` — All Chapters Missing (AllChapterMissing)\n- `8` — Success\n- `9` — Invalid File (InvalidFile)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "ChapterMissing",
+          "VolumeMissing",
+          "SeriesMissing",
+          "NameConflict",
+          "AllSeriesMissing",
+          "EmptyFile",
+          "SeriesCollision",
+          "AllChapterMissing",
+          "Success",
+          "InvalidFile"
+        ],
+        "x-enum-descriptions": [
+          "Chapter missing",
+          "Volume missing",
+          "Series missing",
+          "Name Conflict",
+          "All Series Missing",
+          "Empty File",
+          "Series Collision",
+          "All Chapters Missing",
+          "Success",
+          "Invalid File"
+        ]
+      },
+      "CblImportResult": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Fail\n- `1` — Partial\n- `2` — Success",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Fail",
+          "Partial",
+          "Success"
+        ],
+        "x-enum-descriptions": [
+          "Fail",
+          "Partial",
+          "Success"
+        ]
+      },
       "CblImportSummaryDto": {
         "type": "object",
         "properties": {
@@ -22822,13 +21513,7 @@
             "nullable": true
           },
           "success": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/CblImportResult"
           },
           "successfulInserts": {
             "type": "array",
@@ -22861,6 +21546,44 @@
         },
         "additionalProperties": false
       },
+      "CblMatchTier": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          -1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — RemapRule\n- `1` — ExternalId\n- `2` — ExactName\n- `3` — ComicVineNaming\n- `4` — ArticleStripped\n- `5` — ReprintStripped\n- `6` — AlternateSeries\n- `7` — UserDecision\n- `-1` — Unmatched",
+        "format": "int32",
+        "x-enum-varnames": [
+          "RemapRule",
+          "ExternalId",
+          "ExactName",
+          "ComicVineNaming",
+          "ArticleStripped",
+          "ReprintStripped",
+          "AlternateSeries",
+          "UserDecision",
+          "Unmatched"
+        ],
+        "x-enum-descriptions": [
+          "RemapRule",
+          "ExternalId",
+          "ExactName",
+          "ComicVineNaming",
+          "ArticleStripped",
+          "ReprintStripped",
+          "AlternateSeries",
+          "UserDecision",
+          "Unmatched"
+        ]
+      },
       "CblReValidateRequestDto": {
         "type": "object",
         "properties": {
@@ -22870,6 +21593,26 @@
           }
         },
         "additionalProperties": false
+      },
+      "CblRemapRuleKind": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Series\n- `1` — Volume\n- `2` — Chapter",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Series",
+          "Volume",
+          "Chapter"
+        ],
+        "x-enum-descriptions": [
+          "Series",
+          "Volume",
+          "Chapter"
+        ]
       },
       "CblRepoBrowseResultDto": {
         "type": "object",
@@ -22953,13 +21696,7 @@
             "nullable": true
           },
           "provider": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReadingListProvider"
           },
           "repoPath": {
             "type": "string",
@@ -23115,26 +21852,7 @@
             "nullable": true
           },
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "wordCount": {
             "type": "integer",
@@ -23270,15 +21988,7 @@
             "nullable": true
           },
           "publicationStatus": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PublicationStatus"
           },
           "language": {
             "type": "string",
@@ -23371,17 +22081,7 @@
             "nullable": true
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "readOnly": true
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "aniListId": {
             "type": "integer",
@@ -23430,15 +22130,7 @@
             "nullable": true
           },
           "seriesFormat": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "seriesId": {
             "type": "integer",
@@ -23449,16 +22141,7 @@
             "format": "int32"
           },
           "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "chapterTitle": {
             "type": "string",
@@ -23509,185 +22192,25 @@
         },
         "additionalProperties": false
       },
-      "ChapterMetadataDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "chapterId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "writers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "coverArtists": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "publishers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "characters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "pencillers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "inkers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "imprints": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "colorists": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "letterers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "editors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "translators": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "teams": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "locations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "genres": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GenreTagDto"
-            },
-            "nullable": true
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TagDto"
-            },
-            "nullable": true
-          },
-          "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "releaseDate": {
-            "type": "string",
-            "nullable": true
-          },
-          "publicationStatus": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "summary": {
-            "type": "string",
-            "nullable": true
-          },
-          "language": {
-            "type": "string",
-            "nullable": true
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "wordCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
+      "CharacterRole": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Main\n- `1` — Supporting\n- `2` — Background",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Main",
+          "Supporting",
+          "Background"
+        ],
+        "x-enum-descriptions": [
+          "Main",
+          "Supporting",
+          "Background"
+        ]
       },
       "CheckForFilesInFolderRootsDto": {
         "type": "object",
@@ -23739,21 +22262,72 @@
         },
         "additionalProperties": false
       },
+      "ClientDevicePlatform": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Windows\n- `2` — macOS (MacOs)\n- `3` — IOs (Ios)\n- `4` — Linux\n- `5` — Android",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Unknown",
+          "Windows",
+          "MacOs",
+          "Ios",
+          "Linux",
+          "Android"
+        ],
+        "x-enum-descriptions": [
+          "Unknown",
+          "Windows",
+          "macOS",
+          "IOs",
+          "Linux",
+          "Android"
+        ]
+      },
+      "ClientDeviceType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Web Browser (WebBrowser)\n- `2` — Web App (WebApp)\n- `3` — KOReader (KoReader)\n- `4` — Panels\n- `5` — Librera\n- `6` — OPDS Client (OpdsClient)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Unknown",
+          "WebBrowser",
+          "WebApp",
+          "KoReader",
+          "Panels",
+          "Librera",
+          "OpdsClient"
+        ],
+        "x-enum-descriptions": [
+          "Unknown",
+          "Web Browser",
+          "Web App",
+          "KOReader",
+          "Panels",
+          "Librera",
+          "OPDS Client"
+        ]
+      },
       "ClientDeviceTypeStatCount": {
         "type": "object",
         "properties": {
           "value": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ClientDeviceType"
           },
           "count": {
             "type": "integer",
@@ -23774,27 +22348,10 @@
             "nullable": true
           },
           "authType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AuthenticationType"
           },
           "clientType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ClientDeviceType"
           },
           "appVersion": {
             "type": "string",
@@ -23809,16 +22366,7 @@
             "nullable": true
           },
           "platform": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ClientDevicePlatform"
           },
           "deviceType": {
             "type": "string",
@@ -23962,6 +22510,26 @@
         },
         "additionalProperties": false
       },
+      "ConflictResolution": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Manual\n- `1` — Keep\n- `2` — Replace",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Manual",
+          "Keep",
+          "Replace"
+        ],
+        "x-enum-descriptions": [
+          "Manual",
+          "Keep",
+          "Replace"
+        ]
+      },
       "CopySettingsFromLibraryDto": {
         "type": "object",
         "properties": {
@@ -23983,6 +22551,29 @@
         },
         "additionalProperties": false
       },
+      "CoverImageSize": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Default\n- `2` — Medium\n- `3` — Large\n- `4` — XLarge",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Default",
+          "Medium",
+          "Large",
+          "XLarge"
+        ],
+        "x-enum-descriptions": [
+          "Default",
+          "Medium",
+          "Large",
+          "XLarge"
+        ]
+      },
       "CreateEmailDeviceDto": {
         "required": [
           "emailAddress",
@@ -23996,14 +22587,7 @@
             "type": "string"
           },
           "platform": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/EmailDevicePlatform"
           },
           "emailAddress": {
             "minLength": 1,
@@ -24131,21 +22715,36 @@
             "nullable": true
           },
           "streamType": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/DashboardStreamType"
           },
           "visible": {
             "type": "boolean"
           }
         },
         "additionalProperties": false
+      },
+      "DashboardStreamType": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — OnDeck\n- `2` — RecentlyUpdated\n- `3` — NewlyAdded\n- `4` — SmartFilter",
+        "format": "int32",
+        "x-enum-varnames": [
+          "OnDeck",
+          "RecentlyUpdated",
+          "NewlyAdded",
+          "SmartFilter"
+        ],
+        "x-enum-descriptions": [
+          "OnDeck",
+          "RecentlyUpdated",
+          "NewlyAdded",
+          "SmartFilter"
+        ]
       },
       "DateTimeStatCountWithFormat": {
         "type": "object",
@@ -24159,34 +22758,48 @@
             "format": "int64"
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           }
         },
         "additionalProperties": false
+      },
+      "DayOfWeek": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Sunday\n- `1` — Monday\n- `2` — Tuesday\n- `3` — Wednesday\n- `4` — Thursday\n- `5` — Friday\n- `6` — Saturday",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "x-enum-descriptions": [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ]
       },
       "DayOfWeekStatCount": {
         "type": "object",
         "properties": {
           "value": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/DayOfWeek"
           },
           "count": {
             "type": "integer",
@@ -24378,17 +22991,33 @@
             "nullable": true
           },
           "platform": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/EmailDevicePlatform"
           }
         },
         "additionalProperties": false
+      },
+      "EmailDevicePlatform": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Custom\n- `1` — PocketBook\n- `2` — Kindle\n- `3` — Kobo",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Custom",
+          "PocketBook",
+          "Kindle",
+          "Kobo"
+        ],
+        "x-enum-descriptions": [
+          "Custom",
+          "PocketBook",
+          "Kindle",
+          "Kobo"
+        ]
       },
       "EmailHistoryDto": {
         "type": "object",
@@ -24436,6 +23065,26 @@
         },
         "additionalProperties": false
       },
+      "EncodeFormat": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — PNG\n- `1` — WebP (WEBP)\n- `2` — AVIF",
+        "format": "int32",
+        "x-enum-varnames": [
+          "PNG",
+          "WEBP",
+          "AVIF"
+        ],
+        "x-enum-descriptions": [
+          "PNG",
+          "WebP",
+          "AVIF"
+        ]
+      },
       "EpubFontDto": {
         "type": "object",
         "properties": {
@@ -24448,12 +23097,7 @@
             "nullable": true
           },
           "provider": {
-            "enum": [
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FontProvider"
           },
           "fileName": {
             "type": "string",
@@ -24565,15 +23209,7 @@
             "nullable": true
           },
           "plusMediaFormat": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PlusMediaFormat"
           },
           "siteUrl": {
             "type": "string",
@@ -24609,16 +23245,7 @@
             "nullable": true
           },
           "provider": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScrobbleProvider"
           },
           "startDate": {
             "type": "string",
@@ -24705,16 +23332,7 @@
             "nullable": true
           },
           "provider": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScrobbleProvider"
           }
         },
         "additionalProperties": false
@@ -24780,26 +23398,7 @@
           "ageRatingMappings": {
             "type": "object",
             "additionalProperties": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                -1
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/AgeRating"
             },
             "nullable": true
           },
@@ -24882,15 +23481,7 @@
             "nullable": true
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "totalSize": {
             "type": "integer",
@@ -24903,269 +23494,116 @@
         },
         "additionalProperties": false
       },
-      "FilterDto": {
-        "type": "object",
-        "properties": {
-          "formats": {
-            "type": "array",
-            "items": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-              ],
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "readStatus": {
-            "$ref": "#/components/schemas/ReadStatus"
-          },
-          "libraries": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "genres": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "writers": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "penciller": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "inker": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "colorist": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "letterer": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "coverArtist": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "editor": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "publisher": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "character": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "translators": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "rating": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sortOptions": {
-            "$ref": "#/components/schemas/SeriesSortOptionDto"
-          },
-          "ageRating": {
-            "type": "array",
-            "items": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                -1
-              ],
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "languages": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "publicationStatus": {
-            "type": "array",
-            "items": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-              ],
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "seriesNameQuery": {
-            "type": "string",
-            "nullable": true
-          },
-          "releaseYearRange": {
-            "$ref": "#/components/schemas/Int32Range"
-          }
-        },
-        "additionalProperties": false
+      "FileTypeGroup": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Archive\n- `2` — EPub (Epub)\n- `3` — Pdf\n- `4` — Images",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Archive",
+          "Epub",
+          "Pdf",
+          "Images"
+        ],
+        "x-enum-descriptions": [
+          "Archive",
+          "EPub",
+          "Pdf",
+          "Images"
+        ]
+      },
+      "FilterCombination": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Or\n- `1` — And",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Or",
+          "And"
+        ],
+        "x-enum-descriptions": [
+          "Or",
+          "And"
+        ]
+      },
+      "FilterComparison": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Equal\n- `1` — GreaterThan\n- `2` — GreaterThanEqual\n- `3` — LessThan\n- `4` — LessThanEqual\n- `5` — Contains\n- `6` — MustContains\n- `7` — Matches\n- `8` — NotContains\n- `9` — NotEqual\n- `10` — BeginsWith\n- `11` — EndsWith\n- `12` — IsBefore\n- `13` — IsAfter\n- `14` — IsInLast\n- `15` — IsNotInLast\n- `16` — IsEmpty",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Equal",
+          "GreaterThan",
+          "GreaterThanEqual",
+          "LessThan",
+          "LessThanEqual",
+          "Contains",
+          "MustContains",
+          "Matches",
+          "NotContains",
+          "NotEqual",
+          "BeginsWith",
+          "EndsWith",
+          "IsBefore",
+          "IsAfter",
+          "IsInLast",
+          "IsNotInLast",
+          "IsEmpty"
+        ],
+        "x-enum-descriptions": [
+          "Equal",
+          "GreaterThan",
+          "GreaterThanEqual",
+          "LessThan",
+          "LessThanEqual",
+          "Contains",
+          "MustContains",
+          "Matches",
+          "NotContains",
+          "NotEqual",
+          "BeginsWith",
+          "EndsWith",
+          "IsBefore",
+          "IsAfter",
+          "IsInLast",
+          "IsNotInLast",
+          "IsEmpty"
+        ]
       },
       "FilterStatementDto": {
         "type": "object",
         "properties": {
           "comparison": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              15,
-              16
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FilterComparison"
           },
           "field": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              15,
-              16,
-              17,
-              18,
-              19,
-              20,
-              21,
-              22,
-              23,
-              24,
-              25,
-              26,
-              27,
-              28,
-              29,
-              30,
-              31,
-              32,
-              33
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/SeriesFilterField"
           },
           "value": {
             "type": "string",
@@ -25193,12 +23631,7 @@
             "nullable": true
           },
           "combination": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FilterCombination"
           },
           "sortOptions": {
             "$ref": "#/components/schemas/SeriesSortOptionDto"
@@ -25210,47 +23643,22 @@
         },
         "additionalProperties": false
       },
-      "FullProgressDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "chapterId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pagesRead": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModifiedUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "appUserId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "userName": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
+      "FontProvider": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — System\n- `2` — User",
+        "format": "int32",
+        "x-enum-varnames": [
+          "System",
+          "User"
+        ],
+        "x-enum-descriptions": [
+          "System",
+          "User"
+        ]
       },
       "GenreTagDto": {
         "required": [
@@ -25327,16 +23735,7 @@
             "format": "int32"
           },
           "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "created": {
             "type": "string",
@@ -25355,15 +23754,7 @@
             "format": "int32"
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "count": {
             "type": "integer",
@@ -25415,6 +23806,23 @@
         },
         "additionalProperties": false
       },
+      "IdentityProvider": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Kavita\n- `1` — OpenID Connect (OpenIdConnect)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Kavita",
+          "OpenIdConnect"
+        ],
+        "x-enum-descriptions": [
+          "Kavita",
+          "OpenID Connect"
+        ]
+      },
       "ImportFieldMappingsDto": {
         "type": "object",
         "properties": {
@@ -25427,25 +23835,31 @@
         },
         "additionalProperties": false
       },
+      "ImportMode": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Replace\n- `1` — Merge",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Replace",
+          "Merge"
+        ],
+        "x-enum-descriptions": [
+          "Replace",
+          "Merge"
+        ]
+      },
       "ImportSettingsDto": {
         "type": "object",
         "properties": {
           "importMode": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ImportMode"
           },
           "resolution": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ConflictResolution"
           },
           "whitelist": {
             "type": "boolean"
@@ -25462,29 +23876,9 @@
           "ageRatingConflictResolutions": {
             "type": "object",
             "additionalProperties": {
-              "enum": [
-                0,
-                1,
-                2
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/ConflictResolution"
             },
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "Int32Range": {
-        "type": "object",
-        "properties": {
-          "min": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "max": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -25622,6 +24016,9 @@
         "additionalProperties": false
       },
       "KeyBind": {
+        "required": [
+          "key"
+        ],
         "type": "object",
         "properties": {
           "key": {
@@ -25712,6 +24109,26 @@
         },
         "additionalProperties": false
       },
+      "LayoutMode": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Single\n- `2` — Double\n- `3` — Double (manga) (DoubleReversed)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Single",
+          "Double",
+          "DoubleReversed"
+        ],
+        "x-enum-descriptions": [
+          "Single",
+          "Double",
+          "Double (manga)"
+        ]
+      },
       "LibraryDto": {
         "type": "object",
         "properties": {
@@ -25724,16 +24141,7 @@
             "nullable": true
           },
           "type": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "lastScanned": {
             "type": "string",
@@ -25777,14 +24185,7 @@
           "libraryFileTypes": {
             "type": "array",
             "items": {
-              "enum": [
-                1,
-                2,
-                3,
-                4
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/FileTypeGroup"
             },
             "nullable": true
           },
@@ -25826,6 +24227,35 @@
           }
         },
         "additionalProperties": false
+      },
+      "LibraryType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Manga\n- `1` — Comic (Flexible) (Comic)\n- `2` — Book\n- `3` — Image\n- `4` — Light Novel (LightNovel)\n- `5` — Comic (ComicVine)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Manga",
+          "Comic",
+          "Book",
+          "Image",
+          "LightNovel",
+          "ComicVine"
+        ],
+        "x-enum-descriptions": [
+          "Manga",
+          "Comic (Flexible)",
+          "Book",
+          "Image",
+          "Light Novel",
+          "Comic"
+        ]
       },
       "LicenseInfoDto": {
         "type": "object",
@@ -25943,15 +24373,7 @@
         "type": "object",
         "properties": {
           "matchStateOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MatchStateOption"
           },
           "libraryType": {
             "type": "integer",
@@ -26000,15 +24422,7 @@
             "format": "int64"
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "created": {
             "type": "string",
@@ -26025,19 +24439,37 @@
         },
         "additionalProperties": false
       },
+      "MangaFormat": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Image\n- `1` — Archive\n- `2` — Unknown\n- `3` — EPUB (Epub)\n- `4` — PDF (Pdf)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Image",
+          "Archive",
+          "Unknown",
+          "Epub",
+          "Pdf"
+        ],
+        "x-enum-descriptions": [
+          "Image",
+          "Archive",
+          "Unknown",
+          "EPUB",
+          "PDF"
+        ]
+      },
       "MangaFormatStatCount": {
         "type": "object",
         "properties": {
           "value": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "count": {
             "type": "integer",
@@ -26156,6 +24588,32 @@
         },
         "additionalProperties": false
       },
+      "MatchStateOption": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — All\n- `1` — Matched\n- `2` — NotMatched\n- `3` — Error\n- `4` — DontMatch",
+        "format": "int32",
+        "x-enum-varnames": [
+          "All",
+          "Matched",
+          "NotMatched",
+          "Error",
+          "DontMatch"
+        ],
+        "x-enum-descriptions": [
+          "All",
+          "Matched",
+          "NotMatched",
+          "Error",
+          "DontMatch"
+        ]
+      },
       "MediaErrorDto": {
         "required": [
           "extension",
@@ -26238,12 +24696,7 @@
             "nullable": true
           },
           "identityProvider": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/IdentityProvider"
           }
         },
         "additionalProperties": false
@@ -26282,20 +24735,10 @@
             "format": "int32"
           },
           "sourceType": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MetadataFieldType"
           },
           "destinationType": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MetadataFieldType"
           },
           "sourceValue": {
             "type": "string",
@@ -26310,6 +24753,76 @@
           }
         },
         "additionalProperties": false
+      },
+      "MetadataFieldType": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Genre\n- `1` — Tag",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Genre",
+          "Tag"
+        ],
+        "x-enum-descriptions": [
+          "Genre",
+          "Tag"
+        ]
+      },
+      "MetadataSettingField": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Summary\n- `2` — PublicationStatus\n- `3` — StartDate\n- `4` — Genres\n- `5` — Tags\n- `6` — LocalizedName\n- `7` — Covers\n- `8` — AgeRating\n- `9` — People\n- `10` — ChapterTitle\n- `11` — ChapterSummary\n- `12` — ChapterReleaseDate\n- `13` — ChapterPublisher\n- `14` — ChapterCovers",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Summary",
+          "PublicationStatus",
+          "StartDate",
+          "Genres",
+          "Tags",
+          "LocalizedName",
+          "Covers",
+          "AgeRating",
+          "People",
+          "ChapterTitle",
+          "ChapterSummary",
+          "ChapterReleaseDate",
+          "ChapterPublisher",
+          "ChapterCovers"
+        ],
+        "x-enum-descriptions": [
+          "Summary",
+          "PublicationStatus",
+          "StartDate",
+          "Genres",
+          "Tags",
+          "LocalizedName",
+          "Covers",
+          "AgeRating",
+          "People",
+          "ChapterTitle",
+          "ChapterSummary",
+          "ChapterReleaseDate",
+          "ChapterPublisher",
+          "ChapterCovers"
+        ]
       },
       "MetadataSettingsDto": {
         "type": "object",
@@ -26331,26 +24844,7 @@
           "ageRatingMappings": {
             "type": "object",
             "additionalProperties": {
-              "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                -1
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/AgeRating"
             },
             "nullable": true
           },
@@ -26415,48 +24909,14 @@
           "overrides": {
             "type": "array",
             "items": {
-              "enum": [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/MetadataSettingField"
             },
             "nullable": true
           },
           "personRoles": {
             "type": "array",
             "items": {
-              "enum": [
-                1,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/PersonRole"
             },
             "nullable": true
           }
@@ -26609,26 +25069,7 @@
             "nullable": true
           },
           "defaultAgeRestriction": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "defaultIncludeUnknowns": {
             "type": "boolean"
@@ -26659,6 +25100,46 @@
         },
         "additionalProperties": false
       },
+      "PageLayoutMode": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Cards\n- `1` — List",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Cards",
+          "List"
+        ],
+        "x-enum-descriptions": [
+          "Cards",
+          "List"
+        ]
+      },
+      "PageSplitOption": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — SplitLeftToRight\n- `1` — SplitRightToLeft\n- `2` — NoSplit\n- `3` — FitSplit",
+        "format": "int32",
+        "x-enum-varnames": [
+          "SplitLeftToRight",
+          "SplitRightToLeft",
+          "NoSplit",
+          "FitSplit"
+        ],
+        "x-enum-descriptions": [
+          "SplitLeftToRight",
+          "SplitRightToLeft",
+          "NoSplit",
+          "FitSplit"
+        ]
+      },
       "ParseBulkRequestDto": {
         "type": "object",
         "properties": {
@@ -26670,16 +25151,7 @@
             "nullable": true
           },
           "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           }
         },
         "additionalProperties": false
@@ -26739,6 +25211,83 @@
           }
         },
         "additionalProperties": false
+      },
+      "PdfRenderResolution": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Default\n- `2` — High\n- `3` — Ultra",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Default",
+          "High",
+          "Ultra"
+        ],
+        "x-enum-descriptions": [
+          "Default",
+          "High",
+          "Ultra"
+        ]
+      },
+      "PdfScrollMode": {
+        "enum": [
+          0,
+          1,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Vertical\n- `1` — Horizontal\n- `3` — Page",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Vertical",
+          "Horizontal",
+          "Page"
+        ],
+        "x-enum-descriptions": [
+          "Vertical",
+          "Horizontal",
+          "Page"
+        ]
+      },
+      "PdfSpreadMode": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — None\n- `1` — Odd\n- `2` — Even",
+        "format": "int32",
+        "x-enum-varnames": [
+          "None",
+          "Odd",
+          "Even"
+        ],
+        "x-enum-descriptions": [
+          "None",
+          "Odd",
+          "Even"
+        ]
+      },
+      "PdfTheme": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Dark\n- `1` — Light",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Dark",
+          "Light"
+        ],
+        "x-enum-descriptions": [
+          "Dark",
+          "Light"
+        ]
       },
       "PersonAliasCheckDto": {
         "required": [
@@ -26829,24 +25378,7 @@
           "roles": {
             "type": "array",
             "items": {
-              "enum": [
-                1,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/PersonRole"
             },
             "nullable": true
           }
@@ -26866,41 +25398,37 @@
         },
         "additionalProperties": false
       },
+      "PersonFilterField": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Role\n- `2` — Name\n- `3` — SeriesCount\n- `4` — ChapterCount",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Role",
+          "Name",
+          "SeriesCount",
+          "ChapterCount"
+        ],
+        "x-enum-descriptions": [
+          "Role",
+          "Name",
+          "SeriesCount",
+          "ChapterCount"
+        ]
+      },
       "PersonFilterStatementDto": {
         "type": "object",
         "properties": {
           "comparison": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              15,
-              16
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FilterComparison"
           },
           "field": {
-            "enum": [
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PersonFilterField"
           },
           "value": {
             "type": "string",
@@ -26927,17 +25455,81 @@
         },
         "additionalProperties": false
       },
+      "PersonRole": {
+        "enum": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "type": "integer",
+        "description": "Members:\n- `3` — Writer\n- `4` — Penciller\n- `5` — Inker\n- `6` — Colorist\n- `7` — Letterer\n- `8` — CoverArtist\n- `9` — Editor\n- `10` — Publisher\n- `11` — Character\n- `12` — Translator\n- `13` — Imprint\n- `14` — Team\n- `15` — Location",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Writer",
+          "Penciller",
+          "Inker",
+          "Colorist",
+          "Letterer",
+          "CoverArtist",
+          "Editor",
+          "Publisher",
+          "Character",
+          "Translator",
+          "Imprint",
+          "Team",
+          "Location"
+        ],
+        "x-enum-descriptions": [
+          "Writer",
+          "Penciller",
+          "Inker",
+          "Colorist",
+          "Letterer",
+          "CoverArtist",
+          "Editor",
+          "Publisher",
+          "Character",
+          "Translator",
+          "Imprint",
+          "Team",
+          "Location"
+        ]
+      },
+      "PersonSortField": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Name\n- `2` — SeriesCount\n- `3` — ChapterCount",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Name",
+          "SeriesCount",
+          "ChapterCount"
+        ],
+        "x-enum-descriptions": [
+          "Name",
+          "SeriesCount",
+          "ChapterCount"
+        ]
+      },
       "PersonSortOptionDto": {
         "type": "object",
         "properties": {
           "sortField": {
-            "enum": [
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PersonSortField"
           },
           "isAscending": {
             "type": "boolean"
@@ -26984,6 +25576,32 @@
           }
         },
         "additionalProperties": false
+      },
+      "PlusMediaFormat": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Manga\n- `2` — Comic\n- `3` — LightNovel\n- `4` — Book\n- `5` — Unknown",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Manga",
+          "Comic",
+          "LightNovel",
+          "Book",
+          "Unknown"
+        ],
+        "x-enum-descriptions": [
+          "Manga",
+          "Comic",
+          "LightNovel",
+          "Book",
+          "Unknown"
+        ]
       },
       "ProfileStatBarDto": {
         "type": "object",
@@ -27094,19 +25712,37 @@
         },
         "additionalProperties": false
       },
+      "PublicationStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Ongoing (OnGoing)\n- `1` — Hiatus\n- `2` — Completed\n- `3` — Cancelled\n- `4` — Ended",
+        "format": "int32",
+        "x-enum-varnames": [
+          "OnGoing",
+          "Hiatus",
+          "Completed",
+          "Cancelled",
+          "Ended"
+        ],
+        "x-enum-descriptions": [
+          "Ongoing",
+          "Hiatus",
+          "Completed",
+          "Cancelled",
+          "Ended"
+        ]
+      },
       "PublicationStatusStatCount": {
         "type": "object",
         "properties": {
           "value": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PublicationStatus"
           },
           "count": {
             "type": "integer",
@@ -27114,6 +25750,43 @@
           }
         },
         "additionalProperties": false
+      },
+      "QueryContext": {
+        "enum": [
+          1,
+          2,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — None\n- `2` — Search\n- `4` — Dashboard",
+        "format": "int32",
+        "x-enum-varnames": [
+          "None",
+          "Search",
+          "Dashboard"
+        ],
+        "x-enum-descriptions": [
+          "None",
+          "Search",
+          "Dashboard"
+        ]
+      },
+      "RatingAuthority": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — User\n- `1` — Critic",
+        "format": "int32",
+        "x-enum-varnames": [
+          "User",
+          "Critic"
+        ],
+        "x-enum-descriptions": [
+          "User",
+          "Critic"
+        ]
       },
       "RatingDto": {
         "type": "object",
@@ -27127,90 +25800,14 @@
             "format": "int32"
           },
           "provider": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScrobbleProvider"
           },
           "authority": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/RatingAuthority"
           },
           "providerUrl": {
             "type": "string",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReadHistoryEvent": {
-        "required": [
-          "chapterNumber",
-          "seriesName",
-          "userName"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "userName": {
-            "type": "string",
-            "nullable": true
-          },
-          "libraryId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "seriesId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "seriesName": {
-            "type": "string",
-            "nullable": true
-          },
-          "readDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "readDateUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "chapterId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "chapterNumber": {
-            "type": "number",
-            "format": "float"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReadStatus": {
-        "type": "object",
-        "properties": {
-          "notRead": {
-            "type": "boolean"
-          },
-          "inProgress": {
-            "type": "boolean"
-          },
-          "read": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -27231,6 +25828,26 @@
           }
         },
         "additionalProperties": false
+      },
+      "ReaderMode": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Left and Right (LeftRight)\n- `1` — Up and Down (UpDown)\n- `2` — Webtoon",
+        "format": "int32",
+        "x-enum-varnames": [
+          "LeftRight",
+          "UpDown",
+          "Webtoon"
+        ],
+        "x-enum-descriptions": [
+          "Left and Right",
+          "Up and Down",
+          "Webtoon"
+        ]
       },
       "ReadingActivityDataDto": {
         "type": "object",
@@ -27328,6 +25945,23 @@
         },
         "additionalProperties": false
       },
+      "ReadingDirection": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — LeftToRight\n- `1` — RightToLeft",
+        "format": "int32",
+        "x-enum-varnames": [
+          "LeftToRight",
+          "RightToLeft"
+        ],
+        "x-enum-descriptions": [
+          "LeftToRight",
+          "RightToLeft"
+        ]
+      },
       "ReadingHistoryChapterItemDto": {
         "type": "object",
         "properties": {
@@ -27416,15 +26050,7 @@
             "nullable": true
           },
           "seriesFormat": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "chapters": {
             "type": "array",
@@ -27517,26 +26143,7 @@
             "format": "int32"
           },
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "ownerUserName": {
             "type": "string",
@@ -27555,13 +26162,7 @@
             "nullable": true
           },
           "provider": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReadingListProvider"
           },
           "lastSyncCheckUtc": {
             "type": "string",
@@ -27590,43 +26191,43 @@
         },
         "additionalProperties": false
       },
+      "ReadingListFilterField": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Title\n- `2` — ReleaseYear\n- `3` — ItemCount\n- `4` — Tags\n- `5` — Writer\n- `6` — Artist",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Title",
+          "ReleaseYear",
+          "ItemCount",
+          "Tags",
+          "Writer",
+          "Artist"
+        ],
+        "x-enum-descriptions": [
+          "Title",
+          "ReleaseYear",
+          "ItemCount",
+          "Tags",
+          "Writer",
+          "Artist"
+        ]
+      },
       "ReadingListFilterStatementDto": {
         "type": "object",
         "properties": {
           "comparison": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              15,
-              16
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/FilterComparison"
           },
           "field": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReadingListFilterField"
           },
           "value": {
             "type": "string",
@@ -27755,15 +26356,7 @@
             "nullable": true
           },
           "seriesFormat": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "pagesRead": {
             "type": "integer",
@@ -27802,16 +26395,7 @@
             "nullable": true
           },
           "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "libraryName": {
             "type": "string",
@@ -27881,18 +26465,54 @@
         },
         "additionalProperties": false
       },
+      "ReadingListProvider": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — File (None)\n- `1` — File\n- `2` — Url",
+        "format": "int32",
+        "x-enum-varnames": [
+          "None",
+          "File",
+          "Url"
+        ],
+        "x-enum-descriptions": [
+          "File",
+          "File",
+          "Url"
+        ]
+      },
+      "ReadingListSortField": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Title\n- `2` — ReleaseYearStart\n- `3` — ReleaseYearEnd\n- `4` — ItemCount",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Title",
+          "ReleaseYearStart",
+          "ReleaseYearEnd",
+          "ItemCount"
+        ],
+        "x-enum-descriptions": [
+          "Title",
+          "ReleaseYearStart",
+          "ReleaseYearEnd",
+          "ItemCount"
+        ]
+      },
       "ReadingListSortOptionDto": {
         "type": "object",
         "properties": {
           "sortField": {
-            "enum": [
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReadingListSortField"
           },
           "isAscending": {
             "type": "boolean"
@@ -27951,6 +26571,26 @@
           }
         },
         "additionalProperties": false
+      },
+      "ReadingProfileKind": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Default\n- `1` — User\n- `2` — Implicit",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Default",
+          "User",
+          "Implicit"
+        ],
+        "x-enum-descriptions": [
+          "Default",
+          "User",
+          "Implicit"
+        ]
       },
       "ReadingSessionDto": {
         "type": "object",
@@ -28160,6 +26800,59 @@
         },
         "additionalProperties": false
       },
+      "RelationKind": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Prequel\n- `2` — Sequel\n- `3` — Spin Off (SpinOff)\n- `4` — Adaptation\n- `5` — Side Story (SideStory)\n- `6` — Character\n- `7` — Contains\n- `8` — Other\n- `9` — Alternative Setting (AlternativeSetting)\n- `10` — Alternative Version (AlternativeVersion)\n- `11` — Doujinshi\n- `12` — Parent\n- `13` — Edition\n- `14` — Annual",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Prequel",
+          "Sequel",
+          "SpinOff",
+          "Adaptation",
+          "SideStory",
+          "Character",
+          "Contains",
+          "Other",
+          "AlternativeSetting",
+          "AlternativeVersion",
+          "Doujinshi",
+          "Parent",
+          "Edition",
+          "Annual"
+        ],
+        "x-enum-descriptions": [
+          "Prequel",
+          "Sequel",
+          "Spin Off",
+          "Adaptation",
+          "Side Story",
+          "Character",
+          "Contains",
+          "Other",
+          "Alternative Setting",
+          "Alternative Version",
+          "Doujinshi",
+          "Parent",
+          "Edition",
+          "Annual"
+        ]
+      },
       "RemapRuleDto": {
         "type": "object",
         "properties": {
@@ -28202,13 +26895,7 @@
             "nullable": true
           },
           "kind": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/CblRemapRuleKind"
           },
           "chapterRange": {
             "type": "string",
@@ -28222,16 +26909,7 @@
             "type": "boolean"
           },
           "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "seriesNameAtMapping": {
             "type": "string",
@@ -28289,16 +26967,7 @@
             "nullable": true
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
+            "$ref": "#/components/schemas/MangaFormat"
           }
         },
         "additionalProperties": false
@@ -28400,6 +27069,29 @@
         },
         "additionalProperties": false
       },
+      "ScalingOption": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — FitToHeight\n- `1` — FitToWidth\n- `2` — Original\n- `3` — Automatic",
+        "format": "int32",
+        "x-enum-varnames": [
+          "FitToHeight",
+          "FitToWidth",
+          "Original",
+          "Automatic"
+        ],
+        "x-enum-descriptions": [
+          "FitToHeight",
+          "FitToWidth",
+          "Original",
+          "Automatic"
+        ]
+      },
       "ScanFolderDto": {
         "type": "object",
         "properties": {
@@ -28489,15 +27181,7 @@
             "nullable": true
           },
           "scrobbleEventType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScrobbleEventType"
           },
           "isErrored": {
             "type": "boolean"
@@ -28513,17 +27197,7 @@
         "type": "object",
         "properties": {
           "field": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScrobbleEventSortField"
           },
           "isDescending": {
             "type": "boolean"
@@ -28537,6 +27211,64 @@
           }
         },
         "additionalProperties": false
+      },
+      "ScrobbleEventSortField": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — None\n- `1` — Created\n- `2` — LastModified\n- `3` — Type\n- `4` — Series\n- `5` — IsProcessed\n- `6` — ScrobbleEventFilter",
+        "format": "int32",
+        "x-enum-varnames": [
+          "None",
+          "Created",
+          "LastModified",
+          "Type",
+          "Series",
+          "IsProcessed",
+          "ScrobbleEventFilter"
+        ],
+        "x-enum-descriptions": [
+          "None",
+          "Created",
+          "LastModified",
+          "Type",
+          "Series",
+          "IsProcessed",
+          "ScrobbleEventFilter"
+        ]
+      },
+      "ScrobbleEventType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Chapter Read (ChapterRead)\n- `1` — Add to Want to Read (AddWantToRead)\n- `2` — Remove from Want to Read (RemoveWantToRead)\n- `3` — Score Updated (ScoreUpdated)\n- `4` — Review Added/Updated (Review)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "ChapterRead",
+          "AddWantToRead",
+          "RemoveWantToRead",
+          "ScoreUpdated",
+          "Review"
+        ],
+        "x-enum-descriptions": [
+          "Chapter Read",
+          "Add to Want to Read",
+          "Remove from Want to Read",
+          "Score Updated",
+          "Review Added/Updated"
+        ]
       },
       "ScrobbleHoldDto": {
         "type": "object",
@@ -28564,6 +27296,32 @@
         },
         "additionalProperties": false
       },
+      "ScrobbleProvider": {
+        "enum": [
+          0,
+          1,
+          2,
+          4,
+          5
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Kavita\n- `1` — AniList\n- `2` — Mal\n- `4` — Cbr\n- `5` — Hardcover",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Kavita",
+          "AniList",
+          "Mal",
+          "Cbr",
+          "Hardcover"
+        ],
+        "x-enum-descriptions": [
+          "Kavita",
+          "AniList",
+          "Mal",
+          "Cbr",
+          "Hardcover"
+        ]
+      },
       "SearchResultDto": {
         "type": "object",
         "properties": {
@@ -28588,15 +27346,7 @@
             "nullable": true
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "libraryName": {
             "type": "string",
@@ -28774,13 +27524,7 @@
             "nullable": true
           },
           "role": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/CharacterRole"
           }
         },
         "additionalProperties": false
@@ -28911,15 +27655,7 @@
             "format": "date-time"
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "created": {
             "type": "string",
@@ -29024,6 +27760,119 @@
           }
         },
         "additionalProperties": false
+      },
+      "SeriesFilterField": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Summary\n- `1` — SeriesName\n- `2` — PublicationStatus\n- `3` — Languages\n- `4` — AgeRating\n- `5` — UserRating\n- `6` — Tags\n- `7` — CollectionTags\n- `8` — Translators\n- `9` — Characters\n- `10` — Publisher\n- `11` — Editor\n- `12` — CoverArtist\n- `13` — Letterer\n- `14` — Colorist\n- `15` — Inker\n- `16` — Penciller\n- `17` — Writers\n- `18` — Genres\n- `19` — Libraries\n- `20` — ReadProgress\n- `21` — Formats\n- `22` — ReleaseYear\n- `23` — ReadTime\n- `24` — Path\n- `25` — FilePath\n- `26` — WantToRead\n- `27` — ReadingDate\n- `28` — AverageRating\n- `29` — Imprint\n- `30` — Team\n- `31` — Location\n- `32` — ReadLast\n- `33` — FileSize",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Summary",
+          "SeriesName",
+          "PublicationStatus",
+          "Languages",
+          "AgeRating",
+          "UserRating",
+          "Tags",
+          "CollectionTags",
+          "Translators",
+          "Characters",
+          "Publisher",
+          "Editor",
+          "CoverArtist",
+          "Letterer",
+          "Colorist",
+          "Inker",
+          "Penciller",
+          "Writers",
+          "Genres",
+          "Libraries",
+          "ReadProgress",
+          "Formats",
+          "ReleaseYear",
+          "ReadTime",
+          "Path",
+          "FilePath",
+          "WantToRead",
+          "ReadingDate",
+          "AverageRating",
+          "Imprint",
+          "Team",
+          "Location",
+          "ReadLast",
+          "FileSize"
+        ],
+        "x-enum-descriptions": [
+          "Summary",
+          "SeriesName",
+          "PublicationStatus",
+          "Languages",
+          "AgeRating",
+          "UserRating",
+          "Tags",
+          "CollectionTags",
+          "Translators",
+          "Characters",
+          "Publisher",
+          "Editor",
+          "CoverArtist",
+          "Letterer",
+          "Colorist",
+          "Inker",
+          "Penciller",
+          "Writers",
+          "Genres",
+          "Libraries",
+          "ReadProgress",
+          "Formats",
+          "ReleaseYear",
+          "ReadTime",
+          "Path",
+          "FilePath",
+          "WantToRead",
+          "ReadingDate",
+          "AverageRating",
+          "Imprint",
+          "Team",
+          "Location",
+          "ReadLast",
+          "FileSize"
+        ]
       },
       "SeriesMetadataDto": {
         "type": "object",
@@ -29142,26 +27991,7 @@
             "nullable": true
           },
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "releaseYear": {
             "type": "integer",
@@ -29180,15 +28010,7 @@
             "format": "int32"
           },
           "publicationStatus": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PublicationStatus"
           },
           "webLinks": {
             "type": "string",
@@ -29277,69 +28099,63 @@
             "$ref": "#/components/schemas/ALMediaTitle"
           },
           "relation": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/RelationKind"
           },
           "provider": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScrobbleProvider"
           },
           "plusMediaFormat": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PlusMediaFormat"
           }
         },
         "additionalProperties": false
+      },
+      "SeriesSortField": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — SortName\n- `2` — CreatedDate\n- `3` — LastModifiedDate\n- `4` — LastChapterAdded\n- `5` — TimeToRead\n- `6` — ReleaseYear\n- `7` — ReadProgress\n- `8` — AverageRating\n- `9` — Random\n- `10` — UserRating",
+        "format": "int32",
+        "x-enum-varnames": [
+          "SortName",
+          "CreatedDate",
+          "LastModifiedDate",
+          "LastChapterAdded",
+          "TimeToRead",
+          "ReleaseYear",
+          "ReadProgress",
+          "AverageRating",
+          "Random",
+          "UserRating"
+        ],
+        "x-enum-descriptions": [
+          "SortName",
+          "CreatedDate",
+          "LastModifiedDate",
+          "LastChapterAdded",
+          "TimeToRead",
+          "ReleaseYear",
+          "ReadProgress",
+          "AverageRating",
+          "Random",
+          "UserRating"
+        ]
       },
       "SeriesSortOptionDto": {
         "type": "object",
         "properties": {
           "sortField": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/SeriesSortField"
           },
           "isAscending": {
             "type": "boolean"
@@ -29478,13 +28294,7 @@
             "nullable": true
           },
           "encodeMediaAs": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/EncodeFormat"
           },
           "totalBackups": {
             "type": "integer",
@@ -29514,23 +28324,10 @@
             "format": "int32"
           },
           "coverImageSize": {
-            "enum": [
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/CoverImageSize"
           },
           "pdfRenderResolution": {
-            "enum": [
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PdfRenderResolution"
           },
           "smtpConfig": {
             "$ref": "#/components/schemas/SmtpConfigDto"
@@ -29634,19 +28431,7 @@
             "$ref": "#/components/schemas/ExternalSourceDto"
           },
           "streamType": {
-            "enum": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/SideNavStreamType"
           },
           "visible": {
             "type": "boolean"
@@ -29661,6 +28446,44 @@
           }
         },
         "additionalProperties": false
+      },
+      "SideNavStreamType": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Collections\n- `2` — ReadingLists\n- `3` — Bookmarks\n- `4` — Library\n- `5` — SmartFilter\n- `6` — ExternalSource\n- `7` — AllSeries\n- `8` — WantToRead\n- `9` — BrowsePeople",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Collections",
+          "ReadingLists",
+          "Bookmarks",
+          "Library",
+          "SmartFilter",
+          "ExternalSource",
+          "AllSeries",
+          "WantToRead",
+          "BrowsePeople"
+        ],
+        "x-enum-descriptions": [
+          "Collections",
+          "ReadingLists",
+          "Bookmarks",
+          "Library",
+          "SmartFilter",
+          "ExternalSource",
+          "AllSeries",
+          "WantToRead",
+          "BrowsePeople"
+        ]
       },
       "SiteThemeDto": {
         "required": [
@@ -29690,12 +28513,7 @@
             "type": "boolean"
           },
           "provider": {
-            "enum": [
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ThemeProvider"
           },
           "previewUrls": {
             "type": "array",
@@ -29897,26 +28715,7 @@
             "nullable": true
           },
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "wordCount": {
             "type": "integer",
@@ -30048,15 +28847,7 @@
             "nullable": true
           },
           "publicationStatus": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PublicationStatus"
           },
           "language": {
             "type": "string",
@@ -30149,17 +28940,7 @@
             "nullable": true
           },
           "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "readOnly": true
+            "$ref": "#/components/schemas/MangaFormat"
           },
           "aniListId": {
             "type": "integer",
@@ -30194,16 +28975,7 @@
             "format": "int32"
           },
           "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "volumeTitle": {
             "type": "string",
@@ -30304,6 +29076,23 @@
         },
         "additionalProperties": false
       },
+      "ThemeProvider": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — System\n- `2` — Custom",
+        "format": "int32",
+        "x-enum-varnames": [
+          "System",
+          "Custom"
+        ],
+        "x-enum-descriptions": [
+          "System",
+          "Custom"
+        ]
+      },
       "TokenRequestDto": {
         "type": "object",
         "properties": {
@@ -30352,26 +29141,7 @@
         "type": "object",
         "properties": {
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "includeUnknowns": {
             "type": "boolean"
@@ -30496,26 +29266,7 @@
             "nullable": true
           },
           "ageRating": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-              11,
-              12,
-              13,
-              14,
-              -1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/AgeRating"
           },
           "language": {
             "type": "string",
@@ -30681,14 +29432,7 @@
             "type": "string"
           },
           "platform": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/EmailDevicePlatform"
           },
           "emailAddress": {
             "minLength": 1,
@@ -30741,16 +29485,7 @@
             "type": "string"
           },
           "type": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LibraryType"
           },
           "folders": {
             "type": "array",
@@ -30795,14 +29530,7 @@
           "fileGroupTypes": {
             "type": "array",
             "items": {
-              "enum": [
-                1,
-                2,
-                3,
-                4
-              ],
-              "type": "integer",
-              "format": "int32"
+              "$ref": "#/components/schemas/FileTypeGroup"
             }
           },
           "excludePatterns": {
@@ -31510,12 +30238,7 @@
             "nullable": true
           },
           "identityProvider": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/IdentityProvider"
           }
         },
         "additionalProperties": false
@@ -31533,6 +30256,19 @@
             "nullable": true
           },
           "body": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUsernameRequestDto": {
+        "required": [
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
             "type": "string",
             "nullable": true
           }
@@ -31675,12 +30411,7 @@
             "nullable": true
           },
           "identityProvider": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/IdentityProvider"
           },
           "created": {
             "type": "string",
@@ -31748,12 +30479,7 @@
             "$ref": "#/components/schemas/SiteThemeDto"
           },
           "globalPageLayoutMode": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PageLayoutMode"
           },
           "blurUnreadSummaries": {
             "type": "boolean"
@@ -31867,6 +30593,30 @@
                 "items": {
                   "$ref": "#/components/schemas/KeyBind"
                 }
+              },
+              "NextChapter": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/KeyBind"
+                }
+              },
+              "PreviousChapter": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/KeyBind"
+                }
+              },
+              "FirstPage": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/KeyBind"
+                }
+              },
+              "LastPage": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/KeyBind"
+                }
               }
             },
             "additionalProperties": false
@@ -31962,13 +30712,7 @@
             "nullable": true
           },
           "kind": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReadingProfileKind"
           },
           "deviceIds": {
             "type": "array",
@@ -31995,41 +30739,16 @@
             "nullable": true
           },
           "readingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReadingDirection"
           },
           "scalingOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScalingOption"
           },
           "pageSplitOption": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PageSplitOption"
           },
           "readerMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReaderMode"
           },
           "autoCloseMenu": {
             "type": "boolean"
@@ -32041,13 +30760,7 @@
             "type": "boolean"
           },
           "layoutMode": {
-            "enum": [
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/LayoutMode"
           },
           "backgroundColor": {
             "minLength": 1,
@@ -32065,14 +30778,7 @@
             "nullable": true
           },
           "disableWidthOverride": {
-            "enum": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/BreakPoint"
           },
           "bookReaderMargin": {
             "type": "integer",
@@ -32094,33 +30800,17 @@
             "type": "boolean"
           },
           "bookReaderReadingDirection": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ReadingDirection"
           },
           "bookReaderWritingStyle": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/WritingStyle"
           },
           "bookReaderThemeName": {
             "minLength": 1,
             "type": "string"
           },
           "bookReaderLayoutMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/BookPageLayoutMode"
           },
           "bookReaderImmersiveMode": {
             "type": "boolean"
@@ -32129,30 +30819,13 @@
             "type": "boolean"
           },
           "pdfTheme": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PdfTheme"
           },
           "pdfScrollMode": {
-            "enum": [
-              0,
-              1,
-              3
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PdfScrollMode"
           },
           "pdfSpreadMode": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/PdfSpreadMode"
           }
         },
         "additionalProperties": false
@@ -32217,24 +30890,10 @@
             "type": "boolean"
           },
           "provider": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/ScrobbleProvider"
           },
           "authority": {
-            "enum": [
-              0,
-              1
-            ],
-            "type": "integer",
-            "format": "int32"
+            "$ref": "#/components/schemas/RatingAuthority"
           }
         },
         "additionalProperties": false
@@ -32432,6 +31091,23 @@
         },
         "additionalProperties": false
       },
+      "WritingStyle": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Horizontal\n- `1` — Vertical",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Horizontal",
+          "Vertical"
+        ],
+        "x-enum-descriptions": [
+          "Horizontal",
+          "Vertical"
+        ]
+      },
       "YearMonthGroupingDto": {
         "type": "object",
         "properties": {
@@ -32470,7 +31146,9 @@
     }
   },
   "security": [
-    { }
+    {
+      "AuthKey": [ ]
+    }
   ],
   "tags": [
     {
@@ -32502,14 +31180,6 @@
     },
     {
       "name": "ColorScape"
-    },
-    {
-      "name": "Deprecated",
-      "description": "All APIs here are subject to be removed and are no longer maintained. Will be removed v0.9.0"
-    },
-    {
-      "name": "WantToRead",
-      "description": "Responsible for all things Want To Read"
     },
     {
       "name": "Device",
@@ -32626,6 +31296,10 @@
     },
     {
       "name": "Volume"
+    },
+    {
+      "name": "WantToRead",
+      "description": "Responsible for all things Want To Read"
     }
   ]
 }
