@@ -1106,9 +1106,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         var seriesGroups = await GetRecentlyUpdatedSeriesAsync(userId, userParams, ct);
 
-        // GroupedSeriesDto.Created is sourced from Chapter.Created (local time), which would make
-        // the merge sort mix local + UTC timestamps. Pull the UTC series-level timestamp instead.
-        // This is done separate to not break the old API
         var seriesIds = seriesGroups.Select(s => s.SeriesId).ToList();
         var seriesUpdatedMap = await context.Series
             .Where(s => seriesIds.Contains(s.Id))
