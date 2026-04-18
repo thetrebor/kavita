@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.8.9.44",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.8.9.45",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.44"
+    "version": "0.8.9.45"
   },
   "servers": [
     {
@@ -1212,17 +1212,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseAnnotationFilterDto"
+                "$ref": "#/components/schemas/AnnotationFilterDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseAnnotationFilterDto"
+                "$ref": "#/components/schemas/AnnotationFilterDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseAnnotationFilterDto"
+                "$ref": "#/components/schemas/AnnotationFilterDto"
               }
             }
           }
@@ -1680,17 +1680,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseAnnotationFilterDto"
+                "$ref": "#/components/schemas/AnnotationFilterDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseAnnotationFilterDto"
+                "$ref": "#/components/schemas/AnnotationFilterDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseAnnotationFilterDto"
+                "$ref": "#/components/schemas/AnnotationFilterDto"
               }
             }
           }
@@ -4344,28 +4344,127 @@
         }
       }
     },
-    "/api/Filter/update": {
+    "/api/Filter/update/series": {
       "post": {
         "tags": [
           "Filter"
         ],
-        "summary": "Creates or Updates the filter",
+        "summary": "Creates or Updates the Series filter",
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Filter/update/reading-list": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "summary": "Creates or Updates the Reading List filter",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingListFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingListFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingListFilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Filter/update/person": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "summary": "Creates or Updates the Person filter",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonFilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Filter/update/annotation": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "summary": "Creates or Updates the Reading List filter",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationFilterDto"
               }
             }
           }
@@ -4439,28 +4538,178 @@
         }
       }
     },
-    "/api/Filter/encode": {
+    "/api/Filter/encode/series": {
       "post": {
         "tags": [
           "Filter"
         ],
-        "summary": "Encode the Filter",
+        "summary": "Encode a Series filter",
         "requestBody": {
-          "description": "",
+          "description": "This must be entityType Series",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Filter/encode/reading-list": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "summary": "Encode a Reading List filter",
+        "requestBody": {
+          "description": "This must be entityType ReadingList",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingListFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingListFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingListFilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Filter/encode/person": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "summary": "Encode a Person Filter",
+        "requestBody": {
+          "description": "This must be entityType Person",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonFilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Filter/encode/annotation": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "summary": "Encode an Annotation Filter",
+        "requestBody": {
+          "description": "This must be entityType Annotation",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationFilterDto"
               }
             }
           }
@@ -4495,6 +4744,7 @@
           "Filter"
         ],
         "summary": "Decodes the Filter",
+        "description": "Decoded filter will always have the same shape of Kavita.Models.DTOs.Filtering.v2.IFilterDto`2.\n            The concrete class is driven by `EntityType`.\n            Classes: Kavita.Models.DTOs.Filtering.v2.Requests.SeriesFilterV2Dto, Kavita.Models.DTOs.Filtering.v2.Requests.PersonFilterDto, Kavita.Models.DTOs.Filtering.v2.Requests.AnnotationFilterDto, Kavita.Models.DTOs.Filtering.v2.Requests.ReadingListFilterDto",
         "requestBody": {
           "description": "",
           "content": {
@@ -4521,17 +4771,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/FilterV2Dto"
+                  "$ref": "#/components/schemas/IFilterDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FilterV2Dto"
+                  "$ref": "#/components/schemas/IFilterDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FilterV2Dto"
+                  "$ref": "#/components/schemas/IFilterDto"
                 }
               }
             }
@@ -4559,6 +4809,7 @@
             "name": "name",
             "in": "query",
             "description": "",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -8271,17 +8522,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowsePersonFilterDto"
+                "$ref": "#/components/schemas/PersonFilterDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowsePersonFilterDto"
+                "$ref": "#/components/schemas/PersonFilterDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowsePersonFilterDto"
+                "$ref": "#/components/schemas/PersonFilterDto"
               }
             }
           }
@@ -9846,17 +10097,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             }
           }
@@ -10844,17 +11095,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseReadingListFilterDto"
+                "$ref": "#/components/schemas/ReadingListFilterDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseReadingListFilterDto"
+                "$ref": "#/components/schemas/ReadingListFilterDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/BrowseReadingListFilterDto"
+                "$ref": "#/components/schemas/ReadingListFilterDto"
               }
             }
           }
@@ -13580,17 +13831,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             }
           }
@@ -13954,17 +14205,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             }
           }
@@ -14105,17 +14356,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             }
           }
@@ -19987,17 +20238,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterV2Dto"
+                "$ref": "#/components/schemas/SeriesFilterV2Dto"
               }
             }
           }
@@ -20378,6 +20629,40 @@
           "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AnnotationFilterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnnotationFilterStatementDto"
+            },
+            "nullable": true
+          },
+          "combination": {
+            "$ref": "#/components/schemas/FilterCombination"
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/AnnotationSortOptionDto"
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/FilterEntityType"
+          },
+          "limitTo": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -20968,37 +21253,6 @@
           "Desktop"
         ]
       },
-      "BrowseAnnotationFilterDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "statements": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AnnotationFilterStatementDto"
-            },
-            "nullable": true
-          },
-          "combination": {
-            "$ref": "#/components/schemas/FilterCombination"
-          },
-          "sortOptions": {
-            "$ref": "#/components/schemas/AnnotationSortOptionDto"
-          },
-          "limitTo": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
       "BrowseGenreDto": {
         "required": [
           "title"
@@ -21099,68 +21353,6 @@
             "format": "int32"
           },
           "chapterCount": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "BrowsePersonFilterDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "statements": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonFilterStatementDto"
-            },
-            "nullable": true
-          },
-          "combination": {
-            "$ref": "#/components/schemas/FilterCombination"
-          },
-          "sortOptions": {
-            "$ref": "#/components/schemas/PersonSortOptionDto"
-          },
-          "limitTo": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "BrowseReadingListFilterDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "statements": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReadingListFilterStatementDto"
-            },
-            "nullable": true
-          },
-          "combination": {
-            "$ref": "#/components/schemas/FilterCombination"
-          },
-          "sortOptions": {
-            "$ref": "#/components/schemas/ReadingListSortOptionDto"
-          },
-          "limitTo": {
             "type": "integer",
             "format": "int32"
           }
@@ -22719,6 +22911,9 @@
           },
           "visible": {
             "type": "boolean"
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/FilterEntityType"
           }
         },
         "additionalProperties": false
@@ -23599,52 +23794,28 @@
           "IsNotEmpty"
         ]
       },
-      "FilterStatementDto": {
-        "type": "object",
-        "properties": {
-          "comparison": {
-            "$ref": "#/components/schemas/FilterComparison"
-          },
-          "field": {
-            "$ref": "#/components/schemas/SeriesFilterField"
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FilterV2Dto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "statements": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FilterStatementDto"
-            },
-            "nullable": true
-          },
-          "combination": {
-            "$ref": "#/components/schemas/FilterCombination"
-          },
-          "sortOptions": {
-            "$ref": "#/components/schemas/SeriesSortOptionDto"
-          },
-          "limitTo": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
+      "FilterEntityType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Series\n- `1` — Reading List (ReadingList)\n- `2` — Person\n- `3` — Annotation",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Series",
+          "ReadingList",
+          "Person",
+          "Annotation"
+        ],
+        "x-enum-descriptions": [
+          "Series",
+          "Reading List",
+          "Person",
+          "Annotation"
+        ]
       },
       "FontProvider": {
         "enum": [
@@ -23805,6 +23976,30 @@
           "pageCount": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IFilterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "combination": {
+            "$ref": "#/components/schemas/FilterCombination"
+          },
+          "limitTo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/FilterEntityType"
           }
         },
         "additionalProperties": false
@@ -25401,6 +25596,40 @@
         },
         "additionalProperties": false
       },
+      "PersonFilterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonFilterStatementDto"
+            },
+            "nullable": true
+          },
+          "combination": {
+            "$ref": "#/components/schemas/FilterCombination"
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/PersonSortOptionDto"
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/FilterEntityType"
+          },
+          "limitTo": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "PersonFilterField": {
         "enum": [
           1,
@@ -26193,6 +26422,40 @@
           },
           "canSync": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReadingListFilterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingListFilterStatementDto"
+            },
+            "nullable": true
+          },
+          "combination": {
+            "$ref": "#/components/schemas/FilterCombination"
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/ReadingListSortOptionDto"
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/FilterEntityType"
+          },
+          "limitTo": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -27880,6 +28143,56 @@
           "FileSize"
         ]
       },
+      "SeriesFilterStatementDto": {
+        "type": "object",
+        "properties": {
+          "comparison": {
+            "$ref": "#/components/schemas/FilterComparison"
+          },
+          "field": {
+            "$ref": "#/components/schemas/SeriesFilterField"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeriesFilterV2Dto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesFilterStatementDto"
+            },
+            "nullable": true
+          },
+          "combination": {
+            "$ref": "#/components/schemas/FilterCombination"
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/SeriesSortOptionDto"
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/FilterEntityType"
+          },
+          "limitTo": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "SeriesMetadataDto": {
         "type": "object",
         "properties": {
@@ -28452,6 +28765,9 @@
           },
           "library": {
             "$ref": "#/components/schemas/LibraryDto"
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/FilterEntityType"
           }
         },
         "additionalProperties": false
@@ -28553,6 +28869,7 @@
       },
       "SmartFilterDto": {
         "required": [
+          "entityType",
           "filter",
           "name"
         ],
@@ -28569,6 +28886,9 @@
           "filter": {
             "type": "string",
             "nullable": true
+          },
+          "entityType": {
+            "$ref": "#/components/schemas/FilterEntityType"
           }
         },
         "additionalProperties": false
