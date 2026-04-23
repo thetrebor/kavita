@@ -80,7 +80,7 @@
     "ip-address-invalid": "O endereço IP '{0}' é inválido",
     "total-logs": "O total de registros deve estar entre 1 e 30",
     "stats-permission-denied": "Você não está autorizado a visualizar as estatísticas de outro usuário",
-    "url-not-valid": "A URL não retorna uma imagem válida nem requer autorização",
+    "url-not-valid": "URL não retorna uma imagem válida ou requer autorização",
     "generic-cover-collection-save": "Não foi possível salvar a imagem da capa na Coleção",
     "generic-cover-reading-list-save": "Não é possível salvar a imagem da capa na lista de leitura",
     "generic-cover-chapter-save": "Não foi possível salvar a imagem da capa no Capítulo",
@@ -275,5 +275,7 @@
     "url-blocked-address": "URL resolve para um endereço bloqueado",
     "email.username-change.subject": "Seu nome de usuário foi alterado no servidor de {{InvitingUser}}",
     "email.username-change.title": "Atualização de Mudança de Nome de Usuário",
-    "email.username-change.description": "O nome de usuário da sua conta foi atualizado na instância Kavita de {{InvitingUser}}. Não é necessária nenhuma ação de você."
+    "email.username-change.description": "O nome de usuário da sua conta foi atualizado na instância Kavita de {{InvitingUser}}. Não é necessária nenhuma ação de você.",
+    "cbl-import-download-from-url": "Não foi possível baixar o arquivo da URL",
+    "cbl-import-validation-types": "Apenas arquivos .cbl e .json são permitidos"
 }
