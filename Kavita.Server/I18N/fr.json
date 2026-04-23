@@ -275,5 +275,7 @@
     "email.send-to-device.description": "Vous trouverez ci-joint le ou les fichiers que vous avez envoyés.",
     "email.username-change.subject": "Votre nom d'utilisateur a été modifié sur le serveur de {{InvitingUser}}",
     "email.username-change.title": "Mise à jour concernant le changement de nom d'utilisateur",
-    "email.username-change.description": "Le nom d'utilisateur de votre compte a été mis à jour sur l'instance Kavita de {{InvitingUser}}. Aucune action n'est requise de votre part."
+    "email.username-change.description": "Le nom d'utilisateur de votre compte a été mis à jour sur l'instance Kavita de {{InvitingUser}}. Aucune action n'est requise de votre part.",
+    "cbl-import-download-from-url": "Impossible de télécharger le fichier à partir de l'URL",
+    "cbl-import-validation-types": "Seuls les fichiers .cbl et .json sont autorisés"
 }
