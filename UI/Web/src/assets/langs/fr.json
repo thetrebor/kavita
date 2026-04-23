@@ -45,7 +45,7 @@
         "created-header": "Créé",
         "last-modified-header": "Dernière modification",
         "type-header": "Type",
-        "series-header": "Séries",
+        "series-header": "Série",
         "data-header": "Données",
         "is-processed-header": "A été traité",
         "no-data": "{{common.no-data}}",
@@ -89,7 +89,7 @@
     "want-to-read": {
         "title": "À lire",
         "series-count": "{{common.series-count}}",
-        "no-items": "Il n'y a pas d'élément. Essayez d'ajouter une série.",
+        "no-items": "Il n'y a aucun élément. Essayez d'ajouter une série.",
         "no-items-filtered": "Aucun élément correspondant aux critères."
     },
     "user-preferences": {
@@ -115,7 +115,7 @@
         "disable-animations-label": "Désactiver les Animations",
         "disable-animations-tooltip": "Désactiver les animations dans le site. Utile pour les utilisateurs de liseuse (Kindle, kobo, etc..).",
         "collapse-series-relationships-label": "Réduire les relations des Séries",
-        "collapse-series-relationships-tooltip": "Kavita doit-il afficher des Séries qui n'ont pas de lien ou sont le parent/préquel",
+        "collapse-series-relationships-tooltip": "Kavita devrait-il présenter des séries qui n'ont aucun lien entre elles ? Ou bien des séries mères/filles ?",
         "share-series-reviews-label": "Partagez les critiques de la Série",
         "share-series-reviews-tooltip": "Autorisez les autres utilisateurs de ce serveur à voir vos avis",
         "clients-opds-alert": "OPDS n'est pas activé sur ce serveur. Cela n'aura aucune incidence sur les utilisateurs Mihon.",
@@ -204,11 +204,11 @@
     },
     "manage-devices": {
         "title": "Gestionnaire de périphérique",
-        "description": "Cette section vous permet de configurer des périphériques de messagerie qui ne peuvent pas se connecter à Kavita et qui possèdent à la place une adresse électronique acceptant les fichiers.",
+        "description": "Cette section vous permet de configurer des appareils qui ne peuvent pas se connecter à Kavita, mais qui disposent d'une adresse e-mail permettant de recevoir des fichiers.",
         "platform-label": "Plateforme",
         "email-label": "Courriel",
         "name-label": "Nom",
-        "email-setup-alert": "Vous souhaitez envoyer des fichiers sur votre e-mail ? Configurez d'abord vos paramètres d'E-mail !",
+        "email-setup-alert": "Vous souhaitez envoyer des fichiers vers votre e-mail ? Demandez d'abord à votre administrateur de configurer les paramètres de messagerie !",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
@@ -866,7 +866,7 @@
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
         "series-count": "{{common.series-count}}",
-        "no-data": "Il n'y a pas de marque-page. Essayez d'en créer",
+        "no-data": "Il n'y a aucun marque-page. Essayez d'en créer",
         "no-data-2": "un.",
         "confirm-delete": "Êtes-vous sûr de vouloir effacer tous les marque-pages de plusieurs séries ? Ceci ne peut pas être annulé.",
         "confirm-single-delete": "Êtes-vous sûr de vouloir effacer tous les marque-pages de {{seriesName}}. Ceci ne peut pas être annulé.",
@@ -882,7 +882,7 @@
         "mark-as-read-with-session": "Marquer comme lu avec la session"
     },
     "card-detail-layout": {
-        "total-items": "{{count}} éléments au total",
+        "total-items": "{{count}} élément(s) au total",
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
@@ -914,8 +914,26 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Fichiers",
-        "folder-path-title": "Chemin du dossier",
-        "external-metadata-title": "Métadonnées externes"
+        "folder-path-title": "{{edit-series-modal.folder-path-title}}",
+        "external-metadata-title": "Métadonnées externes",
+        "basic-metadata-title": "Métadonnées de base",
+        "read-time-label": "Durée de lecture",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "added-label": "Ajouté",
+        "updated-label": "Mise à jour",
+        "kavita-id-label": "Kavita ID",
+        "sort-order-label": "{{edit-chapter-modal.sort-order-label}}",
+        "language-label": "Langue",
+        "is-special-label": "Spécial",
+        "pub-status-label": "{{metadata-filter.publication-status-label}}",
+        "yes-label": "Oui",
+        "no-label": "Non",
+        "file-info-title": "Informations sur le fichier",
+        "not-set-label": "Non défini",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} octets"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1311,7 +1329,7 @@
         "remap-rules": "Règles d'association"
     },
     "collection-detail": {
-        "no-data": "Il n'y a pas d'éléments. Essayez d'ajouter une série.",
+        "no-data": "Il n'y a aucun élément. Essayez d'ajouter une série.",
         "no-data-filtered": "Aucun élément ne correspond à votre filtre actuel.",
         "sync-progress": "Séries collectées : {{title}}",
         "last-sync": "Dernière synchro : {{date}}",
@@ -1320,7 +1338,7 @@
     "all-collections": {
         "title": "Collections",
         "item-count": "{{common.item-count}}",
-        "no-data": "Il n'y a pas de collections.",
+        "no-data": "Il n'y a aucune collection.",
         "create-one-part-1": "Essayez d'en créer",
         "create-one-part-2": "une"
     },
@@ -1331,7 +1349,7 @@
     "draggable-ordered-list": {
         "instructions-alt": "Lorsque vous indiquez un chiffre dans la zone de saisie Réordonner, l'article est inséré à cet endroit et l'ordre de tous les autres articles est mise à jour.",
         "reorder-label": "Réordonner",
-        "bulk-select-label": "Sélection d'article en masse",
+        "bulk-select-label": "Sélection d'éléments en masse",
         "remove-item-alt": "Supprimer un élément"
     },
     "reading-lists": {
@@ -1496,7 +1514,7 @@
         "matched-count": "{{count}} correspondances",
         "issues-count": "{{count}} numéros",
         "unmatched-count": "{{count}} manquant(s)",
-        "matched-items-header": "Articles correspondants",
+        "matched-items-header": "Éléments correspondants",
         "issues-header": "Points à prendre en compte",
         "remap-rules-header": "Règles d'association",
         "tier-label": "Trouvé via",
@@ -1530,7 +1548,9 @@
         "volume-num": "{{common.volume-num-shorthand}}",
         "issue-num": "{{common.issue-num-shorthand}}",
         "refresh": "Actualiser",
-        "wiki": "Wiki"
+        "wiki": "Wiki",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
     "pdf-reader": {
         "loading-message": "Chargement...",
@@ -1898,12 +1918,12 @@
         "most-active-users-title": "Utilisateurs les plus actifs",
         "popular-libraries-title": "Bibliothèques populaires",
         "popular-series-title": "Séries populaires",
-        "series-count": "{{num}} Séries",
+        "series-count": "{{num}} Série(s)",
         "volume-count": "{{num}} Volumes",
         "file-count": "{{num}} Fichiers",
         "genre-count": "{{num}} Genres",
         "tag-count": "{{num}} Étiquettes",
-        "people-count": "{{num}} Personnes",
+        "people-count": "{{num}} Personne(s)",
         "tags": "{{metadata-fields.tags-title}}",
         "people": "Personnes",
         "genres": "{{metadata-fields.genres-title}}",
@@ -2216,7 +2236,18 @@
         "failed-to-validate": "Échec de la validation du fichier",
         "failed-to-import": "Échec de l'importation de {{name}}",
         "redownload-confirm": "Vous avez déjà téléchargé {{title}} le {{date}}. Voulez-vous le télécharger à nouveau ?",
-        "redownload-confirm-bulk": "Vous avez déjà téléchargé (une partie de) {{title}}. Souhaitez-vous télécharger à nouveau ces éléments ?"
+        "redownload-confirm-bulk": "Vous avez déjà téléchargé (une partie de) {{title}}. Souhaitez-vous télécharger à nouveau ces éléments ?",
+        "confirm-delete-collection": "Êtes-vous sûr de vouloir supprimer cette collection ? Cette action ne peut pas être annulée.",
+        "confirm-delete-annotations": "Êtes-vous sûr de vouloir supprimer les annotations ? Cette action ne peut pas être annulée.",
+        "annotations-deleted": "Annotation supprimée",
+        "confirm-delete-client-device": "Êtes-vous sûr de vouloir supprimer cet appareil ?",
+        "confirm-delete-cbl-remap-rule": "Êtes-vous sûr de vouloir supprimer cette règle d'association ?",
+        "cbl-remap-rule-created": "Règle d'association créée",
+        "cbl-remap-rule-deleted": "Règle d'association supprimée",
+        "cbl-remap-rule-promoted": "Règle promue au niveau global",
+        "cbl-remap-rule-demoted": "Règle rétrogradée au niveau de l'utilisateur",
+        "confirm-delete-read-from-readinglist": "Êtes-vous sûr de vouloir supprimer tous les ouvrages déjà lus de cette liste de lecture ? Cette action ne peut pas être annulée.",
+        "reading-list-sync-enqueued": "La liste de lecture a été mise en file d'attente pour la synchronisation."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Heure",
@@ -2304,7 +2335,15 @@
         "export": "Exporter",
         "like": "Aimer",
         "unlike": "Retirer les \"J'aime\"",
-        "edit-device-name": "Modifier le nom"
+        "edit-device-name": "Modifier le nom",
+        "mark-as-read-with-session": "Marquer comme lu avec la session",
+        "mark-as-read-with-session-tooltip": "Marquer le contenu comme ayant été lu dans son intégralité et créer une session pour celui-ci",
+        "export-v1": "CBL v1",
+        "export-v1-tooltip": "Utiliser CBL v1 (XML)",
+        "export-v2": "CBL v2",
+        "export-v2-tooltip": "Utiliser CBL v2 (JSON)",
+        "cbl-manager": "CBL Responsable",
+        "cbl-manager-tooltip": "Gérer/Synchroniser les fichiers CBL"
     },
     "preferences": {
         "left-to-right": "De gauche à droite",
@@ -2386,7 +2425,18 @@
         "annotations-tab": "Annotations",
         "overview-tab": "Aperçu",
         "management-tab": "Gestion",
-        "activity-tab": "Activité"
+        "activity-tab": "Activité",
+        "external-ids-tab": "Identifiants externes",
+        "aliases-tab": "Alias",
+        "chapters-tab": "Chapitres",
+        "dashboard-tab": "Tableau de bord",
+        "sidenav-tab": "Menu de navigation",
+        "external-sources-tab": "Sources externes",
+        "image-reader-tab": "Lecteur d'images",
+        "book-reader-tab": "Lecteur de livres",
+        "pdf-reader-tab": "Lecteur de PDF",
+        "bookmark-image-tab": "Image",
+        "bookmark-text-tab": "Texte"
     },
     "common": {
         "reset-to-default": "Réinitialiser aux valeurs par défaut",
@@ -2413,7 +2463,7 @@
         "select-all": "Tout sélectionner",
         "deselect-all": "Tout désélectionner",
         "series-count": "{{num}} Séries",
-        "item-count": "{{num}} Éléments",
+        "item-count": "{{num}} Élément(s)",
         "book-num": "Livre",
         "issue-hash-num": "Numéro #",
         "issue-num": "Numéro",
@@ -2660,7 +2710,7 @@
     },
     "browse-people": {
         "title": "Parcourir les personnes",
-        "author-count": "{{num}} Personnes",
+        "author-count": "{{num}} Personne(s)",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "issue-count": "{{common.issue-count}}",
         "series-count": "{{common.series-count}}",
@@ -2746,7 +2796,9 @@
         "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
-        "readinglist-artist": "{{person-role-pipe.artist}}"
+        "readinglist-artist": "{{person-role-pipe.artist}}",
+        "readinglist-provider": "Fournisseur",
+        "readinglist-missing-item-count": "Nombre d'éléments manquants"
     },
     "breakpoint-pipe": {
         "never": "Jamais",
@@ -2826,7 +2878,9 @@
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Configurer les appareils",
         "select-devices-for": "Configurer les appareils pour {{name}}",
-        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}",
+        "disable-bookmark-icon-label": "Désactiver l'icône de marque-pages",
+        "disable-bookmark-icon-tooltip": "Supprime les icônes de marque-pages des images dans le lecteur"
     },
     "oidc": {
         "title": "OIDC Callback",
@@ -3236,13 +3290,13 @@
     "tag-breakdown": {
         "title": "Étiquettes les plus lues",
         "sub-title": "L'étiquette la plus lue de {{name}} est {{mostUsed}}",
-        "missing": "Étiquettes manquantes pour {{amount}} séries",
+        "missing": "Étiquettes manquantes pour {{amount}} série(s)",
         "no-data": "{{common.no-data}}"
     },
     "genre-breakdown": {
         "title": "Genres les plus lus",
         "sub-title": "Le genre le plus lu de {{name}} est {{mostUsed}}",
-        "missing": "Genres manquants pour {{amount}} séries",
+        "missing": "Genres manquants pour {{amount}} série(s)",
         "no-data": "{{common.no-data}}"
     },
     "reads-by-month": {
@@ -3379,7 +3433,7 @@
         "most-files": "Le {{date}}, {{count}} fichiers ont été ajoutés"
     },
     "list-select-modal": {
-        "hidden": "{{amount}} éléments masqués en raison d'un état invalide"
+        "hidden": "{{amount}} élément(s) masqué(s) en raison d'un état invalide"
     },
     "profile-activity": {
         "time-filter-title": "Activité de {{username}} via",
@@ -3513,7 +3567,8 @@
         "last-synced": "Dernière synchronisation : {{date}}",
         "last-checked": "Dernière vérification : {{date}}",
         "not-authorized": "Vous ne disposez pas des droits nécessaires pour interagir avec ce contenu",
-        "source": "Source"
+        "source": "Source",
+        "sync-manual": "Synchronisation (manuelle)"
     },
     "manage-remap-rules-modal": {
         "title": "Gérer les règles d'association",
@@ -3666,5 +3721,21 @@
         "custom-label": "Calendrier personnalisé (notation Cron)",
         "required-field": "{{validation.required-field}}",
         "cron-notation": "Cette notation Cron n'est pas valide"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "Supprimer le lien OIDC",
+        "confirm-unlink": "Êtes-vous sûr de vouloir supprimer votre lien OIDC ?",
+        "confirm-unlink-extra": "Si vous êtes actuellement connecté avec votre compte OIDC, vous serez déconnecté. Vous pouvez vous reconnecter à tout moment par e-mail."
+    },
+    "edit-external-metadata-form": {
+        "aniListId-label": "AniList Id",
+        "malId-label": "MAL Id",
+        "mangaBakaId-label": "MangaBaka Id",
+        "hardcoverId-label": "Hardcover Id",
+        "comicVineId-label": "Comic Vine Id",
+        "metronId-label": "Metron Id",
+        "not-set-label": "Non défini",
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     }
 }
