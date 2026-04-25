@@ -165,7 +165,7 @@
     "external-source-already-exists": "Fonte Externa já existe",
     "external-source-doesnt-exist": "Fonte Externa inexistente",
     "external-sources": "Fontes Externas",
-    "external-source-required": "ApiKey e Host requeridos",
+    "external-source-required": "O Host é requerido",
     "smart-filter-already-in-use": "Existe um stream com este Filtro Inteligente",
     "collection-deleted": "Coleção eliminada",
     "dashboard-stream-doesnt-exist": "Stream do Painel Principal não existe",
@@ -220,5 +220,15 @@
     "download-not-allowed": "O utilizador não tem permissões para descarregar permissões",
     "client-device-doesnt-exist": "Não existe este dispositivo cliente",
     "auth-key-unique": "O nome da Chave de Autenticação tem de ser único na sua conta",
-    "role-restricted": "Acesso proibido: A sua função não permite esta acção"
+    "role-restricted": "Acesso proibido: A sua função não permite esta acção",
+    "url-malformed": "O URL está mal formado",
+    "url-https-only": "Apenas URLs HTTPS são permitidos",
+    "url-unable-to-resolve": "Não foi possível resolver o hostname",
+    "url-blocked-address": "O URL corresponde a endereço bloqueado",
+    "cbl-export-failed": "Não foi possível exportar o ficheiro CBL, verifique os logs",
+    "cbl-import-download-from-url": "Não foi possível descarregar o ficheiro a partir do URL",
+    "cbl-import-validation-types": "Só são permitidos ficheiros .cbl e .json",
+    "email.auth-key-expired.subject": "Kavita - uma ou mais chaves de autenticação expiraram!",
+    "email.auth-key-expired.header": "Uma ou mais chaves de autenticação expiraram!",
+    "email.auth-key-expired.description": "Enquanto não refrescar a chave, não vai conseguir autenticar-se."
 }
