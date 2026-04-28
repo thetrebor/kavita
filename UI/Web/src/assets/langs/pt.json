@@ -3333,5 +3333,26 @@
         "failure": "O Kavita não consegue carregar a configuração OIDC",
         "not-applicable": "O Kavita não pode avaliar a autoridade porque não está configurada",
         "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "Introduza um {{url}}",
+        "url": "url",
+        "url-label": "Url",
+        "back": "Voltar",
+        "load": "Carregar"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "Novo Nome de Utilizador",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "cbl-match-tier-pipe": {
+        "remap-rule": "Regra de Remapeamento",
+        "external-id": "ID Externo",
+        "exact-name": "Nome Exato"
     }
 }
