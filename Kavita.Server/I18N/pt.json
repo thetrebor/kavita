@@ -268,5 +268,14 @@
     "email.password-reset.preheader": "Pediu um reset de password. Clique no botão para confirmar o seu email e confirmar a alteração de password.",
     "email.password-reset.header": "Esqueceu a sua password?",
     "email.password-reset.description": "Sem problema, isso pode acontecer! Clique no botão abaixo para fazer reset à password.",
-    "email.password-reset.safe-notice": "Se não fez esta ação, ignore este email. A sua conta está segura."
+    "email.password-reset.safe-notice": "Se não fez esta ação, ignore este email. A sua conta está segura.",
+    "email.password-reset.cta": "REPOR A PASSWORD",
+    "email.password-reset.fallback-link-label": "Se o botão acima não funcionar, pode encontrar o link aqui:",
+    "email.send-to-device.subject": "Kavita - Enviar ficheiro do Kavita",
+    "email.send-to-device.preheader": "Ficheiro(s) enviado(s) do Kavita",
+    "email.send-to-device.header": "Enviou ficheiros do Kavita",
+    "email.send-to-device.description": "Vai encontrar os ficheiros que enviou em anexo.",
+    "email.username-change.subject": "O seu nome de utilizador foi alterado no servidor de {{InvitingUser}}",
+    "email.username-change.title": "Atualização de Alteração do Nome de Utilizador",
+    "email.username-change.description": "O nome de utilizador da sua conta foi atualizado na instância Kavita de {{InvitingUser}}. Não é necessária nenhuma ação da sua parte."
 }
