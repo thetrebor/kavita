@@ -485,7 +485,8 @@
     },
     "all-filters": {
         "title": "Todos os Filtros Inteligentes",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} Filtros Inteligentes Totais",
+        "description": "Os filtros inteligentes são filtros gravados que podem ser colocados na navegação lateral e no painel principal. Pode criá-los para Séries e Listas de Leitura ao dar um nome e usando o botão Gravar."
     },
     "announcements": {
         "title": "Anúncios"
@@ -602,7 +603,8 @@
         "completion-label": "{{percent}} completo",
         "force-selected-one-column": "O modo de layout mudou para Uma Coluna por causa de não haver espaço suficiente para Duas Colunas",
         "forced-vertical-switch": "O modo de layout foi alterado por que o modo Duas Colunas não funciona com Estilo de Escrita Vertical",
-        "close-reader-alt": "Fechar Leitor"
+        "close-reader-alt": "Fechar Leitor",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "Ainda não existem marcadores",
@@ -854,7 +856,9 @@
         "reading-profile-updated": "Perfil de leitura atualizado",
         "reading-profile-promoted": "Perfil de leitura promovido",
         "line-spacing-min-label": "1x",
-        "line-spacing-max-label": "2.5x"
+        "line-spacing-max-label": "2.5x",
+        "disable-bookmark-icon-label": "{{manage-reading-profiles.disable-bookmark-icon-label}}",
+        "disable-bookmark-icon-tooltip": "{{manage-reading-profiles.disable-bookmark-icon-tooltip}}"
     },
     "table-of-contents": {
         "no-data": "Este livro não tem um Indíce definido nos metadados ou um ficheiro toc"
@@ -2873,7 +2877,9 @@
         "create": "Criar",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "Editar",
-        "delete": "Eliminar"
+        "delete": "Eliminar",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
     },
     "quill-wrapper": {
         "clean-tooltip": "Remover todos os estilos"
@@ -3001,7 +3007,7 @@
         "progress": "Continuar",
         "progress-incognito": "Continuar anónimo",
         "full-read": "Voltar a Ler",
-        "full-read-incognito": "Voltar a ler anónimo"
+        "full-read-incognito": "Ler anónimo"
     },
     "pdf-render-resolution": {
         "default": "Por Defeito (1080x1920)",
@@ -3353,6 +3359,24 @@
     "cbl-match-tier-pipe": {
         "remap-rule": "Regra de Remapeamento",
         "external-id": "ID Externo",
-        "exact-name": "Nome Exato"
+        "exact-name": "Nome Exato",
+        "comicvine-naming": "Nomes do ComicVine",
+        "article-stripped": "Artigo Removido",
+        "reprint-stripped": "Reimpressão Removida",
+        "alternate-series": "Série Alternativa",
+        "user-decision": "Decisão de Utilizador",
+        "unmatched": "Sem Correspondência"
+    },
+    "cbl-import-reason-pipe": {
+        "chapter-missing": "Capítulo Em Falta",
+        "volume-missing": "Volume Em Falta",
+        "series-missing": "Série Não Encontrada",
+        "name-conflict": "Conflito de Nome",
+        "all-series-missing": "Todas as Séries em Falta",
+        "empty-file": "Ficheiro Vazio",
+        "series-collision": "Múltiplas Séries Correspondentes",
+        "all-chapter-missing": "Todos os Capítulos em Falta",
+        "success": "Sucesso",
+        "invalid-file": "Ficheiro Inválido"
     }
 }
