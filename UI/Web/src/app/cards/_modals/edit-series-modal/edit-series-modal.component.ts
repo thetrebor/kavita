@@ -38,7 +38,11 @@ import {SeriesService} from 'src/app/_services/series.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
-import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
+import {
+  CoverImageChooserComponent,
+  CoverImageOption,
+  ICoverImageChooserConfig
+} from "../../cover-image-chooser/cover-image-chooser.component";
 import {EditSeriesRelationComponent} from "../../edit-series-relation/edit-series-relation.component";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
@@ -68,6 +72,8 @@ import {
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {MangaFormat} from "../../../_models/manga-format";
+import {EntityTitleService} from "../../../_services/entity-title.service";
+import {LibraryType} from "../../../_models/library/library";
 
 
 @Component({
@@ -122,6 +128,7 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly entityTitleService = inject(EntityTitleService);
 
   protected readonly Tabs = Tabs;
   protected readonly PersonRole = PersonRole;
@@ -143,6 +150,7 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
+  libraryType = LibraryType.Manga;
 
 
   // Typeaheads
@@ -157,12 +165,10 @@ export class EditSeriesModalComponent implements OnInit {
   publicationStatuses: Array<PublicationStatusDto> = [];
 
   metadata!: SeriesMetadata;
-  imageUrls: Array<string> = [];
-  /**
-   * Selected Cover for uploading
-   */
   selectedCover: string = '';
   coverImageReset = false;
+  coverImageDirty = false;
+  chooserConfig: ICoverImageChooserConfig = {};
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
@@ -181,10 +187,13 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
 
     this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
+    });
+
+    this.libraryService.getLibraryType(this.series.libraryId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(type => {
+      this.libraryType = type;
     });
 
     this.initSeries = Object.assign({}, this.series);
@@ -197,7 +206,6 @@ export class EditSeriesModalComponent implements OnInit {
       sortName: new FormControl(this.series.sortName, [Validators.required]),
       rating: new FormControl(this.series.userRating, []),
 
-      coverImageIndex: new FormControl(0, []),
       coverImageLocked: new FormControl(this.series.coverImageLocked, []),
 
       ageRating: new FormControl('', []),
@@ -281,11 +289,16 @@ export class EditSeriesModalComponent implements OnInit {
       this.seriesVolumes = volumes;
       this.isLoadingVolumes = false;
 
-      if (this.seriesVolumes.length === 1) {
-        this.imageUrls.push(...this.seriesVolumes[0].chapters.map((c: Chapter) => this.imageService.getChapterCoverImage(c.id)));
-      } else {
-        this.imageUrls.push(...this.seriesVolumes.map(v => this.imageService.getVolumeCoverImage(v.id)));
-      }
+      this.chooserConfig = {
+        showReset: this.series.coverImageLocked,
+        selected: { url: this.imageService.getSeriesCoverImage(this.series.id), title: this.series.name },
+        volumeFunc: this.seriesVolumes.length !== 1
+          ? of(this.seriesVolumes.map(v => ({ url: this.imageService.getVolumeCoverImage(v.id), title: this.formatVolumeName(v) } as CoverImageOption)))
+          : undefined,
+        chapterFunc: this.seriesVolumes.length === 1
+          ? of(this.seriesVolumes[0].chapters.map((c: Chapter) => ({ url: this.imageService.getChapterCoverImage(c.id), title: this.entityTitleService.computeTitle(c, this.libraryType, {prioritizeTitleName: false, includeVolume: false}) } as CoverImageOption)))
+          : undefined,
+      };
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
@@ -496,7 +509,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   save() {
     const model = this.editSeriesForm.getRawValue();
-    const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
 
     const apis = [
       this.seriesService.updateMetadata(this.metadata)
@@ -519,7 +531,7 @@ export class EditSeriesModalComponent implements OnInit {
       tap(result => updatedSeries = result)
     ));
 
-    if (selectedIndex > 0 || this.coverImageReset) {
+    if (this.coverImageDirty || this.coverImageReset) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
     }
 
@@ -530,7 +542,7 @@ export class EditSeriesModalComponent implements OnInit {
       delay(10),
       last()
     ).subscribe(() => {
-      this.modal.close(modalSaved(updatedSeries ?? model, selectedIndex > 0 || this.coverImageReset));
+      this.modal.close(modalSaved(updatedSeries ?? model, this.coverImageDirty || this.coverImageReset));
     });
   }
 
@@ -561,16 +573,9 @@ export class EditSeriesModalComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  updateSelectedIndex(index: number) {
-    this.editSeriesForm.patchValue({
-      coverImageIndex: index
-    });
-    this.cdRef.markForCheck();
-  }
-
-  updateSelectedImage(url: string) {
-    this.selectedCover = url;
-    this.cdRef.markForCheck();
+  handleCoverChanged(event: { isDirty: boolean; url: string }) {
+    this.coverImageDirty = event.isDirty;
+    this.selectedCover = event.url;
   }
 
   handleReset() {

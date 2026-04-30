@@ -34,7 +34,10 @@ import {concat, forkJoin, Observable, of, tap} from "rxjs";
 import {map} from "rxjs/operators";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
-import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
+import {
+  CoverImageChooserComponent,
+  ICoverImageChooserConfig
+} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {MangaFormat} from "../../_models/manga-format";
@@ -57,6 +60,8 @@ import {
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
+import {EntityTitleService} from "../../_services/entity-title.service";
+import {LibraryService} from "../../_services/library.service";
 
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -109,6 +114,8 @@ export class EditChapterModalComponent implements OnInit {
   private readonly downloadService = inject(DownloadService);
   private readonly chapterService = inject(ChapterService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly entityTitleService = inject(EntityTitleService);
+  private readonly libraryService = inject(LibraryService);
 
   @Input({required: true}) chapter!: Chapter;
   @Input({required: true}) libraryType!: LibraryType;
@@ -119,6 +126,9 @@ export class EditChapterModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
+  coverImageDirty = false;
+  chooserConfig: ICoverImageChooserConfig = {};
+
 
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
   languageSettings: TypeaheadSettings<Language> | null = null;
@@ -135,7 +145,6 @@ export class EditChapterModalComponent implements OnInit {
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */
   initChapter!: Chapter;
-  imageUrls: Array<string> = [];
   size: number = 0;
 
   get WebLinks() {
@@ -155,9 +164,13 @@ export class EditChapterModalComponent implements OnInit {
 
   ngOnInit() {
     this.initChapter = Object.assign({}, this.chapter);
-    this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
 
     this.size = (<Chapter>this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
+
+    this.chooserConfig = {
+      showReset: this.chapter.coverImageLocked,
+      selected: { url: this.imageService.getChapterCoverImage(this.chapter.id), title: this.chapter.titleName || this.chapter.range || ('Chapter ' + this.chapter.number) }
+    };
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));
@@ -177,7 +190,6 @@ export class EditChapterModalComponent implements OnInit {
     this.editForm.addControl('tags', new FormControl(this.chapter.tags, []));
 
 
-    this.editForm.addControl('coverImageIndex', new FormControl(0, []));
     this.editForm.addControl('coverImageLocked', new FormControl(this.chapter.coverImageLocked, []));
 
     this.metadataService.getAllValidLanguages().pipe(
@@ -233,7 +245,6 @@ export class EditChapterModalComponent implements OnInit {
 
   save() {
     const model = this.editForm.getRawValue();
-    const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     // Patch in data from the model that is not typeahead (as those are updated during setting)
     if (model.releaseDate === '') {
@@ -259,12 +270,12 @@ export class EditChapterModalComponent implements OnInit {
       this.chapterService.updateChapter(this.chapter)
     ];
 
-    if (selectedIndex > 0 || this.coverImageReset) {
+    const needsCoverUpdate = this.coverImageDirty || this.coverImageReset;
+    if (needsCoverUpdate) {
       apis.push(this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover, !this.coverImageReset));
     }
 
     concat(...apis).subscribe(results => {
-      const needsCoverUpdate = selectedIndex > 0 || this.coverImageReset;
       this.modal.close(modalSaved(model, needsCoverUpdate));
     });
   }
@@ -485,15 +496,9 @@ export class EditChapterModalComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  updateSelectedIndex(index: number) {
-    this.editForm.patchValue({
-      coverImageIndex: index
-    });
-    this.cdRef.markForCheck();
-  }
-
-  updateSelectedImage(url: string) {
-    this.selectedCover = url;
+  handleCoverChanged(event: { isDirty: boolean; url: string }) {
+    this.coverImageDirty = event.isDirty;
+    this.selectedCover = event.url;
     this.cdRef.markForCheck();
   }
 

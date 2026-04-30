@@ -1603,7 +1603,15 @@
         "reset": "{{common.reset}}",
         "image-num": "Image {{num}}",
         "apply": "{{common.apply}}",
-        "applied": "{{theme-manager.applied}}"
+        "applied": "{{theme-manager.applied}}",
+        "upload-tab": "Upload",
+        "current-tab": "Current",
+        "volume-tab": "Volumes",
+        "chapter-tab": "Chapters",
+        "kavita-plus-tab": "Kavita+",
+        "reset-tab": "Reset",
+        "no-images": "No images available",
+        "kavita-plus-coming-soon": "Kavita+ cover images coming soon"
     },
 
     "download-indicator": {

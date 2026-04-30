@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit, ViewChild} from '@angular/core';
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {
   AbstractControl,
@@ -21,9 +21,10 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {PersonService} from "../../../_services/person.service";
 import {translate, TranslocoDirective} from '@jsverse/transloco';
-import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
+import {CoverImageChooserComponent, ICoverImageChooserConfig} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {concat, map, of} from "rxjs";
 import {UploadService} from "../../../_services/upload.service";
+import {ImageService} from "../../../_services/image.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
@@ -60,6 +61,7 @@ export class EditPersonModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly personService = inject(PersonService);
   private readonly uploadService = inject(UploadService);
+  private readonly imageService = inject(ImageService);
   protected readonly accountService = inject(AccountService);
   protected readonly toastr = inject(ToastrService);
   protected readonly breakpointService = inject(BreakpointService);
@@ -67,6 +69,7 @@ export class EditPersonModalComponent implements OnInit {
   protected readonly Tabs = Tabs;
 
   @Input({required: true}) person!: Person;
+  @ViewChild(CoverImageChooserComponent) coverChooser?: CoverImageChooserComponent;
 
   active = Tabs.General;
   editForm: FormGroup = new FormGroup({
@@ -78,10 +81,10 @@ export class EditPersonModalComponent implements OnInit {
     hardcoverId: new FormControl('', []),
   });
 
-  imageUrls: Array<string> = [];
   selectedCover: string = '';
   coverImageReset = false;
-  touchedCoverImage = false;
+  coverImageDirty = false;
+  chooserConfig: ICoverImageChooserConfig = {};
   fetchDisabled: boolean = false;
   /**
    * Suffix to include in the tooltip for external ids if they support characters
@@ -98,8 +101,11 @@ export class EditPersonModalComponent implements OnInit {
       this.editForm.get('malId')!.setValue((this.person.malId || '')  + '');
       this.editForm.get('hardcoverId')!.setValue(this.person.hardcoverId || '');
 
-      this.editForm.addControl('coverImageIndex', new FormControl(0, []));
       this.editForm.addControl('coverImageLocked', new FormControl(this.person.coverImageLocked, []));
+      this.chooserConfig = {
+        showReset: this.person.coverImageLocked,
+        selected: { url: this.imageService.getPersonImage(this.person.id), title: this.person.name }
+      };
 
       const roles = (this.person.roles ?? []);
       if (roles.length === 1 && roles.includes(PersonRole.Character)) {
@@ -135,7 +141,7 @@ export class EditPersonModalComponent implements OnInit {
     };
     apis.push(this.personService.updatePerson(person));
 
-    const hasCoverChanges = this.touchedCoverImage || this.coverImageReset;
+    const hasCoverChanges = this.coverImageDirty || this.coverImageReset;
     if (hasCoverChanges) {
       apis.push(this.uploadService.updatePersonCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
     }
@@ -146,23 +152,9 @@ export class EditPersonModalComponent implements OnInit {
     });
   }
 
-  handleUploadByUrl(urls: Array<string>) {
-    this.selectedCover = urls[0];
-    this.touchedCoverImage = true;
-    this.cdRef.markForCheck();
-  }
-
-  updateSelectedIndex(index: number) {
-    this.editForm.patchValue({
-      coverImageIndex: index
-    });
-    this.touchedCoverImage = true;
-    this.cdRef.markForCheck();
-  }
-
-  updateSelectedImage(url: string) {
-    this.selectedCover = url;
-    this.touchedCoverImage = true;
+  handleCoverChanged(event: { isDirty: boolean; url: string }) {
+    this.coverImageDirty = event.isDirty;
+    this.selectedCover = event.url;
     this.cdRef.markForCheck();
   }
 
@@ -171,7 +163,6 @@ export class EditPersonModalComponent implements OnInit {
     this.editForm.patchValue({
       coverImageLocked: false
     });
-    this.touchedCoverImage = true;
     this.cdRef.markForCheck();
   }
 
@@ -180,7 +171,7 @@ export class EditPersonModalComponent implements OnInit {
       if (imgUrl) {
         this.toastr.success(translate('toasts.person-image-downloaded'));
         this.fetchDisabled = true;
-        this.imageUrls.push(imgUrl);
+        this.coverChooser?.addImage({ url: imgUrl, title: 'Downloaded Cover' });
         this.cdRef.markForCheck();
       }
     });

@@ -18,7 +18,7 @@ import {ImageService} from 'src/app/_services/image.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CoverImageChooserComponent} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
+import {CoverImageChooserComponent, ICoverImageChooserConfig} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
 import {NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {BreakpointService} from "../../../_services/breakpoint.service";
@@ -60,13 +60,10 @@ export class EditReadingListModalComponent implements OnInit {
   @Input({required: true}) readingList!: ReadingList;
 
   reviewGroup!: FormGroup;
-  coverImageIndex: number = 0;
-   /**
-    * Url of the selected cover
-  */
   selectedCover: string = '';
+  coverImageDirty = false;
   coverImageLocked: boolean = false;
-  imageUrls: Array<string> = [];
+  chooserConfig: ICoverImageChooserConfig = {};
   active = Tabs.General;
   tags: ReadingListTag[] = [];
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
@@ -87,6 +84,10 @@ export class EditReadingListModalComponent implements OnInit {
 
     this.coverImageLocked = this.readingList.coverImageLocked;
     this.tags = this.readingList.tags;
+    this.chooserConfig = {
+      showReset: this.readingList.coverImageLocked,
+      selected: { url: this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)), title: this.readingList.title }
+    };
 
     this.reviewGroup.get('title')?.valueChanges.pipe(
       debounceTime(100),
@@ -103,15 +104,6 @@ export class EditReadingListModalComponent implements OnInit {
       }),
       takeUntilDestroyed(this.destroyRef)
       ).subscribe();
-
-    this.imageUrls.push(this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)));
-    if (!this.readingList.items || this.readingList.items.length === 0) {
-      this.readingListService.getListItems(this.readingList.id).subscribe(items => {
-        this.imageUrls.push(...(items).map(rli => this.imageService.getChapterCoverImage(rli.chapterId)));
-      });
-    } else {
-      this.imageUrls.push(...(this.readingList.items).map(rli => this.imageService.getChapterCoverImage(rli.chapterId)));
-    }
 
     this.setupTagSettings();
   }
@@ -168,7 +160,7 @@ export class EditReadingListModalComponent implements OnInit {
       tap(result => updatedRL = result)
     )];
 
-    if (this.selectedCover !== '') {
+    if (this.coverImageDirty) {
       apis.push(this.uploadService.updateReadingListCoverImage(this.readingList.id, this.selectedCover));
     }
 
@@ -176,18 +168,14 @@ export class EditReadingListModalComponent implements OnInit {
       delay(10),
       last()
     ).subscribe(() => {
-      this.ngModal.close(modalSaved(updatedRL, this.selectedCover !== ''));
+      this.ngModal.close(modalSaved(updatedRL, this.coverImageDirty));
       this.toastr.success(translate('toasts.reading-list-updated'));
     });
   }
 
-  updateSelectedIndex(index: number) {
-    this.coverImageIndex = index;
-    this.cdRef.markForCheck();
-  }
-
-  updateSelectedImage(url: string) {
-    this.selectedCover = url;
+  handleCoverChanged(event: { isDirty: boolean; url: string }) {
+    this.coverImageDirty = event.isDirty;
+    this.selectedCover = event.url;
     this.cdRef.markForCheck();
   }
 

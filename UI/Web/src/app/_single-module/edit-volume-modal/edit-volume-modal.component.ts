@@ -6,7 +6,7 @@ import {NgClass} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
-import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
+import {CoverImageChooserComponent, ICoverImageChooserConfig} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -89,13 +89,14 @@ export class EditVolumeModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
+  coverImageDirty = false;
+  chooserConfig: ICoverImageChooserConfig = {};
 
   tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType), this.blacklist);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */
   initVolume!: Volume;
-  imageUrls: Array<string> = [];
   size: number = 0;
   files: Array<MangaFile> = [];
 
@@ -113,13 +114,16 @@ export class EditVolumeModalComponent implements OnInit {
 
   ngOnInit() {
     this.initVolume = Object.assign({}, this.volume);
-    this.imageUrls.push(this.imageService.getVolumeCoverImage(this.volume.id));
 
     this.files = this.volume.chapters.flatMap(c => c.files);
     this.size = this.files.reduce((sum, v) => sum + v.bytes, 0);
 
-    this.editForm.addControl('coverImageIndex', new FormControl(0, []));
     this.editForm.addControl('coverImageLocked', new FormControl(this.volume.coverImageLocked, []));
+
+    this.chooserConfig = {
+      showReset: this.volume.coverImageLocked,
+      selected: { url: this.imageService.getVolumeCoverImage(this.volume.id), title: this.volume.name || ('Volume ' + this.volume.minNumber) }
+    };
   }
 
   close() {
@@ -128,7 +132,6 @@ export class EditVolumeModalComponent implements OnInit {
 
   save() {
     const model = this.editForm.getRawValue();
-    const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     const updateData = {id: this.volume.id, ...model} as UpdateVolume;
 
@@ -136,12 +139,12 @@ export class EditVolumeModalComponent implements OnInit {
       this.volumeService.updateVolume(updateData)
     ];
 
-    if (selectedIndex > 0 || this.coverImageReset) {
+    if (this.coverImageDirty || this.coverImageReset) {
       apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, !this.coverImageReset));
     }
 
     concat(...apis).subscribe(() => {
-      const needsCoverUpdate = selectedIndex > 0 || this.coverImageReset;
+      const needsCoverUpdate = this.coverImageDirty || this.coverImageReset;
       this.modal.close(modalSaved(this.volume, needsCoverUpdate));
     });
   }
@@ -173,15 +176,9 @@ export class EditVolumeModalComponent implements OnInit {
     }
   }
 
-  updateSelectedIndex(index: number) {
-    this.editForm.patchValue({
-      coverImageIndex: index
-    });
-    this.cdRef.markForCheck();
-  }
-
-  updateSelectedImage(url: string) {
-    this.selectedCover = url;
+  handleCoverChanged(event: { isDirty: boolean; url: string }) {
+    this.coverImageDirty = event.isDirty;
+    this.selectedCover = event.url;
     this.cdRef.markForCheck();
   }
 
