@@ -7,7 +7,6 @@ import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../_models
 import {Volume} from "../_models/volume";
 import {EntityTitleService} from "./entity-title.service";
 import {Library, LibraryType} from "../_models/library/library";
-import {translate} from "@jsverse/transloco";
 import {UserCollection} from "../_models/collection-tag";
 import {ReadingList} from "../_models/reading-list/reading-list";
 import {Person} from "../_models/metadata/person";
@@ -122,14 +121,5 @@ export class CoverChooserConfigFactoryService {
         ? { url: this.imageService.getLibraryCoverImage(library!.id), title: library!.name }
         : undefined,
     };
-  }
-
-  public formatVolumeName(volume: Volume) {
-    if (volume.minNumber === LooseLeafOrDefaultNumber) {
-      return translate('edit-series-modal.loose-leaf-volume');
-    } else if (volume.minNumber === SpecialVolumeNumber) {
-      return translate('edit-series-modal.specials-volume');
-    }
-    return translate('edit-series-modal.volume-num') + ' ' + volume.name;
   }
 }

@@ -27,7 +27,6 @@ import {UploadService} from "../../_services/upload.service";
 import {MetadataService} from "../../_services/metadata.service";
 import {ActionService} from "../../_services/action.service";
 import {DownloadService} from '../../shared/_services/download.service';
-import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {concat, forkJoin, Observable, of, tap} from "rxjs";
@@ -63,6 +62,7 @@ import {
 import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
 import {EntityTitleService} from "../../_services/entity-title.service";
 import {LibraryService} from "../../_services/library.service";
+import {DownloadEntityType} from "../../shared/_models/download-queue-item";
 
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -291,6 +291,7 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   async runTask(action: ActionItem<Chapter>) {
+    // TODO: Bug: Not properly implemented
     switch (action.action) {
 
       case Action.MarkAsRead:

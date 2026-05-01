@@ -23,8 +23,7 @@ import {concat, delay, forkJoin, last, Observable, of, tap} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {setupLanguageSettings, TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
-import {Chapter, LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
-import {Volume} from 'src/app/_models/volume';
+import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Genre} from 'src/app/_models/metadata/genre';
 import {AgeRatingDto} from 'src/app/_models/metadata/age-rating-dto';
 import {Language} from 'src/app/_models/metadata/language';
@@ -50,7 +49,7 @@ import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
-import {TranslocoModule} from "@jsverse/transloco";
+import {translate, TranslocoModule} from "@jsverse/transloco";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
@@ -74,6 +73,7 @@ import {
   CoverChooserConfigFactoryService,
   CoverImageChooserConfig
 } from "../../../_services/cover-chooser-config-factory.service";
+import {Volume} from "../../../_models/volume";
 
 
 @Component({
@@ -580,11 +580,16 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   async runTask(action: ActionItem<Series>) {
-
+    action.callback(action,  this.series);
   }
 
-  protected formatVolumeName(volume: Volume) {
-    return this.coverChooserConfigFactory.formatVolumeName(volume);
+  formatVolumeName(volume: Volume) {
+    if (volume.minNumber === LooseLeafOrDefaultNumber) {
+      return translate('edit-series-modal.loose-leaf-volume');
+    } else if (volume.minNumber === SpecialVolumeNumber) {
+      return translate('edit-series-modal.specials-volume');
+    }
+    return translate('edit-series-modal.volume-num', {num: volume.name});
   }
 
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
