@@ -1601,6 +1601,8 @@
         "back": "Back",
         "reset-cover-tooltip": "Reset Cover Image",
         "reset": "{{common.reset}}",
+        "cover-locked": "Cover is locked",
+        "cover-not-locked": "Cover is not locked",
         "image-num": "Image {{num}}",
         "apply": "{{common.apply}}",
         "applied": "{{theme-manager.applied}}",

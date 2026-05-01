@@ -148,7 +148,8 @@ export class EditCollectionTagsModalComponent implements OnInit {
       ).subscribe();
 
     this.chooserConfig = {
-      showReset: this.tag().coverImageLocked,
+      isLocked: this.tag().coverImageLocked,
+      resetFunc: () => this.uploadService.updateCollectionCoverImage(this.tag().id, '', false),
       selected: { url: this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag().id)), title: this.tag().title }
     };
     this.loadSeries();

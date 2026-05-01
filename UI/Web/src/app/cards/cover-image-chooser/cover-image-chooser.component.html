@@ -12,6 +12,16 @@
       />
     </div>
 
+    @if (config().isLocked != null) {
+      <div class="d-flex align-items-center gap-2 mt-2 mb-1">
+        @if (config().isLocked) {
+          <span class="text-warning"><i class="fa fa-lock" aria-hidden="true"></i> {{ t('cover-locked') }}</span>
+            <button class="btn btn-sm btn-outline-warning" (click)="reset()">{{ t('reset') }}</button>
+        } @else {
+          <span class="text-muted small"><i class="fa fa-lock-open" aria-hidden="true"></i> {{ t('cover-not-locked') }}</span>
+        }
+      </div>
+    }
 
     @if (hasTabs()) {
       <ul ngbNav #nav="ngbNav" (navChange)="onTabActivate($event.nextId)" [(activeId)]="activeTabId" class="nav-tabs">
@@ -115,19 +125,6 @@
           </li>
         }
 
-        @if (config().showReset) {
-          <li [ngbNavItem]="'reset'">
-            <a ngbNavLink>{{ t('reset-tab') }}</a>
-            <ng-template ngbNavContent>
-              <div class="row g-0 chooser mt-2">
-                <div class="clickable col-auto" tabindex="0" (click)="reset()">
-                  <app-image [title]="t('reset-cover-tooltip')" height="232.91px" width="160px"
-                             [imageUrl]="imageService.resetCoverImage" />
-                </div>
-              </div>
-            </ng-template>
-          </li>
-        }
       </ul>
       <div [ngbNavOutlet]="nav"></div>
     } @else {
@@ -139,12 +136,6 @@
         [uploadText]="t('upload-continued')"
       />
       <div class="row g-0 chooser" style="padding-top: 0.625rem">
-        @if (config().showReset) {
-          <div class="clickable col-auto" tabindex="0" (click)="reset()">
-            <app-image [title]="t('reset-cover-tooltip')" height="232.91px" width="160px"
-                       [imageUrl]="imageService.resetCoverImage" />
-          </div>
-        }
         @if (config().selected; as sel) {
           <div class="clickable col-auto" tabindex="0" (click)="selectOption(sel, Tabs.Current)"
                [class.selected]="selectedOptionKey() === sel.url">

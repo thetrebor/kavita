@@ -168,7 +168,8 @@ export class EditChapterModalComponent implements OnInit {
     this.size = (<Chapter>this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
 
     this.chooserConfig = {
-      showReset: this.chapter.coverImageLocked,
+      isLocked: this.chapter.coverImageLocked,
+      resetFunc: () => this.uploadService.updateChapterCoverImage(this.chapter.id, '', false),
       selected: { url: this.imageService.getChapterCoverImage(this.chapter.id), title: this.chapter.titleName || this.chapter.range || ('Chapter ' + this.chapter.number) }
     };
 
@@ -271,8 +272,8 @@ export class EditChapterModalComponent implements OnInit {
     ];
 
     const needsCoverUpdate = this.coverImageDirty || this.coverImageReset;
-    if (needsCoverUpdate) {
-      apis.push(this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover, !this.coverImageReset));
+    if (this.coverImageDirty) {
+      apis.push(this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover, true));
     }
 
     concat(...apis).subscribe(results => {

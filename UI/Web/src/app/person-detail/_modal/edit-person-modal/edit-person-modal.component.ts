@@ -103,7 +103,8 @@ export class EditPersonModalComponent implements OnInit {
 
       this.editForm.addControl('coverImageLocked', new FormControl(this.person.coverImageLocked, []));
       this.chooserConfig = {
-        showReset: this.person.coverImageLocked,
+        isLocked: this.person.coverImageLocked,
+        resetFunc: () => this.uploadService.updatePersonCoverImage(this.person.id, '', false),
         selected: { url: this.imageService.getPersonImage(this.person.id), title: this.person.name }
       };
 
@@ -142,8 +143,8 @@ export class EditPersonModalComponent implements OnInit {
     apis.push(this.personService.updatePerson(person));
 
     const hasCoverChanges = this.coverImageDirty || this.coverImageReset;
-    if (hasCoverChanges) {
-      apis.push(this.uploadService.updatePersonCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
+    if (this.coverImageDirty) {
+      apis.push(this.uploadService.updatePersonCoverImage(this.person.id, this.selectedCover, true));
     }
 
     // Run api calls in sequency to prevent them from overwriting each-other in a race condition

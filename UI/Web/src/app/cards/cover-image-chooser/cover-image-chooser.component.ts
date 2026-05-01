@@ -21,7 +21,8 @@ export interface CoverImageOption {
 }
 
 export interface ICoverImageChooserConfig {
-  showReset?: boolean;
+  isLocked?: boolean | null;
+  resetFunc?: () => Observable<unknown>;
   selected?: CoverImageOption;
   volumeFunc?: Observable<CoverImageOption[]>;
   chapterFunc?: Observable<CoverImageOption[]>;
@@ -138,8 +139,16 @@ export class CoverImageChooserComponent {
   }
 
   reset() {
-    this.resetClicked.emit(undefined);
-    this.selectedOptionKey.set(null);
+    const fn = this.config().resetFunc;
+    if (fn) {
+      fn().subscribe(() => {
+        this.resetClicked.emit(undefined);
+        this.selectedOptionKey.set(null);
+      });
+    } else {
+      this.resetClicked.emit(undefined);
+      this.selectedOptionKey.set(null);
+    }
   }
 
   public dropped(files: NgxFileDropEntry[]) {

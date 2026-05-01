@@ -85,7 +85,8 @@ export class EditReadingListModalComponent implements OnInit {
     this.coverImageLocked = this.readingList.coverImageLocked;
     this.tags = this.readingList.tags;
     this.chooserConfig = {
-      showReset: this.readingList.coverImageLocked,
+      isLocked: this.readingList.coverImageLocked,
+      resetFunc: () => this.uploadService.updateReadingListCoverImage(this.readingList.id, '', false),
       selected: { url: this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)), title: this.readingList.title }
     };
 

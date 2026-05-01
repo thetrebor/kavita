@@ -121,7 +121,8 @@ export class EditVolumeModalComponent implements OnInit {
     this.editForm.addControl('coverImageLocked', new FormControl(this.volume.coverImageLocked, []));
 
     this.chooserConfig = {
-      showReset: this.volume.coverImageLocked,
+      isLocked: this.volume.coverImageLocked,
+      resetFunc: () => this.uploadService.updateVolumeCoverImage(this.volume.id, '', false),
       selected: { url: this.imageService.getVolumeCoverImage(this.volume.id), title: this.volume.name || ('Volume ' + this.volume.minNumber) }
     };
   }
@@ -139,8 +140,8 @@ export class EditVolumeModalComponent implements OnInit {
       this.volumeService.updateVolume(updateData)
     ];
 
-    if (this.coverImageDirty || this.coverImageReset) {
-      apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, !this.coverImageReset));
+    if (this.coverImageDirty) {
+      apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, true));
     }
 
     concat(...apis).subscribe(() => {

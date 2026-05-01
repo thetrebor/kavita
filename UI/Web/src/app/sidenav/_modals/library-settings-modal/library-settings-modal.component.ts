@@ -166,7 +166,8 @@ export class LibrarySettingsModalComponent implements OnInit {
     }
 
     this.chooserConfig = {
-      showReset: this.library?.coverImage != null && this.library?.coverImage !== '',
+      isLocked: null,
+      resetFunc: () => this.uploadService.updateLibraryCoverImage(this.library!.id, '', false),
       selected: (this.library?.coverImage != null && this.library?.coverImage !== '')
         ? { url: this.imageService.getLibraryCoverImage(this.library!.id), title: this.library!.name }
         : undefined
@@ -438,10 +439,6 @@ export class LibrarySettingsModalComponent implements OnInit {
     if (event.isDirty) {
       this.applyCoverImage(event.url);
     }
-  }
-
-  resetCoverImage() {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, '', false).subscribe();
   }
 
   openDirectoryPicker() {

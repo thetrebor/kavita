@@ -306,7 +306,8 @@ export class EditSeriesModalComponent implements OnInit {
 
 
       this.chooserConfig = {
-        showReset: this.series.coverImageLocked,
+        isLocked: this.series.coverImageLocked,
+        resetFunc: () => this.uploadService.updateSeriesCoverImage(this.series.id, '', false),
         selected: { url: this.imageService.getSeriesCoverImage(this.series.id), title: this.series.name },
         volumeFunc: nonLooseLeafChapterVolumes.length > 0
           ? of(nonLooseLeafChapterVolumes.map(v => ({ url: this.imageService.getVolumeCoverImage(v.id), title: this.formatVolumeName(v) } as CoverImageOption)))
@@ -534,7 +535,7 @@ export class EditSeriesModalComponent implements OnInit {
 
     let updatedSeries: Series | null = null;
 
-    if (nameFieldsDirty || nameFieldLockChanged || this.coverImageReset) {
+    if (nameFieldsDirty || nameFieldLockChanged) {
       model.nameLocked = this.series.nameLocked;
       model.sortNameLocked = this.series.sortNameLocked;
       model.localizedNameLocked = this.series.localizedNameLocked;
@@ -545,8 +546,8 @@ export class EditSeriesModalComponent implements OnInit {
       tap(result => updatedSeries = result)
     ));
 
-    if (this.coverImageDirty || this.coverImageReset) {
-      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
+    if (this.coverImageDirty) {
+      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, true));
     }
 
     this.saveNestedComponents.emit();
