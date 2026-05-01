@@ -150,7 +150,6 @@ export class EditCollectionTagsModalComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
-    this.chooserConfig = this.coverChooserConfigFactory.forCollection(tag);
     this.loadSeries();
   }
 
@@ -173,6 +172,8 @@ export class EditCollectionTagsModalComponent implements OnInit {
       const series = results[0];
       this.pagination = series.pagination;
       this.series = series.result;
+
+      this.chooserConfig = this.coverChooserConfigFactory.forCollection(this.tag(), this.series);
 
       this.selections = new SelectionModel<Series>(true, this.series);
       this.isLoading = false;

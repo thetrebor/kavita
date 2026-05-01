@@ -4046,7 +4046,8 @@
         "bookmark-text-tab": "Text",
         "uploaded-tab": "Uploaded",
         "current-tab": "Current",
-        "kavita-plus-tab": "Kavita+"
+        "kavita-plus-tab": "Kavita+",
+        "other-tab": "Other"
     },
 
     "common": {

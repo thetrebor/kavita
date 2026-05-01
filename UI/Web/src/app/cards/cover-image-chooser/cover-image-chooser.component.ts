@@ -50,11 +50,13 @@ export class CoverImageChooserComponent {
   protected readonly chapterImages = signal<CoverImageOption[] | null>(null);
   protected readonly uploadedImages = signal<CoverImageOption[]>([]);
   protected readonly kavitaplusImages = signal<CoverImageOption[]>([]);
+  protected readonly otherImages = signal<CoverImageOption[]>([]);
   protected readonly selectedOptionKey = signal<string | null>(null);
 
   private volumeLoaded = false;
   private chapterLoaded = false;
   private kavitaPlusLoaded = false;
+  private otherLoaded = false;
   private hasInit = false;
 
   activeTabId = Tabs.Current;
@@ -113,14 +115,15 @@ export class CoverImageChooserComponent {
     if (tabId === Tabs.Volumes && !this.volumeLoaded && this.config().volumeFunc) {
       this.volumeLoaded = true;
       this.config().volumeFunc!.subscribe(items => {this.volumeImages.set(items)});
-    }
-    if (tabId === Tabs.Chapters && !this.chapterLoaded && this.config().chapterFunc) {
+    } else if (tabId === Tabs.Chapters && !this.chapterLoaded && this.config().chapterFunc) {
       this.chapterLoaded = true;
       this.config().chapterFunc!.subscribe(items => {this.chapterImages.set(items)});
-    }
-    if (tabId === Tabs.KavitaPlus && !this.kavitaPlusLoaded && this.config().kavitaplusFunc) {
-      this.chapterLoaded = true;
+    } else if (tabId === Tabs.KavitaPlus && !this.kavitaPlusLoaded && this.config().kavitaplusFunc) {
+      this.kavitaPlusLoaded = true;
       this.config().kavitaplusFunc!.subscribe(items => {this.kavitaplusImages.set(items)});
+    } else if (tabId === Tabs.Other && !this.otherLoaded && this.config().otherFunc) {
+      this.otherLoaded = true;
+      this.config().otherFunc!.subscribe(items => {this.otherImages.set(items)});
     }
   }
 

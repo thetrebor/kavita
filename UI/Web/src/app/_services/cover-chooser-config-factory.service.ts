@@ -25,6 +25,7 @@ export interface CoverImageChooserConfig {
   volumeFunc?: Observable<CoverImageOption[]>;
   chapterFunc?: Observable<CoverImageOption[]>;
   kavitaplusFunc?: Observable<CoverImageOption[]>;
+  otherFunc?: Observable<CoverImageOption[]>;
 }
 
 @Injectable({
@@ -86,11 +87,14 @@ export class CoverChooserConfigFactoryService {
     };
   }
 
-  public forCollection(tag: UserCollection): CoverImageChooserConfig {
+  public forCollection(tag: UserCollection, series: Series[]): CoverImageChooserConfig {
     return {
       isLocked: tag.coverImageLocked,
       resetFunc: () => this.uploadService.updateCollectionCoverImage(tag.id, '', false),
-      selected: { url: this.imageService.randomize(this.imageService.getCollectionCoverImage(tag.id)), title: tag.title },
+      selected: { url: this.imageService.getCollectionCoverImage(tag.id), title: tag.title },
+      otherFunc: of(series.map(s => {
+        return {url: this.imageService.getSeriesCoverImage(s.id), title: s.name}
+      }) as CoverImageOption[])
     };
   }
 
@@ -98,7 +102,7 @@ export class CoverChooserConfigFactoryService {
     return {
       isLocked: list.coverImageLocked,
       resetFunc: () => this.uploadService.updateReadingListCoverImage(list.id, '', false),
-      selected: { url: this.imageService.randomize(this.imageService.getReadingListCoverImage(list.id)), title: list.title },
+      selected: { url: this.imageService.getReadingListCoverImage(list.id), title: list.title },
     };
   }
 

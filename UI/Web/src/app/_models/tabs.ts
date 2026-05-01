@@ -48,5 +48,6 @@ export enum Tabs {
   KavitaPlus = 'kavita-plus-tab',
   Current = 'current-tab',
   Uploaded = 'uploaded-tab',
+  Other = 'other-tab',
 
 }
