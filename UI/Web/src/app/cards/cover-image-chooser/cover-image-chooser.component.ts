@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, inject, input, output, signal} from '@angular/core';
 import {FileSystemFileEntry, NgxFileDropEntry} from 'ngx-file-drop';
 import {ToastrService} from 'ngx-toastr';
 import {ImageService} from 'src/app/_services/image.service';
@@ -13,6 +13,7 @@ import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-b
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
 import {CoverImageChooserConfig, CoverImageOption} from "../../_services/cover-chooser-config-factory.service";
+import {NgTemplateOutlet} from "@angular/common";
 
 
 @Component({
@@ -26,7 +27,8 @@ import {CoverImageChooserConfig, CoverImageOption} from "../../_services/cover-c
     NgbNavLink,
     NgbNavContent,
     NgbNavOutlet,
-    TabTitlePipe
+    TabTitlePipe,
+    NgTemplateOutlet
   ],
   templateUrl: './cover-image-chooser.component.html',
   styleUrls: ['./cover-image-chooser.component.scss'],
@@ -61,10 +63,6 @@ export class CoverImageChooserComponent {
 
   activeTabId = Tabs.Current;
 
-  protected readonly hasTabs = computed(() => {
-    const cfg = this.config();
-    return !!(cfg.volumeFunc || cfg.chapterFunc || cfg.kavitaplusFunc);
-  });
 
   constructor() {
     effect(() => {

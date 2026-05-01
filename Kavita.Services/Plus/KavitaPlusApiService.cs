@@ -9,6 +9,7 @@ using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
@@ -21,7 +22,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
 {
     private const string ScrobblingPath = "/api/scrobbling/";
 
-    public async Task<bool> HasTokenExpired(string license, string token, ScrobbleProvider provider,
+    public async Task<bool> HasTokenExpiredAsync(string license, string token, ScrobbleProvider provider,
         CancellationToken ct = default)
     {
         var res = await Get(ScrobblingPath + "valid-key?provider=" + provider + "&key=" + token, license, token);
@@ -29,27 +30,27 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         return bool.Parse(str);
     }
 
-    public async Task<int> GetRateLimit(string license, string token, CancellationToken ct = default)
+    public async Task<int> GetRateLimitAsync(string license, string token, CancellationToken ct = default)
     {
         var res = await Get(ScrobblingPath + "rate-limit?accessToken=" + token, license, token);
         var str = await res.GetStringAsync();
         return int.Parse(str);
     }
 
-    public async Task<ScrobbleResponseDto> PostScrobbleUpdate(ScrobbleDto data, string license,
+    public async Task<ScrobbleResponseDto> PostScrobbleUpdateAsync(ScrobbleDto data, string license,
         CancellationToken ct = default)
     {
         return await PostAndReceive<ScrobbleResponseDto>(ScrobblingPath + "update", data, license);
     }
 
-    public async Task<IList<MalStackDto>> GetMalStacks(string malUsername, string license, CancellationToken ct = default)
+    public async Task<IList<MalStackDto>> GetMalStacksAsync(string malUsername, string license, CancellationToken ct = default)
     {
         return await $"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stacks?username={malUsername}"
             .WithKavitaPlusHeaders(license)
             .GetJsonAsync<IList<MalStackDto>>(cancellationToken: ct);
     }
 
-    public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesRequestDto request,
+    public async Task<IList<ExternalSeriesMatchDto>> MatchSeriesAsync(MatchSeriesRequestDto request,
         CancellationToken ct = default)
     {
         var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
@@ -61,7 +62,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ReceiveJson<IList<ExternalSeriesMatchDto>>();
     }
 
-    public async Task<SeriesDetailPlusApiDto> GetSeriesDetail(PlusSeriesRequestDto request, CancellationToken ct = default)
+    public async Task<SeriesDetailPlusApiDto> GetSeriesDetailAsync(PlusSeriesRequestDto request, CancellationToken ct = default)
     {
         var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
         var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct)).AniListAccessToken;
@@ -72,7 +73,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ReceiveJson<SeriesDetailPlusApiDto>();
     }
 
-    public async Task<ExternalSeriesDetailDto> GetSeriesDetailById(ExternalMetadataIdsDto request,
+    public async Task<ExternalSeriesDetailDto> GetSeriesDetailByIdAsync(ExternalMetadataIdsDto request,
         CancellationToken ct = default)
     {
         var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
@@ -84,7 +85,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ReceiveJson<ExternalSeriesDetailDto>();
     }
 
-    public async Task<ExternalSeriesDetailDto> GetCoverImages(ExternalCoverRequestDto request,
+    public async Task<List<ExternalCoverResponseDto>> GetCoverImagesAsync(ExternalCoverRequestDto request,
         CancellationToken ct = default)
     {
         var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
@@ -93,7 +94,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/covers")
             .WithKavitaPlusHeaders(license, token)
             .PostJsonAsync(request, cancellationToken: ct)
-            .ReceiveJson<ExternalSeriesDetailDto>();
+            .ReceiveJson<List<ExternalCoverResponseDto>>();
     }
 
     /// <summary>

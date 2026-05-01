@@ -20,6 +20,7 @@ using Kavita.Models.Builders;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Person;
@@ -162,7 +163,7 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogDebug("Fetching Kavita+ for MAL Stacks for user {UserName}", user.MalUserName);
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-            return await _kavitaPlusApiService.GetMalStacks(user.MalUserName, license, ct);
+            return await _kavitaPlusApiService.GetMalStacksAsync(user.MalUserName, license, ct);
         }
         catch (Exception ex)
         {
@@ -207,7 +208,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         try
         {
-            var results = await _kavitaPlusApiService.MatchSeries(matchRequest, ct);
+            var results = await _kavitaPlusApiService.MatchSeriesAsync(matchRequest, ct);
 
             // Some summaries can contain multiple <br/>s, we need to ensure it's only 1
             foreach (var result in results)
@@ -382,7 +383,7 @@ public class ExternalMetadataService : IExternalMetadataService
             try
             {
                 // This returns an AniListSeries and Match returns ExternalSeriesDto
-                result = await _kavitaPlusApiService.GetSeriesDetail(data, ct);
+                result = await _kavitaPlusApiService.GetSeriesDetailAsync(data, ct);
             }
             catch (FlurlHttpException ex)
             {
@@ -397,7 +398,7 @@ public class ExternalMetadataService : IExternalMetadataService
                         _logger.LogDebug("Hit rate limit, will retry in 3 seconds");
                         await Task.Delay(3000, ct);
 
-                        result = await _kavitaPlusApiService.GetSeriesDetail(data, ct);
+                        result = await _kavitaPlusApiService.GetSeriesDetailAsync(data, ct);
                     }
                     else if (errorMessage.Contains("Unknown Series"))
                     {
@@ -570,6 +571,37 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
         return madeModification;
+    }
+
+    public async Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, CancellationToken ct = default)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
+        if (series == null) throw new KavitaException("Series not found");
+
+        var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId, ct);
+
+        var payload = new ExternalCoverRequestDto()
+        {
+            SeriesName = series.Name,
+            AltSeriesName = series.LocalizedName,
+            MediaFormat = libraryType.ConvertToPlusMediaFormat(),
+            AniListId = series.AniListId,
+            ComicVineId = series.ComicVineId,
+            HardcoverId = series.HardcoverId,
+            MangabakaId = series.MangaBakaId,
+            MalId = series.MalId,
+            MetronId = series.MetronId,
+        };
+
+        if (volumeId.HasValue)
+        {
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId.Value, ct: ct);
+            if (volume == null) throw new KavitaException("Volume not found");
+            payload.VolumeNumber = volume.MinNumber;
+            payload.VolumesOnly = true;
+        }
+
+        return await _kavitaPlusApiService.GetCoverImagesAsync(payload, ct);
     }
 
     private async Task<List<SeriesStaffDto>> SetNameAndAddAliases(MetadataSettingsDto settings, IList<SeriesStaffDto>? staff)
@@ -1899,7 +1931,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
         try
         {
-            var ret =  await _kavitaPlusApiService.GetSeriesDetailById(payload, ct);
+            var ret =  await _kavitaPlusApiService.GetSeriesDetailByIdAsync(payload, ct);
 
             ret.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(ret.Summary));
 

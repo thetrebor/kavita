@@ -7,6 +7,7 @@ import {IHasMetadataIds} from "./common/i-has-metadata-ids";
 
 export interface Volume extends IHasCover, IHasReadingTime, IHasProgress, IHasMetadataIds {
   id: number;
+  seriesId: number;
   minNumber: number;
   maxNumber: number;
   name: string;

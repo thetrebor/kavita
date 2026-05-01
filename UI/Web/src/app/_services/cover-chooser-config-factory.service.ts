@@ -10,6 +10,7 @@ import {Library, LibraryType} from "../_models/library/library";
 import {UserCollection} from "../_models/collection-tag";
 import {ReadingList} from "../_models/reading-list/reading-list";
 import {Person} from "../_models/metadata/person";
+import {LicenseService} from "./license.service";
 
 export interface CoverImageOption {
   url: string;
@@ -35,6 +36,7 @@ export class CoverChooserConfigFactoryService {
   private readonly uploadService = inject(UploadService);
   private readonly imageService = inject(ImageService);
   private readonly entityTitleService = inject(EntityTitleService);
+  private readonly licenseService = inject(LicenseService);
 
 
   public forSeries(series: Series, volumes: Volume[], libraryType: LibraryType) {
@@ -53,7 +55,6 @@ export class CoverChooserConfigFactoryService {
 
     const nonLooseLeafChapterVolumes: Volume[] = volumes.filter((v: Volume) => v.minNumber !== LooseLeafOrDefaultNumber && v.minNumber !== SpecialVolumeNumber);
 
-
     return {
       isLocked: series.coverImageLocked,
       resetFunc: () => this.uploadService.updateSeriesCoverImage(series.id, '', false),
@@ -63,6 +64,9 @@ export class CoverChooserConfigFactoryService {
           title: this.entityTitleService.computeTitle(v, libraryType, { prioritizeTitleName: false, includeVolume: true }) } as CoverImageOption)))
         : undefined,
       chapterFunc: looseLeafChapters,
+      kavitaplusFunc: this.licenseService.hasValidLicense() ?
+        this.imageService.getKavitaPlusSeriesCoverImages(series.id) : undefined
+      ,
     };
   }
 
@@ -75,6 +79,8 @@ export class CoverChooserConfigFactoryService {
         url: this.imageService.getVolumeCoverImage(volume.id),
         title: this.entityTitleService.computeTitle(volume, libraryType, { prioritizeTitleName: false, includeVolume: true, fallbackToVolume: true })
       },
+      kavitaplusFunc: this.licenseService.hasValidLicense() ?
+        this.imageService.getKavitaPlusSeriesCoverImages(volume.seriesId, volume.id) : undefined
     };
   }
 

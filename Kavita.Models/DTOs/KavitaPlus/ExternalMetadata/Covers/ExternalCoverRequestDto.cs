@@ -1,7 +1,7 @@
-﻿using Kavita.Models.DTOs.Common;
-using Kavita.Models.DTOs.Scrobbling;
+﻿using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Interfaces;
 
-namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 #nullable enable
 
 /// <summary>
@@ -16,8 +16,8 @@ public sealed record ExternalCoverRequestDto
     public long? MalId { get; set; }
     public long? MetronId { get; set; }
     public string? ComicVineId { get; set; }
-    public int? MangabakaId { get; set; }
-    public int? HardcoverId { get; set; }
+    public long? MangabakaId { get; set; }
+    public long? HardcoverId { get; set; }
     public int? CbrId { get; set; }
 
     public PlusMediaFormat MediaFormat { get; set; }
