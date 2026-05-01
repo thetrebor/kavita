@@ -1,23 +1,27 @@
 <ng-container *transloco="let t; prefix: 'cover-image-chooser'">
   <div class="container-fluid" style="padding-left: 0; padding-right: 0">
+
+
+    <div class="mt-2">
+      <app-file-drag-and-drop-upload
+        (dropped)="dropped($event)"
+        (urlSubmitted)="loadImage($event)"
+        [showUrlUpload]="true"
+        [acceptableExtensions]="acceptableExtensions"
+        [uploadText]="t('upload-continued')"
+      />
+    </div>
+
+
     @if (hasTabs()) {
-      <ul ngbNav #nav="ngbNav" (navChange)="onTabActivate($event.nextId)" class="nav-tabs">
-        <li [ngbNavItem]="'upload'">
-          <a ngbNavLink>{{ t('upload-tab') }}</a>
+      <ul ngbNav #nav="ngbNav" (navChange)="onTabActivate($event.nextId)" [(activeId)]="activeTabId" class="nav-tabs">
+        <li [ngbNavItem]="Tabs.Uploaded">
+          <a ngbNavLink>{{ Tabs.Uploaded | tabTitle }}</a>
           <ng-template ngbNavContent>
-            <div class="mt-2">
-              <app-file-drag-and-drop-upload
-                (dropped)="dropped($event)"
-                (urlSubmitted)="loadImage($event)"
-                [showUrlUpload]="true"
-                [acceptableExtensions]="acceptableExtensions"
-                [uploadText]="t('upload-continued')"
-              />
-            </div>
             @if (uploadedImages().length > 0) {
               <div class="row g-0 chooser mt-2">
                 @for (opt of uploadedImages(); track opt.url) {
-                  <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, 'upload')"
+                  <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, Tabs.Uploaded)"
                        [class.selected]="selectedOptionKey() === opt.url">
                     <app-image height="232.91px" width="160px" [imageUrl]="opt.url" />
                     @if (opt.title) {
@@ -31,12 +35,12 @@
         </li>
 
         @if (config().selected) {
-          <li [ngbNavItem]="'current'">
-            <a ngbNavLink>{{ t('current-tab') }}</a>
+          <li [ngbNavItem]="Tabs.Current">
+            <a ngbNavLink>{{ Tabs.Current | tabTitle }}</a>
             <ng-template ngbNavContent>
               <div class="row g-0 chooser mt-2">
                 <div class="clickable col-auto" tabindex="0"
-                     (click)="selectOption(config().selected!, 'current')"
+                     (click)="selectOption(config().selected!, Tabs.Current)"
                      [class.selected]="selectedOptionKey() === config().selected!.url">
                   <app-image height="232.91px" width="160px" [imageUrl]="config().selected!.url" />
                   @if (config().selected!.title) {
@@ -49,8 +53,8 @@
         }
 
         @if (config().volumeFunc) {
-          <li [ngbNavItem]="'volume'">
-            <a ngbNavLink>{{ t('volume-tab') }}</a>
+          <li [ngbNavItem]="Tabs.Volumes">
+            <a ngbNavLink>{{ Tabs.Volumes | tabTitle }}</a>
             <ng-template ngbNavContent>
               @if (volumeImages() === null) {
                 <div class="d-flex justify-content-center mt-3">
@@ -60,8 +64,8 @@
                 <p class="mt-3">{{ t('no-images') }}</p>
               } @else {
                 <div class="row g-0 chooser mt-2">
-                  @for (opt of volumeImages()!; track opt.url) {
-                    <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, 'volume')"
+                  @for (opt of volumeImages()!; track opt) {
+                    <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, Tabs.Volumes)"
                          [class.selected]="selectedOptionKey() === opt.url">
                       <app-image height="232.91px" width="160px" [imageUrl]="opt.url" />
                       @if (opt.title) {
@@ -76,8 +80,8 @@
         }
 
         @if (config().chapterFunc) {
-          <li [ngbNavItem]="'chapter'">
-            <a ngbNavLink>{{ t('chapter-tab') }}</a>
+          <li [ngbNavItem]="Tabs.Chapters">
+            <a ngbNavLink>{{ Tabs.Chapters | tabTitle }}</a>
             <ng-template ngbNavContent>
               @if (chapterImages() === null) {
                 <div class="d-flex justify-content-center mt-3">
@@ -87,8 +91,8 @@
                 <p class="mt-3">{{ t('no-images') }}</p>
               } @else {
                 <div class="row g-0 chooser mt-2">
-                  @for (opt of chapterImages()!; track opt.url) {
-                    <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, 'chapter')"
+                  @for (opt of chapterImages()!; track opt) {
+                    <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, Tabs.Chapters)"
                          [class.selected]="selectedOptionKey() === opt.url">
                       <app-image height="232.91px" width="160px" [imageUrl]="opt.url" />
                       @if (opt.title) {
@@ -103,8 +107,8 @@
         }
 
         @if (config().kavitaplusFunc) {
-          <li [ngbNavItem]="'kavitaplus'">
-            <a ngbNavLink>{{ t('kavita-plus-tab') }}</a>
+          <li [ngbNavItem]="Tabs.KavitaPlus">
+            <a ngbNavLink>{{ Tabs.KavitaPlus | tabTitle }}</a>
             <ng-template ngbNavContent>
               <p class="mt-3 text-muted">{{ t('kavita-plus-coming-soon') }}</p>
             </ng-template>
@@ -142,7 +146,7 @@
           </div>
         }
         @if (config().selected; as sel) {
-          <div class="clickable col-auto" tabindex="0" (click)="selectOption(sel, 'current')"
+          <div class="clickable col-auto" tabindex="0" (click)="selectOption(sel, Tabs.Current)"
                [class.selected]="selectedOptionKey() === sel.url">
             <app-image height="232.91px" width="160px" [imageUrl]="sel.url" />
             @if (sel.title) {
@@ -151,7 +155,7 @@
           </div>
         }
         @for (opt of uploadedImages(); track opt.url) {
-          <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, 'upload')"
+          <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, Tabs.Uploaded)"
                [class.selected]="selectedOptionKey() === opt.url">
             <app-image height="232.91px" width="160px" [imageUrl]="opt.url" />
             @if (opt.title) {

@@ -6,7 +6,8 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
@@ -138,7 +139,7 @@ export class EditSeriesModalComponent implements OnInit {
 
 
   seriesVolumes: any[] = [];
-  isLoadingVolumes = false;
+  isLoadingVolumes = signal<boolean>(false);
   /**
    * A copy of the series from init. This is used to compare values for name fields to see if lock was modified
    */
@@ -283,21 +284,34 @@ export class EditSeriesModalComponent implements OnInit {
       }
     });
 
-    this.isLoadingVolumes = true;
-    this.cdRef.markForCheck();
+    this.isLoadingVolumes.set(true);
     this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
       this.seriesVolumes = volumes;
-      this.isLoadingVolumes = false;
+      this.isLoadingVolumes.set(false);
+
+      const looseLeafChapterVolume = this.seriesVolumes.filter((v: Volume) => v.minNumber === LooseLeafOrDefaultNumber || v.minNumber === SpecialVolumeNumber);
+
+      let looseLeafChapters: Observable<CoverImageOption[]> | undefined = undefined;
+      if (looseLeafChapterVolume.length > 0) {
+        const opts = looseLeafChapterVolume.flatMap(v =>
+          v.chapters.map((c: Chapter) => ({
+            url: this.imageService.getChapterCoverImage(c.id),
+            title: this.entityTitleService.computeTitle(c, this.libraryType, { prioritizeTitleName: false, includeVolume: false })
+          } as CoverImageOption))
+        );
+        looseLeafChapters = of(opts);
+      }
+
+      const nonLooseLeafChapterVolumes: Volume[] = this.seriesVolumes.filter((v: Volume) => v.minNumber !== LooseLeafOrDefaultNumber && v.minNumber !== SpecialVolumeNumber);
+
 
       this.chooserConfig = {
         showReset: this.series.coverImageLocked,
         selected: { url: this.imageService.getSeriesCoverImage(this.series.id), title: this.series.name },
-        volumeFunc: this.seriesVolumes.length !== 1
-          ? of(this.seriesVolumes.map(v => ({ url: this.imageService.getVolumeCoverImage(v.id), title: this.formatVolumeName(v) } as CoverImageOption)))
+        volumeFunc: nonLooseLeafChapterVolumes.length > 0
+          ? of(nonLooseLeafChapterVolumes.map(v => ({ url: this.imageService.getVolumeCoverImage(v.id), title: this.formatVolumeName(v) } as CoverImageOption)))
           : undefined,
-        chapterFunc: this.seriesVolumes.length === 1
-          ? of(this.seriesVolumes[0].chapters.map((c: Chapter) => ({ url: this.imageService.getChapterCoverImage(c.id), title: this.entityTitleService.computeTitle(c, this.libraryType, {prioritizeTitleName: false, includeVolume: false}) } as CoverImageOption)))
-          : undefined,
+        chapterFunc: looseLeafChapters,
       };
 
       volumes.forEach(v => {

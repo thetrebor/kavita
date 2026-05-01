@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal} from '@angular/core';
 import {FileSystemFileEntry, NgxFileDropEntry} from 'ngx-file-drop';
 import {Observable} from 'rxjs';
 import {ToastrService} from 'ngx-toastr';
@@ -11,6 +11,8 @@ import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
+import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
+import {Tabs} from "../../_models/tabs";
 
 export interface CoverImageOption {
   url: string;
@@ -36,7 +38,8 @@ export interface ICoverImageChooserConfig {
     NgbNavItem,
     NgbNavLink,
     NgbNavContent,
-    NgbNavOutlet
+    NgbNavOutlet,
+    TabTitlePipe
   ],
   templateUrl: './cover-image-chooser.component.html',
   styleUrls: ['./cover-image-chooser.component.scss'],
@@ -54,24 +57,48 @@ export class CoverImageChooserComponent {
   coverChanged = output<{ isDirty: boolean; url: string }>();
   resetClicked = output();
 
-  acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif'].join(',');
+  protected readonly acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif'].join(',');
 
   protected readonly volumeImages = signal<CoverImageOption[] | null>(null);
   protected readonly chapterImages = signal<CoverImageOption[] | null>(null);
   protected readonly uploadedImages = signal<CoverImageOption[]>([]);
+  protected readonly kavitaplusImages = signal<CoverImageOption[]>([]);
   protected readonly selectedOptionKey = signal<string | null>(null);
 
   private volumeLoaded = false;
   private chapterLoaded = false;
+  private kavitaPlusLoaded = false;
+
+  activeTabId = Tabs.Current;
 
   protected readonly hasTabs = computed(() => {
     const cfg = this.config();
     return !!(cfg.volumeFunc || cfg.chapterFunc || cfg.kavitaplusFunc);
   });
 
-  selectOption(option: CoverImageOption, sourceTab: 'upload' | 'current' | 'volume' | 'chapter' | 'kavitaplus') {
+  constructor() {
+    effect(() => {
+      // Keep track of the default tab
+      const hasUploadedImages = this.uploadedImages().length > 0;
+      const hasSelected = this.selectedOptionKey() != null;
+      const hasVolume = (this.volumeImages() ?? []).length > 0;
+      const hasChapter = (this.chapterImages() ?? []).length > 0;
+
+      if (hasSelected) {
+        this.activeTabId = Tabs.Current;
+      } else if (hasUploadedImages) {
+        this.activeTabId = Tabs.Uploaded;
+      } else if (hasVolume) {
+        this.activeTabId = Tabs.Volumes;
+      } else if (hasChapter) {
+        this.activeTabId = Tabs.Chapters;
+      }
+    });
+  }
+
+  selectOption(option: CoverImageOption, sourceTab: Tabs) {
     this.selectedOptionKey.set(option.url);
-    const isDirty = sourceTab !== 'current';
+    const isDirty = sourceTab !== Tabs.Current;
 
     if (option.url.startsWith('data:image/')) {
       this.coverChanged.emit({ isDirty, url: option.url });
@@ -91,14 +118,18 @@ export class CoverImageChooserComponent {
     };
   }
 
-  onTabActivate(tabId: string) {
-    if (tabId === 'volume' && !this.volumeLoaded && this.config().volumeFunc) {
+  onTabActivate(tabId: Tabs) {
+    if (tabId === Tabs.Volumes && !this.volumeLoaded && this.config().volumeFunc) {
       this.volumeLoaded = true;
-      this.config().volumeFunc!.subscribe(items => this.volumeImages.set(items));
+      this.config().volumeFunc!.subscribe(items => {this.volumeImages.set(items)});
     }
-    if (tabId === 'chapter' && !this.chapterLoaded && this.config().chapterFunc) {
+    if (tabId === Tabs.Chapters && !this.chapterLoaded && this.config().chapterFunc) {
       this.chapterLoaded = true;
-      this.config().chapterFunc!.subscribe(items => this.chapterImages.set(items));
+      this.config().chapterFunc!.subscribe(items => {this.chapterImages.set(items)});
+    }
+    if (tabId === Tabs.KavitaPlus && !this.kavitaPlusLoaded && this.config().kavitaplusFunc) {
+      this.chapterLoaded = true;
+      this.config().kavitaplusFunc!.subscribe(items => {this.kavitaplusImages.set(items)});
     }
   }
 
@@ -144,11 +175,13 @@ export class CoverImageChooserComponent {
   private addToUploaded(base64: string) {
     const option: CoverImageOption = { url: base64, title: '' };
     this.uploadedImages.update(imgs => [...imgs, option]);
-    this.selectOption(option, 'upload');
+    this.selectOption(option, Tabs.Uploaded);
   }
 
   addImage(option: CoverImageOption) {
     this.uploadedImages.update(imgs => [...imgs, option]);
-    this.selectOption(option, 'upload');
+    this.selectOption(option, Tabs.Uploaded);
   }
+
+  protected readonly Tabs = Tabs;
 }

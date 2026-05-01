@@ -1604,11 +1604,6 @@
         "image-num": "Image {{num}}",
         "apply": "{{common.apply}}",
         "applied": "{{theme-manager.applied}}",
-        "upload-tab": "Upload",
-        "current-tab": "Current",
-        "volume-tab": "Volumes",
-        "chapter-tab": "Chapters",
-        "kavita-plus-tab": "Kavita+",
         "reset-tab": "Reset",
         "no-images": "No images available",
         "kavita-plus-coming-soon": "Kavita+ cover images coming soon"
@@ -4046,7 +4041,10 @@
         "book-reader-tab": "Book Reader",
         "pdf-reader-tab": "PDF Reader",
         "bookmark-image-tab": "Image",
-        "bookmark-text-tab": "Text"
+        "bookmark-text-tab": "Text",
+        "uploaded-tab": "Uploaded",
+        "current-tab": "Current",
+        "kavita-plus-tab": "Kavita+"
     },
 
     "common": {

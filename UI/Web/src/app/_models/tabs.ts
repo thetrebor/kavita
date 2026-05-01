@@ -45,4 +45,8 @@ export enum Tabs {
   BookmarkImageTab = "bookmark-image-tab",
   BookmarkTextTab = "bookmark-text-tab",
 
+  KavitaPlus = 'kavita-plus-tab',
+  Current = 'current-tab',
+  Uploaded = 'uploaded-tab',
+
 }
