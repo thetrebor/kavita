@@ -18,7 +18,11 @@ import {ImageService} from 'src/app/_services/image.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CoverImageChooserComponent, ICoverImageChooserConfig} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
+import {CoverImageChooserComponent} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
+import {
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from '../../../_services/cover-chooser-config-factory.service';
 import {NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {BreakpointService} from "../../../_services/breakpoint.service";
@@ -55,7 +59,7 @@ export class EditReadingListModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly utilityService = inject(UtilityService);
   private readonly metadataService = inject(MetadataService);
-
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   @Input({required: true}) readingList!: ReadingList;
 
@@ -64,7 +68,7 @@ export class EditReadingListModalComponent implements OnInit {
   coverImageDirty = false;
   coverImageLocked: boolean = false;
   coverImageReset = false;
-  chooserConfig: ICoverImageChooserConfig = {};
+  chooserConfig: CoverImageChooserConfig = {};
   active = Tabs.General;
   tags: ReadingListTag[] = [];
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
@@ -85,11 +89,7 @@ export class EditReadingListModalComponent implements OnInit {
 
     this.coverImageLocked = this.readingList.coverImageLocked;
     this.tags = this.readingList.tags;
-    this.chooserConfig = {
-      isLocked: this.readingList.coverImageLocked,
-      resetFunc: () => this.uploadService.updateReadingListCoverImage(this.readingList.id, '', false),
-      selected: { url: this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)), title: this.readingList.title }
-    };
+    this.chooserConfig = this.coverChooserConfigFactory.forReadingList(this.readingList);
 
     this.reviewGroup.get('title')?.valueChanges.pipe(
       debounceTime(100),

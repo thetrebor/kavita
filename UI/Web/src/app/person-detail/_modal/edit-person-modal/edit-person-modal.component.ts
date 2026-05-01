@@ -21,7 +21,11 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {PersonService} from "../../../_services/person.service";
 import {translate, TranslocoDirective} from '@jsverse/transloco';
-import {CoverImageChooserComponent, ICoverImageChooserConfig} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
+import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
+import {
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from "../../../_services/cover-chooser-config-factory.service";
 import {concat, map, of} from "rxjs";
 import {UploadService} from "../../../_services/upload.service";
 import {ImageService} from "../../../_services/image.service";
@@ -65,6 +69,7 @@ export class EditPersonModalComponent implements OnInit {
   protected readonly accountService = inject(AccountService);
   protected readonly toastr = inject(ToastrService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   protected readonly Tabs = Tabs;
 
@@ -84,7 +89,7 @@ export class EditPersonModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: ICoverImageChooserConfig = {};
+  chooserConfig: CoverImageChooserConfig = {};
   fetchDisabled: boolean = false;
   /**
    * Suffix to include in the tooltip for external ids if they support characters
@@ -102,11 +107,7 @@ export class EditPersonModalComponent implements OnInit {
       this.editForm.get('hardcoverId')!.setValue(this.person.hardcoverId || '');
 
       this.editForm.addControl('coverImageLocked', new FormControl(this.person.coverImageLocked, []));
-      this.chooserConfig = {
-        isLocked: this.person.coverImageLocked,
-        resetFunc: () => this.uploadService.updatePersonCoverImage(this.person.id, '', false),
-        selected: { url: this.imageService.getPersonImage(this.person.id), title: this.person.name }
-      };
+      this.chooserConfig = this.coverChooserConfigFactory.forPerson(this.person);
 
       const roles = (this.person.roles ?? []);
       if (roles.length === 1 && roles.includes(PersonRole.Character)) {

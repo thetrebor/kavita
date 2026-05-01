@@ -1,0 +1,29 @@
+﻿using Kavita.Models.DTOs.Common;
+using Kavita.Models.DTOs.Scrobbling;
+
+namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+#nullable enable
+
+/// <summary>
+/// Requests for Cover Images from Kavita+
+/// </summary>
+public sealed record ExternalCoverRequestDto
+{
+    public string? SeriesName { get; set; }
+    public string? AltSeriesName { get; set; }
+
+    public int? AniListId { get; set; }
+    public long? MalId { get; set; }
+    public long? MetronId { get; set; }
+    public string? ComicVineId { get; set; }
+    public int? MangabakaId { get; set; }
+    public int? HardcoverId { get; set; }
+    public int? CbrId { get; set; }
+
+    public PlusMediaFormat MediaFormat { get; set; }
+
+    /// <summary>When true, only volume/volume_back type images are returned.</summary>
+    public bool VolumesOnly { get; set; }
+    /// <summary>When set, restrict results to this specific volume number.</summary>
+    public float? VolumeNumber { get; set; }
+}

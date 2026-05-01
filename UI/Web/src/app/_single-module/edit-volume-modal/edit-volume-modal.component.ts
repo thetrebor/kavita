@@ -6,7 +6,11 @@ import {NgClass} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
-import {CoverImageChooserComponent, ICoverImageChooserConfig} from "../../cards/cover-image-chooser/cover-image-chooser.component";
+import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
+import {
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from "../../_services/cover-chooser-config-factory.service";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -79,6 +83,7 @@ export class EditVolumeModalComponent implements OnInit {
   private readonly downloadService = inject(DownloadService);
   private readonly volumeService = inject(VolumeService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   @Input({required: true}) volume!: Volume;
   @Input({required: true}) libraryType!: LibraryType;
@@ -90,7 +95,7 @@ export class EditVolumeModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: ICoverImageChooserConfig = {};
+  chooserConfig: CoverImageChooserConfig = {};
 
   tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType), this.blacklist);
   /**
@@ -120,11 +125,7 @@ export class EditVolumeModalComponent implements OnInit {
 
     this.editForm.addControl('coverImageLocked', new FormControl(this.volume.coverImageLocked, []));
 
-    this.chooserConfig = {
-      isLocked: this.volume.coverImageLocked,
-      resetFunc: () => this.uploadService.updateVolumeCoverImage(this.volume.id, '', false),
-      selected: { url: this.imageService.getVolumeCoverImage(this.volume.id), title: this.volume.name || ('Volume ' + this.volume.minNumber) }
-    };
+    this.chooserConfig = this.coverChooserConfigFactory.forVolume(this.volume, this.libraryType);
   }
 
   close() {

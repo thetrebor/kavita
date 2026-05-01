@@ -33,7 +33,11 @@ import {SeriesService} from 'src/app/_services/series.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
-import {CoverImageChooserComponent, ICoverImageChooserConfig} from "../../cover-image-chooser/cover-image-chooser.component";
+import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
+import {
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from "../../../_services/cover-chooser-config-factory.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
@@ -73,9 +77,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
   protected readonly breakpointService = inject(BreakpointService);
-
-
-
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   tag = input.required<UserCollection>();
 
@@ -91,7 +93,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageDirty = false;
   coverImageReset = false;
-  chooserConfig: ICoverImageChooserConfig = {};
+  chooserConfig: CoverImageChooserConfig = {};
   formGroup = new FormGroup({'filter': new FormControl('', [])});
 
 
@@ -148,11 +150,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
-    this.chooserConfig = {
-      isLocked: this.tag().coverImageLocked,
-      resetFunc: () => this.uploadService.updateCollectionCoverImage(this.tag().id, '', false),
-      selected: { url: this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag().id)), title: this.tag().title }
-    };
+    this.chooserConfig = this.coverChooserConfigFactory.forCollection(tag);
     this.loadSeries();
   }
 

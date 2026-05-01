@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal} from '@angular/core';
 import {FileSystemFileEntry, NgxFileDropEntry} from 'ngx-file-drop';
-import {Observable} from 'rxjs';
 import {ToastrService} from 'ngx-toastr';
 import {ImageService} from 'src/app/_services/image.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -13,21 +12,8 @@ import {
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
+import {CoverImageChooserConfig, CoverImageOption} from "../../_services/cover-chooser-config-factory.service";
 
-export interface CoverImageOption {
-  url: string;
-  title: string;
-  subtitle?: string;
-}
-
-export interface ICoverImageChooserConfig {
-  isLocked?: boolean | null;
-  resetFunc?: () => Observable<unknown>;
-  selected?: CoverImageOption;
-  volumeFunc?: Observable<CoverImageOption[]>;
-  chapterFunc?: Observable<CoverImageOption[]>;
-  kavitaplusFunc?: Observable<CoverImageOption[]>;
-}
 
 @Component({
   selector: 'app-cover-image-chooser',
@@ -53,7 +39,7 @@ export class CoverImageChooserComponent {
   private readonly uploadService = inject(UploadService);
   private readonly colorscapeService = inject(ColorscapeService);
 
-  config = input<ICoverImageChooserConfig>({});
+  config = input<CoverImageChooserConfig>({});
 
   coverChanged = output<{ isDirty: boolean; url: string }>();
   resetClicked = output();
@@ -142,11 +128,11 @@ export class CoverImageChooserComponent {
     const fn = this.config().resetFunc;
     if (fn) {
       fn().subscribe(() => {
-        this.resetClicked.emit(undefined);
+        this.resetClicked.emit();
         this.selectedOptionKey.set(null);
       });
     } else {
-      this.resetClicked.emit(undefined);
+      this.resetClicked.emit();
       this.selectedOptionKey.set(null);
     }
   }

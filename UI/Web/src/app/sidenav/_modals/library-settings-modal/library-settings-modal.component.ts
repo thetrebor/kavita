@@ -39,7 +39,11 @@ import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DatePipe, NgTemplateOutlet} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
-import {CoverImageChooserComponent, ICoverImageChooserConfig} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
+import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
+import {
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from "../../../_services/cover-chooser-config-factory.service";
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
@@ -95,6 +99,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly metadataService = inject(MetadataService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   protected readonly LibraryType = LibraryType;
   protected readonly Tabs = Tabs;
@@ -105,7 +110,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   @Input({required: true}) library!: Library | undefined;
 
   active = Tabs.General;
-  chooserConfig: ICoverImageChooserConfig = {};
+  chooserConfig: CoverImageChooserConfig = {};
   protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') +
   `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
   `<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>`;
@@ -165,13 +170,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.cdRef.markForCheck();
     }
 
-    this.chooserConfig = {
-      isLocked: null,
-      resetFunc: () => this.uploadService.updateLibraryCoverImage(this.library!.id, '', false),
-      selected: (this.library?.coverImage != null && this.library?.coverImage !== '')
-        ? { url: this.imageService.getLibraryCoverImage(this.library!.id), title: this.library!.name }
-        : undefined
-    };
+    this.chooserConfig = this.coverChooserConfigFactory.forLibrary(this.library);
     this.cdRef.markForCheck();
 
     if (this.library && !(this.library.type === LibraryType.Manga || this.library.type === LibraryType.LightNovel) ) {

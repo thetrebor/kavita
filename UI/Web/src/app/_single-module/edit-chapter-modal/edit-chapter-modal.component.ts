@@ -34,10 +34,11 @@ import {concat, forkJoin, Observable, of, tap} from "rxjs";
 import {map} from "rxjs/operators";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
+import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
 import {
-  CoverImageChooserComponent,
-  ICoverImageChooserConfig
-} from "../../cards/cover-image-chooser/cover-image-chooser.component";
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from "../../_services/cover-chooser-config-factory.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {MangaFormat} from "../../_models/manga-format";
@@ -116,6 +117,7 @@ export class EditChapterModalComponent implements OnInit {
   protected readonly breakpointService = inject(BreakpointService);
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly libraryService = inject(LibraryService);
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   @Input({required: true}) chapter!: Chapter;
   @Input({required: true}) libraryType!: LibraryType;
@@ -127,7 +129,7 @@ export class EditChapterModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: ICoverImageChooserConfig = {};
+  chooserConfig: CoverImageChooserConfig = {};
 
 
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
@@ -167,11 +169,7 @@ export class EditChapterModalComponent implements OnInit {
 
     this.size = (<Chapter>this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
 
-    this.chooserConfig = {
-      isLocked: this.chapter.coverImageLocked,
-      resetFunc: () => this.uploadService.updateChapterCoverImage(this.chapter.id, '', false),
-      selected: { url: this.imageService.getChapterCoverImage(this.chapter.id), title: this.chapter.titleName || this.chapter.range || ('Chapter ' + this.chapter.number) }
-    };
+    this.chooserConfig = this.coverChooserConfigFactory.forChapter(this.chapter, this.libraryType);
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));

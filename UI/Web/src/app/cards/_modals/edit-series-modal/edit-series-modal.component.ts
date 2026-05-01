@@ -23,7 +23,8 @@ import {concat, delay, forkJoin, last, Observable, of, tap} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {setupLanguageSettings, TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
-import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
+import {Chapter, LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
+import {Volume} from 'src/app/_models/volume';
 import {Genre} from 'src/app/_models/metadata/genre';
 import {AgeRatingDto} from 'src/app/_models/metadata/age-rating-dto';
 import {Language} from 'src/app/_models/metadata/language';
@@ -39,11 +40,7 @@ import {SeriesService} from 'src/app/_services/series.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
-import {
-  CoverImageChooserComponent,
-  CoverImageOption,
-  ICoverImageChooserConfig
-} from "../../cover-image-chooser/cover-image-chooser.component";
+import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
 import {EditSeriesRelationComponent} from "../../edit-series-relation/edit-series-relation.component";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
@@ -53,11 +50,10 @@ import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
-import {translate, TranslocoModule} from "@jsverse/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
-import {Volume} from "../../../_models/volume";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../../_services/license.service";
@@ -73,8 +69,11 @@ import {
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {MangaFormat} from "../../../_models/manga-format";
-import {EntityTitleService} from "../../../_services/entity-title.service";
 import {LibraryType} from "../../../_models/library/library";
+import {
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from "../../../_services/cover-chooser-config-factory.service";
 
 
 @Component({
@@ -129,7 +128,7 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly breakpointService = inject(BreakpointService);
-  private readonly entityTitleService = inject(EntityTitleService);
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   protected readonly Tabs = Tabs;
   protected readonly PersonRole = PersonRole;
@@ -169,7 +168,7 @@ export class EditSeriesModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: ICoverImageChooserConfig = {};
+  chooserConfig: CoverImageChooserConfig = {};
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
@@ -289,31 +288,7 @@ export class EditSeriesModalComponent implements OnInit {
       this.seriesVolumes = volumes;
       this.isLoadingVolumes.set(false);
 
-      const looseLeafChapterVolume = this.seriesVolumes.filter((v: Volume) => v.minNumber === LooseLeafOrDefaultNumber || v.minNumber === SpecialVolumeNumber);
-
-      let looseLeafChapters: Observable<CoverImageOption[]> | undefined = undefined;
-      if (looseLeafChapterVolume.length > 0) {
-        const opts = looseLeafChapterVolume.flatMap(v =>
-          v.chapters.map((c: Chapter) => ({
-            url: this.imageService.getChapterCoverImage(c.id),
-            title: this.entityTitleService.computeTitle(c, this.libraryType, { prioritizeTitleName: false, includeVolume: false })
-          } as CoverImageOption))
-        );
-        looseLeafChapters = of(opts);
-      }
-
-      const nonLooseLeafChapterVolumes: Volume[] = this.seriesVolumes.filter((v: Volume) => v.minNumber !== LooseLeafOrDefaultNumber && v.minNumber !== SpecialVolumeNumber);
-
-
-      this.chooserConfig = {
-        isLocked: this.series.coverImageLocked,
-        resetFunc: () => this.uploadService.updateSeriesCoverImage(this.series.id, '', false),
-        selected: { url: this.imageService.getSeriesCoverImage(this.series.id), title: this.series.name },
-        volumeFunc: nonLooseLeafChapterVolumes.length > 0
-          ? of(nonLooseLeafChapterVolumes.map(v => ({ url: this.imageService.getVolumeCoverImage(v.id), title: this.formatVolumeName(v) } as CoverImageOption)))
-          : undefined,
-        chapterFunc: looseLeafChapters,
-      };
+      this.chooserConfig = this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType);
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
@@ -339,14 +314,7 @@ export class EditSeriesModalComponent implements OnInit {
     });
   }
 
-  formatVolumeName(volume: Volume) {
-    if (volume.minNumber === LooseLeafOrDefaultNumber) {
-      return translate('edit-series-modal.loose-leaf-volume');
-    } else if (volume.minNumber === SpecialVolumeNumber) {
-      return translate('edit-series-modal.specials-volume');
-    }
-    return translate('edit-series-modal.volume-num') + ' ' + volume.name;
-  }
+
 
 
   setupTypeaheads() {
@@ -613,6 +581,10 @@ export class EditSeriesModalComponent implements OnInit {
 
   async runTask(action: ActionItem<Series>) {
 
+  }
+
+  protected formatVolumeName(volume: Volume) {
+    return this.coverChooserConfigFactory.formatVolumeName(volume);
   }
 
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;

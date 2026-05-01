@@ -1,0 +1,131 @@
+import {inject, Injectable} from '@angular/core';
+import {Observable, of} from "rxjs";
+import {UploadService} from "./upload.service";
+import {ImageService} from "./image.service";
+import {Series} from "../_models/series";
+import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../_models/chapter";
+import {Volume} from "../_models/volume";
+import {EntityTitleService} from "./entity-title.service";
+import {Library, LibraryType} from "../_models/library/library";
+import {translate} from "@jsverse/transloco";
+import {UserCollection} from "../_models/collection-tag";
+import {ReadingList} from "../_models/reading-list/reading-list";
+import {Person} from "../_models/metadata/person";
+
+export interface CoverImageOption {
+  url: string;
+  title: string;
+  subtitle?: string;
+}
+
+export interface CoverImageChooserConfig {
+  isLocked?: boolean | null;
+  resetFunc?: () => Observable<unknown>;
+  selected?: CoverImageOption;
+  volumeFunc?: Observable<CoverImageOption[]>;
+  chapterFunc?: Observable<CoverImageOption[]>;
+  kavitaplusFunc?: Observable<CoverImageOption[]>;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class CoverChooserConfigFactoryService {
+
+  private readonly uploadService = inject(UploadService);
+  private readonly imageService = inject(ImageService);
+  private readonly entityTitleService = inject(EntityTitleService);
+
+
+  public forSeries(series: Series, volumes: Volume[], libraryType: LibraryType) {
+    const looseLeafChapterVolume = volumes.filter((v: Volume) => v.minNumber === LooseLeafOrDefaultNumber || v.minNumber === SpecialVolumeNumber);
+
+    let looseLeafChapters: Observable<CoverImageOption[]> | undefined = undefined;
+    if (looseLeafChapterVolume.length > 0) {
+      const opts = looseLeafChapterVolume.flatMap(v =>
+        v.chapters.map((c: Chapter) => ({
+          url: this.imageService.getChapterCoverImage(c.id),
+          title: this.entityTitleService.computeTitle(c, libraryType, { prioritizeTitleName: false, includeVolume: false })
+        } as CoverImageOption))
+      );
+      looseLeafChapters = of(opts);
+    }
+
+    const nonLooseLeafChapterVolumes: Volume[] = volumes.filter((v: Volume) => v.minNumber !== LooseLeafOrDefaultNumber && v.minNumber !== SpecialVolumeNumber);
+
+
+    return {
+      isLocked: series.coverImageLocked,
+      resetFunc: () => this.uploadService.updateSeriesCoverImage(series.id, '', false),
+      selected: { url: this.imageService.getSeriesCoverImage(series.id), title: series.name },
+      volumeFunc: nonLooseLeafChapterVolumes.length > 0
+        ? of(nonLooseLeafChapterVolumes.map(v => ({ url: this.imageService.getVolumeCoverImage(v.id),
+          title: this.entityTitleService.computeTitle(v, libraryType, { prioritizeTitleName: false, includeVolume: true }) } as CoverImageOption)))
+        : undefined,
+      chapterFunc: looseLeafChapters,
+    };
+  }
+
+  public forVolume(volume: Volume, libraryType: LibraryType): CoverImageChooserConfig {
+
+    return {
+      isLocked: volume.coverImageLocked,
+      resetFunc: () => this.uploadService.updateVolumeCoverImage(volume.id, '', false),
+      selected: {
+        url: this.imageService.getVolumeCoverImage(volume.id),
+        title: this.entityTitleService.computeTitle(volume, libraryType, { prioritizeTitleName: false, includeVolume: true, fallbackToVolume: true })
+      },
+    };
+  }
+
+  public forChapter(chapter: Chapter, libraryType: LibraryType): CoverImageChooserConfig {
+    return {
+      isLocked: chapter.coverImageLocked,
+      resetFunc: () => this.uploadService.updateChapterCoverImage(chapter.id, '', false),
+      selected: { url: this.imageService.getChapterCoverImage(chapter.id), title: this.entityTitleService.computeTitle(chapter, libraryType) },
+    };
+  }
+
+  public forCollection(tag: UserCollection): CoverImageChooserConfig {
+    return {
+      isLocked: tag.coverImageLocked,
+      resetFunc: () => this.uploadService.updateCollectionCoverImage(tag.id, '', false),
+      selected: { url: this.imageService.randomize(this.imageService.getCollectionCoverImage(tag.id)), title: tag.title },
+    };
+  }
+
+  public forReadingList(list: ReadingList): CoverImageChooserConfig {
+    return {
+      isLocked: list.coverImageLocked,
+      resetFunc: () => this.uploadService.updateReadingListCoverImage(list.id, '', false),
+      selected: { url: this.imageService.randomize(this.imageService.getReadingListCoverImage(list.id)), title: list.title },
+    };
+  }
+
+  public forPerson(person: Person): CoverImageChooserConfig {
+    return {
+      isLocked: person.coverImageLocked,
+      resetFunc: () => this.uploadService.updatePersonCoverImage(person.id, '', false),
+      selected: { url: this.imageService.getPersonImage(person.id), title: person.name },
+    };
+  }
+
+  public forLibrary(library: Library | undefined): CoverImageChooserConfig {
+    return {
+      isLocked: null,
+      resetFunc: library ? () => this.uploadService.updateLibraryCoverImage(library.id, '', false) : undefined,
+      selected: (library?.coverImage != null && library?.coverImage !== '')
+        ? { url: this.imageService.getLibraryCoverImage(library!.id), title: library!.name }
+        : undefined,
+    };
+  }
+
+  public formatVolumeName(volume: Volume) {
+    if (volume.minNumber === LooseLeafOrDefaultNumber) {
+      return translate('edit-series-modal.loose-leaf-volume');
+    } else if (volume.minNumber === SpecialVolumeNumber) {
+      return translate('edit-series-modal.specials-volume');
+    }
+    return translate('edit-series-modal.volume-num') + ' ' + volume.name;
+  }
+}

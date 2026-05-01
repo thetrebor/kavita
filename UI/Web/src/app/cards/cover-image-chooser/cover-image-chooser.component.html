@@ -128,13 +128,6 @@
       </ul>
       <div [ngbNavOutlet]="nav"></div>
     } @else {
-      <app-file-drag-and-drop-upload
-        (dropped)="dropped($event)"
-        (urlSubmitted)="loadImage($event)"
-        [showUrlUpload]="true"
-        [acceptableExtensions]="acceptableExtensions"
-        [uploadText]="t('upload-continued')"
-      />
       <div class="row g-0 chooser" style="padding-top: 0.625rem">
         @if (config().selected; as sel) {
           <div class="clickable col-auto" tabindex="0" (click)="selectOption(sel, Tabs.Current)"

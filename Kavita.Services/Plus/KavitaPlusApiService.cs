@@ -84,6 +84,18 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ReceiveJson<ExternalSeriesDetailDto>();
     }
 
+    public async Task<ExternalSeriesDetailDto> GetCoverImages(ExternalCoverRequestDto request,
+        CancellationToken ct = default)
+    {
+        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct)).AniListAccessToken;
+
+        return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/covers")
+            .WithKavitaPlusHeaders(license, token)
+            .PostJsonAsync(request, cancellationToken: ct)
+            .ReceiveJson<ExternalSeriesDetailDto>();
+    }
+
     /// <summary>
     /// Send a GET request to K+
     /// </summary>
@@ -114,4 +126,5 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .PostJsonAsync(body)
             .ReceiveJson<T>();
     }
+
 }
