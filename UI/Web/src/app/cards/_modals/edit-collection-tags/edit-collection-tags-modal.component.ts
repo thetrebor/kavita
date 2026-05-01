@@ -90,6 +90,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
   active = Tabs.General;
   selectedCover: string = '';
   coverImageDirty = false;
+  coverImageReset = false;
   chooserConfig: ICoverImageChooserConfig = {};
   formGroup = new FormGroup({'filter': new FormControl('', [])});
 
@@ -199,7 +200,11 @@ export class EditCollectionTagsModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.dismiss();
+    if (this.coverImageReset) {
+      this.modal.close(modalSaved(this.tag(), true));
+    } else {
+      this.modal.dismiss();
+    }
   }
 
   async save() {
@@ -246,9 +251,9 @@ export class EditCollectionTagsModalComponent implements OnInit {
   }
 
   handleReset() {
-    this.collectionTagForm.patchValue({
-      coverImageLocked: false
-    });
+    this.coverImageReset = true;
+    this.collectionTagForm.patchValue({ coverImageLocked: false });
+    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
     this.cdRef.markForCheck();
   }
 

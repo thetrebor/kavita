@@ -241,7 +241,11 @@ export class EditChapterModalComponent implements OnInit {
 
 
   close() {
-    this.modal.dismiss();
+    if (this.coverImageReset) {
+      this.modal.close(modalSaved(this.chapter, true));
+    } else {
+      this.modal.dismiss();
+    }
   }
 
   save() {
@@ -505,9 +509,8 @@ export class EditChapterModalComponent implements OnInit {
 
   handleReset() {
     this.coverImageReset = true;
-    this.editForm.patchValue({
-      coverImageLocked: false
-    });
+    this.editForm.patchValue({ coverImageLocked: false });
+    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
     this.cdRef.markForCheck();
   }
 

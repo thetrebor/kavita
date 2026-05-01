@@ -63,6 +63,7 @@ export class EditReadingListModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageDirty = false;
   coverImageLocked: boolean = false;
+  coverImageReset = false;
   chooserConfig: ICoverImageChooserConfig = {};
   active = Tabs.General;
   tags: ReadingListTag[] = [];
@@ -110,7 +111,11 @@ export class EditReadingListModalComponent implements OnInit {
   }
 
   close() {
-    this.ngModal.dismiss();
+    if (this.coverImageReset) {
+      this.ngModal.close(modalSaved(this.readingList, true));
+    } else {
+      this.ngModal.dismiss();
+    }
   }
 
   setupTagSettings() {
@@ -181,7 +186,9 @@ export class EditReadingListModalComponent implements OnInit {
   }
 
   handleReset() {
+    this.coverImageReset = true;
     this.coverImageLocked = false;
+    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
     this.cdRef.markForCheck();
   }
 

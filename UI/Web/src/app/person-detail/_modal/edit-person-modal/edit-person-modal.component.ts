@@ -121,7 +121,11 @@ export class EditPersonModalComponent implements OnInit {
 
 
   close() {
-    this.modal.dismiss();
+    if (this.coverImageReset) {
+      this.modal.close(modalSaved(this.person, true));
+    } else {
+      this.modal.dismiss();
+    }
   }
 
   save() {
@@ -161,9 +165,8 @@ export class EditPersonModalComponent implements OnInit {
 
   handleReset() {
     this.coverImageReset = true;
-    this.editForm.patchValue({
-      coverImageLocked: false
-    });
+    this.editForm.patchValue({ coverImageLocked: false });
+    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
     this.cdRef.markForCheck();
   }
 

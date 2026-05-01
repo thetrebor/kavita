@@ -514,7 +514,11 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.dismiss();
+    if (this.coverImageReset) {
+      this.modal.close(modalSaved(this.series, true));
+    } else {
+      this.modal.dismiss();
+    }
   }
 
   updateWeblinks(items: Array<string>) {
@@ -595,9 +599,8 @@ export class EditSeriesModalComponent implements OnInit {
 
   handleReset() {
     this.coverImageReset = true;
-    this.editSeriesForm.patchValue({
-      coverImageLocked: false
-    });
+    this.editSeriesForm.patchValue({ coverImageLocked: false });
+    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
     this.cdRef.markForCheck();
   }
 
