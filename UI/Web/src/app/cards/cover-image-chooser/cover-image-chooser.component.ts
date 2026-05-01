@@ -68,6 +68,7 @@ export class CoverImageChooserComponent {
   private volumeLoaded = false;
   private chapterLoaded = false;
   private kavitaPlusLoaded = false;
+  private hasInit = false;
 
   activeTabId = Tabs.Current;
 
@@ -84,6 +85,8 @@ export class CoverImageChooserComponent {
       const hasVolume = (this.volumeImages() ?? []).length > 0;
       const hasChapter = (this.chapterImages() ?? []).length > 0;
 
+      if (this.hasInit) return;
+
       if (hasSelected) {
         this.activeTabId = Tabs.Current;
       } else if (hasUploadedImages) {
@@ -93,6 +96,8 @@ export class CoverImageChooserComponent {
       } else if (hasChapter) {
         this.activeTabId = Tabs.Chapters;
       }
+
+      this.hasInit = true;
     });
   }
 
@@ -110,7 +115,6 @@ export class CoverImageChooserComponent {
     img.src = option.url;
     img.onload = () => {
       const base64 = this.colorscapeService.getBase64Image(img);
-      this.selectedOptionKey.set(base64);
       this.coverChanged.emit({ isDirty, url: base64 });
     };
     img.onerror = () => {
