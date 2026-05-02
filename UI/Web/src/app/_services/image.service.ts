@@ -106,7 +106,9 @@ export class ImageService {
     const base = volumeId == null ? 'series' : 'volume';
     const volStr = volumeId == null ? '' : `&volumeId=${volumeId}`;
     return this.httpClient.get<{url: string, type: 'series' | string, volumeNumber?: number, language?: string}[]>(`${this.baseUrl}image/external/${base}?seriesId=${seriesId}${volStr}`).pipe(
-      map(res => res.map(d => {
+      map(res => res
+        .filter(res => res.type != 'volume_back')
+        .map(d => {
         let title = '';
         if (d.type === 'series') {
           title = d.language ?? '';
@@ -115,7 +117,8 @@ export class ImageService {
         }
 
         return {url: d.url, title: title} as CoverImageOption;
-      }))
+      })
+      )
     );
   }
 

@@ -14,6 +14,8 @@ import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
 import {CoverImageChooserConfig, CoverImageOption} from "../../_services/cover-chooser-config-factory.service";
 import {NgTemplateOutlet} from "@angular/common";
+import {marked} from "marked";
+import Image = marked.Tokens.Image;
 
 
 @Component({
@@ -97,16 +99,18 @@ export class CoverImageChooserComponent {
       return;
     }
 
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.src = option.url;
-    img.onload = () => {
-      const base64 = this.colorscapeService.getBase64Image(img);
-      this.coverChanged.emit({ isDirty, url: base64 });
-    };
-    img.onerror = () => {
-      this.toastr.error(translate('errors.rejected-cover-upload'));
-    };
+    this.uploadService.uploadByUrl(option.url).subscribe(filename => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = this.imageService.getCoverUploadImage(filename);
+      img.onload = () => {
+        const base64 = this.colorscapeService.getBase64Image(img);
+        this.coverChanged.emit({ isDirty, url: base64 });
+      };
+      img.onerror = () => {
+        this.toastr.error(translate('errors.rejected-cover-upload'));
+      };
+    });
   }
 
   onTabActivate(tabId: Tabs) {
