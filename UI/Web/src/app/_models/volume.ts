@@ -36,4 +36,5 @@ export interface Volume extends IHasCover, IHasReadingTime, IHasProgress, IHasMe
   metronId: number;
   comicVineId: string | null;
   mangaBakaId: number;
+  cbrId: number;
 }

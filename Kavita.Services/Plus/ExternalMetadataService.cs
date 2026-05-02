@@ -596,6 +596,7 @@ public class ExternalMetadataService : IExternalMetadataService
             MangabakaId = series.MangaBakaId,
             MalId = series.MalId,
             MetronId = series.MetronId,
+            CbrId = series.CbrId
         };
 
         if (volumeId.HasValue)
@@ -616,11 +617,12 @@ public class ExternalMetadataService : IExternalMetadataService
             ct) ?? [];
     }
 
-    private static string GetCoversCacheKey(int seriesId, int? volumeId = null)
+    private static string GetCoversCacheKey(int seriesId, int? volumeId = null, int? chapterId = null)
     {
-        return volumeId.HasValue
-            ? $"covers-series-{seriesId}-vol-{volumeId}"
-            : $"covers-series-{seriesId}";
+        var chapterPart = chapterId.HasValue ? $"-chp-{chapterId}" : string.Empty;
+        var volumePart = volumeId.HasValue ? $"-vol-{volumeId}" : string.Empty;
+
+        return $"covers-series-{seriesId}{volumePart}{chapterPart}";
     }
 
     private async Task<List<SeriesStaffDto>> SetNameAndAddAliases(MetadataSettingsDto settings, IList<SeriesStaffDto>? staff)
@@ -1161,6 +1163,14 @@ public class ExternalMetadataService : IExternalMetadataService
             series.MalId = externalMetadata.MALId.Value;
             madeModification = true;
         }
+
+        if (externalMetadata.CbrId is > 0)
+        {
+            series.CbrId = externalMetadata.CbrId.Value;
+            madeModification = true;
+        }
+
+        // TODO: Add the rest of the Ids when Kavita+ has them
 
         return madeModification;
     }

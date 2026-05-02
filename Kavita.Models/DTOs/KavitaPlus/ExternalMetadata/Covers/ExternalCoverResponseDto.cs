@@ -1,14 +1,26 @@
 ﻿namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 #nullable enable
 
+public enum ExternalCoverImageType
+{
+    Series,
+    Volume,
+    VolumeBack,
+    Chapter,
+    Issue,
+    Banner,
+    Season,
+    Audiobook,
+    Other
+}
+
 public sealed record ExternalCoverResponseDto
 {
     public required string Url { get; set; } = string.Empty;
-    /// <summary>
-    /// "series" for the series-level cover; otherwise the MangaBaka image type
-    /// (volume, volume_back, banner, chapter, season, audiobook, other).
-    /// </summary>
-    public string? Type { get; set; }
-    public float? VolumeNumber { get; set; }
     public string? Language { get; set; }
+    public ExternalCoverImageType? Type { get; set; }
+    /// <summary>
+    /// Represents Volume or Chapter Number
+    /// </summary>
+    public float? Number { get; set; }
 }

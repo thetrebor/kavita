@@ -7,6 +7,7 @@ import {map} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {CoverImageOption} from "./cover-chooser-config-factory.service";
 import {translate} from "@jsverse/transloco";
+import {ExternalCoverImageType, ExternalCoverResponse} from "../_models/kavitaplus/external-cover-response";
 
 @Injectable({
   providedIn: 'root'
@@ -105,18 +106,36 @@ export class ImageService {
   getKavitaPlusSeriesCoverImages(seriesId: number, volumeId: number | null = null) {
     const base = volumeId == null ? 'series' : 'volume';
     const volStr = volumeId == null ? '' : `&volumeId=${volumeId}`;
-    return this.httpClient.get<{url: string, type: 'series' | string, volumeNumber?: number, language?: string}[]>(`${this.baseUrl}image/external/${base}?seriesId=${seriesId}${volStr}`).pipe(
+    return this.httpClient.get<ExternalCoverResponse[]>(`${this.baseUrl}image/external/${base}?seriesId=${seriesId}${volStr}`).pipe(
       map(res => res
-        .filter(res => res.type != 'volume_back')
+        .filter(res => [ExternalCoverImageType.Volume, ExternalCoverImageType.Chapter, ExternalCoverImageType.Series, ExternalCoverImageType.Issue].includes(res.type))
         .map(d => {
-        let title = '';
-        if (d.type === 'series') {
-          title = d.language ?? '';
-        } else {
-          title = translate('common.volume-num-shorthand', {num: d.volumeNumber}) + (d.language ? ` (${d.language})` : '');
-        }
+          const langSuffix = d.language ? ` (${d.language})` : '';
 
-        return {url: d.url, title: title} as CoverImageOption;
+          let label: string;
+          switch (d.type) {
+            case ExternalCoverImageType.Series:
+              label = d.language ?? '';
+              break;
+            case ExternalCoverImageType.Volume:
+              label = translate('common.volume-num-shorthand', { num: d.number });
+              break;
+            case ExternalCoverImageType.Chapter:
+              label = translate('common.chapter-num-shorthand', { num: d.number });
+              break;
+            case ExternalCoverImageType.Issue:
+              label = translate('common.issue-hash-num', { num: d.number });
+              break;
+            default:
+              label = '';
+          }
+
+          // Series uses language as the label itself; others append it as a suffix
+          const title = d.type === ExternalCoverImageType.Series
+            ? label
+            : label + langSuffix;
+
+          return { url: d.url, title } as CoverImageOption;
       })
       )
     );

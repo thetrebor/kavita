@@ -26,4 +26,6 @@ public sealed record ExternalCoverRequestDto
     public bool VolumesOnly { get; set; }
     /// <summary>When set, restrict results to this specific volume number.</summary>
     public float? VolumeNumber { get; set; }
+    /// <summary>When set, restrict results to this specific chapter/issue number.</summary>
+    public float? ChapterNumber { get; set; }
 }

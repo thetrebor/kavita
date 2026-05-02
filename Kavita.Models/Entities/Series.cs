@@ -123,6 +123,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public long MetronId { get; set; }
     public string ComicVineId { get; set; }
     public long MangaBakaId { get; set; }
+    public int CbrId { get; set; }
     #endregion
 
     public SeriesMetadata Metadata { get; set; } = null!;

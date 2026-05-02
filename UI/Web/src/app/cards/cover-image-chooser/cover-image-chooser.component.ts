@@ -84,6 +84,8 @@ export class CoverImageChooserComponent {
         this.activeTabId = Tabs.Volumes;
       } else if (hasChapter) {
         this.activeTabId = Tabs.Chapters;
+      } else {
+        this.activeTabId = Tabs.Uploaded;
       }
 
       this.hasInit = true;
