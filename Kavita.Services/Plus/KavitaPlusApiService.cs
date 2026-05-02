@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -85,16 +86,24 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ReceiveJson<ExternalSeriesDetailDto>();
     }
 
-    public async Task<List<ExternalCoverResponseDto>> GetCoverImagesAsync(ExternalCoverRequestDto request,
+    public async Task<IList<ExternalCoverResponseDto>> GetCoverImagesAsync(ExternalCoverRequestDto request,
         CancellationToken ct = default)
     {
-        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct)).AniListAccessToken;
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct)).AniListAccessToken;
 
-        return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/covers")
-            .WithKavitaPlusHeaders(license, token)
-            .PostJsonAsync(request, cancellationToken: ct)
-            .ReceiveJson<List<ExternalCoverResponseDto>>();
+            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/covers")
+                .WithKavitaPlusHeaders(license, token)
+                .PostJsonAsync(request, cancellationToken: ct)
+                .ReceiveJson<List<ExternalCoverResponseDto>>();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an issue getting cover images from Kavita+ for Series ({SeriesId})", request.SeriesName);
+            return Array.Empty<ExternalCoverResponseDto>();
+        }
     }
 
     /// <summary>

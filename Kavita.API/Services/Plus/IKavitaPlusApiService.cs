@@ -24,5 +24,5 @@ public interface IKavitaPlusApiService
     Task<IList<ExternalSeriesMatchDto>> MatchSeriesAsync(MatchSeriesRequestDto request, CancellationToken ct = default);
     Task<SeriesDetailPlusApiDto> GetSeriesDetailAsync(PlusSeriesRequestDto request, CancellationToken ct = default);
     Task<ExternalSeriesDetailDto> GetSeriesDetailByIdAsync(ExternalMetadataIdsDto request, CancellationToken ct = default);
-    Task<List<ExternalCoverResponseDto>> GetCoverImagesAsync(ExternalCoverRequestDto request, CancellationToken ct = default);
+    Task<IList<ExternalCoverResponseDto>> GetCoverImagesAsync(ExternalCoverRequestDto request, CancellationToken ct = default);
 }

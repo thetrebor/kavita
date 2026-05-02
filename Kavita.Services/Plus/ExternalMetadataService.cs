@@ -11,6 +11,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
+using Kavita.API.Services;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
@@ -52,6 +53,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IEventHub _eventHub;
     private readonly ICoverDbService _coverDbService;
     private readonly IKavitaPlusApiService _kavitaPlusApiService;
+    private readonly IFileCacheService _fileCacheService;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     public static readonly HashSet<LibraryType> NonEligibleLibraryTypes =
         [LibraryType.Comic, LibraryType.Book, LibraryType.Image];
@@ -68,7 +70,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService,
-        IKavitaPlusApiService kavitaPlusApiService)
+        IKavitaPlusApiService kavitaPlusApiService, IFileCacheService fileCacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -78,6 +80,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _eventHub = eventHub;
         _coverDbService = coverDbService;
         _kavitaPlusApiService = kavitaPlusApiService;
+        _fileCacheService = fileCacheService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -287,6 +290,7 @@ public class ExternalMetadataService : IExternalMetadataService
         series.IsBlacklisted = false;
         series.DontMatch = false;
         _unitOfWork.SeriesRepository.Update(series);
+        _fileCacheService.InvalidatePrefix(GetCoversCacheKey(seriesId), FileCacheService.KavitaPlusCacheDirectory);
 
         // Refetch metadata with a Direct lookup
         try
@@ -351,6 +355,7 @@ public class ExternalMetadataService : IExternalMetadataService
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
+            _fileCacheService.InvalidatePrefix(GetCoversCacheKey(seriesId), FileCacheService.KavitaPlusCacheDirectory);
         }
 
         _unitOfWork.SeriesRepository.Update(series);
@@ -601,7 +606,21 @@ public class ExternalMetadataService : IExternalMetadataService
             payload.VolumesOnly = true;
         }
 
-        return await _kavitaPlusApiService.GetCoverImagesAsync(payload, ct);
+        var cacheKey = GetCoversCacheKey(seriesId, volumeId);
+
+        return await _fileCacheService.GetOrFetchAsync<IList<ExternalCoverResponseDto>>(
+            cacheKey,
+            FileCacheService.KavitaPlusCacheDirectory,
+            TimeSpan.FromDays(7),
+            async _ => await _kavitaPlusApiService.GetCoverImagesAsync(payload, ct),
+            ct) ?? [];
+    }
+
+    private static string GetCoversCacheKey(int seriesId, int? volumeId = null)
+    {
+        return volumeId.HasValue
+            ? $"covers-series-{seriesId}-vol-{volumeId}"
+            : $"covers-series-{seriesId}";
     }
 
     private async Task<List<SeriesStaffDto>> SetNameAndAddAliases(MetadataSettingsDto settings, IList<SeriesStaffDto>? staff)
