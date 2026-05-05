@@ -24,6 +24,7 @@ public sealed record ExternalCoverRequestDto
 
     /// <summary>When true, only volume/volume_back type images are returned.</summary>
     public bool VolumesOnly { get; set; }
+    public bool ChaptersOnly { get; set; }
     /// <summary>When set, restrict results to this specific volume number.</summary>
     public float? VolumeNumber { get; set; }
     /// <summary>When set, restrict results to this specific chapter/issue number.</summary>

@@ -613,6 +613,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId.Value, 0, ct: ct);
             if (chapter == null) throw new KavitaException("Volume not found");
             payload.ChapterNumber = chapter.MinNumber;
+            payload.ChaptersOnly = true;
             payload.VolumesOnly = false;
         }
 
