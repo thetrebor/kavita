@@ -457,6 +457,7 @@ public class ExternalMetadataService : IExternalMetadataService
             externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
             externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
             externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
+            series.MangaBakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
@@ -1167,6 +1168,12 @@ public class ExternalMetadataService : IExternalMetadataService
         if (externalMetadata.CbrId is > 0)
         {
             series.CbrId = externalMetadata.CbrId.Value;
+            madeModification = true;
+        }
+
+        if (externalMetadata.MangabakaId is > 0)
+        {
+            series.MangaBakaId = externalMetadata.MangabakaId.Value;
             madeModification = true;
         }
 
@@ -1930,6 +1937,8 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? seriesId, CancellationToken ct = default)
     {
+        // TODO: This is the primary point where we need to integrate ExternalIds since weblink parsing is already handled
+        // TODO: Ensure when we set/update weblinks via API, we reparse and update external ids (if they are empty only)
         var payload = new ExternalMetadataIdsDto()
         {
             AniListId = aniListId,
