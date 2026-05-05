@@ -93,11 +93,12 @@ public interface IExternalMetadataService
     Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId, CancellationToken ct = default);
 
     /// <summary>
-    /// Get cover images for a Series or Volume
+    /// Get cover images for a Series/Volume/Chapter
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="volumeId">If null, will be a Series request</param>
+    /// <param name="volumeId">If set, will get a volume</param>
+    /// <param name="chapterId">If set, will filter to chapters (overrides volume)</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, CancellationToken ct = default);
+    Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, int? chapterId = null, CancellationToken ct = default);
 }

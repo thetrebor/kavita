@@ -169,7 +169,7 @@ export class EditChapterModalComponent implements OnInit {
 
     this.size = (<Chapter>this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
 
-    this.chooserConfig = this.coverChooserConfigFactory.forChapter(this.chapter, this.libraryType);
+    this.chooserConfig = this.coverChooserConfigFactory.forChapter(this.chapter, this.libraryType, this.seriesId);
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));

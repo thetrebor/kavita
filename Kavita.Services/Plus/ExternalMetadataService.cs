@@ -579,7 +579,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return madeModification;
     }
 
-    public async Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, CancellationToken ct = default)
+    public async Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, int? chapterId = null, CancellationToken ct = default)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
         if (series == null) throw new KavitaException("Series not found");
@@ -608,7 +608,15 @@ public class ExternalMetadataService : IExternalMetadataService
             payload.VolumesOnly = true;
         }
 
-        var cacheKey = GetCoversCacheKey(seriesId, volumeId);
+        if (chapterId.HasValue)
+        {
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId.Value, 0, ct: ct);
+            if (chapter == null) throw new KavitaException("Volume not found");
+            payload.ChapterNumber = chapter.MinNumber;
+            payload.VolumesOnly = false;
+        }
+
+        var cacheKey = GetCoversCacheKey(seriesId, volumeId, chapterId);
 
         return await _fileCacheService.GetOrFetchAsync<IList<ExternalCoverResponseDto>>(
             cacheKey,

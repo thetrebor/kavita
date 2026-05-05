@@ -71,7 +71,6 @@ export class CoverChooserConfigFactoryService {
   }
 
   public forVolume(volume: Volume, libraryType: LibraryType): CoverImageChooserConfig {
-
     return {
       isLocked: volume.coverImageLocked,
       resetFunc: () => this.uploadService.updateVolumeCoverImage(volume.id, '', false),
@@ -84,11 +83,13 @@ export class CoverChooserConfigFactoryService {
     };
   }
 
-  public forChapter(chapter: Chapter, libraryType: LibraryType): CoverImageChooserConfig {
+  public forChapter(chapter: Chapter, libraryType: LibraryType, seriesId: number): CoverImageChooserConfig {
     return {
       isLocked: chapter.coverImageLocked,
       resetFunc: () => this.uploadService.updateChapterCoverImage(chapter.id, '', false),
       selected: { url: this.imageService.getChapterCoverImage(chapter.id), title: this.entityTitleService.computeTitle(chapter, libraryType) },
+      kavitaplusFunc: this.licenseService.hasValidLicense() ?
+        this.imageService.getKavitaPlusSeriesCoverImages(seriesId, null, chapter.id) : undefined
     };
   }
 

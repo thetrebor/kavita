@@ -103,10 +103,11 @@ export class ImageService {
     return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey()}`;
   }
 
-  getKavitaPlusSeriesCoverImages(seriesId: number, volumeId: number | null = null) {
-    const base = volumeId == null ? 'series' : 'volume';
+  getKavitaPlusSeriesCoverImages(seriesId: number, volumeId: number | null = null, chapterId: number | null = null) {
+    const base = (chapterId === null) ? volumeId == null ? 'series' : 'volume' : 'chapter';
     const volStr = volumeId == null ? '' : `&volumeId=${volumeId}`;
-    return this.httpClient.get<ExternalCoverResponse[]>(`${this.baseUrl}image/external/${base}?seriesId=${seriesId}${volStr}`).pipe(
+    const chStr = chapterId == null ? '' : `&chapterId=${volumeId}`;
+    return this.httpClient.get<ExternalCoverResponse[]>(`${this.baseUrl}image/external/${base}?seriesId=${seriesId}${volStr}${chStr}`).pipe(
       map(res => res
         .filter(res => [ExternalCoverImageType.Volume, ExternalCoverImageType.Chapter, ExternalCoverImageType.Series, ExternalCoverImageType.Issue].includes(res.type))
         .map(d => {

@@ -272,7 +272,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     [SeriesAccess]
     public async Task<ActionResult<List<ExternalCoverResponseDto>>> GetExternalCoverImagesForSeries(int seriesId)
     {
-        return Ok(await externalMetadataService.GetExternalCovers(seriesId, null, HttpContext.RequestAborted));
+        return Ok(await externalMetadataService.GetExternalCovers(seriesId, null, null, HttpContext.RequestAborted));
     }
 
     [HttpGet("external/volume")]
@@ -280,6 +280,14 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     [VolumeAccess]
     public async Task<ActionResult<List<ExternalCoverResponseDto>>> GetExternalCoverImagesForVolume(int seriesId, int volumeId)
     {
-        return Ok(await externalMetadataService.GetExternalCovers(seriesId, volumeId, HttpContext.RequestAborted));
+        return Ok(await externalMetadataService.GetExternalCovers(seriesId, volumeId, null, HttpContext.RequestAborted));
+    }
+
+    [HttpGet("external/chapter")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [ChapterAccess]
+    public async Task<ActionResult<List<ExternalCoverResponseDto>>> GetExternalCoverImagesForChapter(int seriesId, int chapterId)
+    {
+        return Ok(await externalMetadataService.GetExternalCovers(seriesId, null, chapterId, HttpContext.RequestAborted));
     }
 }
