@@ -105,6 +105,18 @@ public class FileCacheServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetOrFetchAsync_ShouldCacheReturnsFalse_ReturnsValueWithoutWritingFile()
+    {
+        var result = await _sut.GetOrFetchAsync(
+            "key", Bucket, Ttl,
+            _ => Task.FromResult<string?>("value"),
+            shouldCache: _ => false);
+
+        Assert.Equal("value", result);
+        Assert.False(File.Exists(CachePath("key")));
+    }
+
+    [Fact]
     public async Task GetOrFetchAsync_KeySanitization_WritesToSanitizedPath()
     {
         await _sut.GetOrFetchAsync("Hello World/Test", Bucket, Ttl,
@@ -140,7 +152,7 @@ public class FileCacheServiceTests : IDisposable
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             _sut.GetOrFetchAsync("key", Bucket, Ttl,
-                _ => Task.FromResult<string?>("value"), cts.Token));
+                _ => Task.FromResult<string?>("value"), ct: cts.Token));
     }
 
     // ── Invalidate ────────────────────────────────────────────────────────────

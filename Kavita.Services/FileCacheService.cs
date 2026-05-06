@@ -30,7 +30,9 @@ public partial class FileCacheService : IFileCacheService
     }
 
     public async Task<T?> GetOrFetchAsync<T>(string key, string cacheBucket, TimeSpan ttl,
-        Func<CancellationToken, Task<T?>> fetch, CancellationToken ct = default)
+        Func<CancellationToken, Task<T?>> fetch,
+        Func<T?, bool>? shouldCache = null,
+        CancellationToken ct = default)
     {
         var safeKey = SanitizeKey(key);
         var path = GetPath(safeKey, cacheBucket);
@@ -60,6 +62,7 @@ public partial class FileCacheService : IFileCacheService
             _logger.LogDebug("[FileCache] Miss: {Key}", safeKey);
             var result = await fetch(ct);
             if (Equals(result, default(T))) return result;
+            if (shouldCache != null && !shouldCache(result)) return result;
 
             try
             {

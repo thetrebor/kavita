@@ -17,10 +17,10 @@ public enum ExternalCoverImageType
 public sealed record ExternalCoverResponseDto
 {
     public required string Url { get; set; } = string.Empty;
-    public string? Language { get; set; }
     public ExternalCoverImageType? Type { get; set; }
     /// <summary>
     /// Represents Volume or Chapter Number
     /// </summary>
     public float? Number { get; set; }
+    public string? Language { get; set; }
 }

@@ -20,6 +20,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
@@ -619,12 +620,22 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var cacheKey = GetCoversCacheKey(seriesId, volumeId, chapterId);
 
-        return await _fileCacheService.GetOrFetchAsync<IList<ExternalCoverResponseDto>>(
+        var result = await _fileCacheService.GetOrFetchAsync<KPlusResult<IList<ExternalCoverResponseDto>>>(
             cacheKey,
             FileCacheService.KavitaPlusCacheDirectory,
             TimeSpan.FromDays(7),
             async _ => await _kavitaPlusApiService.GetCoverImagesAsync(payload, ct),
-            ct) ?? [];
+            shouldCache: r => r?.IsSuccess == true,
+            ct: ct);
+
+        if (result is null || !result.IsSuccess)
+        {
+            _logger.LogWarning("[Covers] Failed to retrieve covers for Series {SeriesId}: {Error}",
+                seriesId, result?.ErrorMessage);
+            return [];
+        }
+
+        return result.Data ?? [];
     }
 
     private static string GetCoversCacheKey(int seriesId, int? volumeId = null, int? chapterId = null)

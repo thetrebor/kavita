@@ -9,6 +9,7 @@ using Kavita.API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
@@ -86,7 +87,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ReceiveJson<ExternalSeriesDetailDto>();
     }
 
-    public async Task<IList<ExternalCoverResponseDto>> GetCoverImagesAsync(ExternalCoverRequestDto request,
+    public async Task<KPlusResult<IList<ExternalCoverResponseDto>>> GetCoverImagesAsync(ExternalCoverRequestDto request,
         CancellationToken ct = default)
     {
         try
@@ -94,15 +95,16 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
             var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct)).AniListAccessToken;
 
-            return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/covers")
+            return await (Configuration.KavitaPlusApiUrl + "/api/v3/metadata/covers")
                 .WithKavitaPlusHeaders(license, token)
                 .PostJsonAsync(request, cancellationToken: ct)
-                .ReceiveJson<List<ExternalCoverResponseDto>>();
+                .ReceiveJson<KPlusResult<IList<ExternalCoverResponseDto>>>();
         }
         catch (Exception ex)
         {
+            // TODO: How should I handle this? swallow and return nothing
             logger.LogError(ex, "There was an issue getting cover images from Kavita+ for Series ({SeriesId})", request.SeriesName);
-            return Array.Empty<ExternalCoverResponseDto>();
+            return KPlusResult<IList<ExternalCoverResponseDto>>.Failure(ex.Message);
         }
     }
 
