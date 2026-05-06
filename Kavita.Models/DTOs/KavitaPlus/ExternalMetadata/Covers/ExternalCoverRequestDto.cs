@@ -19,6 +19,7 @@ public sealed record ExternalCoverRequestDto
     public long? MangabakaId { get; set; }
     public long? HardcoverId { get; set; }
     public int? CbrId { get; set; }
+    public bool IsStandAlone { get; set; }
 
     public PlusMediaFormat MediaFormat { get; set; }
 

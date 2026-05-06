@@ -582,7 +582,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public async Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, int? chapterId = null, CancellationToken ct = default)
     {
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Chapters, ct: ct);
         if (series == null) throw new KavitaException("Series not found");
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId, ct);
@@ -598,7 +598,8 @@ public class ExternalMetadataService : IExternalMetadataService
             MangabakaId = series.MangaBakaId,
             MalId = series.MalId,
             MetronId = series.MetronId,
-            CbrId = series.CbrId
+            CbrId = series.CbrId,
+            IsStandAlone = series.Volumes.Sum(v => v.Chapters.Count) == 1, // TODO: Temp code, update to series field
         };
 
         if (volumeId.HasValue)

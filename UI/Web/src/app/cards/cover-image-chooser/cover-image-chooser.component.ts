@@ -54,6 +54,7 @@ export class CoverImageChooserComponent {
   protected readonly chapterImages = signal<CoverImageOption[] | null>(null);
   protected readonly uploadedImages = signal<CoverImageOption[]>([]);
   protected readonly kavitaplusImages = signal<CoverImageOption[]>([]);
+  protected readonly kavitaplusImagesLoaded = signal(false);
   protected readonly otherImages = signal<CoverImageOption[]>([]);
   protected readonly selectedOptionKey = signal<string | null>(null);
 
@@ -124,7 +125,10 @@ export class CoverImageChooserComponent {
       this.config().chapterFunc!.subscribe(items => {this.chapterImages.set(items)});
     } else if (tabId === Tabs.KavitaPlus && !this.kavitaPlusLoaded && this.config().kavitaplusFunc) {
       this.kavitaPlusLoaded = true;
-      this.config().kavitaplusFunc!.subscribe(items => {this.kavitaplusImages.set(items)});
+      this.config().kavitaplusFunc!.subscribe(items => {
+        this.kavitaplusImages.set(items);
+        this.kavitaplusImagesLoaded.set(true);
+      });
     } else if (tabId === Tabs.Other && !this.otherLoaded && this.config().otherFunc) {
       this.otherLoaded = true;
       this.config().otherFunc!.subscribe(items => {this.otherImages.set(items)});

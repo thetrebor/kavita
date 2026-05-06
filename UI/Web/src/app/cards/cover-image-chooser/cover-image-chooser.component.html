@@ -105,7 +105,7 @@
         <li [ngbNavItem]="Tabs.KavitaPlus">
           <a ngbNavLink>{{ Tabs.KavitaPlus | tabTitle }}</a>
           <ng-template ngbNavContent>
-            <ng-container *ngTemplateOutlet="imageChooserTab; context: { images: kavitaplusImages(), tabId: Tabs.KavitaPlus }" />
+            <ng-container *ngTemplateOutlet="imageChooserTab; context: { images: kavitaplusImages(), tabId: Tabs.KavitaPlus, loading: !kavitaplusImagesLoaded() }" />
           </ng-template>
         </li>
       }
@@ -114,8 +114,8 @@
     <div [ngbNavOutlet]="nav"></div>
   </div>
 
-  <ng-template #imageChooserTab let-images="images" let-tabId="tabId">
-    @if (images === null) {
+  <ng-template #imageChooserTab let-images="images" let-tabId="tabId" let-loading="loading">
+    @if (images === null || loading) {
       <div class="d-flex justify-content-center mt-3">
         <div class="spinner-border" role="status">
           <span class="visually-hidden">{{ t('loading') }}</span>
