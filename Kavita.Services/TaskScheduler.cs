@@ -273,6 +273,7 @@ public class TaskScheduler : ITaskScheduler
 
         // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+
         var randomMinute = Rnd.Next(0, 60);
+        _logger.LogDebug("Scheduling KavitaPlus Scrobbling Task every hour @ {Minute}m", randomMinute);
         RecurringJob.AddOrUpdate(ProcessScrobblingEventsId,
             () => _scrobblingService.ProcessUpdatesSinceLastSync(CancellationToken.None),
             Cron.Hourly(randomMinute), RecurringJobOptions);
