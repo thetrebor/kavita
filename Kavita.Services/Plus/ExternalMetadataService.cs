@@ -615,7 +615,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (chapterId.HasValue)
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId.Value, 0, ct: ct);
-            if (chapter == null) throw new KavitaException("Volume not found");
+            if (chapter == null) throw new KavitaException("Chapter not found");
             payload.ChapterNumber = chapter.MinNumber;
             payload.ChaptersOnly = true;
             payload.VolumesOnly = false;

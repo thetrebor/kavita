@@ -1608,7 +1608,9 @@
         "applied": "{{theme-manager.applied}}",
         "reset-tab": "Reset",
         "no-images": "No images available",
-        "kavita-plus-coming-soon": "Kavita+ cover images coming soon"
+        "loading": "{{common.loading}}",
+        "select-image-alt": "Select an image",
+        "download-cover": "Download Cover"
     },
 
     "download-indicator": {

@@ -176,7 +176,7 @@ export class EditPersonModalComponent implements OnInit {
       if (imgUrl) {
         this.toastr.success(translate('toasts.person-image-downloaded'));
         this.fetchDisabled = true;
-        this.coverChooser?.addImage({ url: imgUrl, title: 'Downloaded Cover' });
+        this.coverChooser?.addImage({ url: imgUrl, title: translate('cover-image-chooser.download-cover') });
         this.cdRef.markForCheck();
       }
     });

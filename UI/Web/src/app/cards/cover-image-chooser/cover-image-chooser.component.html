@@ -23,31 +23,6 @@
       </div>
     }
 
-<!--    @if (hasTabs()) {-->
-<!--      -->
-<!--    } @else {-->
-<!--      <div class="row g-0 chooser" style="padding-top: 0.625rem">-->
-<!--        @if (config().selected; as sel) {-->
-<!--          <div class="clickable col-auto" tabindex="0" (click)="selectOption(sel, Tabs.Current)"-->
-<!--               [class.selected]="selectedOptionKey() === sel.url">-->
-<!--            <app-image height="232.91px" width="160px" [imageUrl]="sel.url" />-->
-<!--            @if (sel.title) {-->
-<!--              <p class="cover-title">{{ sel.title }}</p>-->
-<!--            }-->
-<!--          </div>-->
-<!--        }-->
-<!--        @for (opt of uploadedImages(); track opt.url) {-->
-<!--          <div class="clickable col-auto" tabindex="0" (click)="selectOption(opt, Tabs.Uploaded)"-->
-<!--               [class.selected]="selectedOptionKey() === opt.url">-->
-<!--            <app-image height="232.91px" width="160px" [imageUrl]="opt.url" />-->
-<!--            @if (opt.title) {-->
-<!--              <p class="cover-title">{{ opt.title }}</p>-->
-<!--            }-->
-<!--          </div>-->
-<!--        }-->
-<!--      </div>-->
-<!--    }-->
-
     <ul ngbNav #nav="ngbNav" (navChange)="onTabActivate($event.nextId)" [(activeId)]="activeTabId" class="nav-tabs">
       <li [ngbNavItem]="Tabs.Uploaded">
         <a ngbNavLink>{{ Tabs.Uploaded | tabTitle }}</a>
@@ -129,7 +104,7 @@
           <div class="clickable col-auto"
                tabindex="0"
                role="button"
-               [attr.aria-label]="opt.title || t('select-image')"
+               [attr.aria-label]="opt.title || t('select-image-alt')"
                [attr.aria-pressed]="selectedOptionKey() === opt.url"
                (click)="selectOption(opt, tabId)"
                (keydown.enter)="selectOption(opt, tabId)"

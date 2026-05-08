@@ -95,13 +95,23 @@ public class FileCacheServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetOrFetchAsync_FetchReturnsNull_ReturnsNullWithoutWritingFile()
+    public async Task GetOrFetchAsync_FetchReturnsNull_ReturnsNullWithoutWritingFile_WhenNoCache()
+    {
+        var result = await _sut.GetOrFetchAsync<string>("key", Bucket, Ttl,
+            _ => Task.FromResult<string?>(null), r => r != null);
+
+        Assert.Null(result);
+        Assert.False(File.Exists(CachePath("key")));
+    }
+
+    [Fact]
+    public async Task GetOrFetchAsync_FetchReturnsNull_ReturnsNullAndWritesFile_WhenNoCacheGate()
     {
         var result = await _sut.GetOrFetchAsync<string>("key", Bucket, Ttl,
             _ => Task.FromResult<string?>(null));
 
         Assert.Null(result);
-        Assert.False(File.Exists(CachePath("key")));
+        Assert.True(File.Exists(CachePath("key")));
     }
 
     [Fact]

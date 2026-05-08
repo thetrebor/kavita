@@ -192,9 +192,7 @@ export class EditSeriesModalComponent implements OnInit {
       this.libraryName = names[this.series.libraryId];
     });
 
-    this.libraryService.getLibraryType(this.series.libraryId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(type => {
-      this.libraryType = type;
-    });
+
 
     this.initSeries = Object.assign({}, this.series);
 
@@ -284,15 +282,20 @@ export class EditSeriesModalComponent implements OnInit {
     });
 
     this.isLoadingVolumes.set(true);
-    this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-      this.seriesVolumes = volumes;
-      this.isLoadingVolumes.set(false);
 
+    forkJoin({volumes: this.seriesService.getVolumes(this.series.id), libraryType: this.libraryService.getLibraryType(this.series.libraryId)}).subscribe(res => {
+      const volumes = res.volumes;
+      const libraryType = res.libraryType;
+
+      this.seriesVolumes = volumes;
+      this.libraryType = libraryType;
+      this.isLoadingVolumes.set(false);
       this.chooserConfig = this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType);
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
       });
+
       this.seriesVolumes.forEach(vol => {
         vol.volumeFiles = vol.chapters?.map((c: Chapter) => c.files.map((f: any) => {
           // TODO: Identify how to fix this hack
@@ -312,6 +315,7 @@ export class EditSeriesModalComponent implements OnInit {
       }
       this.cdRef.markForCheck();
     });
+
   }
 
 

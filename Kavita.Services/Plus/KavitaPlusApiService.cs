@@ -103,7 +103,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         catch (Exception ex)
         {
             // TODO: How should I handle this? swallow and return nothing
-            logger.LogError(ex, "There was an issue getting cover images from Kavita+ for Series ({SeriesId})", request.SeriesName);
+            logger.LogError(ex, "There was an issue getting cover images from Kavita+ for Series ({SeriesName})", request.SeriesName);
             return KPlusResult<IList<ExternalCoverResponseDto>>.Failure(ex.Message);
         }
     }

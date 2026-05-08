@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, Component, effect, inject, input, output, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  effect,
+  inject,
+  input,
+  output,
+  signal
+} from '@angular/core';
 import {FileSystemFileEntry, NgxFileDropEntry} from 'ngx-file-drop';
 import {ToastrService} from 'ngx-toastr';
 import {ImageService} from 'src/app/_services/image.service';
@@ -14,8 +23,6 @@ import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
 import {CoverImageChooserConfig, CoverImageOption} from "../../_services/cover-chooser-config-factory.service";
 import {NgTemplateOutlet} from "@angular/common";
-import {marked} from "marked";
-import Image = marked.Tokens.Image;
 
 
 @Component({
@@ -36,12 +43,13 @@ import Image = marked.Tokens.Image;
   styleUrls: ['./cover-image-chooser.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CoverImageChooserComponent {
+export class CoverImageChooserComponent  {
 
   public readonly imageService = inject(ImageService);
   private readonly toastr = inject(ToastrService);
   private readonly uploadService = inject(UploadService);
   private readonly colorscapeService = inject(ColorscapeService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   config = input<CoverImageChooserConfig>({});
 
@@ -71,9 +79,11 @@ export class CoverImageChooserComponent {
     effect(() => {
       // Keep track of the default tab
       const hasUploadedImages = this.uploadedImages().length > 0;
-      const hasSelected = this.selectedOptionKey() != null;
+      const hasSelected = this.config().selected;
       const hasVolume = (this.volumeImages() ?? []).length > 0;
       const hasChapter = (this.chapterImages() ?? []).length > 0;
+
+      if (Object.keys(this.config()).length === 0) return;
 
       if (this.hasInit) return;
 
@@ -92,6 +102,7 @@ export class CoverImageChooserComponent {
       this.hasInit = true;
     });
   }
+
 
   selectOption(option: CoverImageOption, sourceTab: Tabs) {
     this.selectedOptionKey.set(option.url);

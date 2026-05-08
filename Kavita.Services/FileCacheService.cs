@@ -47,11 +47,8 @@ public partial class FileCacheService : IFileCacheService
                 {
                     var json = await File.ReadAllTextAsync(path, ct);
                     var cached = JsonSerializer.Deserialize<T>(json, JsonOptions);
-                    if (!Equals(cached, default(T)))
-                    {
-                        _logger.LogDebug("[FileCache] Hit: {Key}", safeKey);
-                        return cached;
-                    }
+                    _logger.LogDebug("[FileCache] Hit: {Key}", safeKey);
+                    return cached;
                 }
                 catch (Exception ex)
                 {
@@ -61,7 +58,6 @@ public partial class FileCacheService : IFileCacheService
 
             _logger.LogDebug("[FileCache] Miss: {Key}", safeKey);
             var result = await fetch(ct);
-            if (Equals(result, default(T))) return result;
             if (shouldCache != null && !shouldCache(result)) return result;
 
             try
