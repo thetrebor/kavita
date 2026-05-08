@@ -597,7 +597,7 @@ public class ExternalMetadataService : IExternalMetadataService
             AniListId = series.AniListId,
             ComicVineId = series.ComicVineId,
             HardcoverId = series.HardcoverId,
-            MangabakaId = series.MangaBakaId,
+            MangabakaId = (int) series.MangaBakaId,
             MalId = series.MalId,
             MetronId = series.MetronId,
             CbrId = series.CbrId,

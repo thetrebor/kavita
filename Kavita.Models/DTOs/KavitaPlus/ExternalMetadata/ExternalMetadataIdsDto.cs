@@ -10,7 +10,7 @@ public sealed record ExternalMetadataIdsDto
 {
     public long? MalId { get; set; }
     public int? AniListId { get; set; }
-    public long? MangabakaId { get; set; }
+    public int? MangabakaId { get; set; }
     public int? HardcoverId { get; set; }
     public int? CbrId { get; set; }
 

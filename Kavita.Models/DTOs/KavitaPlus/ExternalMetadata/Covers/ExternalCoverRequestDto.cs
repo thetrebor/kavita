@@ -16,7 +16,7 @@ public sealed record ExternalCoverRequestDto
     public long? MalId { get; set; }
     public long? MetronId { get; set; }
     public string? ComicVineId { get; set; }
-    public long? MangabakaId { get; set; }
+    public int? MangabakaId { get; set; }
     public long? HardcoverId { get; set; }
     public int? CbrId { get; set; }
     public bool IsStandAlone { get; set; }
