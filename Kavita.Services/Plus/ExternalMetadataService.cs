@@ -9,7 +9,6 @@ using Flurl.Http;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
-using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services;
 using Kavita.API.Services.Plus;
