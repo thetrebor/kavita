@@ -184,6 +184,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var potentialAnilistId = WeblinkParser.GetAniListId(dto.Query);
         var potentialMalId = WeblinkParser.GetMalId(dto.Query);
+        var potentialMangabakaId = WeblinkParser.GetMangaBakaId(dto.Query);
 
         var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
         var otherNames = ExtractAlternativeNames(series);
@@ -198,6 +199,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
+        // TODO: Match needs to be overhauled
         var matchRequest = new MatchSeriesRequestDto()
         {
             Format = format,
@@ -206,7 +208,8 @@ public class ExternalMetadataService : IExternalMetadataService
             AlternativeNames = otherNames,
             Year = year,
             AniListId = potentialAnilistId ?? ScrobblingHelper.GetAniListId(series),
-            MalId = potentialMalId ?? ScrobblingHelper.GetMalId(series)
+            MalId = potentialMalId ?? ScrobblingHelper.GetMalId(series),
+            MangabakaId = potentialMangabakaId > 0 ? (int) potentialMangabakaId : (int?) series.MangaBakaId
         };
 
         try
@@ -373,7 +376,8 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="data"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesRequestDto data, bool fromMatchFlow = false, CancellationToken ct = default)
+    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesRequestDto data,
+        bool fromMatchFlow = false, CancellationToken ct = default)
     {
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
