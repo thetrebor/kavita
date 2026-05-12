@@ -405,7 +405,8 @@ public class Startup
             {
                 try
                 {
-                    var licenseService = serviceProvider.GetRequiredService<ILicenseService>();
+                    using var scope = app.ApplicationServices.CreateScope();
+                    var licenseService = scope.ServiceProvider.GetRequiredService<ILicenseService>();
                     await licenseService.HasActiveLicense(true);
                 }
                 catch (Exception ex)
