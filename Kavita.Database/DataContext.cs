@@ -289,6 +289,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion(new AppUserOpdsPreferences())
             .HasColumnType("TEXT")
             .HasDefaultValue(new AppUserOpdsPreferences());
+
+        builder.Entity<AppUser>()
+            .Property(u => u.ScrobbleProviders)
+            .HasJsonConversion(new Dictionary<ScrobbleProvider, AppUserScrobbleProvider>())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new Dictionary<ScrobbleProvider, AppUserScrobbleProvider>());
+
         #endregion
 
         #region AppUserReadingProfile

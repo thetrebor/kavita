@@ -72,19 +72,24 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     public bool AgeRestrictionIncludeUnknowns { get; set; } = false;
 
+    #region KavitaPlus
+
     /// <summary>
     /// The JWT for the user's AniList account. Expires after a year.
     /// </summary>
     /// <remarks>Requires Kavita+ Subscription</remarks>
+    [Obsolete]
     public string? AniListAccessToken { get; set; }
 
     /// <summary>
     /// The Username of the MAL user
     /// </summary>
+    [Obsolete]
     public string? MalUserName { get; set; }
     /// <summary>
     /// The Client ID for the user's MAL account. User should create a client on MAL for this.
     /// </summary>
+    [Obsolete]
     public string? MalAccessToken { get; set; }
 
     /// <summary>
@@ -97,6 +102,13 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     /// <remarks>Kavita+ only</remarks>
     public DateTime ScrobbleEventGenerationRan { get; set; }
+
+    /// <summary>
+    /// Provider tokens, usernames, etc
+    /// </summary>
+    public Dictionary<ScrobbleProvider, AppUserScrobbleProvider> ScrobbleProviders { get; set; } = new();
+
+    #endregion
 
     /// <summary>
     /// The sub returned the by OIDC provider

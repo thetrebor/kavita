@@ -14,6 +14,7 @@ using Kavita.Models.DTOs.Email;
 using Kavita.Models.DTOs.Font;
 using Kavita.Models.DTOs.KavitaPlus.Manage;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.MediaErrors;
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Person;
@@ -411,6 +412,7 @@ public class AutoMapperProfiles : Profile
                 opt => opt.MapFrom(src => src.Chapter));
 
         CreateMap<AppUserAuthKey, AuthKeyDto>();
+        CreateMap<AppUserScrobbleProvider, ScrobbleProviderDto>();
 
 
         #region Deprecated Code
