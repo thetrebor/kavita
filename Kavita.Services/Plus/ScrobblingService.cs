@@ -1193,6 +1193,11 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync(ct);
     }
 
+    public Task SyncProviderInfo(CancellationToken ct = default)
+    {
+        return Task.CompletedTask;
+    }
+
     /// <summary>
     /// Removes all events that have been processed that are 7 days old
     /// </summary>

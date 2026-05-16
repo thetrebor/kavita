@@ -96,6 +96,13 @@ public interface IScrobblingService
     Task CreateEventsFromExistingHistory(int userId = 0, CancellationToken ct = default);
     Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default);
     Task ClearEventsForSeries(int userId, int seriesId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Sync local information for each scrobble provider for all suers
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task SyncProviderInfo(CancellationToken ct = default);
 }
 
 public static class ScrobblingHelper
