@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
 
@@ -14,10 +16,16 @@ public class ScrobbleEvent : IEntityDate
     public long Id { get; set; }
 
     public required ScrobbleEventType ScrobbleEventType { get; set; }
+    /// <summary>
+    /// The provider for this event
+    /// </summary>
+    public ScrobbleProvider ScrobbleProvider { get; set; }
 
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
-
+    public long? MangabakaId { get; set; }
+    /// <remarks>This **MUST** be the book id, not series id!</remarks>>
+    public int? HardcoverId { get; set; }
 
     /// <summary>
     /// Rating for the Series
@@ -38,6 +46,10 @@ public class ScrobbleEvent : IEntityDate
     /// </summary>
     public float? VolumeNumber { get; set; }
     /// <summary>
+    /// The % on the chapter (This is for Chapter-based tracking, i.e. Hardcover)
+    /// </summary>
+    public float? Progress { get; set; }
+    /// <summary>
     /// Has this event been processed and pushed to Provider
     /// </summary>
     public bool IsProcessed { get; set; }
@@ -57,6 +69,9 @@ public class ScrobbleEvent : IEntityDate
 
     public required int SeriesId { get; set; }
     public Series Series { get; set; }
+
+    public int? ChapterId { get; set; }
+    public Chapter? Chapter { get; set; }
 
     public required int LibraryId { get; set; }
     public Library Library { get; set; }

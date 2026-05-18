@@ -29,6 +29,8 @@ public class ExternalSeriesMetadata
     public int CbrId { get; set; }
     public long MalId { get; set; }
     public string GoogleBooksId { get; set; }
+    public long MangabakaId { get; set; }
+    public int HardcoverId { get; set; }
 
     /// <summary>
     /// Data is valid until this time

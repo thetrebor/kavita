@@ -84,7 +84,9 @@ public interface IUserRepository
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId, CancellationToken ct = default);
     Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId, CancellationToken ct = default);
+    Task<List<AppUserChapterRating>> GetChaptersWithRatings(int userId, CancellationToken ct = default);
     Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId, CancellationToken ct = default);
+    Task<List<AppUserChapterRating>> GetChaptersWithReviews(int userId, CancellationToken ct = default);
     Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, int requestingUserId, string? query = null, float? ratingFilter = null, CancellationToken ct = default);
     #endregion
 

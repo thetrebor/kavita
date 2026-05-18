@@ -9,6 +9,7 @@ using Kavita.API.Repositories;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Scrobble;
 using Microsoft.EntityFrameworkCore;
 
@@ -110,12 +111,17 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
         return await context.ScrobbleError.AnyAsync(n => n.SeriesId == seriesId, ct);
     }
 
-    public async Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType,
+    public async Task<ScrobbleEvent?> GetEvent(ScrobbleProvider scrobbleProvider, int userId, int seriesId,
+        int? chapterId, ScrobbleEventType eventType,
         bool isNotProcessed = false, CancellationToken ct = default)
     {
         return await context.ScrobbleEvent
-            .Where(e => e.AppUserId == userId && e.SeriesId == seriesId && e.ScrobbleEventType == eventType)
+            .Where(e => e.ScrobbleProvider == scrobbleProvider
+                        && e.AppUserId == userId
+                        && e.SeriesId == seriesId
+                        && e.ScrobbleEventType == eventType)
             .WhereIf(isNotProcessed, e => !e.IsProcessed)
+            .WhereIf(chapterId.HasValue, e => e.ChapterId == chapterId)
             .OrderBy(e => e.LastModifiedUtc)
             .FirstOrDefaultAsync(ct);
     }

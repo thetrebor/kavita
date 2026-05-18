@@ -42,6 +42,7 @@ public class Library : IEntityDate, IHasCoverImage
     /// Should this library allow Scrobble events to emit from it
     /// </summary>
     /// <remarks>Requires a valid LicenseKey</remarks>
+    [Obsolete("This is no longer used. Scrobbling is now controlled by AppUserScrobbleSettings per user")]
     public bool AllowScrobbling { get; set; } = true;
     /// <summary>
     /// Allow any series within this Library to download metadata.

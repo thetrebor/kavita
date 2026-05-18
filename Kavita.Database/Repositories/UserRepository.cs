@@ -318,12 +318,26 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ToListAsync(ct);
     }
 
+    public Task<List<AppUserChapterRating>> GetChaptersWithRatings(int userId, CancellationToken ct = default)
+    {
+        return context.AppUserChapterRating
+            .Where(cr => cr.AppUserId == userId && cr.Rating > 0)
+            .ToListAsync(ct);
+    }
+
     public async Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId, CancellationToken ct = default)
     {
         return await context.AppUserRating
             .Where(u => u.AppUserId == userId && !string.IsNullOrEmpty(u.Review))
             .Include(u => u.Series)
             .AsSplitQuery()
+            .ToListAsync(ct);
+    }
+
+    public Task<List<AppUserChapterRating>> GetChaptersWithReviews(int userId, CancellationToken ct = default)
+    {
+        return context.AppUserChapterRating
+            .Where(cr => cr.AppUserId == userId && !string.IsNullOrEmpty(cr.Review))
             .ToListAsync(ct);
     }
 

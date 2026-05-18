@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
-using Kavita.API.Services.Helpers;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.User;
 
 namespace Kavita.API.Services.Plus;
 
@@ -37,11 +35,13 @@ public interface IScrobblingService
     /// Create, or update a non-processed, <see cref="ScrobbleEventType.ScoreUpdated"/> event, for the given series
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="seriesId"></param>
+    /// <param name="seriesId"></param> </param>
     /// <param name="rating"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task ScrobbleRatingUpdate(int userId, int seriesId, float rating, CancellationToken ct = default);
+    Task ScrobbleSeriesRatingUpdate(int userId, int seriesId, float rating, CancellationToken ct = default);
+
+    Task ScrobbleChapterRatingUpdate(int userId, int seriesId, int chapterId, float rating, CancellationToken ct = default);
 
     /// <summary>
     /// NOP, until hardcover support has been worked out
@@ -52,16 +52,25 @@ public interface IScrobblingService
     /// <param name="reviewBody"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task ScrobbleReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody, CancellationToken ct = default);
+    Task ScrobbleSeriesReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody, CancellationToken ct = default);
+
+    Task ScrobbleChapterReviewUpdate(int userId, int seriesId, int chapterId, string? reviewTitle, string reviewBody, CancellationToken ct = default);
 
     /// <summary>
     /// Create, or update a non-processed, <see cref="ScrobbleEventType.ChapterRead"/> event, for the given series
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
+    /// <param name="chapterId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task ScrobbleReadingUpdate(int userId, int seriesId, CancellationToken ct = default);
+    Task ScrobbleReadingUpdate(int userId, int seriesId, int chapterId, CancellationToken ct = default);
+
+    Task ScrobbleReadingUpdateForSeries(int userId, int seriesId, CancellationToken ct = default);
+
+    Task ScrobbleReadingUpdateForVolume(int userId, int volumeId, CancellationToken ct = default);
+
+    Task ScrobbleReadingUpdateForChapters(int userId, int seriesId, List<int> chapterIds, CancellationToken ct = default);
 
     /// <summary>
     /// Creates an <see cref="ScrobbleEventType.AddWantToRead"/> or <see cref="ScrobbleEventType.RemoveWantToRead"/> for
@@ -103,6 +112,55 @@ public interface IScrobblingService
     /// <param name="ct"></param>
     /// <returns></returns>
     Task SyncProviderInfo(CancellationToken ct = default);
+}
+
+public interface IScrobbleProviderService
+{
+    /// <summary>
+    /// Create, or update a non-processed, <see cref="ScrobbleEventType.ScoreUpdated"/> event, for the given series
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="series"></param>
+    /// <param name="chapter"></param>
+    /// <param name="rating"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task ScrobbleRatingUpdate(AppUser user, Series series, Chapter? chapter, float rating, CancellationToken ct = default);
+
+    /// <summary>
+    /// NOP, until hardcover support has been worked out
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="series"></param>
+    /// <param name="chapter"></param>
+    /// <param name="reviewTitle"></param>
+    /// <param name="reviewBody"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task ScrobbleReviewUpdate(AppUser user, Series series, Chapter? chapter, string? reviewTitle, string reviewBody, CancellationToken ct = default);
+
+    /// <summary>
+    /// Create, or update a non-processed, <see cref="ScrobbleEventType.ChapterRead"/> event, for the given series
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="series"></param>
+    /// <param name="chapter"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task ScrobbleReadingUpdate(AppUser user, Series series, Chapter chapter, CancellationToken ct = default);
+
+    /// <summary>
+    /// Creates an <see cref="ScrobbleEventType.AddWantToRead"/> or <see cref="ScrobbleEventType.RemoveWantToRead"/> for
+    /// the given series
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="series"></param>
+    /// <param name="chapter"></param>
+    /// <param name="onWantToRead"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    /// <remarks>Only the result of both WantToRead types is send to K+</remarks>
+    Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead, CancellationToken ct = default);
 }
 
 public static class ScrobblingHelper

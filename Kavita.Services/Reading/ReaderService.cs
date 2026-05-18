@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
@@ -272,10 +273,12 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 if (progressDto.PageNum >= totalPages)
                 {
                     // Inform Scrobble service that a chapter is read
-                    BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(userId, progressDto.SeriesId));
+                    BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(userId,
+                        progressDto.SeriesId, progressDto.ChapterId,  CancellationToken.None));
                 }
 
-                BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(progressDto.SeriesId, userId));
+                BackgroundJob.Enqueue(() =>
+                    unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(progressDto.SeriesId, userId));
 
                 return true;
             }

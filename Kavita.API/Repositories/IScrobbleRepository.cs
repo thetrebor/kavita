@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Scrobble;
 
 namespace Kavita.API.Repositories;
@@ -25,13 +26,15 @@ public interface IScrobbleRepository
     /// <summary>
     /// Get all events for a specific user and type
     /// </summary>
+    /// <param name="scrobbleProvider"></param>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
+    /// <param name="chapterId"></param>
     /// <param name="eventType"></param>
     /// <param name="isNotProcessed">If true, only returned not processed events</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType, bool isNotProcessed = false, CancellationToken ct = default);
+    Task<ScrobbleEvent?> GetEvent(ScrobbleProvider scrobbleProvider, int userId, int seriesId, int? chapterId, ScrobbleEventType eventType, bool isNotProcessed = false, CancellationToken ct = default);
     Task<IEnumerable<ScrobbleEvent>> GetUserEventsForSeries(int userId, int seriesId, CancellationToken ct = default);
 
     /// <summary>
