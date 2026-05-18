@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,11 +23,13 @@ where T: IScrobbleProviderService
 {
     protected abstract ScrobbleProvider Provider { get; }
 
+    protected abstract IReadOnlyList<ScrobbleEventType> SupportedEvents { get; }
+
     protected abstract void SetScrobbleIds(ScrobbleEvent evt, Series series, Chapter chapter);
 
     public async Task ScrobbleRatingUpdate(AppUser user, Series series, Chapter? chapter, float rating, CancellationToken ct = default)
     {
-        if (chapter == null) return;
+        if (!SupportedEvents.Contains(ScrobbleEventType.ScoreUpdated) || chapter == null) return;
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, user.Id, series.Id, chapter.Id, ScrobbleEventType.ScoreUpdated, true, ct
@@ -67,7 +70,7 @@ where T: IScrobbleProviderService
     public async Task ScrobbleReviewUpdate(AppUser user, Series series, Chapter? chapter, string? reviewTitle, string reviewBody,
         CancellationToken ct = default)
     {
-        if (chapter == null) return;
+        if (!SupportedEvents.Contains(ScrobbleEventType.Review) || chapter == null) return;
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, user.Id, series.Id, chapter.Id, ScrobbleEventType.Review, true, ct
@@ -110,6 +113,8 @@ where T: IScrobbleProviderService
 
     public async Task ScrobbleReadingUpdate(AppUser user, Series series, Chapter chapter, CancellationToken ct = default)
     {
+        if (!SupportedEvents.Contains(ScrobbleEventType.ChapterRead)) return;
+
         var chapterProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, user.Id, ct);
         var hasAnyProgress = chapterProgress is not { PagesRead: > 0 };
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
@@ -167,6 +172,8 @@ where T: IScrobbleProviderService
     public async Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead,
         CancellationToken ct = default)
     {
+        if (!SupportedEvents.Contains(ScrobbleEventType.AddWantToRead) || !SupportedEvents.Contains(ScrobbleEventType.RemoveWantToRead)) return;
+
         var eventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead;
 
         var existingEvents = (await unitOfWork.ScrobbleRepository.GetUserEventsForSeries(user.Id, series.Id, ct))

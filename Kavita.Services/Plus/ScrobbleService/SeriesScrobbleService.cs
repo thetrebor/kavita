@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,11 +26,13 @@ where T: IScrobbleProviderService
 {
     protected abstract ScrobbleProvider Provider { get; }
 
-    protected abstract void SetScrobbleIds(ScrobbleEvent evt, Series series, Chapter? chapter);
+    protected abstract IReadOnlyList<ScrobbleEventType> SupportedEvents { get; }
+
+    protected abstract void SetScrobbleIds(ScrobbleEvent evt, Series series);
 
     public async Task ScrobbleRatingUpdate(AppUser user, Series series, Chapter? chapter, float rating, CancellationToken ct = default)
     {
-        if (chapter != null) return;
+        if (!SupportedEvents.Contains(ScrobbleEventType.ScoreUpdated) || chapter != null) return;
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, user.Id, series.Id, null, ScrobbleEventType.ScoreUpdated, true, ct
@@ -57,7 +60,7 @@ where T: IScrobbleProviderService
             Rating = rating,
         };
 
-        SetScrobbleIds(scrobbleEvent, series, chapter);
+        SetScrobbleIds(scrobbleEvent, series);
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
@@ -68,7 +71,7 @@ where T: IScrobbleProviderService
     public async Task ScrobbleReviewUpdate(AppUser user, Series series, Chapter? chapter, string? reviewTitle, string reviewBody,
         CancellationToken ct = default)
     {
-        if (chapter != null) return;
+        if (!SupportedEvents.Contains(ScrobbleEventType.Review) || chapter != null) return;
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, user.Id, series.Id, null, ScrobbleEventType.Review, true, ct
@@ -98,7 +101,7 @@ where T: IScrobbleProviderService
             ReviewBody = reviewBody,
         };
 
-        SetScrobbleIds(scrobbleEvent, series, chapter);
+        SetScrobbleIds(scrobbleEvent, series);
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
@@ -108,6 +111,8 @@ where T: IScrobbleProviderService
 
     public async Task ScrobbleReadingUpdate(AppUser user, Series series, Chapter chapter, CancellationToken ct = default)
     {
+        if (!SupportedEvents.Contains(ScrobbleEventType.ChapterRead)) return;
+
         var isAnyProgressOnSeries = await unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(series.Id, user.Id, ct);
 
         var volumeNumber = (int) await unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(series.Id, user.Id, ct);
@@ -157,7 +162,7 @@ where T: IScrobbleProviderService
             Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
         };
 
-        SetScrobbleIds(evt, series, chapter);
+        SetScrobbleIds(evt, series);
 
         if (evt.VolumeNumber is Parser.SpecialVolumeNumber)
         {
@@ -176,6 +181,8 @@ where T: IScrobbleProviderService
     public async Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead,
         CancellationToken ct = default)
     {
+        if (!SupportedEvents.Contains(ScrobbleEventType.AddWantToRead) || !SupportedEvents.Contains(ScrobbleEventType.RemoveWantToRead)) return;
+
         var eventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead;
 
         var existingEvents = (await unitOfWork.ScrobbleRepository.GetUserEventsForSeries(user.Id, series.Id, ct))
@@ -193,7 +200,7 @@ where T: IScrobbleProviderService
             ScrobbleEventType = eventType,
         };
 
-        SetScrobbleIds(scrobbleEvent, series, chapter);
+        SetScrobbleIds(scrobbleEvent, series);
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
