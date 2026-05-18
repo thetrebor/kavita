@@ -267,14 +267,16 @@ public class ScrobblingService : IScrobblingService
     /// Returns the providers for which an
     /// </summary>
     /// <param name="eventType"></param>
-    /// <param name="userPreferences"></param>
+    /// <param name="user">Should include UserPreferences</param>
     /// <param name="series"></param>
     /// <returns></returns>
     private static List<ScrobbleProvider> GetProvidersForScrobbleEvent(
         ScrobbleEventType eventType,
-        AppUserPreferences userPreferences,
+        AppUser user,
         Series series)
     {
+        var userPreferences = user.UserPreferences;
+
         Func<AppUserScrobbleSettings, bool> guard = eventType switch
         {
             ScrobbleEventType.ChapterRead => s => s.ProgressScrobbling,
@@ -290,6 +292,12 @@ public class ScrobblingService : IScrobblingService
         foreach (var scrobbleProvider in Enum.GetValues<ScrobbleProvider>())
         {
             if (!userPreferences.ScrobbleSettings.TryGetValue(scrobbleProvider, out var settings) || !guard(settings))
+            {
+                continue;
+            }
+
+            if (!user.ScrobbleProviders.TryGetValue(scrobbleProvider, out var scrobbleProviderSettings)
+                || string.IsNullOrEmpty(scrobbleProviderSettings.AuthenticationToken))
             {
                 continue;
             }
@@ -347,7 +355,7 @@ public class ScrobblingService : IScrobblingService
 
         var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
 
-        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.Review, user.UserPreferences, series);
+        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.Review, user, series);
         if (providers.Count == 0) return;
 
         _logger.LogInformation("Processing Scrobbling review event for {AppUserId} on {SeriesName}", userId, series.Name);
@@ -389,7 +397,7 @@ public class ScrobblingService : IScrobblingService
 
         var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
 
-        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.ScoreUpdated, user.UserPreferences, series);
+        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.ScoreUpdated, user, series);
         if (providers.Count == 0) return;
 
         _logger.LogInformation("Processing Scrobbling rating event for {AppUserId} on {SeriesName}", userId, series.Name);
@@ -421,7 +429,7 @@ public class ScrobblingService : IScrobblingService
 
         var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
 
-        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.ChapterRead, user.UserPreferences, series);
+        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.ChapterRead, user, series);
         if (providers.Count == 0) return;
 
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
@@ -496,7 +504,7 @@ public class ScrobblingService : IScrobblingService
 
     private async Task ScrobbleReadingUpdatesForChaptersSmart(AppUser user, Series series, List<Chapter> chapters, CancellationToken ct = default)
     {
-        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.ChapterRead, user.UserPreferences, series);
+        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.ChapterRead, user, series);
         if (providers.Count == 0) return;
 
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName} for {Count} chapters",
@@ -537,7 +545,7 @@ public class ScrobblingService : IScrobblingService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ScrobbleSeriesIncludes | SeriesIncludes.Chapters, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
-        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.ChapterRead, user.UserPreferences, series);
+        var providers = GetProvidersForScrobbleEvent(ScrobbleEventType.ChapterRead, user, series);
         if (providers.Count == 0) return;
 
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
@@ -558,13 +566,13 @@ public class ScrobblingService : IScrobblingService
                 // As WantToRead updates are always at a series level, we split here to avoid DB calls
                 if (scrobbleProviderService is ISeriesScrobbleService)
                 {
-                    await scrobbleProviderService.ScrobbleReadingUpdate(user, series, firstChapter, ct);
+                    await scrobbleProviderService.ScrobbleWantToReadUpdate(user, series, firstChapter, onWantToRead, ct);
                 }
                 else
                 {
                     foreach (var chapter in allChapters)
                     {
-                        await scrobbleProviderService.ScrobbleReadingUpdate(user, series, chapter, ct);
+                        await scrobbleProviderService.ScrobbleWantToReadUpdate(user, series, chapter, onWantToRead, ct);
                     }
                 }
             }
@@ -597,7 +605,7 @@ public class ScrobblingService : IScrobblingService
         }
 
         var library = series.Library ?? await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
-        return library != null && ExternalMetadataService.IsPlusEligible(library.Type);
+        return library == null || !ExternalMetadataService.IsPlusEligible(library.Type);
     }
 
     /// <summary>
@@ -1267,8 +1275,12 @@ public class ScrobblingService : IScrobblingService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user != null)
         {
-            user.HasRunScrobbleEventGeneration = true;
-            user.ScrobbleEventGenerationRan = DateTime.UtcNow;
+            foreach (var scrobbleProvider in user.ScrobbleProviders.Values.Where(s => !string.IsNullOrEmpty(s.AuthenticationToken)))
+            {
+                scrobbleProvider.HasRunScrobbleEventGeneration = true;
+                scrobbleProvider.ScrobbleEventGenerationRan = DateTime.UtcNow;
+            }
+
             await _unitOfWork.CommitAsync(ct);
         }
     }

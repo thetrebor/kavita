@@ -50,6 +50,7 @@ where T: IScrobbleProviderService
         var scrobbleEvent = new ScrobbleEvent
         {
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
+            ScrobbleProvider = Provider,
             Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             SeriesId = series.Id,
             ChapterId = chapter.Id,
@@ -92,6 +93,7 @@ where T: IScrobbleProviderService
         var scrobbleEvent = new ScrobbleEvent
         {
             ScrobbleEventType = ScrobbleEventType.Review,
+            ScrobbleProvider = Provider,
             Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             SeriesId = series.Id,
             ChapterId = chapter.Id,
@@ -152,6 +154,7 @@ where T: IScrobbleProviderService
         var evt = new ScrobbleEvent
         {
             ScrobbleEventType = ScrobbleEventType.ChapterRead,
+            ScrobbleProvider = Provider,
             Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
             SeriesId = series.Id,
             ChapterId = chapter.Id,
@@ -184,6 +187,7 @@ where T: IScrobbleProviderService
 
         var scrobbleEvent = new ScrobbleEvent
         {
+            ScrobbleProvider = Provider,
             AppUserId = user.Id,
             LibraryId = series.LibraryId,
             SeriesId = series.Id,

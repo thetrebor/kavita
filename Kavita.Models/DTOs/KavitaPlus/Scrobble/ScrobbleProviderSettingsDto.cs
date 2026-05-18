@@ -31,10 +31,11 @@ public sealed record ScrobbleProviderSettingsDto
     /// </summary>
     /// <remarks>This auto-enables scrobble for newly created libraries</remarks>
     public bool AllLibraries { get; set; }
+
     /// <summary>
     /// Libraries for which scrobbling is enabled
     /// </summary>
-    public List<int> Libraries { get; set; }
+    public List<int> Libraries { get; set; } = [];
     /// <summary>
     /// Highest (inclusive) age rating to scrobble for.
     /// </summary>
