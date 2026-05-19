@@ -115,6 +115,10 @@ where T: IScrobbleProviderService
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.ChapterRead)) return;
 
+        // Series should only create scrobble events for completed chapters
+        var chapterProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, user.Id, ct);
+        if (chapterProgress?.PagesRead < chapter.Pages) return;
+
         var isAnyProgressOnSeries = await unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(series.Id, user.Id, ct);
 
         var volumeNumber = (int) await unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(series.Id, user.Id, ct);
