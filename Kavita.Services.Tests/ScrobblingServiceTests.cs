@@ -987,4 +987,202 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     }
 
     #endregion
+
+    #region Scrobble settings test
+
+    [Fact]
+    public async Task ScrobbleSettings_ScrobbleEventToggles()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList] = new AppUserScrobbleSettings
+        {
+            AllLibraries = true,
+            RatingScrobbling = false,
+            ProgressScrobbling = false,
+            ReviewsScrobbling = false,
+            WantToReadSync = true,
+        };
+
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        await service.ScrobbleReadingUpdate(1, 1, 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleSeriesRatingUpdate(1, 1, 5);
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleChapterRatingUpdate(1, 1, 1, 5);
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleSeriesReviewUpdate(1, 1, string.Empty, "test");
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleChapterReviewUpdate(1, 1, 1, string.Empty, "test");
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleWantToReadUpdate(1, 1, false);
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Single(events);
+        Assert.Equal(ScrobbleEventType.RemoveWantToRead, events[0].ScrobbleEventType);
+    }
+
+    [Fact]
+    public async Task ScrobbleSettings_Libraries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList].AllLibraries = false;
+        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList].Libraries = [1]; // Manga library from base class
+
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        var testLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(await GetTestLibraryIdAsync(context));
+        Assert.NotNull(testLib);
+
+        var lib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1, LibraryIncludes.Series);
+        Assert.NotNull(lib);
+
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithVolume(new VolumeBuilder("Volume 1")
+                .WithChapters([
+                    new ChapterBuilder("1")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("2")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("3")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .WithVolume(new VolumeBuilder("Volume 2")
+                .WithChapters([
+                    new ChapterBuilder("4")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("5")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("6")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .Build();
+
+        lib.Series.Add(series);
+
+        await unitOfWork.CommitAsync();
+
+        var testSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(testLib.Series.First().Id, SeriesIncludes.Chapters);
+        Assert.NotNull(testSeries);
+
+        await service.ScrobbleSeriesRatingUpdate(1, testSeries.Id, 5);
+        await service.ScrobbleSeriesRatingUpdate(1, series.Id, 5);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(series.Id);
+        Assert.Single(events);
+        Assert.Equal(ScrobbleEventType.ScoreUpdated, events[0].ScrobbleEventType);
+        Assert.Equal(series.Id, events[0].SeriesId);
+    }
+
+    [Fact]
+    public async Task ScrobbleSettings_HighestAgeRating()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList].HighestAgeRating = AgeRating.Mature;
+
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        var lib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1, LibraryIncludes.Series);
+        Assert.NotNull(lib);
+
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.R18Plus)
+                .Build())
+            .WithVolume(new VolumeBuilder("Volume 1")
+                .WithChapters([
+                    new ChapterBuilder("1")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("2")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("3")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .WithVolume(new VolumeBuilder("Volume 2")
+                .WithChapters([
+                    new ChapterBuilder("4")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("5")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("6")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .Build();
+
+        lib.Series.Add(series);
+
+        await unitOfWork.CommitAsync();
+
+        await service.ScrobbleSeriesRatingUpdate(1, series.Id, 5);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(series.Id);
+        Assert.Empty(events);
+
+        series.Metadata.AgeRating = AgeRating.Everyone;
+
+        await unitOfWork.CommitAsync();
+
+        await service.ScrobbleSeriesRatingUpdate(1, series.Id, 5);
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(series.Id);
+        Assert.Single(events);
+        Assert.Equal(ScrobbleEventType.ScoreUpdated, events[0].ScrobbleEventType);
+        Assert.Equal(series.Id, events[0].SeriesId);
+    }
+
+    #endregion
 }
