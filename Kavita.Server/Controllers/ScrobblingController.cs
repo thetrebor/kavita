@@ -109,9 +109,17 @@ public class ScrobblingController(
     /// <returns></returns>
     [HttpPost("generate-scrobble-events")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public ActionResult GenerateScrobbleEvents()
+    public async Task<ActionResult> GenerateScrobbleEvents([FromQuery] ScrobbleProvider scrobbleProvider)
     {
-        BackgroundJob.Enqueue(() => scrobblingService.CreateEventsFromExistingHistory(UserId));
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
+        if (user == null) return Unauthorized();
+
+        if (!user.ScrobbleProviders.ContainsKey(scrobbleProvider))
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, "scrobble-provider-not-setup", scrobbleProvider.ToString()));
+        }
+
+        BackgroundJob.Enqueue(() => scrobblingService.CreateEventsFromExistingHistory(scrobbleProvider, UserId));
 
         return Ok();
     }
@@ -272,10 +280,17 @@ public class ScrobblingController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("has-ran-scrobble-gen")]
-    public async Task<ActionResult<bool>> HasRanScrobbleGen()
+    public async Task<ActionResult<bool>> HasRanScrobbleGen(ScrobbleProvider scrobbleProvider)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
-        return Ok(user is {HasRunScrobbleEventGeneration: true});
+        if (user == null) return Unauthorized();
+
+        if (user.ScrobbleProviders.TryGetValue(scrobbleProvider, out var settings))
+        {
+            return Ok(settings.HasRunScrobbleEventGeneration);
+        }
+
+        return Ok(false);
     }
 
     /// <summary>

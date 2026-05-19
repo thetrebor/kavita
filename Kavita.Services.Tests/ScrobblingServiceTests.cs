@@ -704,7 +704,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await readerService.MarkChaptersAsRead(user, 1, [chapter1]);
         await unitOfWork.CommitAsync();
 
-        await service.CreateEventsFromExistingHistory();
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
@@ -740,7 +740,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await unitOfWork.CommitAsync();
 
         // User has no AniListAccessToken, guard at line 1038 should short-circuit
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
@@ -760,8 +760,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
-        user.HasRunScrobbleEventGeneration = true;
+        user.ScrobbleProviders[ScrobbleProvider.AniList].HasRunScrobbleEventGeneration = true;
         await unitOfWork.CommitAsync();
 
         // Seed a rating that would otherwise create an event
@@ -774,7 +773,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         });
         await unitOfWork.CommitAsync();
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
@@ -807,7 +806,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         });
         await unitOfWork.CommitAsync();
 
-        await service.CreateEventsFromExistingHistory();
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
@@ -840,7 +839,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var before = DateTime.UtcNow.AddSeconds(-1);
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
@@ -875,7 +874,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         });
         await unitOfWork.CommitAsync();
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
@@ -910,7 +909,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             .SumAsync(p => p.PagesRead);
         Assert.Equal(ChapterPages, progressPagesRead);
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.NotEmpty(events);
@@ -955,7 +954,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         await unitOfWork.CommitAsync();
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
@@ -979,7 +978,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var before = DateTime.UtcNow.AddSeconds(-1);
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);

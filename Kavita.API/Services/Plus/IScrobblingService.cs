@@ -102,7 +102,7 @@ public interface IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ProcessUpdatesSinceLastSync(CancellationToken ct = default);
 
-    Task CreateEventsFromExistingHistory(int userId = 0, CancellationToken ct = default);
+    Task CreateEventsFromExistingHistory(ScrobbleProvider scrobbleProvider, int userId = 0, CancellationToken ct = default);
     Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default);
     Task ClearEventsForSeries(int userId, int seriesId, CancellationToken ct = default);
 

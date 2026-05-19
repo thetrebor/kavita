@@ -466,11 +466,6 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.ContinueJobWith(jobId, () => _cleanupService.CleanupCacheDirectory());
     }
 
-    public void TurnOnScrobbling(int userId = 0)
-    {
-        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(userId));
-    }
-
     public void CleanupChapters(int[] chapterIds)
     {
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
