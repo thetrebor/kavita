@@ -6,7 +6,7 @@ public record MetadataRequest
     public long? MalId { get; set; }
     public int? HardcoverId { get; set; }
     public int? CbrId { get; set; }
-    public int? MangabakaId { get; set; }
+    public long? MangabakaId { get; set; }
     public string? GoogleBooksId { get; set; }
     public string? MangaDexId { get; set; }
     public long? MetronId { get; set; }

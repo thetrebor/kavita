@@ -9,6 +9,8 @@ using Kavita.Common;
 using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
+using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -202,7 +204,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var (unitOfWork, context, _) = await CreateDatabase();
         var (service, _, kavitaPlusApiService, _, _, _) = await Setup(unitOfWork, context);
 
-        kavitaPlusApiService.PostScrobbleUpdateAsync(null!, "")
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(null!, "")
             .ReturnsForAnyArgs(new ScrobbleResponseDto()
             {
                 ErrorMessage = "Unauthorized"
@@ -211,7 +213,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var evt = await CreateScrobbleEvent(unitOfWork);
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
-            await service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
+            await service.PostScrobbleUpdate(new ScrobbleV3Dto
+            {
+                AuthenticationToken = null,
+                Provider = ScrobbleProvider.AniList,
+                SeriesName = null,
+                Format = (PlusMediaFormat)0,
+            }, "", evt);
         });
         Assert.True(evt.IsErrored);
         Assert.Equal("Kavita+ subscription no longer active", evt.ErrorDetails);
@@ -223,7 +231,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var (unitOfWork, context, _) = await CreateDatabase();
         var (service, _, kavitaPlusApiService, _, _, _) = await Setup(unitOfWork, context);
 
-        kavitaPlusApiService.PostScrobbleUpdateAsync(null!, "")
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(null!, "")
             .ReturnsForAnyArgs(new ScrobbleResponseDto()
             {
                 ErrorMessage = "Unknown Series"
@@ -231,7 +239,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var evt = await CreateScrobbleEvent(unitOfWork, 1);
 
-        await service.PostScrobbleUpdate(new ScrobbleDto(), string.Empty, evt);
+        await service.PostScrobbleUpdate(new ScrobbleV3Dto
+        {
+            AuthenticationToken = null,
+            Provider = ScrobbleProvider.AniList,
+            SeriesName = null,
+            Format = (PlusMediaFormat)0,
+        }, string.Empty, evt);
         await unitOfWork.CommitAsync();
         Assert.True(evt.IsErrored);
 
@@ -251,7 +265,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var (unitOfWork, context, _) = await CreateDatabase();
         var (service, _, kavitaPlusApiService, _, _, _) = await Setup(unitOfWork, context);
 
-        kavitaPlusApiService.PostScrobbleUpdateAsync(null!, "")
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(null!, "")
             .ReturnsForAnyArgs(new ScrobbleResponseDto()
             {
                 ErrorMessage = "Access token is invalid"
@@ -261,7 +275,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
-            await service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
+            await service.PostScrobbleUpdate(new ScrobbleV3Dto
+            {
+                AuthenticationToken = null,
+                Provider = ScrobbleProvider.AniList,
+                SeriesName = null,
+                Format = (PlusMediaFormat)0,
+            }, "", evt);
         });
 
         Assert.True(evt.IsErrored);
@@ -311,8 +331,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         // Set Returns
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
-        kavitaPlusApiService.GetRateLimitAsync(Arg.Any<string>(), Arg.Any<string>())
-            .Returns(100);
+        kavitaPlusApiService.GetRateLimitForProviderAsync(ScrobbleProvider.AniList, Arg.Any<string>(), Arg.Any<string>())
+            .Returns(KPlusResult<int>.Success(100));
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
@@ -344,8 +364,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         await service.ProcessUpdatesSinceLastSync();
 
-        await kavitaPlusApiService.Received(1).PostScrobbleUpdateAsync(
-            Arg.Is<ScrobbleDto>(data =>
+        await kavitaPlusApiService.Received(1).PostScrobbleV3UpdateAsync(
+            Arg.Is<ScrobbleV3Dto>(data =>
                 data.ChapterNumber == (int)chapter.MaxNumber &&
                 data.VolumeNumber == (int)volume.MaxNumber
             ),

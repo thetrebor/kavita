@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Scrobble;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Scrobble;
 
-public class ScrobbleV3Dto
+public record ScrobbleV3Dto: MetadataRequest
 {
     public required ScrobbleProvider Provider { get; set; }
     public required string AuthenticationToken { get; set; }
@@ -27,7 +28,7 @@ public class ScrobbleV3Dto
     /// <remarks>Defaults to English</remarks>
     public string? Language { get; set; }
 
-    public ScrobbleEvent ScrobbleEventType { get; set; }
+    public ScrobbleEventType ScrobbleEventType { get; set; }
     /// <summary>
     /// Number of chapters read
     /// </summary>

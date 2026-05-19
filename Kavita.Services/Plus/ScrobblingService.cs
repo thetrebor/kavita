@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -16,6 +15,7 @@ using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -53,7 +53,7 @@ public class ScrobbleSyncContext
     /// <summary>
     /// Maps userId to left over request amount
     /// </summary>
-    public required Dictionary<int, int> RateLimits { get; init; }
+    public required Dictionary<int, Dictionary<ScrobbleProvider, int>> RateLimits { get; init; }
 
     /// <summary>
     /// All users being scrobbled for
@@ -145,35 +145,37 @@ public class ScrobblingService : IScrobblingService
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
         foreach (var user in users)
         {
-            if (string.IsNullOrEmpty(user.AniListAccessToken)) continue;
-
-            var tokenExpiry = JwtHelper.GetTokenExpiry(user.AniListAccessToken);
-
-            // Send early reminder 5 days before token expiry
-            if (await ShouldSendEarlyReminder(user.Id, tokenExpiry))
+            foreach (var (provider, settings) in user.ScrobbleProviders)
             {
-                await _emailService.SendTokenExpiringSoonEmail(user.Id, ScrobbleProvider.AniList);
+                if (string.IsNullOrEmpty(settings.AuthenticationToken)) continue;
+
+                var tokenExpiry = JwtHelper.GetTokenExpiry(settings.AuthenticationToken);
+
+                // Send early reminder 5 days before token expiry
+                if (await ShouldSendEarlyReminder(user.Id, tokenExpiry))
+                {
+                    await _emailService.SendTokenExpiringSoonEmail(user.Id, provider);
+                }
+
+                // Send expiration notification after token expiry
+                if (await ShouldSendExpirationReminder(user.Id, tokenExpiry))
+                {
+                    await _emailService.SendTokenExpiredEmail(user.Id, provider);
+                }
+
+                // Check token validity
+                if (JwtHelper.IsTokenValid(settings.AuthenticationToken)) continue;
+
+                _logger.LogInformation(
+                    "User {UserName}'s authentication token for {Provider} has expired or is expiring in a few days! They need to regenerate it for scrobbling to work",
+                    user.UserName, provider);
+
+                // Notify user via event
+                await _eventHub.SendMessageToAsync(
+                    MessageFactory.ScrobblingKeyExpired,
+                    MessageFactory.ScrobblingKeyExpiredEvent(provider),
+                    user.Id, ct);
             }
-
-            // Send expiration notification after token expiry
-            if (await ShouldSendExpirationReminder(user.Id, tokenExpiry))
-            {
-                await _emailService.SendTokenExpiredEmail(user.Id, ScrobbleProvider.AniList);
-            }
-
-            // Check token validity
-            if (JwtHelper.IsTokenValid(user.AniListAccessToken)) continue;
-
-            _logger.LogInformation(
-                "User {UserName}'s AniList token has expired or is expiring in a few days! They need to regenerate it for scrobbling to work",
-                user.UserName);
-
-            // Notify user via event
-            await _eventHub.SendMessageToAsync(
-                MessageFactory.ScrobblingKeyExpired,
-                MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList),
-                user.Id, ct);
-
         }
     }
 
@@ -252,11 +254,12 @@ public class ScrobblingService : IScrobblingService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return string.Empty;
 
-        return provider switch
+        if (user.ScrobbleProviders.TryGetValue(provider, out var scrobbleProviderSettings))
         {
-            ScrobbleProvider.AniList => user.AniListAccessToken,
-            _ => string.Empty
-        } ?? string.Empty;
+            return scrobbleProviderSettings.AuthenticationToken;
+        }
+
+        return string.Empty;
     }
 
     #endregion
@@ -604,6 +607,7 @@ public class ScrobblingService : IScrobblingService
     /// Returns false if the series cannot be scrobbled for the given provider. I.e. not matched for that provider
     /// series on hold, or the library is not eligible
     /// </summary>
+    /// <param name="provider"></param>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
     /// <param name="series">Should have Library resolved</param>
@@ -626,23 +630,17 @@ public class ScrobblingService : IScrobblingService
     /// <summary>
     /// Returns the rate limit from the K+ api
     /// </summary>
+    /// <param name="provider"></param>
     /// <param name="license"></param>
-    /// <param name="aniListToken"></param>
+    /// <param name="accessToken"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task<int> GetRateLimit(string license, string aniListToken)
+    private async Task<int> GetRateLimit(ScrobbleProvider provider, string license, string accessToken, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(aniListToken)) return 0;
+        if (string.IsNullOrWhiteSpace(accessToken)) return 0;
 
-        try
-        {
-            return await _kavitaPlusApiService.GetRateLimitAsync(license, aniListToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An error happened trying to get rate limit from Kavita+ API");
-        }
-
-        return 0;
+        var result = await _kavitaPlusApiService.GetRateLimitForProviderAsync(provider, accessToken, license, ct);
+        return result.IsSuccess ? result.Data : 0;
     }
 
     #region Scrobble process (Requests to K+)
@@ -650,32 +648,23 @@ public class ScrobblingService : IScrobblingService
     /// <summary>
     /// Retrieve all events for which the series has not errored, then delete all current errors
     /// </summary>
-    private async Task<ScrobbleSyncContext> PrepareScrobbleContext()
+    private async Task<ScrobbleSyncContext> PrepareScrobbleContext(CancellationToken ct)
     {
-        var librariesWithScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
-            .AsEnumerable()
-            .Select(l => l.Id)
-            .ToImmutableHashSet();
-
-        var erroredSeries = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors())
+        var erroredSeries = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors(ct))
             .Where(e => e.Comment is "Unknown Series" or UnknownSeriesErrorMessage or AccessTokenErrorMessage)
             .Select(e => e.SeriesId)
             .ToList();
 
-        var readEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ChapterRead))
-            .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+        var readEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ChapterRead, ct: ct))
             .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
-        var addToWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.AddWantToRead))
-            .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+        var addToWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.AddWantToRead, ct: ct))
             .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
-        var removeWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead))
-            .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+        var removeWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead, ct: ct))
             .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
-        var ratingEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ScoreUpdated))
-            .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+        var ratingEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ScoreUpdated, ct: ct))
             .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
 
@@ -687,7 +676,7 @@ public class ScrobblingService : IScrobblingService
             RemoveWantToRead = removeWantToRead,
             Decisions = CalculateNetWantToReadDecisions(addToWantToRead, removeWantToRead),
             RateLimits = [],
-            License = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value,
+            License = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value,
         };
     }
 
@@ -695,22 +684,21 @@ public class ScrobblingService : IScrobblingService
     /// Filters users who can scrobble, sets their rate limit and updates the <see cref="ScrobbleSyncContext.Users"/>
     /// </summary>
     /// <param name="ctx"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task PrepareUsersToScrobble(ScrobbleSyncContext ctx)
+    private async Task PrepareUsersToScrobble(ScrobbleSyncContext ctx, CancellationToken ct)
     {
         // For all userIds, ensure that we can connect and have access
         var usersToScrobble = ctx.ReadEvents.Select(r => r.AppUser)
             .Concat(ctx.AddToWantToRead.Select(r => r.AppUser))
             .Concat(ctx.RemoveWantToRead.Select(r => r.AppUser))
             .Concat(ctx.RatingEvents.Select(r => r.AppUser))
-            .Where(user => !string.IsNullOrEmpty(user.AniListAccessToken))
-            .Where(user => user.UserPreferences.AniListScrobblingEnabled)
             .DistinctBy(u => u.Id)
             .ToList();
 
         foreach (var user in usersToScrobble)
         {
-            await SetAndCheckRateLimit(ctx.RateLimits, user, ctx.License);
+            await SetAndCheckRateLimit(ctx.RateLimits, user, ctx.License, ct);
         }
 
         ctx.Users = usersToScrobble;
@@ -723,11 +711,12 @@ public class ScrobblingService : IScrobblingService
     {
         try
         {
-            var eventsWithoutAnilistToken = (await _unitOfWork.ScrobbleRepository.GetEvents())
+            var eventsWithoutAuthenticationToken = (await _unitOfWork.ScrobbleRepository.GetEvents())
                 .Where(e => e is { IsProcessed: false, IsErrored: false })
-                .Where(e => string.IsNullOrEmpty(e.AppUser.AniListAccessToken));
+                .Where(e => e.AppUser.ScrobbleProviders.TryGetValue(e.ScrobbleProvider, out var value)
+                            && string.IsNullOrEmpty(value.AuthenticationToken));
 
-            _unitOfWork.ScrobbleRepository.Remove(eventsWithoutAnilistToken);
+            _unitOfWork.ScrobbleRepository.Remove(eventsWithoutAuthenticationToken);
             await _unitOfWork.CommitAsync();
         }
         catch (Exception ex)
@@ -745,11 +734,11 @@ public class ScrobblingService : IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ProcessUpdatesSinceLastSync(CancellationToken ct = default)
     {
-        var ctx = await PrepareScrobbleContext();
+        var ctx = await PrepareScrobbleContext(ct);
         if (ctx.TotalCount == 0) return;
 
         // Get all the applicable users to scrobble and set their rate limits
-        await PrepareUsersToScrobble(ctx);
+        await PrepareUsersToScrobble(ctx, ct);
 
         _logger.LogInformation("Scrobble Processing Details:" +
                                "\n  Read Events: {ReadEventsCount}" +
@@ -765,9 +754,9 @@ public class ScrobblingService : IScrobblingService
 
         try
         {
-            await ProcessReadEvents(ctx);
-            await ProcessRatingEvents(ctx);
-            await ProcessWantToReadRatingEvents(ctx);
+            await ProcessReadEvents(ctx, ct);
+            await ProcessRatingEvents(ctx, ct);
+            await ProcessWantToReadRatingEvents(ctx, ct);
         }
         catch (FlurlHttpException ex)
         {
@@ -792,12 +781,12 @@ public class ScrobblingService : IScrobblingService
     private static List<ScrobbleEvent> CalculateNetWantToReadDecisions(List<ScrobbleEvent> addEvents, List<ScrobbleEvent> removeEvents)
     {
         // Create a dictionary to track the latest event for each user/series combination
-        var latestEvents = new Dictionary<(int SeriesId, int AppUserId), ScrobbleEvent>();
+        var latestEvents = new Dictionary<(int SeriesId, int? ChapterID, int AppUserId), ScrobbleEvent>();
 
         // Process all add events
         foreach (var addEvent in addEvents)
         {
-            var key = (addEvent.SeriesId, addEvent.AppUserId);
+            var key = (addEvent.SeriesId, addEvent.ChapterId, addEvent.AppUserId);
 
             if (latestEvents.TryGetValue(key, out var value) && addEvent.CreatedUtc <= value.CreatedUtc) continue;
 
@@ -808,7 +797,7 @@ public class ScrobblingService : IScrobblingService
         // Process all remove events
         foreach (var removeEvent in removeEvents)
         {
-            var key = (removeEvent.SeriesId, removeEvent.AppUserId);
+            var key = (removeEvent.SeriesId, removeEvent.ChapterId, removeEvent.AppUserId);
 
             if (latestEvents.TryGetValue(key, out var value) && removeEvent.CreatedUtc <= value.CreatedUtc) continue;
 
@@ -820,21 +809,21 @@ public class ScrobblingService : IScrobblingService
         return latestEvents.Values.ToList();
     }
 
-    private async Task ProcessWantToReadRatingEvents(ScrobbleSyncContext ctx)
+    private async Task ProcessWantToReadRatingEvents(ScrobbleSyncContext ctx, CancellationToken ct)
     {
-        await ProcessEvents(ctx.Decisions, ctx, evt => Task.FromResult(new ScrobbleDto
+        await ProcessEvents(ctx.Decisions, ctx, evt => Task.FromResult(new ScrobbleV3Dto
             {
+                Provider = evt.ScrobbleProvider,
+                AuthenticationToken = null,
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = (int?) evt.MalId,
+                MalId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = (int?) evt.VolumeNumber,
-                AniListToken = evt.AppUser.AniListAccessToken ?? string.Empty,
                 SeriesName = evt.Series.Name,
-                LocalizedSeriesName = evt.Series.LocalizedName,
                 Year = evt.Series.Metadata.ReleaseYear
-            }));
+            }), ct);
 
         // After decisions, we need to mark all the want to read and remove from want to read as completed
         var processedDecisions = ctx.Decisions.Where(d => d.IsProcessed).ToList();
@@ -846,74 +835,84 @@ public class ScrobblingService : IScrobblingService
                 scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
                 _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
             }
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
         }
     }
 
-    private async Task ProcessRatingEvents(ScrobbleSyncContext ctx)
+    private async Task ProcessRatingEvents(ScrobbleSyncContext ctx, CancellationToken ct)
     {
-        await ProcessEvents(ctx.RatingEvents, ctx, evt => Task.FromResult(new ScrobbleDto
+        await ProcessEvents(ctx.RatingEvents, ctx, evt => Task.FromResult(new ScrobbleV3Dto
             {
+                Provider = evt.ScrobbleProvider,
+                AuthenticationToken = null,
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = (int?) evt.MalId,
+                MalId = (int?) evt.MalId,
+                MangabakaId = evt.MangabakaId,
+                HardcoverId = evt.HardcoverId,
                 ScrobbleEventType = evt.ScrobbleEventType,
-                AniListToken = evt.AppUser.AniListAccessToken ?? string.Empty,
                 SeriesName = evt.Series.Name,
-                LocalizedSeriesName = evt.Series.LocalizedName,
                 Rating = evt.Rating,
                 Year = evt.Series.Metadata.ReleaseYear
-            }));
+            }), ct);
     }
 
-    private async Task ProcessReadEvents(ScrobbleSyncContext ctx)
+    private async Task ProcessReadEvents(ScrobbleSyncContext ctx, CancellationToken ct)
     {
-        // Recalculate the highest volume/chapter
-        foreach (var readEvt in ctx.ReadEvents)
+        // Recalculate the highest volume/chapter for non chapter events
+        foreach (var readEvt in ctx.ReadEvents.Where(e => e.ChapterId is null))
         {
             // Note: this causes skewing in the scrobble history because it makes it look like there are duplicate events
             readEvt.VolumeNumber =
                 (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
-                    readEvt.AppUser.Id);
+                    readEvt.AppUser.Id, ct);
             readEvt.ChapterNumber =
                 await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(readEvt.SeriesId,
-                    readEvt.AppUser.Id);
+                    readEvt.AppUser.Id, ct);
             _unitOfWork.ScrobbleRepository.Update(readEvt);
         }
 
-        await ProcessEvents(ctx.ReadEvents, ctx, async evt => new ScrobbleDto
-            {
-                Format = evt.Format,
-                AniListId = evt.AniListId,
-                MALId = (int?) evt.MalId,
-                ScrobbleEventType = evt.ScrobbleEventType,
-                ChapterNumber = evt.ChapterNumber,
-                VolumeNumber = (int?) evt.VolumeNumber,
-                AniListToken = evt.AppUser.AniListAccessToken  ?? string.Empty,
-                SeriesName = evt.Series.Name,
-                LocalizedSeriesName = evt.Series.LocalizedName,
-                ScrobbleDateUtc = evt.LastModifiedUtc,
-                Year = evt.Series.Metadata.ReleaseYear,
-                StartedReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetFirstProgressForSeries(evt.SeriesId, evt.AppUser.Id),
-                LatestReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(evt.SeriesId, evt.AppUser.Id),
-            });
+        await ProcessEvents(ctx.ReadEvents, ctx, async evt => new ScrobbleV3Dto
+        {
+            Provider = evt.ScrobbleProvider,
+            AuthenticationToken = null,
+            Format = evt.Format,
+            AniListId = evt.AniListId,
+            MalId = (int?)evt.MalId,
+            MangabakaId = evt.MangabakaId,
+            HardcoverId = evt.HardcoverId,
+            ScrobbleEventType = evt.ScrobbleEventType,
+            ChapterNumber = evt.ChapterNumber,
+            VolumeNumber = (int?)evt.VolumeNumber,
+            SeriesName = evt.Series.Name,
+            ScrobbleDateUtc = evt.LastModifiedUtc,
+            Year = evt.Series.Metadata.ReleaseYear,
+            StartedReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetFirstProgressForSeries(evt.SeriesId,
+                evt.AppUser.Id, ct),
+            LatestReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(evt.SeriesId,
+                evt.AppUser.Id, ct),
+        }, ct);
     }
 
     /// <summary>
     /// Returns true if the user token is valid
     /// </summary>
+    /// <param name="user"></param>
     /// <param name="evt"></param>
     /// <returns></returns>
     /// <remarks>If the token is not, adds a scrobble error</remarks>
-    private async Task<bool> ValidateUserToken(ScrobbleEvent evt)
+    private async Task<bool> ValidateUserToken(AppUser user, ScrobbleEvent evt)
     {
-        if (!TokenService.HasTokenExpired(evt.AppUser.AniListAccessToken))
+        if (user.ScrobbleProviders.TryGetValue(evt.ScrobbleProvider, out var settings)
+            && !TokenService.HasTokenExpired(settings.AuthenticationToken))
+        {
             return true;
+        }
 
         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
         {
             Comment = "AniList token has expired and needs rotating. Scrobbling wont work until then",
-            Details = $"User: {evt.AppUser.UserName}, Expired: {TokenService.GetTokenExpiry(evt.AppUser.AniListAccessToken)}",
+            Details = $"User: {evt.AppUser.UserName}, Expired: {TokenService.GetTokenExpiry(settings?.AuthenticationToken)}",
             LibraryId = evt.LibraryId,
             SeriesId = evt.SeriesId
         });
@@ -955,7 +954,7 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    private static ScrobbleDto NormalizeScrobbleData(ScrobbleDto data)
+    private static ScrobbleV3Dto NormalizeScrobbleData(ScrobbleV3Dto data)
     {
         // We need to handle the encoding and changing it to the old one until we can update the API layer to handle these
         // which could happen in v0.8.3
@@ -980,20 +979,23 @@ public class ScrobblingService : IScrobblingService
     /// <param name="events"></param>
     /// <param name="ctx"></param>
     /// <param name="createEvent"></param>
-    private async Task ProcessEvents(IEnumerable<ScrobbleEvent> events, ScrobbleSyncContext ctx, Func<ScrobbleEvent, Task<ScrobbleDto>> createEvent)
+    /// <param name="ct"></param>
+    private async Task ProcessEvents(IEnumerable<ScrobbleEvent> events, ScrobbleSyncContext ctx, Func<ScrobbleEvent, Task<ScrobbleV3Dto>> createEvent, CancellationToken ct)
     {
         foreach (var evt in events.Where(CanProcessScrobbleEvent))
         {
+            var user = ctx.Users.FirstOrDefault(u => u.Id == evt.AppUserId);
+            if (user is null) continue;
+
             _logger.LogDebug("Processing Scrobble Events: {Count} / {Total}", ctx.ProgressCounter, ctx.TotalCount);
             ctx.ProgressCounter++;
 
-            if (!await ValidateUserToken(evt)) continue;
+            if (!await ValidateUserToken(user, evt)) continue;
             if (!await ValidateSeriesCanBeScrobbled(evt)) continue;
 
-            var count = await SetAndCheckRateLimit(ctx.RateLimits, evt.AppUser, ctx.License);
-            if (count == 0)
+            var rateLimits = await SetAndCheckRateLimit(ctx.RateLimits, evt.AppUser, ctx.License, ct);
+            if (!rateLimits.TryGetValue(evt.ScrobbleProvider, out var rateLimit) || rateLimit == 0)
             {
-                if (ctx.Users.Count == 1) break;
                 continue;
             }
 
@@ -1001,7 +1003,8 @@ public class ScrobblingService : IScrobblingService
             {
                 var data = NormalizeScrobbleData(await createEvent(evt));
 
-                ctx.RateLimits[evt.AppUserId] = await PostScrobbleUpdate(data, ctx.License, evt);
+                var rateLeft = await PostScrobbleUpdate(data, ctx.License, evt);
+                ctx.RateLimits[evt.AppUserId][evt.ScrobbleProvider] = rateLeft;
 
                 evt.IsProcessed = true;
                 evt.ProcessDateUtc = DateTime.UtcNow;
@@ -1039,8 +1042,8 @@ public class ScrobblingService : IScrobblingService
             await SaveToDb(ctx.ProgressCounter);
 
             // We can use count to determine how long to sleep based on rate gain. It might be specific to AniList, but we can model others
-            var delay = count > 10 ? TimeSpan.FromMilliseconds(ScrobbleSleepTime) : TimeSpan.FromSeconds(60);
-            await Task.Delay(delay);
+            var delay = rateLimit > 10 ? TimeSpan.FromMilliseconds(ScrobbleSleepTime) : TimeSpan.FromSeconds(60);
+            await Task.Delay(delay, ct);
         }
 
         await SaveToDb(ctx.ProgressCounter, true);
@@ -1065,7 +1068,7 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     /// <param name="data"></param>
     /// <param name="evt"></param>
-    private async Task MarkSeriesAsUnknown(ScrobbleDto data, ScrobbleEvent evt)
+    private async Task MarkSeriesAsUnknown(ScrobbleV3Dto data, ScrobbleEvent evt)
     {
         if (await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId)) return;
 
@@ -1095,11 +1098,11 @@ public class ScrobblingService : IScrobblingService
     /// <returns></returns>
     /// <exception cref="KavitaException">Exceptions may be rethrown as a KavitaException</exception>
     /// <remarks>Some FlurlHttpException are also rethrown</remarks>
-    public async Task<int> PostScrobbleUpdate(ScrobbleDto data, string license, ScrobbleEvent evt)
+    public async Task<int> PostScrobbleUpdate(ScrobbleV3Dto data, string license, ScrobbleEvent evt)
     {
         try
         {
-            var response = await _kavitaPlusApiService.PostScrobbleUpdateAsync(data, license);
+            var response = await _kavitaPlusApiService.PostScrobbleV3UpdateAsync(data, license);
 
             _logger.LogDebug("K+ API Scrobble response for series {SeriesName}: Successful {Successful}, ErrorMessage {ErrorMessage}, ExtraInformation: {ExtraInformation}, RateLeft: {RateLeft}",
                 data.SeriesName, response.Successful, response.ErrorMessage, response.ExtraInformation, response.RateLeft);
@@ -1153,7 +1156,9 @@ public class ScrobblingService : IScrobblingService
 
             return response.RateLeft;
         }
+        #pragma warning disable S2139
         catch (FlurlHttpException ex)
+        #pragma warning restore S2139
         {
             var errorMessage = await ex.GetResponseStringAsync();
             // Trim quotes if the response is a JSON string
@@ -1418,36 +1423,33 @@ public class ScrobblingService : IScrobblingService
 
     private static List<ScrobbleProvider> GetUserProviders(AppUser appUser)
     {
-        var providers = new List<ScrobbleProvider>();
-        if (!string.IsNullOrEmpty(appUser.AniListAccessToken)) providers.Add(ScrobbleProvider.AniList);
-
-        return providers;
+        return appUser.ScrobbleProviders
+            .Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken))
+            .Select(kv => kv.Key)
+            .ToList();
     }
 
-    private async Task<int> SetAndCheckRateLimit(IDictionary<int, int> userRateLimits, AppUser user, string license)
+    private async Task<Dictionary<ScrobbleProvider, int>> SetAndCheckRateLimit(IDictionary<int, Dictionary<ScrobbleProvider, int>> userRateLimits, AppUser user, string license, CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(user.AniListAccessToken)) return 0;
-        try
+        var providersToCheck = user.ScrobbleProviders
+            .Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken))
+            .ToList();
+
+        if (!userRateLimits.ContainsKey(user.Id))
+            userRateLimits[user.Id] = [];
+
+        foreach (var kv in providersToCheck.Where(kv => !userRateLimits[user.Id].ContainsKey(kv.Key)))
         {
-            if (!userRateLimits.ContainsKey(user.Id))
+            var result = await GetRateLimit(kv.Key, license, kv.Value.AuthenticationToken, ct);
+            userRateLimits[user.Id][kv.Key] = result;
+
+            if (result == 0)
             {
-                var rate = await GetRateLimit(license, user.AniListAccessToken);
-                userRateLimits.Add(user.Id, rate);
+                _logger.LogWarning("User {UserName} has no remaining rate limit for {Provider}", user.UserName, kv.Key);
             }
         }
-        catch (Exception ex)
-        {
-            _logger.LogInformation(ex, "User {UserName} had an issue figuring out rate: {Message}", user.UserName, ex.Message);
-            userRateLimits.Add(user.Id, 0);
-        }
 
-        userRateLimits.TryGetValue(user.Id, out var count);
-        if (count == 0)
-        {
-            _logger.LogInformation("User {UserName} is out of rate for Scrobbling", user.UserName);
-        }
-
-        return count;
+        return userRateLimits[user.Id];
     }
 
 }
