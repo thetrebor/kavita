@@ -6,6 +6,7 @@ export interface KavitaPlusScrobbleDetails {
   scrobbleEventType: ScrobbleEventType | null;
   chapterNumber: number | null;
   volumeNumber: number | null;
+  percentRead: number | null;
   rating: number | null;
   provider: ScrobbleProvider;
   libraryType: LibraryType;

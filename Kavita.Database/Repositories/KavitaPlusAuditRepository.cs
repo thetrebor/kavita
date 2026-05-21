@@ -212,6 +212,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                         ScrobbleEventType = p.ScrobbleEventType,
                         ChapterNumber = p.ChapterNumber,
                         VolumeNumber = p.VolumeNumber,
+                        PercentRead = p.PercentRead,
                         Rating = p.Rating,
                         ReviewBody = p.ReviewBody,
                         Provider = p.Provider,

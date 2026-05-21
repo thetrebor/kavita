@@ -17,6 +17,14 @@
                      classes="rounded-1 w-100 h-100"
                      objectFit="cover" />
         </div>
+      } @else if (entry().subjectType === AuditSubjectType.Person && entry().subjectId) {
+        <div class="cover flex-shrink-0">
+          <app-image [imageUrl]="imageService.getPersonImage(entry().subjectId!)"
+                     [errorImage]="imageService.noPersonImage"
+                     width="48px" height="64px"
+                     classes="rounded-1 w-100 h-100"
+                     objectFit="cover" />
+        </div>
       }
 
       <div class="flex-grow-1 min-w-0">

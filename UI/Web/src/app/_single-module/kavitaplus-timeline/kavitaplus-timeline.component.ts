@@ -19,6 +19,7 @@ import {AuditLogErrorPipe} from "../../_pipes/audit-log-error.pipe";
 import {
   KavitaPlusAuditEventTypeIconComponent
 } from "../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
+import {AuditSubjectType} from "../../_models/kavitaplus/audit-subject-type.enum";
 
 interface DayGroup {
   key: string;
@@ -116,4 +117,5 @@ export class KavitaplusTimelineComponent {
   }
 
 
+  protected readonly AuditSubjectType = AuditSubjectType;
 }

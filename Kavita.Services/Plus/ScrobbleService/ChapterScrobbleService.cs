@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -163,7 +164,7 @@ where T: IScrobbleProviderService
             Provider, user.Id, series.Id, chapter.Id, ScrobbleEventType.ChapterRead, true, ct
         );
 
-        var currentProgress = chapterProgress != null ? chapterProgress.PagesRead / (float)chapter.Pages : 0f;
+        var currentProgress = (float) Math.Ceiling((chapterProgress != null ? chapterProgress.PagesRead / (float)chapter.Pages : 0f) * 100);
 
         if (existingEvent is { IsProcessed: false })
         {
@@ -210,6 +211,8 @@ where T: IScrobbleProviderService
             SeriesId = series.Id,
             ChapterId = chapter.Id,
             LibraryId = series.LibraryId,
+            ChapterNumber = (int) chapter.MaxNumber,
+            VolumeNumber = chapter.Volume?.MaxNumber,
             AppUserId = user.Id,
             Progress = currentProgress,
         };
@@ -224,6 +227,8 @@ where T: IScrobbleProviderService
             {
                 Provider = Provider,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
+                ChapterNumber = (int) chapter.MaxNumber,
+                VolumeNumber = chapter.Volume?.MaxNumber,
                 PercentRead = currentProgress,
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);

@@ -1373,7 +1373,8 @@
         "fields-updated": "{{count}} fields updated",
         "chapter-cover-updated": "Cover updated: {{chapter}}",
         "series-cover-updated": "Series cover updated",
-        "series-match-fixed": "Series matched with {{matchName}}"
+        "series-match-fixed": "Series matched with {{matchName}}",
+        "person-alias-added": "Added alias {{alias}} for {{personName}}"
     },
 
     "kavita-plus-event-type-pipe": {

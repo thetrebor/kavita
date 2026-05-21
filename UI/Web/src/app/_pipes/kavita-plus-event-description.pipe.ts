@@ -52,6 +52,10 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
       return this.translocoService.translate(`${PREFIX}.series-match-fixed`, {matchName: entry.matchDetails?.matchedName});
     }
 
+    if (entry.eventType === KavitaPlusEventType.PersonAliasAdded) {
+      return this.translocoService.translate(`${PREFIX}.person-alias-added`, {personName: entry.metadataExtras?.personName, alias: entry.metadataExtras?.aliasAdded});
+    }
+
     return '';
   }
 }

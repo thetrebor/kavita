@@ -372,7 +372,7 @@ public class ScrobblingService : IScrobblingService
         Chapter? chapter = null;
         if (chapterId.HasValue)
         {
-            chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId.Value, ct: ct);
+            chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId.Value, ChapterIncludes.Volumes, ct: ct);
             if (chapter == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "chapter-doesnt-exist"));
         }
 
