@@ -1,0 +1,159 @@
+
+<ng-container *transloco="let t; prefix: 'scrobble-provider-settings-manager'">
+  <p class="ps-2">{{t('description')}}</p>
+
+  @if (formGroups().size > 0) {
+    <div class="row g-0" ngbAccordion>
+
+      @for (provider of scrobbleService.validExternalScrobbleProviders(); track $index) {
+        @let formGroup = formGroups().get(provider)!;
+        @let userScrobbleProvider = userScrobbleProviders().get(provider)!;
+
+        <div ngbAccordionItem>
+          <h2 class="accordion-header" ngbAccordionHeader>
+            <button class="accordion-button" ngbAccordionButton type="button">
+              <img
+                [src]="userScrobbleProvider.provider | providerImage"
+                [alt]="userScrobbleProvider.provider | scrobbleProviderName"
+                width="40"
+                height="40"
+                class="rounded me-3">
+
+              <span class="flex-grow-1">
+                {{ userScrobbleProvider.provider | scrobbleProviderName }}
+
+                @if (userScrobbleProvider.authenticationToken) {
+                  <app-tag-badge>{{t('connected')}}</app-tag-badge>
+                }
+
+              </span>
+
+              <i class="fas fa-chevron-up" aria-hidden="true"></i>
+            </button>
+          </h2>
+
+          <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+
+              <ng-template>
+                <form [formGroup]="formGroup" class="d-flex flex-column gap-3 py-2">
+
+                  <p class="text-muted small mb-1 px-1">{{ provider | scrobbleProviderDescription }}</p>
+
+                  <div class="mt-2">
+                    <div class="text-secondary fw-bold text-uppercase small px-1 mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                      {{ t('authentication') }}
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between gap-3 px-1">
+                      @if (userScrobbleProvider.authenticationToken) {
+                        <div class="d-flex flex-column min-w-0">
+                          <span class="fw-semibold text-truncate">{{ userScrobbleProvider.userName }}</span>
+                          <div class="d-flex flex-wrap gap-x-3 gap-y-1 small text-muted">
+                            <span class="text-nowrap">
+                              <i class="fa-regular fa-clock me-1"></i>
+                              {{ t('expires', {time: userScrobbleProvider.validUntilUtc | utcToLocalTime}) }}
+                            </span>
+                            @if (userScrobbleProvider.lastSyncedUtc) {
+                              <span class="text-nowrap">
+                                <i class="fa-solid fa-rotate me-1"></i>
+                                {{ t('last-synced', { time: userScrobbleProvider.lastSyncedUtc | utcToLocalTime }) }}
+                              </span>
+                            }
+                          </div>
+                        </div>
+
+                        <div class="d-flex gap-2 flex-shrink-0">
+                          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="connectScrobbleProvider(provider)" [title]="t('regenerate')">
+                            <i class="fa-solid fa-rotate-right"></i><span class="d-none d-sm-inline ms-1">{{ t('regenerate') }}</span>
+                          </button>
+                          <button type="button" class="btn btn-outline-danger btn-sm" (click)="disconnectScrobbleProvider(provider)" [title]="t('disconnect')">
+                            <i class="fa-solid fa-plug-circle-xmark"></i><span class="d-none d-sm-inline ms-1">{{ t('disconnect') }}</span>
+                          </button>
+                        </div>
+
+                      } @else {
+                        <span class="text-muted small">{{ t('not-setup') }}</span>
+                        <button type="button" class="btn btn-outline-primary btn-sm flex-shrink-0" (click)="connectScrobbleProvider(provider)">
+                          <i class="fa-solid fa-plug me-1"></i>{{ t('connect') }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+
+                  <hr class="my-2 text-muted opacity-25">
+
+                  <div>
+                    <div class="text-secondary fw-bold text-uppercase small px-1 mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                      {{ t('sync-options') }}
+                    </div>
+
+                    <div class="px-1">
+
+                      @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.ChapterRead)) {
+                        <div class="mt-4">
+                          <app-setting-switch [title]="t('progress-sync-label')">
+                            <ng-template #switch>
+                              <div class="form-check form-switch">
+                                <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="progressScrobbling">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+                      }
+
+                      @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.ScoreUpdated)) {
+                        <div class="mt-4">
+                          <app-setting-switch [title]="t('rating-sync-label')">
+                            <ng-template #switch>
+                              <div class="form-check form-switch">
+                                <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="ratingScrobbling">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+                      }
+
+                      @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.AddWantToRead)) {
+                        <div class="mt-4">
+                          <app-setting-switch [title]="t('want-to-read-sync-label')">
+                            <ng-template #switch>
+                              <div class="form-check form-switch">
+                                <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="wantToReadSync">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+                      }
+
+                      @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.Review)) {
+                        <div class="mt-4">
+                          <app-setting-switch [title]="t('sync-reviews-label')">
+                            <ng-template #switch>
+                              <div class="form-check form-switch">
+                                <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="reviewScrobbling">
+                              </div>
+                            </ng-template>
+                          </app-setting-switch>
+                        </div>
+                      }
+
+                    </div>
+                  </div>
+
+                </form>
+              </ng-template>
+
+            </div>
+          </div>
+        </div>
+
+      } @empty {
+        <p class="ps-2">{{t('none-setup')}}</p>
+
+      }
+
+    </div>
+  }
+
+</ng-container>

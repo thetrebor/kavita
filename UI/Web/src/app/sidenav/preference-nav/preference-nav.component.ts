@@ -59,6 +59,7 @@ export enum SettingsTabId {
   // Non-Admin
   Account = 'account',
   Preferences = 'preferences',
+  ScrobbleSettings = 'scrobble-settings',
   CustomKeyBinds = 'custom-key-binds',
   ReadingProfiles = 'reading-profiles',
   Font = 'font',
@@ -234,6 +235,7 @@ export class PreferenceNavComponent implements AfterViewInit {
         children: [
           new SideNavItem(SettingsTabId.Account),
           new SideNavItem(SettingsTabId.Preferences),
+          SideNavItem.kPlusOnly(SettingsTabId.ScrobbleSettings),
           new SideNavItem(SettingsTabId.CustomKeyBinds),
           new SideNavItem(SettingsTabId.ReadingProfiles),
           new SideNavItem(SettingsTabId.Customize, [], undefined, [Role.ReadOnly]),

@@ -5,6 +5,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
 using Kavita.Database;
 using Kavita.Database.Extensions;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
@@ -32,22 +33,22 @@ public class ManualMigrationScrobbleRework: ManualMigration
 
             user.ScrobbleProviders[ScrobbleProvider.AniList] = new AppUserScrobbleProvider
             {
+                Provider = ScrobbleProvider.AniList,
                 AuthenticationToken = user.AniListAccessToken,
+                Settings = new ScrobbleProviderSettingsDto()
+                {
+                    ProgressScrobbling = user.UserPreferences.AniListScrobblingEnabled,
+                    WantToReadSync = user.UserPreferences.WantToReadSync,
+                }
             };
             user.ScrobbleProviders[ScrobbleProvider.Mal] = new AppUserScrobbleProvider
             {
+                Provider = ScrobbleProvider.Mal,
                 AuthenticationToken = user.MalAccessToken,
                 UserName = user.MalAccessToken,
-            };
-
-            user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList] = new AppUserScrobbleSettings()
-            {
-                ProgressScrobbling = user.UserPreferences.AniListScrobblingEnabled,
-                WantToReadSync = user.UserPreferences.WantToReadSync,
-            };
-            user.UserPreferences.ScrobbleSettings[ScrobbleProvider.Mal] = new AppUserScrobbleSettings()
-            {
-                WantToReadSync = user.UserPreferences.WantToReadSync,
+                Settings = new ScrobbleProviderSettingsDto() {
+                    WantToReadSync = user.UserPreferences.WantToReadSync,
+                }
             };
 
             context.AppUser.Update(user);

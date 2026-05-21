@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using Flurl.Http;
 using Hangfire;
 using Kavita.API.Database;
@@ -80,6 +81,7 @@ public class ScrobblingService : IScrobblingService
     private readonly IEmailService _emailService;
     private readonly IKavitaPlusApiService _kavitaPlusApiService;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IMapper _mapper;
 
     public const string AniListWeblinkWebsite = ScrobblingHelper.AniListWeblinkWebsite;
     public const string MalWeblinkWebsite = ScrobblingHelper.MalWeblinkWebsite;
@@ -105,8 +107,16 @@ public class ScrobblingService : IScrobblingService
         ScrobbleProvider.Hardcover
     ];
     private static readonly IList<ScrobbleProvider> MangaProviders = [
-        ScrobbleProvider.AniList, ScrobbleProvider.Hardcover, ScrobbleProvider.Mangabaka
+        ScrobbleProvider.AniList, ScrobbleProvider.Hardcover, ScrobbleProvider.Mangabaka, ScrobbleProvider.Mal
     ];
+
+    private static readonly IList<ScrobbleProvider> AllProviders = BookProviders
+        .Concat(LightNovelProviders)
+        .Concat(ComicProviders)
+        .Concat(MangaProviders)
+        .Distinct()
+        .ToList()
+        .AsReadOnly();
 
     private const string UnknownSeriesErrorMessage = "Series cannot be matched for Scrobbling";
     private const string AccessTokenErrorMessage = "Access Token needs to be rotated to continue scrobbling";
@@ -117,7 +127,7 @@ public class ScrobblingService : IScrobblingService
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
         ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService,
-        IKavitaPlusApiService kavitaPlusApiService, IServiceProvider serviceProvider)
+        IKavitaPlusApiService kavitaPlusApiService, IServiceProvider serviceProvider, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -127,8 +137,30 @@ public class ScrobblingService : IScrobblingService
         _emailService = emailService;
         _kavitaPlusApiService = kavitaPlusApiService;
         _serviceProvider = serviceProvider;
+        _mapper = mapper;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
+    }
+
+    public async Task<List<ScrobbleProviderDto>> GetScrobbleProviderDtosForUser(int userId, CancellationToken ct = default)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
+        if (user == null) throw new KavitaUnauthenticatedUserException();
+
+        var settings = user.ScrobbleProviders.Values
+            .Select(s => _mapper.Map<ScrobbleProviderDto>(s))
+            .ToList();
+
+        var missingProviders = Enum.GetValues<ScrobbleProvider>()
+            .Where(p => AllProviders.Contains(p) && !user.ScrobbleProviders.ContainsKey(p) )
+            .ToList();
+
+        return settings.Concat(missingProviders.Select(p => new ScrobbleProviderDto
+        {
+            Provider = p,
+            Settings = new ScrobbleProviderSettingsDto()
+        })).ToList();
+
     }
 
     #region Access token checks
@@ -280,9 +312,8 @@ public class ScrobblingService : IScrobblingService
         AppUser user,
         Series series)
     {
-        var userPreferences = user.UserPreferences;
 
-        Func<AppUserScrobbleSettings, bool> guard = eventType switch
+        Func<ScrobbleProviderSettingsDto, bool> guard = eventType switch
         {
             ScrobbleEventType.ChapterRead => s => s.ProgressScrobbling,
             ScrobbleEventType.AddWantToRead => s => s.WantToReadSync,
@@ -294,15 +325,16 @@ public class ScrobblingService : IScrobblingService
 
         List<ScrobbleProvider> providers = [];
 
-        foreach (var scrobbleProvider in Enum.GetValues<ScrobbleProvider>())
+        foreach (var provider in Enum.GetValues<ScrobbleProvider>())
         {
-            if (!userPreferences.ScrobbleSettings.TryGetValue(scrobbleProvider, out var settings) || !guard(settings))
+            if (!user.ScrobbleProviders.TryGetValue(provider, out var scrobbleProvider)
+                || string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken))
             {
                 continue;
             }
 
-            if (!user.ScrobbleProviders.TryGetValue(scrobbleProvider, out var scrobbleProviderSettings)
-                || string.IsNullOrEmpty(scrobbleProviderSettings.AuthenticationToken))
+            var settings = scrobbleProvider.Settings;
+            if (!guard(settings))
             {
                 continue;
             }
@@ -317,7 +349,7 @@ public class ScrobblingService : IScrobblingService
                 continue;
             }
 
-            providers.Add(scrobbleProvider);
+            providers.Add(provider);
         }
 
         return scrobbleProviders == null ? providers : providers.Intersect(scrobbleProviders).ToList();

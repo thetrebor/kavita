@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -11,9 +12,12 @@ using Kavita.Common.Helpers;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.Account;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Scrobble;
+using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -31,6 +35,33 @@ public class ScrobblingController(
     ILocalizationService localizationService)
     : BaseApiController
 {
+
+    [HttpGet("scrobble-settings")]
+    public async Task<ActionResult<List<ScrobbleProviderDto>>> GetScrobbleSettings()
+    {
+        return Ok(await scrobblingService.GetScrobbleProviderDtosForUser(UserId, HttpContext.RequestAborted));
+    }
+
+    [HttpPost("update-scrobble-settings")]
+    public async Task<ActionResult> UpdateScrobbleSettings([FromBody] ScrobbleProviderDto dto)
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
+        if (user == null) return Unauthorized();
+
+        if (!user.ScrobbleProviders.ContainsKey(dto.Provider))
+        {
+            user.ScrobbleProviders[dto.Provider] = new AppUserScrobbleProvider { Provider = dto.Provider };
+        }
+
+        user.ScrobbleProviders[dto.Provider].Settings = dto.Settings;
+
+        unitOfWork.UserRepository.Update(user);
+
+        await unitOfWork.CommitAsync();
+
+        return Ok();
+    }
+
     /// <summary>
     /// Get the current user's AniList token
     /// </summary>

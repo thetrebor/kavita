@@ -9,12 +9,15 @@ import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
 import {PaginatedResult} from "../_models/pagination";
 import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
 import {UtilityService} from "../shared/_services/utility.service";
+import {ScrobbleProviderSettings, UserScrobbleProvider,} from "../_models/kavitaplus/scrobble-provider-settings";
 
 export enum ScrobbleProvider {
   Kavita = 0,
   AniList = 1,
   Mal = 2,
-  Cbr = 4
+  Cbr = 4,
+  Hardcover = 5,
+  MangaBaka = 6,
 }
 
 @Injectable({
@@ -24,38 +27,28 @@ export class ScrobblingService {
   private httpClient = inject(HttpClient);
   private utilityService = inject(UtilityService);
 
-
   baseUrl = environment.apiUrl;
+
+  validExternalScrobbleProviders() {
+    return [ScrobbleProvider.AniList, ScrobbleProvider.Mal, ScrobbleProvider.Hardcover, ScrobbleProvider.MangaBaka]
+  }
+
+  getScrobbleSettings() {
+    return this.httpClient.get<UserScrobbleProvider[]>(this.baseUrl + 'scrobbling/scrobble-settings');
+  }
+
+  saveScrobbleSettings(settings: UserScrobbleProvider) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/update-scrobble-settings', settings);
+  }
 
   hasTokenExpired(provider: ScrobbleProvider) {
     return this.httpClient.get<string>(this.baseUrl + 'scrobbling/token-expired?provider=' + provider, TextResonse)
       .pipe(map(r => r === "true"));
   }
 
-  /**
-   * Returns if the token was new or not
-   */
-  updateAniListToken(token: string) {
-    return this.httpClient.post<boolean>(this.baseUrl + 'scrobbling/update-anilist-token', {token}, TextResonse)
-      .pipe(map(r => r + '' === 'true'));
-  }
-
-  /**
-   * Returns if the token was new or not
-   */
-  updateMalToken(username: string, accessToken: string) {
-    return this.httpClient.post<boolean>(this.baseUrl + 'scrobbling/update-mal-token', {username, accessToken}, TextResonse)
-      .pipe(map(r => r + '' === 'true'));
-  }
-
-  getAniListToken() {
-    return this.httpClient.get<string>(this.baseUrl + 'scrobbling/anilist-token', TextResonse);
-  }
-
   getMalToken() {
     return this.httpClient.get<{username: string, accessToken: string}>(this.baseUrl + 'scrobbling/mal-token');
   }
-
 
   hasRunScrobbleGen() {
     return this.httpClient.get(this.baseUrl + 'scrobbling/has-ran-scrobble-gen ', TextResonse).pipe(map(r => r === 'true'));

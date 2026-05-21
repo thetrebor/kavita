@@ -1,7 +1,7 @@
-﻿using Kavita.API.Database;
+﻿using AutoMapper;
+using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
-using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.SignalR;
@@ -78,7 +78,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.Hardcover, (_, _) => hardcover);
 
         var service = new ScrobblingService(unitOfWork, Substitute.For<IEventHub>(), logger,  licenseService,
-            localizationService, emailService, kavitaPlusApiService, serviceCollection.BuildServiceProvider());
+            localizationService, emailService, kavitaPlusApiService, serviceCollection.BuildServiceProvider(), Substitute.For<IMapper>());
 
         var readerService = new ReaderService(unitOfWork,
             Substitute.For<ILogger<ReaderService>>(),
@@ -155,15 +155,14 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         user.ScrobbleProviders[ScrobbleProvider.AniList] = new AppUserScrobbleProvider
         {
             AuthenticationToken = ValidJwtToken,
-        };
-
-        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList] = new AppUserScrobbleSettings
-        {
-            ProgressScrobbling = true,
-            RatingScrobbling = true,
-            ReviewsScrobbling = true,
-            AllLibraries = true,
-            WantToReadSync = true,
+            Settings = new ScrobbleProviderSettingsDto
+            {
+                ProgressScrobbling = true,
+                RatingScrobbling = true,
+                ReviewsScrobbling = true,
+                AllLibraries = true,
+                WantToReadSync = true,
+            }
         };
 
         unitOfWork.UserRepository.Add(user);
@@ -970,7 +969,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(testLibraryId);
         Assert.NotNull(library);
 
-        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList].AllLibraries = false;
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.AllLibraries = false;
 
         await unitOfWork.CommitAsync();
 
@@ -1021,7 +1020,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
 
-        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList] = new AppUserScrobbleSettings
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings = new ScrobbleProviderSettingsDto
         {
             AllLibraries = true,
             RatingScrobbling = false,
@@ -1076,8 +1075,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
 
-        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList].AllLibraries = false;
-        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList].Libraries = [1]; // Manga library from base class
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.AllLibraries = false;
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.Libraries = [1]; // Manga library from base class
 
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync();
@@ -1144,7 +1143,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
 
-        user.UserPreferences.ScrobbleSettings[ScrobbleProvider.AniList].HighestAgeRating = AgeRating.Mature;
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.HighestAgeRating = AgeRating.Mature;
 
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync();

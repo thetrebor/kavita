@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.Common.Helpers;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -12,6 +13,9 @@ namespace Kavita.API.Services.Plus;
 
 public interface IScrobblingService
 {
+
+    Task<List<ScrobbleProviderDto>> GetScrobbleProviderDtosForUser(int userId, CancellationToken ct = default);
+
     /// <summary>
     /// An automated job that will run against all user's tokens and validate if they are still active
     /// </summary>
