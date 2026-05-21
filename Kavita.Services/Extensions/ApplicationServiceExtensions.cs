@@ -86,7 +86,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IAuthKeyService, AuthKeyService>();
 
         services.AddScoped<IKavitaPlusApiService, KavitaPlusApiService>();
-        services.AddKeyedScoped<IScrobbleProviderService, MangabakaScrobbleProviderService>(ScrobbleProvider.Mangabaka);
+        services.AddKeyedScoped<IScrobbleProviderService, MangabakaScrobbleProviderService>(ScrobbleProvider.MangaBaka);
         services.AddKeyedScoped<IScrobbleProviderService, AniListScrobbleProviderService>(ScrobbleProvider.AniList);
         services.AddKeyedScoped<IScrobbleProviderService, MyAnimeListScrobbleProviderService>(ScrobbleProvider.Mal);
         services.AddKeyedScoped<IScrobbleProviderService, HardcoverScrobbleProviderService>(ScrobbleProvider.Hardcover);

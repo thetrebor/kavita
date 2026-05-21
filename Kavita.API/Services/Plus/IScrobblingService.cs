@@ -8,6 +8,7 @@ using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.User;
 
 namespace Kavita.API.Services.Plus;
 

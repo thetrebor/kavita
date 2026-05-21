@@ -112,7 +112,7 @@ public class ScrobblingService : IScrobblingService
         ScrobbleProvider.Hardcover
     ];
     private static readonly IList<ScrobbleProvider> MangaProviders = [
-        ScrobbleProvider.AniList, ScrobbleProvider.Hardcover, ScrobbleProvider.Mangabaka, ScrobbleProvider.Mal
+        ScrobbleProvider.AniList, ScrobbleProvider.Hardcover, ScrobbleProvider.MangaBaka, ScrobbleProvider.Mal
     ];
 
     private static readonly IList<ScrobbleProvider> AllProviders = BookProviders
@@ -1483,8 +1483,12 @@ public class ScrobblingService : IScrobblingService
         switch (auditEntry.ScrobbleDetails!.ScrobbleEventType)
         {
             case ScrobbleEventType.ChapterRead:
-                if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
-                await ScrobbleReadingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, ct);
+                if (auditEntry.SeriesId == null || auditEntry.UserId == null || auditEntry.SubjectId == null) return false;
+
+                // TODO: COme back to this and rethink
+                //var chapterId = auditEntry.SubjectType == AuditSubjectType.Chapter ? auditEntry.SubjectId : null;
+
+                //await ScrobbleReadingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, chapterId, ct);
                 break;
             case ScrobbleEventType.AddWantToRead:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
@@ -1496,23 +1500,38 @@ public class ScrobblingService : IScrobblingService
                 break;
             case ScrobbleEventType.ScoreUpdated:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
-                await ScrobbleRatingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, auditEntry.ScrobbleDetails.Rating ?? 0f, ct);
+
+                if (auditEntry.SubjectType == AuditSubjectType.Chapter)
+                {
+                    await ScrobbleChapterRatingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, auditEntry.SubjectId!.Value, auditEntry.ScrobbleDetails.Rating ?? 0f, ct);
+                }
+                else
+                {
+                    await ScrobbleSeriesRatingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, auditEntry.ScrobbleDetails.Rating ?? 0f, ct);
+                }
                 break;
             case ScrobbleEventType.Review:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
-                string? reviewBody;
+
                 if (auditEntry is {SubjectType: AuditSubjectType.Chapter, SubjectId: not null})
                 {
                     var chapterRating = await _unitOfWork.UserRepository.GetUserChapterRatingAsync(auditEntry.UserId.Value, auditEntry.SubjectId.Value, ct);
-                    reviewBody = chapterRating?.Review;
+
+                    if (!string.IsNullOrEmpty(chapterRating?.Review))
+                    {
+                        await ScrobbleChapterReviewUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, auditEntry.SubjectId.Value,
+                            string.Empty, chapterRating.Review, ct);
+                    }
                 }
                 else
                 {
                     var seriesRating = await _unitOfWork.UserRepository.GetUserRatingAsync(auditEntry.SeriesId.Value, auditEntry.UserId.Value, ct);
-                    reviewBody = seriesRating?.Review;
+                    if (!string.IsNullOrEmpty(seriesRating?.Review))
+                    {
+                        await ScrobbleSeriesReviewUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value,
+                            string.Empty, seriesRating.Review, ct);
+                    }
                 }
-                if (string.IsNullOrEmpty(reviewBody)) return false;
-                await ScrobbleReviewUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, string.Empty, reviewBody, ct);
                 break;
             default:
                 return false;

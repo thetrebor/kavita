@@ -318,7 +318,7 @@ public class ReaderController(ICacheService cacheService,
                 => s.GenerateReadingSessionForChapters(UserId, dto.SeriesId, progressDictionary, CancellationToken.None));
         }
 
-        BackgroundJob.Enqueue<IScrobblingService>(s => s.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
+        BackgroundJob.Enqueue<IScrobblingService>(s => s.ScrobbleReadingUpdate(user.Id, dto.SeriesId, dto.ChapterId, CancellationToken.None));
 
         return Ok();
     }

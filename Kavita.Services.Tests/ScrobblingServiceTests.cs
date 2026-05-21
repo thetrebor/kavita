@@ -74,11 +74,11 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.AniList, (_, _) => aniList);
         serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.Mal, (_, _) => mal);
-        serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.Mangabaka, (_, _) => mangaBaka);
+        serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.MangaBaka, (_, _) => mangaBaka);
         serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.Hardcover, (_, _) => hardcover);
 
         var service = new ScrobblingService(unitOfWork, Substitute.For<IEventHub>(), logger,  licenseService,
-            localizationService, emailService, kavitaPlusApiService, serviceCollection.BuildServiceProvider(), Substitute.For<IMapper>(), , Substitute.For<IKavitaPlusAuditService>());
+            localizationService, emailService, kavitaPlusApiService, serviceCollection.BuildServiceProvider(), Substitute.For<IMapper>(), Substitute.For<IKavitaPlusAuditService>());
 
         var readerService = new ReaderService(unitOfWork,
             Substitute.For<ILogger<ReaderService>>(),

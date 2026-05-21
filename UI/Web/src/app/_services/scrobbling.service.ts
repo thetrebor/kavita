@@ -35,7 +35,7 @@ export class ScrobblingService {
     return [ScrobbleProvider.AniList, ScrobbleProvider.Mal, ScrobbleProvider.Hardcover, ScrobbleProvider.MangaBaka]
   }
 
-  getScrobbleSettings() {
+  getScrobbleProviders() {
     return this.httpClient.get<UserScrobbleProvider[]>(this.baseUrl + 'scrobbling/scrobble-settings');
   }
 

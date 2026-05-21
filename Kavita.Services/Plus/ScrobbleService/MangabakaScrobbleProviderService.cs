@@ -10,7 +10,7 @@ namespace Kavita.Services.Plus.ScrobbleService;
 
 public class MangabakaScrobbleProviderService(ILogger<MangabakaScrobbleProviderService> logger, IUnitOfWork unitOfWork) : SeriesScrobbleService<MangabakaScrobbleProviderService>(logger, unitOfWork)
 {
-    protected override ScrobbleProvider Provider => ScrobbleProvider.Mangabaka;
+    protected override ScrobbleProvider Provider => ScrobbleProvider.MangaBaka;
     protected override IReadOnlyList<ScrobbleEventType> SupportedEvents =>
     [
         ScrobbleEventType.ChapterRead, ScrobbleEventType.AddWantToRead, ScrobbleEventType.RemoveWantToRead,

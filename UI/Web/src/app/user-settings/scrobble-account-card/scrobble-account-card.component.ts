@@ -2,13 +2,13 @@ import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angu
 import {Router} from '@angular/router';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {UserScrobbleProvider} from '../../_services/scrobbling.service';
 import {ScrobbleProviderNamePipe} from '../../_pipes/scrobble-provider-name.pipe';
 import {SettingsTabId} from '../../sidenav/preference-nav/preference-nav.component';
 import {
   ScrobbleProviderImageComponent
 } from '../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
 import {AccountService} from "../../_services/account.service";
+import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-provider-settings";
 
 @Component({
   selector: 'app-scrobble-account-card',

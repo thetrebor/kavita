@@ -91,7 +91,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
 
   ngOnInit() {
-    this.scrobbleService.getScrobbleSettings()
+    this.scrobbleService.getScrobbleProviders()
       .pipe(tap(userScrobbleProviders => {
         const groups: Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup> = new Map();
 
