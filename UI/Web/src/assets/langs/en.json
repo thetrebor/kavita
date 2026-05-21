@@ -2238,7 +2238,6 @@
         "mal-stack-import": "MAL Stack",
         "admin-public-metadata": "Manage Metadata",
         "admin-manage-kavitaplus-activity": "Manage Kavita+ Activity",
-        "admin-public-metadata": "Manage Metadata",
         "scrobble-settings": "Scrobble Settings"
     },
 
@@ -2248,16 +2247,33 @@
         "select-provider-title": "New Scrobble Provider",
         "authentication": "Authentication",
         "connect": "Connect",
+        "connected": "Connected",
         "regenerate": "Regenerate",
         "disconnect": "Disconnect",
         "expires":  "Expires {{time}}",
         "last-synced": "Last synced {{time}}",
         "not-setup": "Provider not set-up, connect to get started",
         "sync-options": "Sync options",
-        "sync-reviews-label": "Sync reviews",
+        "reviews-sync-label": "Sync reviews",
+        "reviews-sync-tooltip": "Kavita will scrobble reviews for matched series & chapters",
         "progress-sync-label": "Sync Progress",
+        "progress-sync-tooltip": "Kavita scrobbles series progress when chapters complete, or chapter progress on page changes",
         "rating-sync-label": "Sync Ratings",
-        "want-to-read-sync-label": "Sync Want To Read list"
+        "rating-sync-tooltip": "Kavita scrobbles ratings for matched series & chapters",
+        "want-to-read-sync-label": "Sync Want To Read list",
+        "want-to-read-sync-tooltip": "Keep your want to read list in sync. Does not change read statuses",
+        "reviews-target-label": "Review target",
+        "reviews-target-tooltip": "Who gets to see synced reviews, depends on provider support",
+        "filter-rules": "Filters",
+        "highest-age-rating-label": "Highest age ratings",
+        "highest-age-rating-tooltip": "Highest (inclusive) age rating a series can have to be scrobbled",
+        "automations": "Automations",
+        "inactive-series-rule-label": "Inactive series rule",
+        "inactive-series-rule-condition": "If a series/chapter hasn't been read for",
+        "rule-days-mark": "days, mark it is",
+        "rule-publication-exception": "unless publication status is",
+        "dropped-series-rule-label": "Dropped series rule",
+        "dropped-series-rule-condition": "If a series/chapter hasn't been read for"
     },
 
     "scrobble-provider-description-pipe": {
@@ -2265,8 +2281,23 @@
         "ani-list": "Everything Manga & Light Novels",
         "my-anime-list": "Want To Read & Stacks sync for Manga & Light Novels",
         "comic-book-roundup": "",
-        "harcover": "Everything Books, Manga, and Light Novels!",
-        "mangabaka": "Everything Manga & Light Novels"
+        "hardcover": "Everything Books, Manga, and Light Novels!",
+        "manga-baka": "Everything Manga & Light Novels"
+    },
+
+    "review-scrobble-target-name-pipe": {
+        "private": "Only you",
+        "friends": "Friends",
+        "public": "Everyone"
+    },
+
+    "scrobble-read-status-pipe": {
+        "ignore": "Ignore",
+        "want-to-read": "Want to Read",
+        "read": "Read",
+        "unread": "Unread",
+        "dropped": "Dropped",
+        "on-hold": "On Hold"
     },
 
     "manage-custom-key-binds": {

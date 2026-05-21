@@ -32,6 +32,8 @@ export enum ReviewScrobbleTarget {
   Public = 2,
 }
 
+export const ReviewScrobbleTargets = [ReviewScrobbleTarget.Private, ReviewScrobbleTarget.Friends, ReviewScrobbleTarget.Public];
+
 export enum ScrobbleReadStatus {
   Ignore = 0,
   WantToRead = 1,
@@ -40,6 +42,9 @@ export enum ScrobbleReadStatus {
   Dropped = 4,
   OnHold = 5,
 }
+
+export const ScrobbleReadStatuses = [ScrobbleReadStatus.Ignore, ScrobbleReadStatus.WantToRead, ScrobbleReadStatus.Read,
+  ScrobbleReadStatus.UnRead, ScrobbleReadStatus.Dropped, ScrobbleReadStatus.OnHold];
 
 export type ReadStatusTransitionRule = {
   enabled: boolean;

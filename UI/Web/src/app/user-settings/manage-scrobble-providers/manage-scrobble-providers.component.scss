@@ -1,3 +1,7 @@
 .accordion-button {
   color: var(--body-text-color);
 }
+
+::ng-deep .select2-selection__rendered {
+  padding-top: 0.25rem !important;
+}

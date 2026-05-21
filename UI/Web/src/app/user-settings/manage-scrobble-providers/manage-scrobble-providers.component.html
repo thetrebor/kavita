@@ -20,10 +20,10 @@
                 class="rounded me-3">
 
               <span class="flex-grow-1">
-                {{ userScrobbleProvider.provider | scrobbleProviderName }}
+                <span class="me-2">{{ userScrobbleProvider.provider | scrobbleProviderName }}</span>
 
                 @if (userScrobbleProvider.authenticationToken) {
-                  <app-tag-badge>{{t('connected')}}</app-tag-badge>
+                  <app-tag-badge color="primary">{{t('connected')}}</app-tag-badge>
                 }
 
               </span>
@@ -49,7 +49,7 @@
                       @if (userScrobbleProvider.authenticationToken) {
                         <div class="d-flex flex-column min-w-0">
                           <span class="fw-semibold text-truncate">{{ userScrobbleProvider.userName }}</span>
-                          <div class="d-flex flex-wrap gap-x-3 gap-y-1 small text-muted">
+                          <div class="d-flex flex-column flex-wrap gap-x-3 gap-y-1 small text-muted">
                             <span class="text-nowrap">
                               <i class="fa-regular fa-clock me-1"></i>
                               {{ t('expires', {time: userScrobbleProvider.validUntilUtc | utcToLocalTime}) }}
@@ -91,55 +91,177 @@
                     <div class="px-1">
 
                       @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.ChapterRead)) {
-                        <div class="mt-4">
-                          <app-setting-switch [title]="t('progress-sync-label')">
-                            <ng-template #switch>
-                              <div class="form-check form-switch">
-                                <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="progressScrobbling">
-                              </div>
-                            </ng-template>
-                          </app-setting-switch>
+                        <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
+                          <div>
+                            <span>{{t('progress-sync-label')}}</span>
+                            <div class="form-text text-muted small mt-1">
+                              {{t('progress-sync-tooltip')}}
+                            </div>
+                          </div>
+                          <div class="form-check form-switch mb-0 flex-shrink-0">
+                            <input id="age-ratings-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="progressScrobbling" role="switch">
+                          </div>
                         </div>
                       }
 
                       @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.ScoreUpdated)) {
-                        <div class="mt-4">
-                          <app-setting-switch [title]="t('rating-sync-label')">
-                            <ng-template #switch>
-                              <div class="form-check form-switch">
-                                <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="ratingScrobbling">
-                              </div>
-                            </ng-template>
-                          </app-setting-switch>
+                        <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
+                          <div>
+                            <span>{{t('rating-sync-label')}}</span>
+                            <div class="form-text text-muted small mt-1">
+                              {{t('rating-sync-tooltip')}}
+                            </div>
+                          </div>
+                          <div class="form-check form-switch mb-0 flex-shrink-0">
+                            <input id="rating-sync-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="ratingScrobbling" role="switch">
+                          </div>
                         </div>
                       }
 
                       @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.AddWantToRead)) {
-                        <div class="mt-4">
-                          <app-setting-switch [title]="t('want-to-read-sync-label')">
-                            <ng-template #switch>
-                              <div class="form-check form-switch">
-                                <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="wantToReadSync">
-                              </div>
-                            </ng-template>
-                          </app-setting-switch>
+                        <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
+                          <div>
+                            <span>{{t('want-to-read-sync-label')}}</span>
+                            <div class="form-text text-muted small mt-1">
+                              {{t('want-to-read-sync-tooltip')}}
+                            </div>
+                          </div>
+                          <div class="form-check form-switch mb-0 flex-shrink-0">
+                            <input id="want-to-read-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="wantToReadSync" role="switch">
+                          </div>
                         </div>
                       }
 
                       @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.Review)) {
-                        <div class="mt-4">
-                          <app-setting-switch [title]="t('sync-reviews-label')">
-                            <ng-template #switch>
-                              <div class="form-check form-switch">
-                                <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="reviewScrobbling">
-                              </div>
-                            </ng-template>
-                          </app-setting-switch>
+                        <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
+                          <div>
+                            <span>{{t('reviews-sync-label')}}</span>
+                            <div class="form-text text-muted small mt-1">
+                              {{t('reviews-sync-tooltip')}}
+                            </div>
+                          </div>
+                          <div class="form-check form-switch mb-0 flex-shrink-0">
+                            <input id="reviews-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="reviewScrobbling" role="switch">
+                          </div>
                         </div>
+
+                        <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
+                          <div>
+                            <span>{{t('reviews-target-label')}}</span>
+                            <div class="form-text text-muted small mt-1">
+                              {{t('reviews-target-tooltip')}}
+                            </div>
+                          </div>
+                          <div class="mb-0 flex-shrink-0">
+                            <select class="form-select" formControlName="reviewScrobbleTarget">
+                              @for (opt of ReviewScrobbleTargets; track opt) {
+                                <option [ngValue]="opt">{{opt | reviewScrobbleTargetName}}</option>
+                              }
+                            </select>
+                          </div>
+                        </div>
+
                       }
 
                     </div>
                   </div>
+
+                  <div>
+                    <div class="text-secondary fw-bold text-uppercase small px-1 mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                      {{ t('filter-rules') }}
+                    </div>
+
+                    <div class="px-1">
+
+                      <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
+                        <div>
+                          <span>{{t('highest-age-rating-label')}}</span>
+                          <div class="form-text text-muted small mt-1">
+                            {{t('highest-age-rating-tooltip')}}
+                          </div>
+                        </div>
+                        <div class="mb-0 flex-shrink-0">
+                          <select class="form-select" formControlName="highestAgeRating">
+                            @for (opt of AgeRatings; track opt) {
+                              <option [ngValue]="opt">{{opt | ageRating}}</option>
+                            }
+                          </select>
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.ChapterRead)) {
+                    <div>
+
+                      <div class="text-secondary fw-bold text-uppercase small px-1 mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        {{ t('automations') }}
+                      </div>
+
+                      <div class="px-1">
+
+                        @let inactiveSeriesRuleGroup = inactiveSeriesRule(formGroup);
+                        <div class="mt-4 d-flex justify-content-between align-items-center gap-3" [formGroup]="inactiveSeriesRuleGroup">
+                          <div>
+                            <span>{{t('inactive-series-rule-label')}}</span>
+                            <div class="d-flex align-items-center flex-wrap gap-2 small text-muted mt-1">
+                              <span>{{t('inactive-series-rule-condition')}}</span>
+
+                              <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days"/>
+
+                              <span>{{t('rule-days-mark')}}</span>
+
+                              <select class="form-select form-select-sm" style="width: auto;" formControlName="transitionStatus">
+                                @for (opt of ScrobbleReadStatuses; track opt) {
+                                  <option [ngValue]="opt">{{ opt | scrobbleReadStatus }}</option>
+                                }
+                              </select>
+
+                              <span>{{t('rule-publication-exception')}}</span>
+
+                              <select2 formControlName="excludedPublicationStatus" multiple [data]="publicationStatusOptions">
+                              </select2>
+                            </div>
+                          </div>
+                          <div class="form-check form-switch mb-0 flex-shrink-0">
+                            <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch">
+                          </div>
+                        </div>
+
+                        @let droppedSeriesRuleGroup = droppedSeriesRule(formGroup);
+                        <div class="mt-4 d-flex justify-content-between align-items-center gap-3" [formGroup]="droppedSeriesRuleGroup">
+                          <div class="flex-grow-1">
+                            <span>{{t('dropped-series-rule-label')}}</span>
+                            <div class="d-flex align-items-center flex-wrap gap-2 small text-muted mt-1">
+                              <span>{{t('dropped-series-rule-condition')}}</span>
+
+                              <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days"/>
+
+                              <span>{{t('rule-days-mark')}}</span>
+
+                              <select class="form-select form-select-sm" style="width: auto;" formControlName="transitionStatus">
+                                @for (opt of ScrobbleReadStatuses; track opt) {
+                                  <option [ngValue]="opt">{{ opt | scrobbleReadStatus }}</option>
+                                }
+                              </select>
+
+                              <span>{{t('rule-publication-exception')}}</span>
+
+                              <select2 formControlName="excludedPublicationStatus" multiple [data]="publicationStatusOptions">
+                              </select2>
+                            </div>
+                          </div>
+                          <div class="form-check form-switch mb-0 flex-shrink-0">
+                            <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch">
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+                  }
 
                 </form>
               </ng-template>

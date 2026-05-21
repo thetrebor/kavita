@@ -36,10 +36,11 @@ public sealed record ScrobbleProviderSettingsDto
     /// Libraries for which scrobbling is enabled
     /// </summary>
     public List<int> Libraries { get; set; } = [];
+
     /// <summary>
     /// Highest (inclusive) age rating to scrobble for.
     /// </summary>
-    public AgeRating HighestAgeRating { get; set; }
+    public AgeRating HighestAgeRating { get; set; } = AgeRating.NotApplicable;
     /// <summary>
     /// Triggers if a series hasn't been read for n days and has unread chapters
     /// </summary>

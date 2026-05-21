@@ -1,16 +1,16 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {map, switchMap, tap} from "rxjs";
-import {AgeRating} from "../../_models/metadata/age-rating";
+import {AgeRating, AgeRatings} from "../../_models/metadata/age-rating";
 import {
   ReadStatusTransitionRule,
-  ReviewScrobbleTarget,
+  ReviewScrobbleTarget, ReviewScrobbleTargets,
   ScrobbleProviderSettings,
-  ScrobbleReadStatus,
+  ScrobbleReadStatus, ScrobbleReadStatuses,
   UserScrobbleProvider
 } from "../../_models/kavitaplus/scrobble-provider-settings";
-import {PublicationStatus} from "../../_models/metadata/publication-status";
+import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/publication-status";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged} from "rxjs/operators";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -28,7 +28,16 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {ScrobbleProviderDescriptionPipe} from "../manga-user-preferences/scrobble-provider-description.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
-import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {ReviewScrobbleTargetNamePipe} from "../../_pipes/review-scrobble-target-name.pipe";
+import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
+import {Library} from "../../_models/library/library";
+import {
+  MultiCheckBoxItem
+} from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
+import {LibraryService} from "../../_services/library.service";
+import {PublicationStatusPipe} from "../../_pipes/publication-status.pipe";
+import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
+import {Select2, Select2Data} from "ng-select2-component";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -75,7 +84,11 @@ const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
     TagBadgeComponent,
     ScrobbleProviderDescriptionPipe,
     UtcToLocalTimePipe,
-    SettingSwitchComponent
+    ReviewScrobbleTargetNamePipe,
+    AgeRatingPipe,
+    PublicationStatusPipe,
+    ScrobbleReadStatusPipe,
+    Select2
   ],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',
@@ -84,13 +97,26 @@ const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
 export class ManageScrobbleProvidersComponent implements OnInit {
 
   protected readonly scrobbleService = inject(ScrobblingService);
+  private readonly libraryService = inject(LibraryService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly destroyRef$ = inject(DestroyRef);
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
+  libraries = signal<Library[]>([]);
+  libraryOptions = computed<MultiCheckBoxItem<number>[]>(() => this.libraries().map(l => {
+    return { label: l.name, value: l.id };
+  }));
+
+  private publicationStatusPipe = new PublicationStatusPipe();
+  publicationStatusOptions: Select2Data = PublicationStatuses.map(p => ({
+    value: p,
+    label: this.publicationStatusPipe.transform(p)
+  }));
 
   ngOnInit() {
+    this.libraryService.getLibraries().subscribe(libraries => this.libraries.set(libraries));
+
     this.scrobbleService.getScrobbleProviders()
       .pipe(tap(userScrobbleProviders => {
         const groups: Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup> = new Map();
@@ -149,6 +175,14 @@ export class ManageScrobbleProvidersComponent implements OnInit {
     })
   }
 
+  protected inactiveSeriesRule(formGroup: ScrobbleProviderSettingsFormGroup): ReadStatusTransitionRuleFromGroup {
+    return formGroup.get('inactiveSeriesRule') as ReadStatusTransitionRuleFromGroup;
+  }
+
+  protected droppedSeriesRule(formGroup: ScrobbleProviderSettingsFormGroup): ReadStatusTransitionRuleFromGroup {
+    return formGroup.get('droppedSeriesRule') as ReadStatusTransitionRuleFromGroup;
+  }
+
   protected disconnectScrobbleProvider(provider: ScrobbleProvider) {
     const group = this.formGroups().get(provider);
     if (!group) return;
@@ -160,4 +194,9 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
   protected readonly ProviderSupportedEvents = ProviderSupportedEvents;
   protected readonly ScrobbleEventType = ScrobbleEventType;
+  protected readonly ReviewScrobbleTarget = ReviewScrobbleTarget;
+  protected readonly ReviewScrobbleTargets = ReviewScrobbleTargets;
+  protected readonly AgeRatings = AgeRatings;
+  protected readonly ScrobbleReadStatuses = ScrobbleReadStatuses;
+  protected readonly PublicationStatuses = PublicationStatuses;
 }

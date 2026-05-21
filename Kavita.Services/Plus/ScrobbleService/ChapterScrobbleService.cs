@@ -158,7 +158,7 @@ where T: IScrobbleProviderService
         if (!SupportedEvents.Contains(ScrobbleEventType.ChapterRead)) return;
 
         var chapterProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, user.Id, ct);
-        var hasAnyProgress = chapterProgress is not { PagesRead: > 0 };
+        var hasAnyProgress = chapterProgress is { PagesRead: > 0 };
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, user.Id, series.Id, chapter.Id, ScrobbleEventType.ChapterRead, true, ct
         );
@@ -184,14 +184,16 @@ where T: IScrobbleProviderService
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
 
-            await auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id, chapter.Id,
+            // TODO: Decide if we want to include this. This gets rather spammy as ChapterScrobbleProviders update
+            // on every page change!
+            /*await auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id, chapter.Id,
                 new AuditLogScrobbleParamsDto
                 {
                     Provider = Provider,
                     ScrobbleEventType = ScrobbleEventType.ChapterRead,
                     PercentRead = currentProgress,
                     LibraryType = series.Library.Type,
-                }, AuditStatus.Info, userId: user.Id, ct: ct);
+                }, AuditStatus.Info, userId: user.Id, ct: ct);*/
 
             logger.LogDebug("[{Provider}] Overriding scrobble event for {Series} - ChapterId: {ChapterId} from {PrevProgress}% -> {Progress}%",
                 Provider, series.Name, chapter.Id, prevProgress, currentProgress);

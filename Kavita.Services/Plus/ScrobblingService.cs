@@ -253,7 +253,7 @@ public class ScrobblingService : IScrobblingService
     {
         var token = await GetTokenForProvider(userId, provider);
 
-        if (string.IsNullOrEmpty(token)) return true;
+        if (string.IsNullOrEmpty(token)) return false;
 
         if (await HasTokenExpired(token, provider))
         {
