@@ -407,7 +407,7 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var provider in providers)
         {
-            if (await CheckIfCannotScrobble(provider, userId, seriesId, series)) continue;
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.Review, userId, seriesId, series)) continue;
 
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
@@ -449,7 +449,7 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var provider in providers)
         {
-            if (await CheckIfCannotScrobble(provider, userId, seriesId, series)) continue;
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ScoreUpdated, userId, seriesId, series)) continue;
 
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
@@ -481,7 +481,7 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var provider in providers)
         {
-            if (await CheckIfCannotScrobble(provider, userId, seriesId, series)) continue;
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ChapterRead, userId, seriesId, series)) continue;
 
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
@@ -615,7 +615,7 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var provider in providers)
         {
-            if (await CheckIfCannotScrobble(provider, userId, seriesId, series)) continue;
+            if (await CheckIfCannotScrobble(provider, eventType, userId, seriesId, series)) continue;
 
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
@@ -648,11 +648,12 @@ public class ScrobblingService : IScrobblingService
     /// series on hold, or the library is not eligible
     /// </summary>
     /// <param name="provider"></param>
+    /// <param name="eventType"></param>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
     /// <param name="series">Should have Library resolved</param>
     /// <returns></returns>
-    private async Task<bool> CheckIfCannotScrobble(ScrobbleProvider provider, int userId, int seriesId, Series series)
+    private async Task<bool> CheckIfCannotScrobble(ScrobbleProvider provider, ScrobbleEventType eventType, int userId, int seriesId, Series series)
     {
         // TODO: This needs updating to take the provider into account (Dict?)
         if (series.DontMatch) return true;
@@ -661,7 +662,7 @@ public class ScrobblingService : IScrobblingService
         {
             _logger.LogInformation("Series {SeriesName} is on AppUserId {AppUserId}'s hold list. Not scrobbling", series.Name, userId);
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto(), AuditStatus.Info, "scrobble-hold-active", userId);
+                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "scrobble-hold-active", userId);
             return true;
         }
 
@@ -669,7 +670,7 @@ public class ScrobblingService : IScrobblingService
         if (library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(library.Type))
         {
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto(), AuditStatus.Info, "library-scrobbling-disabled", userId);
+                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "library-scrobbling-disabled", userId);
             return true;
         }
 
@@ -967,7 +968,7 @@ public class ScrobblingService : IScrobblingService
         });
         await _unitOfWork.CommitAsync();
         await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
+            new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
             AuditStatus.Failure, "token-expired", evt.AppUserId);
         return false;
     }
@@ -999,7 +1000,7 @@ public class ScrobblingService : IScrobblingService
         _unitOfWork.ScrobbleRepository.Update(evt);
         await _unitOfWork.CommitAsync();
         await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
+            new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
             AuditStatus.Failure, "unknown-series", evt.AppUserId);
         return false;
     }
@@ -1041,7 +1042,7 @@ public class ScrobblingService : IScrobblingService
         foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
         {
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
+                new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
                 AuditStatus.Info, userId: evt.AppUserId);
         }
 
@@ -1060,9 +1061,9 @@ public class ScrobblingService : IScrobblingService
             if (!rateLimits.TryGetValue(evt.ScrobbleProvider, out var rateLimit) || rateLimit == 0)
             {
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
-                    AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId);
-                if (ctx.Users.Count == 1) break;
+                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
+                    AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
+
                 continue;
             }
 
@@ -1177,7 +1178,16 @@ public class ScrobblingService : IScrobblingService
             if (response.Successful || response.ErrorMessage == null)
             {
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { ScrobbleEventType = data.ScrobbleEventType, ChapterNumber = data.ChapterNumber, VolumeNumber = data.VolumeNumber, Rating = data.Rating, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
+                    new AuditLogScrobbleParamsDto
+                    {
+                        Provider = data.Provider,
+                        ScrobbleEventType = data.ScrobbleEventType,
+                        ChapterNumber = data.ChapterNumber,
+                        VolumeNumber = data.VolumeNumber,
+                        PercentRead = data.PercentRead,
+                        Rating = data.Rating,
+                        LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga
+                    },
                     AuditStatus.Success, userId: evt.AppUserId);
                 return response.RateLeft;
             }
@@ -1203,9 +1213,11 @@ public class ScrobblingService : IScrobblingService
             if (response.ErrorMessage.Contains("Access token is invalid"))
             {
                 evt.SetErrorMessage(AccessTokenErrorMessage);
+
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
+                    new AuditLogScrobbleParamsDto { Provider = evt.ScrobbleProvider, ScrobbleEventType = evt.ScrobbleEventType, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
                     AuditStatus.Failure, "invalid-token", userId: evt.AppUserId);
+
                 throw new KavitaException("Access token is invalid");
             }
 
@@ -1213,11 +1225,14 @@ public class ScrobblingService : IScrobblingService
             {
                 // Log the Series name and Id in ScrobbleErrors
                 _logger.LogInformation("Kavita+ was unable to match the series: {SeriesName}", evt.Series.Name);
+
                 await MarkSeriesAsUnknown(data, evt);
                 evt.SetErrorMessage(UnknownSeriesErrorMessage);
+
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
+                    new AuditLogScrobbleParamsDto { Provider = evt.ScrobbleProvider, ScrobbleEventType = evt.ScrobbleEventType, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
                     AuditStatus.Failure, "unknown-series", userId: evt.AppUserId);
+
             } else if (response.ErrorMessage.StartsWith("Review"))
             {
                 // Log the Series name and Id in ScrobbleErrors

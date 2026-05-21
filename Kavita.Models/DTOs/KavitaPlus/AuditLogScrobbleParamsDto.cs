@@ -10,9 +10,12 @@ namespace Kavita.Models.DTOs.KavitaPlus;
 /// </summary>
 public sealed record AuditLogScrobbleParamsDto
 {
+    public ScrobbleProvider Provider { get; init; }
     public ScrobbleEventType? ScrobbleEventType { get; init; }
     public int? ChapterNumber { get; init; }
     public float? VolumeNumber { get; init; }
+    public float? PercentRead { get; init; }
     public float? Rating { get; init; }
+    public string? ReviewBody { get; init; }
     public LibraryType LibraryType { get; init; } = LibraryType.Manga;
 }

@@ -66,10 +66,10 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var emailService = Substitute.For<IEmailService>();
         var kavitaPlusApiService = Substitute.For<IKavitaPlusApiService>();
 
-        var aniList = new AniListScrobbleProviderService(Substitute.For<ILogger<AniListScrobbleProviderService>>(), unitOfWork);
-        var mal = new MyAnimeListScrobbleProviderService(Substitute.For<ILogger<MyAnimeListScrobbleProviderService>>(), unitOfWork);
-        var mangaBaka = new MangabakaScrobbleProviderService(Substitute.For<ILogger<MangabakaScrobbleProviderService>>(), unitOfWork);
-        var hardcover = new HardcoverScrobbleProviderService(Substitute.For<ILogger<HardcoverScrobbleProviderService>>(), unitOfWork);
+        var aniList = new AniListScrobbleProviderService(Substitute.For<ILogger<AniListScrobbleProviderService>>(), unitOfWork, Substitute.For<IKavitaPlusAuditService>());
+        var mal = new MyAnimeListScrobbleProviderService(Substitute.For<ILogger<MyAnimeListScrobbleProviderService>>(), unitOfWork, Substitute.For<IKavitaPlusAuditService>());
+        var mangaBaka = new MangabakaScrobbleProviderService(Substitute.For<ILogger<MangabakaScrobbleProviderService>>(), unitOfWork, Substitute.For<IKavitaPlusAuditService>());
+        var hardcover = new HardcoverScrobbleProviderService(Substitute.For<ILogger<HardcoverScrobbleProviderService>>(), unitOfWork, Substitute.For<IKavitaPlusAuditService>());
 
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.AniList, (_, _) => aniList);

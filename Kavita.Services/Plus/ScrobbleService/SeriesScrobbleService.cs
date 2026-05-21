@@ -4,9 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
+using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
@@ -21,7 +23,7 @@ public interface ISeriesScrobbleService : IScrobbleProviderService;
 /// A <see cref="IScrobbleProviderService"/> implementation for <see cref="ScrobbleProvider"/>'s that track data
 /// based on series. (Mangabaka, AniList, etc)
 /// </summary>
-public abstract class SeriesScrobbleService<T>(ILogger<T> logger, IUnitOfWork unitOfWork): ISeriesScrobbleService
+public abstract class SeriesScrobbleService<T>(ILogger<T> logger, IUnitOfWork unitOfWork, IKavitaPlusAuditService auditService): ISeriesScrobbleService
 where T: IScrobbleProviderService
 {
     protected abstract ScrobbleProvider Provider { get; }
@@ -47,6 +49,15 @@ where T: IScrobbleProviderService
 
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
+
+            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id,
+                new AuditLogScrobbleParamsDto
+                {
+                    Provider = Provider,
+                    ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
+                    Rating = rating,
+                    LibraryType = series.Library.Type,
+                }, AuditStatus.Info, userId: user.Id, ct: ct);
             return;
         }
 
@@ -65,6 +76,15 @@ where T: IScrobbleProviderService
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
+
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+            new AuditLogScrobbleParamsDto
+            {
+                Provider = Provider,
+                ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
+                Rating = rating,
+                LibraryType = series.Library.Type,
+            }, AuditStatus.Info, userId: user.Id, ct: ct);
 
         logger.LogDebug("[{Provider}] Created new scrobble event for {Series} with Rating {Rating}", Provider, series.Name, rating);
     }
@@ -88,6 +108,16 @@ where T: IScrobbleProviderService
 
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
+
+            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id,
+                new AuditLogScrobbleParamsDto
+                {
+                    Provider = Provider,
+                    ScrobbleEventType = ScrobbleEventType.Review,
+                    ReviewBody = reviewBody,
+                    LibraryType = series.Library.Type,
+                }, AuditStatus.Info, userId: user.Id, ct: ct);
+
             return;
         }
 
@@ -108,7 +138,16 @@ where T: IScrobbleProviderService
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
 
-        logger.LogDebug("[{Provider}] Created new scrobble event for {Series} with Review Title {Title}", Provider, series.Name, reviewTitle);
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+            new AuditLogScrobbleParamsDto
+            {
+                Provider = Provider,
+                ScrobbleEventType = ScrobbleEventType.Review,
+                ReviewBody = reviewBody,
+                LibraryType = series.Library.Type,
+            }, AuditStatus.Info, userId: user.Id, ct: ct);
+
+        logger.LogDebug("[{Provider}] Created new review scrobble event for {Series}", Provider, series.Name);
     }
 
     public async Task ScrobbleReadingUpdate(AppUser user, Series series, Chapter chapter, CancellationToken ct = default)
@@ -149,6 +188,16 @@ where T: IScrobbleProviderService
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
 
+            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id,
+                new AuditLogScrobbleParamsDto
+                {
+                    Provider = Provider,
+                    ScrobbleEventType = ScrobbleEventType.ChapterRead,
+                    ChapterNumber = chapterNumber,
+                    VolumeNumber = volumeNumber,
+                    LibraryType = series.Library.Type,
+                }, AuditStatus.Info, userId: user.Id, ct: ct);
+
             logger.LogDebug("[{Provider}] Updated scrobble event for {Series} from Volume {PrevVolume} -> {Volume}, Chapter {PrevChapter} -> {Chapter}",
                 Provider, series.Name, prevVolumeNumber, volumeNumber, prevChapterNumber, chapterNumber);
             return;
@@ -179,6 +228,16 @@ where T: IScrobbleProviderService
 
         unitOfWork.ScrobbleRepository.Attach(evt);
         await unitOfWork.CommitAsync(ct);
+
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+            new AuditLogScrobbleParamsDto
+            {
+                Provider = Provider,
+                ScrobbleEventType = ScrobbleEventType.ChapterRead,
+                ChapterNumber = chapterNumber,
+                VolumeNumber = volumeNumber,
+                LibraryType = series.Library.Type,
+            }, AuditStatus.Info, userId: user.Id, ct: ct);
 
         logger.LogDebug("[{Provider}] Created new scrobble read event for {Series} with Volume {Volume}, Chapter {Chapter} for User: {UserId}",
             Provider, series.Name, volumeNumber, chapterNumber, user.Id);
@@ -212,6 +271,14 @@ where T: IScrobbleProviderService
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
+
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+            new AuditLogScrobbleParamsDto
+            {
+                Provider = Provider,
+                ScrobbleEventType = eventType,
+                LibraryType = series.Library.Type,
+            }, AuditStatus.Info, userId: user.Id, ct: ct);
 
         logger.LogDebug("[{Provider}] Created new scrobble {Event} event for {Series} for User: {UserId}",
             Provider, eventType, series.Name, user.Id);

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Kavita.API.Database;
+using Kavita.API.Services.Plus;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -8,7 +9,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus.ScrobbleService;
 
-public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProviderService> logger, IUnitOfWork unitOfWork) : SeriesScrobbleService<MyAnimeListScrobbleProviderService>(logger, unitOfWork)
+public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProviderService> logger, IUnitOfWork unitOfWork, IKavitaPlusAuditService auditService)
+    : SeriesScrobbleService<MyAnimeListScrobbleProviderService>(logger, unitOfWork, auditService)
 {
     protected override ScrobbleProvider Provider => ScrobbleProvider.Mal;
     protected override IReadOnlyList<ScrobbleEventType> SupportedEvents =>
