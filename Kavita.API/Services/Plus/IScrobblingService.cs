@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using Hangfire;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
+using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.User;
 
 namespace Kavita.API.Services.Plus;
 
@@ -109,6 +109,7 @@ public interface IScrobblingService
     Task CreateEventsFromExistingHistory(ScrobbleProvider scrobbleProvider, int userId = 0, CancellationToken ct = default);
     Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default);
     Task ClearEventsForSeries(int userId, int seriesId, CancellationToken ct = default);
+    Task<bool> RetryScrobbleAsync(int authUserId, KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default);
 
     /// <summary>
     /// Sync local information for each scrobble provider for all suers
@@ -167,6 +168,7 @@ public interface IScrobbleProviderService
     Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead, CancellationToken ct = default);
 }
 
+// TODO: Figure out a place to put this that doesn't cause dependency hell
 public static class ScrobblingHelper
 {
     public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
@@ -217,5 +219,4 @@ public static class ScrobblingHelper
     {
         return id is null or 0 ? string.Empty : $"{url}{id}/";
     }
-
 }

@@ -78,7 +78,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.Hardcover, (_, _) => hardcover);
 
         var service = new ScrobblingService(unitOfWork, Substitute.For<IEventHub>(), logger,  licenseService,
-            localizationService, emailService, kavitaPlusApiService, serviceCollection.BuildServiceProvider(), Substitute.For<IMapper>());
+            localizationService, emailService, kavitaPlusApiService, serviceCollection.BuildServiceProvider(), Substitute.For<IMapper>(), , Substitute.For<IKavitaPlusAuditService>());
 
         var readerService = new ReaderService(unitOfWork,
             Substitute.For<ILogger<ReaderService>>(),

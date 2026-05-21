@@ -9,6 +9,8 @@ import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
 import {PaginatedResult} from "../_models/pagination";
 import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
 import {UtilityService} from "../shared/_services/utility.service";
+import {forkJoin} from "rxjs";
+import {KavitaPlusAuditEntry} from "../_models/kavitaplus/kavita-plus-audit-entry";
 import {ScrobbleProviderSettings, UserScrobbleProvider,} from "../_models/kavitaplus/scrobble-provider-settings";
 
 export enum ScrobbleProvider {
@@ -48,6 +50,14 @@ export class ScrobblingService {
 
   getMalToken() {
     return this.httpClient.get<{username: string, accessToken: string}>(this.baseUrl + 'scrobbling/mal-token');
+  }
+
+  /**
+   * Re-queues the underlying event to process. Only applicable if the event is in failed/rate limit state
+   * @param event
+   */
+  retryScrobbleEvent(event: KavitaPlusAuditEntry) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/retry-scrobble', event, TextResonse).pipe(map(r => r === 'true'));
   }
 
   hasRunScrobbleGen() {
