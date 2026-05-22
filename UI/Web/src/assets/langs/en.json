@@ -2274,7 +2274,9 @@
         "rule-days-mark": "days, mark it is",
         "rule-publication-exception": "unless publication status is",
         "dropped-series-rule-label": "Dropped series rule",
-        "dropped-series-rule-condition": "If a series/chapter hasn't been read for"
+        "dropped-series-rule-condition": "If a series/chapter hasn't been read for",
+        "all-libraries-label": "All libraries",
+        "all-libraries-tooltip": "If enabled, scrobble will run on all libraries. And the below selection does not take effect"
     },
 
     "scrobble-provider-description-pipe": {

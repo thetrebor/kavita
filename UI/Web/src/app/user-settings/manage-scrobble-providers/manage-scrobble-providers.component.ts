@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {map, switchMap, tap} from "rxjs";
+import {map, of, switchMap, tap} from "rxjs";
 import {AgeRating, AgeRatings} from "../../_models/metadata/age-rating";
 import {
   ReadStatusTransitionRule,
@@ -38,6 +38,8 @@ import {LibraryService} from "../../_services/library.service";
 import {PublicationStatusPipe} from "../../_pipes/publication-status.pipe";
 import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
 import {Select2, Select2Data} from "ng-select2-component";
+import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
+import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -88,7 +90,8 @@ const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
     AgeRatingPipe,
     PublicationStatusPipe,
     ScrobbleReadStatusPipe,
-    Select2
+    Select2,
+    TypeaheadComponent
   ],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',
@@ -103,10 +106,8 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
+
   libraries = signal<Library[]>([]);
-  libraryOptions = computed<MultiCheckBoxItem<number>[]>(() => this.libraries().map(l => {
-    return { label: l.name, value: l.id };
-  }));
 
   private publicationStatusPipe = new PublicationStatusPipe();
   publicationStatusOptions: Select2Data = PublicationStatuses.map(p => ({
@@ -181,6 +182,28 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
   protected droppedSeriesRule(formGroup: ScrobbleProviderSettingsFormGroup): ReadStatusTransitionRuleFromGroup {
     return formGroup.get('droppedSeriesRule') as ReadStatusTransitionRuleFromGroup;
+  }
+
+  protected libraryTypeaheadSettings(provider: ScrobbleProvider): TypeaheadSettings<Library> {
+    const libraries = this.libraries();
+    const userScrobbleProvider = this.userScrobbleProviders().get(provider)!;
+
+    const settings = new TypeaheadSettings<Library>();
+    settings.id = "libraries-" + provider;
+    settings.multiple = true;
+    settings.fetchFn = () => of(libraries);
+    settings.compareFn = (optionList, filter) => optionList.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()));
+    settings.savedData = libraries.filter(l => userScrobbleProvider.settings.libraries.includes(l.id));
+    settings.trackByIdentityFn = (index, value) => value.id + '';
+    settings.minCharacters = 0; // All preloaded
+
+    return settings;
+  }
+
+  updateLibrarySelection(provider: ScrobbleProvider, libraries: Library[]) {
+    const group = this.formGroups().get(provider);
+
+    group?.get('libraries')?.setValue(libraries.map(l => l.id));
   }
 
   protected disconnectScrobbleProvider(provider: ScrobbleProvider) {
