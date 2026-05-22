@@ -324,7 +324,7 @@ export class PreferenceNavComponent implements AfterViewInit {
 
     this.keyBindService.registerListener(
       this.destroyRef,
-      () => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling})
+      () => this.router.navigate(['/settings'], { fragment: SettingsTabId.MyActivity})
         .then(() => this.scrollToActiveItem()),
       [KeyBindTarget.NavigateToScrobbling],
       {condition$: this.hasValidLicense$},

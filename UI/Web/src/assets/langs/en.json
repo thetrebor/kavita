@@ -2323,8 +2323,8 @@
         "key-bind-tooltip-navigate-to-settings": "Open settings while not in a reader",
         "key-bind-title-open-search": "Open search",
         "key-bind-tooltip-open-search": "Open the top search bar",
-        "key-bind-title-navigate-to-scrobbling": "Open Scrobbling",
-        "key-bind-tooltip-navigate-to-scrobbling": "Open settings page on the Scrobbling tab",
+        "key-bind-title-navigate-to-scrobbling": "Open My Activity",
+        "key-bind-tooltip-navigate-to-scrobbling": "Open settings page on the My Activity tab",
         "key-bind-title-escape": "Escape",
         "key-bind-tooltip-escape": "Close the currently open context",
 
