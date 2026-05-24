@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire;
@@ -25,6 +26,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
@@ -34,7 +36,8 @@ public class ScrobblingController(
     IScrobblingService scrobblingService,
     ILogger<ScrobblingController> logger,
     ILocalizationService localizationService,
-    IKavitaPlusAuditService kavitaPlusAuditService)
+    IKavitaPlusAuditService kavitaPlusAuditService,
+    IServiceProvider serviceProvider)
     : BaseApiController
 {
 
@@ -64,76 +67,16 @@ public class ScrobblingController(
         return Ok();
     }
 
-    /// <summary>
-    /// Get the current user's AniList token
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("anilist-token")]
-    public async Task<ActionResult<string>> GetAniListToken()
+    [HttpPost("update-user-scrobble-provider")]
+    public async Task<ActionResult> UpdateUserScrobbleProvider([FromBody] ScrobbleProviderDto dto)
     {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user == null) return Unauthorized();
+        var service = serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(dto.Provider);
 
-        return Ok(user.AniListAccessToken);
-    }
+        await service.UpdateUserScrobbleProvider(UserId, dto, HttpContext.RequestAborted);
 
-    /// <summary>
-    /// Get the current user's MAL token and username
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("mal-token")]
-    public async Task<ActionResult<MalUserInfoDto>> GetMalToken()
-    {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user == null) return Unauthorized();
+        BackgroundJob.Enqueue(() => scrobblingService.SyncProviderInfo(UserId, dto.Provider, CancellationToken.None));
 
-        return Ok(new MalUserInfoDto()
-        {
-            Username = user.MalUserName,
-            AccessToken = user.MalAccessToken
-        });
-    }
-
-    /// <summary>
-    /// Update the current user's AniList token
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns>True if the token was new or not</returns>
-    [HttpPost("update-anilist-token")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult<bool>> UpdateAniListToken(AniListUpdateDto dto)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user == null) return Unauthorized();
-
-        var isNewToken = string.IsNullOrEmpty(user.AniListAccessToken);
-        user.AniListAccessToken = dto.Token;
-        unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
-
-        return Ok(isNewToken);
-    }
-
-    /// <summary>
-    /// Update the current user's MAL token (Client ID) and Username
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns>True if the token was new or not</returns>
-    [HttpPost("update-mal-token")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult<bool>> UpdateMalToken(MalUserInfoDto dto)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user == null) return Unauthorized();
-
-        var isNewToken = string.IsNullOrEmpty(user.MalAccessToken);
-        user.MalAccessToken = dto.AccessToken;
-        user.MalUserName = dto.Username;
-
-        unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
-
-        return Ok(isNewToken);
+        return Ok();
     }
 
     /// <summary>

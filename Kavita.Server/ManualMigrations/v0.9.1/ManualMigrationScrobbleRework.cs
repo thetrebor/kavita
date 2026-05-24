@@ -39,7 +39,9 @@ public class ManualMigrationScrobbleRework: ManualMigration
                 {
                     ProgressScrobbling = user.UserPreferences.AniListScrobblingEnabled,
                     WantToReadSync = user.UserPreferences.WantToReadSync,
-                }
+                },
+                HasRunScrobbleEventGeneration = user.HasRunScrobbleEventGeneration,
+                ScrobbleEventGenerationRan = user.ScrobbleEventGenerationRan,
             };
             user.ScrobbleProviders[ScrobbleProvider.Mal] = new AppUserScrobbleProvider
             {
@@ -58,12 +60,6 @@ public class ManualMigrationScrobbleRework: ManualMigration
         if (context.ChangeTracker.HasChanges())
         {
             await context.SaveChangesAsync();
-        }
-
-        if (hasValidScrobbleProviders)
-        {
-            logger.LogDebug("Valid scrobble providers found, enqueueing a provider sync task");
-            BackgroundJob.Enqueue<IScrobblingService>(s => s.SyncProviderInfo(CancellationToken.None));
         }
     }
 }

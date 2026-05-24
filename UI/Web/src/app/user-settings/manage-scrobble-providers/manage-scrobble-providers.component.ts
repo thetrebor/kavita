@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {map, of, switchMap, tap} from "rxjs";
+import {filter, map, of, switchMap, tap} from "rxjs";
 import {AgeRating, AgeRatings} from "../../_models/metadata/age-rating";
 import {
   ReadStatusTransitionRule,
@@ -13,7 +13,7 @@ import {
 import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/publication-status";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged} from "rxjs/operators";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {
   NgbAccordionBody,
   NgbAccordionButton,
@@ -31,15 +31,19 @@ import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ReviewScrobbleTargetNamePipe} from "../../_pipes/review-scrobble-target-name.pipe";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {Library} from "../../_models/library/library";
-import {
-  MultiCheckBoxItem
-} from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
 import {LibraryService} from "../../_services/library.service";
 import {PublicationStatusPipe} from "../../_pipes/publication-status.pipe";
 import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
 import {Select2, Select2Data} from "ng-select2-component";
 import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
+import {ModalService} from "../../_services/modal.service";
+import {
+  ManageUserScrobbleProviderModalComponent
+} from "../_modals/manage-user-scrobble-provider-modal/manage-user-scrobble-provider-modal.component";
+import {DefaultModalOptions} from "../../_models/modal/modal-options";
+import {ConfirmService} from "../../shared/confirm.service";
+import {fromPromise} from "rxjs/internal/observable/innerFrom";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -88,7 +92,6 @@ const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
     UtcToLocalTimePipe,
     ReviewScrobbleTargetNamePipe,
     AgeRatingPipe,
-    PublicationStatusPipe,
     ScrobbleReadStatusPipe,
     Select2,
     TypeaheadComponent
@@ -103,6 +106,8 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly destroyRef$ = inject(DestroyRef);
+  private readonly modalService = inject(ModalService);
+  private readonly confirmService = inject(ConfirmService);
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
@@ -110,6 +115,8 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   libraries = signal<Library[]>([]);
 
   private publicationStatusPipe = new PublicationStatusPipe();
+  private scrobbleProviderNamePipe = new ScrobbleProviderNamePipe();
+
   publicationStatusOptions: Select2Data = PublicationStatuses.map(p => ({
     value: p,
     label: this.publicationStatusPipe.transform(p)
@@ -206,20 +213,34 @@ export class ManageScrobbleProvidersComponent implements OnInit {
     group?.get('libraries')?.setValue(libraries.map(l => l.id));
   }
 
-  protected disconnectScrobbleProvider(provider: ScrobbleProvider) {
-    const group = this.formGroups().get(provider);
-    if (!group) return;
+  protected async disconnectScrobbleProvider(provider: ScrobbleProvider) {
+    const userScrobbleProvider = this.userScrobbleProviders().get(provider);
+    if (!userScrobbleProvider) return;
 
-    group.get('')
+    fromPromise(this.confirmService.confirm(translate('scrobble-provider-settings-manager.confirm-delete',
+      {provider: this.scrobbleProviderNamePipe.transform(provider)}))).pipe(
+      filter(confirmed => confirmed),
+      switchMap(() => {
+        userScrobbleProvider.authenticationToken = '';
+
+        return this.scrobbleService.saveUserScrobbleProvider(userScrobbleProvider);
+      }),
+    ).subscribe();
   }
 
-  protected connectScrobbleProvider(provider: ScrobbleProvider) {}
+  protected connectScrobbleProvider(provider: ScrobbleProvider) {
+    const userScrobbleProvider = this.userScrobbleProviders().get(provider);
+    if (!userScrobbleProvider) return;
+
+    const modal = this.modalService.open(ManageUserScrobbleProviderModalComponent, {
+      centered: true, fullscreen: "sm"
+    });
+    modal.setInput('userScrobbleProvider', userScrobbleProvider);
+  }
 
   protected readonly ProviderSupportedEvents = ProviderSupportedEvents;
   protected readonly ScrobbleEventType = ScrobbleEventType;
-  protected readonly ReviewScrobbleTarget = ReviewScrobbleTarget;
   protected readonly ReviewScrobbleTargets = ReviewScrobbleTargets;
   protected readonly AgeRatings = AgeRatings;
   protected readonly ScrobbleReadStatuses = ScrobbleReadStatuses;
-  protected readonly PublicationStatuses = PublicationStatuses;
 }

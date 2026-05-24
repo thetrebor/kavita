@@ -1482,8 +1482,9 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync(ct);
     }
 
-    public Task SyncProviderInfo(CancellationToken ct = default)
+    public Task SyncProviderInfo(int userId, ScrobbleProvider provider, CancellationToken ct = default)
     {
+        // TODO: Call out to K+ to sync & check validity
         return Task.CompletedTask;
     }
 

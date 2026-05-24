@@ -1,0 +1,94 @@
+<ng-container *transloco="let t; prefix:'manage-user-scrobble-provider-modal'">
+  <div class="modal-header">
+    <div class="d-flex align-items-center gap-2">
+      <img
+        [src]="userScrobbleProvider().provider | providerImage"
+        [alt]="userScrobbleProvider().provider | scrobbleProviderName"
+        width="40"
+        height="40"
+        class="rounded me-3">
+      <h4 class="modal-title">{{t('title', { provider: userScrobbleProvider().provider | scrobbleProviderName })}}</h4>
+    </div>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <div class="modal-body">
+
+    <div class="row g-2 mb-3">
+      <div class="col-4">
+        <div>
+          <p>{{t('valid-until-label')}}</p>
+          <p>{{ userScrobbleProvider().validUntilUtc | utcToLocalTime | defaultValue }}</p>
+        </div>
+      </div>
+      <div class="col-4">
+        <div>
+          <p>{{t('last-synced-label')}}</p>
+          @let lastSyncedUtc = userScrobbleProvider().lastSyncedUtc | utcToLocalTime;
+          @if (lastSyncedUtc) {
+            <p>{{ userScrobbleProvider().lastSyncedUtc | utcToLocalTime }}</p>
+            <p class="text-muted">{{ userScrobbleProvider().lastSyncedUtc | utcToLocalDate | timeAgo }}</p>
+          } @else {
+            <p>{{t('not-synced')}}</p>
+          }
+        </div>
+      </div>
+      <div class="col-4">
+        <div>
+          <p>{{t('event-generation-label')}}</p>
+          @let scrobbleEventGenerationRan = userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalTime;
+          @if (scrobbleEventGenerationRan) {
+            <p class="text-muted">{{ scrobbleEventGenerationRan}}</p>
+          } @else {
+            <p class="text-muted">{{t('event-generation-not-run')}}</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (formGroup) {
+      <form [formGroup]="formGroup" class="row">
+        <div class="col-12">
+          <app-setting-item [title]="t('username-label')" [canEdit]="userScrobbleProvider().provider === ScrobbleProvider.Mal">
+            <ng-template #view>
+              {{ formGroup.get('userName')?.value | defaultValue }}
+            </ng-template>
+            <ng-template #edit>
+              <input class="form-control" formControlName="userName">
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="col-12 mt-4">
+          <app-setting-item [title]="t('authentication-token-label')">
+            <ng-template #view>
+            <span class="font-monospace text-muted small">
+              {{ formGroup.get('authenticationToken')?.value | truncate:50 | defaultValue }}
+            </span>
+            </ng-template>
+            <ng-template #edit>
+              <textarea class="form-control" formControlName="authenticationToken"></textarea>
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        @if (generateTokenLink(); as tokenLink) {
+          <div class="text-end">
+            <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+              <a class="flex-fill btn btn-secondary me-2"
+                 [href]="tokenLink"
+                 target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
+            </div>
+          </div>
+        }
+
+      </form>
+    }
+
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+    <button class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+  </div>
+</ng-container>

@@ -2276,7 +2276,22 @@
         "dropped-series-rule-label": "Dropped series rule",
         "dropped-series-rule-condition": "If a series/chapter hasn't been read for",
         "all-libraries-label": "All libraries",
-        "all-libraries-tooltip": "If enabled, scrobble will run on all libraries. And the below selection does not take effect"
+        "all-libraries-tooltip": "If enabled, scrobble will run on all libraries. And the below selection does not take effect",
+        "confirm-delete": "Are you sure want to disconnect {{provider}}"
+    },
+
+    "manage-user-scrobble-provider-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "title": "Manage your authentication details for {{provider}}",
+        "username-label": "Username",
+        "authentication-token-label": "Authentication Token",
+        "valid-until-label": "Valid Until",
+        "last-synced-label": "Last synced",
+        "not-synced": "Not yet synced",
+        "event-generation-label": "Last scrobble backfill",
+        "event-generation-not-run": "Backfill not yet ran",
+        "generate": "Generate"
     },
 
     "scrobble-provider-description-pipe": {

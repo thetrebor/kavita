@@ -43,6 +43,10 @@ export class ScrobblingService {
     return this.httpClient.post(this.baseUrl + 'scrobbling/update-scrobble-settings', settings);
   }
 
+  saveUserScrobbleProvider(userScrobbleProvider: UserScrobbleProvider) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/update-user-scrobble-provider', userScrobbleProvider);
+  }
+
   hasTokenExpired(provider: ScrobbleProvider) {
     return this.httpClient.get<string>(this.baseUrl + 'scrobbling/token-expired?provider=' + provider, TextResonse)
       .pipe(map(r => r === "true"));

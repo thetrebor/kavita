@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
 using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -31,6 +32,8 @@ where T: IScrobbleProviderService
     protected abstract IReadOnlyList<ScrobbleEventType> SupportedEvents { get; }
 
     protected abstract void SetScrobbleIds(ScrobbleEvent evt, Series series);
+
+    public abstract Task UpdateUserScrobbleProvider(int userId, ScrobbleProviderDto dto, CancellationToken ct = default);
 
     public async Task ScrobbleRatingUpdate(AppUser user, Series series, Chapter? chapter, float rating, CancellationToken ct = default)
     {

@@ -115,9 +115,11 @@ public interface IScrobblingService
     /// <summary>
     /// Sync local information for each scrobble provider for all suers
     /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="provider"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task SyncProviderInfo(CancellationToken ct = default);
+    Task SyncProviderInfo(int userId, ScrobbleProvider provider, CancellationToken ct = default);
 }
 
 public interface IScrobbleProviderService
@@ -167,6 +169,8 @@ public interface IScrobbleProviderService
     /// <returns></returns>
     /// <remarks>Only the result of both WantToRead types is send to K+</remarks>
     Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead, CancellationToken ct = default);
+
+    Task UpdateUserScrobbleProvider(int userId, ScrobbleProviderDto dto, CancellationToken ct = default);
 }
 
 // TODO: Figure out a place to put this that doesn't cause dependency hell
