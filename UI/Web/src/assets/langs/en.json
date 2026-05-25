@@ -2239,7 +2239,7 @@
         "mal-stack-import": "MAL Stack",
         "admin-public-metadata": "Manage Metadata",
         "admin-manage-kavitaplus-activity": "Manage Kavita+ Activity",
-        "scrobble-settings": "Scrobble Settings"
+        "scrobble-settings": "Connections"
     },
 
     "scrobble-provider-settings-manager": {

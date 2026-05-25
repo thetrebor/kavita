@@ -250,7 +250,6 @@ export class PreferenceNavComponent implements AfterViewInit {
         children: [
           new SideNavItem(SettingsTabId.Account),
           new SideNavItem(SettingsTabId.Preferences),
-          SideNavItem.kPlusOnly(SettingsTabId.ScrobbleSettings),
           new SideNavItem(SettingsTabId.CustomKeyBinds),
           new SideNavItem(SettingsTabId.ReadingProfiles),
           new SideNavItem(SettingsTabId.Customize, [], undefined, [Role.ReadOnly]),
@@ -307,6 +306,7 @@ export class PreferenceNavComponent implements AfterViewInit {
           SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount),
           SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
           SideNavItem.kPlusOnly(SettingsTabId.ManageKavitaPlusActivity),
+          SideNavItem.kPlusOnly(SettingsTabId.ScrobbleSettings),
           SideNavItem.kPlusOnly(SettingsTabId.MyActivity, [], this.scrobblingFailuresBadgeCount),
           SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount),
         ]

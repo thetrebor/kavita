@@ -1057,8 +1057,7 @@ public class ScrobblingService : IScrobblingService
             if (!await ValidateUserToken(user, evt)) continue;
             if (!await ValidateSeriesCanBeScrobbled(evt)) continue;
 
-            var rateLimits = await SetAndCheckRateLimit(ctx.RateLimits, evt.AppUser, ctx.License, ct);
-            if (!rateLimits.TryGetValue(evt.ScrobbleProvider, out var rateLimit) || rateLimit == 0)
+            if (!ctx.RateLimits[evt.AppUserId].TryGetValue(evt.ScrobbleProvider, out var rateLimit) || rateLimit == 0)
             {
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
                     new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
