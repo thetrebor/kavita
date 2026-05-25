@@ -4,7 +4,7 @@ using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 
-public sealed record MatchRequestV3Dto
+public sealed record MatchRequestV3Dto: MetadataRequest
 {
     public required MetadataProvider Provider { get; set; }
     public required string SeriesName { get; set; }

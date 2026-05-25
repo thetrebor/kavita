@@ -43,6 +43,7 @@ public class ScrobbleSyncContext
 {
     public required List<ScrobbleEvent> ReadEvents {get; init;}
     public required List<ScrobbleEvent> RatingEvents {get; init;}
+    public required List<ScrobbleEvent> ReviewEvents {get; init;}
     /// <remarks>Do not use this as events to send to K+, use <see cref="Decisions"/></remarks>
     public required List<ScrobbleEvent> AddToWantToRead {get; init;}
     /// <remarks>Do not use this as events to send to K+, use <see cref="Decisions"/></remarks>
@@ -72,7 +73,7 @@ public class ScrobbleSyncContext
     /// <summary>
     /// Sum of all events to process
     /// </summary>
-    public int TotalCount => ReadEvents.Count + RatingEvents.Count + AddToWantToRead.Count + RemoveWantToRead.Count;
+    public int TotalCount => ReadEvents.Count + RatingEvents.Count + ReviewEvents.Count + AddToWantToRead.Count + RemoveWantToRead.Count;
 }
 
 public class ScrobblingService : IScrobblingService
@@ -718,6 +719,9 @@ public class ScrobblingService : IScrobblingService
         var ratingEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ScoreUpdated, ct: ct))
             .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
+        var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review, ct: ct))
+            .Where(e => !erroredSeries.Contains(e.SeriesId))
+            .ToList();
 
         return new ScrobbleSyncContext
         {
@@ -725,6 +729,7 @@ public class ScrobblingService : IScrobblingService
             RatingEvents = ratingEvents,
             AddToWantToRead = addToWantToRead,
             RemoveWantToRead = removeWantToRead,
+            ReviewEvents = reviewEvents,
             Decisions = CalculateNetWantToReadDecisions(addToWantToRead, removeWantToRead),
             RateLimits = [],
             License = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value,
@@ -744,6 +749,7 @@ public class ScrobblingService : IScrobblingService
             .Concat(ctx.AddToWantToRead.Select(r => r.AppUser))
             .Concat(ctx.RemoveWantToRead.Select(r => r.AppUser))
             .Concat(ctx.RatingEvents.Select(r => r.AppUser))
+            .Concat(ctx.ReviewEvents.Select(r => r.AppUser))
             .DistinctBy(u => u.Id)
             .ToList();
 
@@ -795,11 +801,13 @@ public class ScrobblingService : IScrobblingService
                                "\n  Read Events: {ReadEventsCount}" +
                                "\n  Want to Read Events: {WantToReadEventsCount}" +
                                "\n  Rating Events: {RatingEventsCount}" +
+                               "\n  Review Events: {ReviewEventsCount}" +
                                "\n  Users to Scrobble: {UsersToScrobbleCount}"  +
                                "\n  Total Events to Process: {TotalEvents}",
             ctx.ReadEvents.Count,
             ctx.Decisions.Count,
             ctx.RatingEvents.Count,
+            ctx.ReviewEvents.Count,
             ctx.Users.Count,
             ctx.TotalCount);
 
@@ -807,6 +815,7 @@ public class ScrobblingService : IScrobblingService
         {
             await ProcessReadEvents(ctx, ct);
             await ProcessRatingEvents(ctx, ct);
+            await ProcessReviewEvents(ctx, ct);
             await ProcessWantToReadRatingEvents(ctx, ct);
         }
         catch (FlurlHttpException ex)
@@ -908,6 +917,33 @@ public class ScrobblingService : IScrobblingService
             }), ct);
     }
 
+    private async Task ProcessReviewEvents(ScrobbleSyncContext ctx, CancellationToken ct)
+    {
+        await ProcessEvents(ctx.ReviewEvents, ctx, evt =>
+        {
+            var scrobbleSettings = ctx.Users
+                .FirstOrDefault(u => u.Id == evt.AppUserId)?
+                .ScrobbleProviders.GetValueOrDefault(evt.ScrobbleProvider);
+
+            return Task.FromResult(new ScrobbleV3Dto
+            {
+                Provider = evt.ScrobbleProvider,
+                AuthenticationToken = null,
+                Format = evt.Format,
+                AniListId = evt.AniListId,
+                MalId = (int?)evt.MalId,
+                MangabakaId = evt.MangabakaId,
+                HardcoverId = evt.HardcoverId,
+                ScrobbleEventType = evt.ScrobbleEventType,
+                SeriesName = evt.Series.Name,
+                Year = evt.Series.Metadata.ReleaseYear,
+                ReviewBody = evt.ReviewBody,
+                ReviewTitle = evt.ReviewTitle,
+                ReviewScrobbleTarget = scrobbleSettings?.Settings.ReviewScrobbleTarget
+            });
+        }, ct);
+    }
+
     private async Task ProcessReadEvents(ScrobbleSyncContext ctx, CancellationToken ct)
     {
         // Recalculate the highest volume/chapter for non chapter events
@@ -935,6 +971,7 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType = evt.ScrobbleEventType,
             ChapterNumber = evt.ChapterNumber,
             VolumeNumber = (int?)evt.VolumeNumber,
+            PercentRead = (int?)evt.Progress,
             SeriesName = evt.Series.Name,
             ScrobbleDateUtc = evt.LastModifiedUtc,
             Year = evt.Series.Metadata.ReleaseYear,
@@ -1050,7 +1087,11 @@ public class ScrobblingService : IScrobblingService
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
         {
             var user = ctx.Users.FirstOrDefault(u => u.Id == evt.AppUserId);
-            if (user is null) continue;
+            if (user is null)
+            {
+                _logger.LogError("Event for unknown user, skipping");
+                continue;
+            }
 
             _logger.LogDebug("Processing Scrobble Events: {Count} / {Total}", ctx.ProgressCounter, ctx.TotalCount);
             ctx.ProgressCounter++;
@@ -1070,6 +1111,8 @@ public class ScrobblingService : IScrobblingService
             try
             {
                 var data = NormalizeScrobbleData(await createEvent(evt));
+
+                data.AuthenticationToken = user.ScrobbleProviders[evt.ScrobbleProvider].AuthenticationToken;
 
                 var rateLeft = await PostScrobbleUpdate(data, ctx.License, evt);
                 ctx.RateLimits[evt.AppUserId][evt.ScrobbleProvider] = rateLeft;
@@ -1257,7 +1300,7 @@ public class ScrobblingService : IScrobblingService
                 evt.SetErrorMessage(ReviewFailedErrorMessage);
             }
 
-            return response.RateLeft;
+            throw new KavitaException(response.ErrorMessage);
         }
         #pragma warning disable S2139
         catch (FlurlHttpException ex)
@@ -1604,7 +1647,8 @@ public class ScrobblingService : IScrobblingService
             .ToList();
     }
 
-    private async Task<Dictionary<ScrobbleProvider, int>> SetAndCheckRateLimit(IDictionary<int, Dictionary<ScrobbleProvider, int>> userRateLimits, AppUser user, string license, CancellationToken ct)
+    private async Task SetAndCheckRateLimit(IDictionary<int, Dictionary<ScrobbleProvider, int>> userRateLimits,
+        AppUser user, string license, CancellationToken ct)
     {
         var providersToCheck = user.ScrobbleProviders
             .Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken))
@@ -1623,8 +1667,6 @@ public class ScrobblingService : IScrobblingService
                 _logger.LogWarning("User {UserName} has no remaining rate limit for {Provider}", user.UserName, kv.Key);
             }
         }
-
-        return userRateLimits[user.Id];
     }
 
 }

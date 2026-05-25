@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Scrobble;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Scrobble;
@@ -64,4 +65,5 @@ public record ScrobbleV3Dto: MetadataRequest
     public DateTime? ScrobbleDateUtc { get; set; }
     public string? ReviewTitle { get; set; }
     public string? ReviewBody { get; set; }
+    public ReviewScrobbleTarget? ReviewScrobbleTarget { get; set; }
 }
