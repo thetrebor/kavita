@@ -123,6 +123,7 @@ public class ScrobblingService : IScrobblingService
         .ToList()
         .AsReadOnly();
 
+    private const string RateLimitHitErrorMessage = "Scrobbling rate limit hit";
     private const string UnknownSeriesErrorMessage = "Series cannot be matched for Scrobbling";
     private const string AccessTokenErrorMessage = "Access Token needs to be rotated to continue scrobbling";
     private const string InvalidKPlusLicenseErrorMessage = "Kavita+ subscription no longer active";
@@ -1043,7 +1044,7 @@ public class ScrobblingService : IScrobblingService
         {
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
                 new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
-                AuditStatus.Info, userId: evt.AppUserId);
+                AuditStatus.Info, userId: evt.AppUserId, ct: ct);
         }
 
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
@@ -1099,6 +1100,13 @@ public class ScrobblingService : IScrobblingService
                         SeriesId = evt.SeriesId,
                     });
                 }
+
+                if (ex.Message.Contains(RateLimitHitErrorMessage))
+                {
+                    // Ensure we skip all events for this provider this cycle
+                    ctx.RateLimits[evt.AppUserId][evt.ScrobbleProvider] = 0;
+                }
+
             }
             catch (Exception ex)
             {
@@ -1194,11 +1202,11 @@ public class ScrobblingService : IScrobblingService
             // Might want to log this under ScrobbleError
             if (response.ErrorMessage.Contains("Too Many Requests"))
             {
-                _logger.LogInformation("Hit Too many requests while posting scrobble updates, sleeping to regain requests and retrying");
+                _logger.LogInformation("Hit Too many requests while posting scrobble updates, will be retried in the next cycle");
                 await _auditService.LogAsync(KavitaPlusAuditCategory.Scrobble, KavitaPlusEventType.ScrobbleRateLimitHit,
-                    AuditStatus.Failure, AuditSubjectType.Global, error: "rate-limit-hit");
-                await Task.Delay(TimeSpan.FromMinutes(10));
-                return await PostScrobbleUpdate(data, license, evt);
+                    AuditStatus.Failure, error: "rate-limit-hit");
+
+                throw new KavitaException(RateLimitHitErrorMessage);
             }
 
             if (response.ErrorMessage.Contains("Unauthorized"))
@@ -1261,9 +1269,11 @@ public class ScrobblingService : IScrobblingService
 
             if (errorMessage.Contains("Too Many Requests"))
             {
-                _logger.LogInformation("Hit Too many requests while posting scrobble updates, sleeping to regain requests and retrying");
-                await Task.Delay(TimeSpan.FromMinutes(10));
-                return await PostScrobbleUpdate(data, license, evt);
+                _logger.LogInformation("Hit Too many requests while posting scrobble updates, will be retried in the next cycle");
+                await _auditService.LogAsync(KavitaPlusAuditCategory.Scrobble, KavitaPlusEventType.ScrobbleRateLimitHit,
+                    AuditStatus.Failure, error: "rate-limit-hit");
+
+                throw new KavitaException(RateLimitHitErrorMessage);
             }
 
             _logger.LogError(ex, "Scrobbling to Kavita+ API failed due to error: {ErrorMessage}", ex.Message);
