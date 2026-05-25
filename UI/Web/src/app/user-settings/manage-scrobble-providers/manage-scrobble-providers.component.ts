@@ -56,7 +56,7 @@ type ScrobbleProviderSettingsFormGroup = FormGroup<{
   progressScrobbling: FormControl<boolean>;
   wantToReadSync: FormControl<boolean>;
   ratingScrobbling: FormControl<boolean>;
-  reviewScrobbling: FormControl<boolean>;
+  reviewsScrobbling: FormControl<boolean>;
   reviewScrobbleTarget: FormControl<ReviewScrobbleTarget>;
   allLibraries: FormControl<boolean>;
   libraries: FormControl<number[]>;
@@ -164,7 +164,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
       progressScrobbling: this.fb.control(scrobbleSettings.progressScrobbling),
       wantToReadSync: this.fb.control(scrobbleSettings.wantToReadSync),
       ratingScrobbling: this.fb.control(scrobbleSettings.ratingScrobbling),
-      reviewScrobbling: this.fb.control(scrobbleSettings.reviewScrobbling),
+      reviewsScrobbling: this.fb.control(scrobbleSettings.reviewsScrobbling),
       reviewScrobbleTarget: this.fb.control(scrobbleSettings.reviewScrobbleTarget),
       allLibraries: this.fb.control(scrobbleSettings.allLibraries),
       libraries: this.fb.control(scrobbleSettings.libraries),

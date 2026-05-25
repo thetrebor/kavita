@@ -17,7 +17,7 @@ export type ScrobbleProviderSettings = {
   progressScrobbling: boolean;
   wantToReadSync: boolean;
   ratingScrobbling: boolean;
-  reviewScrobbling: boolean;
+  reviewsScrobbling: boolean;
   reviewScrobbleTarget: ReviewScrobbleTarget;
   allLibraries: boolean;
   libraries: number[];
@@ -72,6 +72,6 @@ export const DEFAULT_SCROBBLE_PROVIDER_SETTINGS: ScrobbleProviderSettings = {
   progressScrobbling: true,
   ratingScrobbling: true,
   reviewScrobbleTarget: ReviewScrobbleTarget.Private,
-  reviewScrobbling: true,
+  reviewsScrobbling: true,
   wantToReadSync: true
 };
