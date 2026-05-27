@@ -160,21 +160,26 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // See if this user has Mal account on record
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
-        if (user == null || string.IsNullOrEmpty(user.MalUserName) || string.IsNullOrEmpty(user.MalAccessToken))
+        if (user == null) return ArraySegment<MalStackDto>.Empty;
+
+        var scrobbleSettings = user?.ScrobbleProviders.GetValueOrDefault(ScrobbleProvider.Mal);
+
+        if (scrobbleSettings == null || string.IsNullOrEmpty(scrobbleSettings.UserName) || string.IsNullOrEmpty(scrobbleSettings.AuthenticationToken))
         {
             _logger.LogInformation("User is attempting to fetch MAL Stacks, but missing information on their account");
             return ArraySegment<MalStackDto>.Empty;
         }
+
         try
         {
-            _logger.LogDebug("Fetching Kavita+ for MAL Stacks for user {UserName}", user.MalUserName);
+            _logger.LogDebug("Fetching Kavita+ for MAL Stacks for user {UserName}", scrobbleSettings.UserName);
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-            return await _kavitaPlusApiService.GetMalStacksAsync(user.MalUserName, license, ct);
+            return await _kavitaPlusApiService.GetMalStacksAsync(scrobbleSettings.UserName, license, ct);
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Fetching Kavita+ for MAL Stacks for user {UserName} failed", user.MalUserName);
+            _logger.LogDebug(ex, "Fetching Kavita+ for MAL Stacks for user {UserName} failed", scrobbleSettings.UserName);
             return ArraySegment<MalStackDto>.Empty;
         }
     }

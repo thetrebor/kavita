@@ -200,6 +200,25 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         }
     }
 
+    public async Task<KPlusResult<List<ExternalSeriesDetailDto>>> GetWantToRead(ScrobbleProvider provider, string token,
+        string license, CancellationToken ct = default)
+    {
+        try
+        {
+            return await (Configuration.KavitaPlusApiUrl + "/api/v3/Scrobble/want-to-read")
+                .WithKavitaPlusHeaders(license)
+                .WithTimeout(TimeSpan.FromSeconds(120))
+                .SetQueryParam("provider", provider)
+                .SetQueryParam("accessToken", token)
+                .GetJsonAsync<KPlusResult<List<ExternalSeriesDetailDto>>>(cancellationToken: ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an issue getting want to read from Kavita+ for provider {Provider}", provider);
+            return KPlusResult<List<ExternalSeriesDetailDto>>.Failure(ex.Message);
+        }
+    }
+
     /// <summary>
     /// Send a GET request to K+
     /// </summary>
