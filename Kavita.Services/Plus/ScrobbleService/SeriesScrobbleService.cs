@@ -159,7 +159,7 @@ where T: IScrobbleProviderService
 
         // Series should only create scrobble events for completed chapters
         var chapterProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, user.Id, ct);
-        if (chapterProgress?.PagesRead < chapter.Pages) return;
+        if (chapterProgress?.PagesRead != 0 && chapterProgress?.PagesRead < chapter.Pages) return;
 
         var isAnyProgressOnSeries = await unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(series.Id, user.Id, ct);
 
