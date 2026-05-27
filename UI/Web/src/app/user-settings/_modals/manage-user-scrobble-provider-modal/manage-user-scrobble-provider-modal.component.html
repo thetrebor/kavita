@@ -1,12 +1,7 @@
 <ng-container *transloco="let t; prefix:'manage-user-scrobble-provider-modal'">
   <div class="modal-header">
     <div class="d-flex align-items-center gap-2">
-      <img
-        [src]="userScrobbleProvider().provider | providerImage"
-        [alt]="userScrobbleProvider().provider | scrobbleProviderName"
-        width="40"
-        height="40"
-        class="rounded me-3">
+      <app-scrobble-provider-image [provider]="userScrobbleProvider().provider" [size]="40" />
       <h4 class="modal-title">{{t('title', { provider: userScrobbleProvider().provider | scrobbleProviderName })}}</h4>
     </div>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>

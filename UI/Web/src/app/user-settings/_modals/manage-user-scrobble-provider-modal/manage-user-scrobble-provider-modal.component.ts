@@ -13,6 +13,9 @@ import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {ToastrService} from "ngx-toastr";
+import {
+  ScrobbleProviderImageComponent
+} from "../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -26,7 +29,8 @@ import {ToastrService} from "ngx-toastr";
     UtcToLocalTimePipe,
     TimeAgoPipe,
     ProviderImagePipe,
-    UtcToLocalDatePipe
+    UtcToLocalDatePipe,
+    ScrobbleProviderImageComponent
   ],
   templateUrl: './manage-user-scrobble-provider-modal.component.html',
   styleUrl: './manage-user-scrobble-provider-modal.component.scss',

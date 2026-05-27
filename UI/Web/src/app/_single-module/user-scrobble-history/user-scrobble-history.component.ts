@@ -30,6 +30,10 @@ import {ToastrService} from "ngx-toastr";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {RouterLink} from "@angular/router";
+import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
+import {
+  ScrobbleProviderImageComponent
+} from "../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -42,7 +46,7 @@ export interface DataTablePage {
   selector: 'app-user-scrobble-history',
   imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
     DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule,
-    ResponsiveTableComponent, RouterLink],
+    ResponsiveTableComponent, RouterLink, ScrobbleProviderNamePipe, ScrobbleProviderImageComponent],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -60,7 +64,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
   protected readonly accountService = inject(AccountService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
 
-  tokenExpired = signal(false);
   formGroup: FormGroup = new FormGroup({
     'filter': new FormControl('', [])
   });
@@ -100,10 +103,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
   ngOnInit() {
     this.scrobblingService.hasRunScrobbleGen().subscribe(res => {
       this.hasRunScrobbleGen.set(res);
-    });
-
-    this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
-      this.tokenExpired.set(hasExpired);
     });
 
     this.formGroup.get('filter')?.valueChanges.pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(() => {

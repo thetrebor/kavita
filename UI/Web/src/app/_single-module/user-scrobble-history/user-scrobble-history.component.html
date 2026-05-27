@@ -1,10 +1,4 @@
 <ng-container *transloco="let t; prefix:'user-scrobble-history'">
-  @if (tokenExpired()) {
-    <p class="alert alert-warning">{{t('token-expired')}}</p>
-  } @else if (!accountService.currentUser()!.preferences.aniListScrobblingEnabled) {
-    <p class="alert alert-warning">{{t('scrobbling-disabled')}}</p>
-  }
-
   <p>{{t('description')}}</p>
   <p class="fw-bold">{{t('not-read-warning')}}</p>
   <div class="row g-0 mb-2">
@@ -52,6 +46,15 @@
           <ng-template let-event="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
             <input id="select-event-{{rowIndex}}" type="checkbox" class="form-check-input"
                    [checked]="selections().isSelected(event)" (change)="handleSelection(event, rowIndex)">
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="scrobbleProvider" [sortable]="true" [draggable]="false" [resizeable]="false">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('provider-header')}}
+          </ng-template>
+          <ng-template let-value="value" ngx-datatable-cell-template>
+            <app-scrobble-provider-image [provider]="value" [size]="16" [tooltip]="true" />
           </ng-template>
         </ngx-datatable-column>
 

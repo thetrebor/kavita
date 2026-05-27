@@ -1,3 +1,5 @@
+import {ScrobbleProvider} from "../../_services/scrobbling.service";
+
 export enum ScrobbleEventType {
   ChapterRead = 0,
   AddWantToRead = 1,
@@ -13,6 +15,7 @@ export interface ScrobbleEvent {
   libraryId: number;
   isProcessed: string;
   scrobbleEventType: ScrobbleEventType;
+  scrobbleProvider: ScrobbleProvider;
   rating: number | null;
   processedDateUtc: string;
   lastModifiedUtc: string;

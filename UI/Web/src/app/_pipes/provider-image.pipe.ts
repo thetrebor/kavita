@@ -21,10 +21,6 @@ export class ProviderImagePipe implements PipeTransform {
         return `assets/images/logo-${large ? '64' : '32'}.png`;
       case ScrobbleProvider.Cbr:
         return `assets/images/ExternalServices/ComicBookRoundup.png`;
-      case ScrobbleProvider.MangaBaka:
-        return `assets/images/ExternalServices/Mangabaka.png`;
-      case ScrobbleProvider.Hardcover:
-        return `assets/images/ExternalServices/Hardcover.png`;
     }
   }
 
