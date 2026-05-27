@@ -190,7 +190,6 @@
         "processed": "Processed",
         "not-processed": "Not Processed",
         "special": "{{entity-title.special}}",
-        "generate-scrobble-events": "Backfill Events",
         "token-expired": "Your AniList token is Expired! Scrobbling events will not process until you renew on Accounts page.",
         "scrobbling-disabled": "Scrobbling is disabled on your Account Settings."
     },
@@ -2320,7 +2319,8 @@
         "not-synced": "Not yet synced",
         "event-generation-label": "Last scrobble backfill",
         "event-generation-not-run": "Backfill not yet ran",
-        "generate": "Generate"
+        "generate": "Generate",
+        "generate-scrobble-events": "Backfill Events"
     },
 
     "scrobble-provider-description-pipe": {

@@ -108,8 +108,8 @@ export class ScrobblingService {
     return this.httpClient.delete(this.baseUrl + 'scrobbling/remove-hold?seriesId=' + seriesId, TextResonse);
   }
 
-  triggerScrobbleEventGeneration() {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/generate-scrobble-events', TextResonse);
+  triggerScrobbleEventGeneration(provider: ScrobbleProvider) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/generate-scrobble-events?scrobbleProvider=' + provider, TextResonse);
   }
 
   bulkRemoveEvents(eventIds: number[]) {

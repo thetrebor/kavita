@@ -1,11 +1,4 @@
 <ng-container *transloco="let t; prefix:'user-scrobble-history'">
-
-  <div class="position-relative">
-    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="hasRunScrobbleGen()" (click)="generateScrobbleEvents()" [title]="t('generate-scrobble-events')">
-      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('generate-scrobble-events')}}</span>
-    </button>
-  </div>
-
   @if (tokenExpired()) {
     <p class="alert alert-warning">{{t('token-expired')}}</p>
   } @else if (!accountService.currentUser()!.preferences.aniListScrobblingEnabled) {

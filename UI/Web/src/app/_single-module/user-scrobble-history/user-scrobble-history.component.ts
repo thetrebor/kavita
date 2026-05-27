@@ -161,12 +161,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
     return ScrobbleEventSortField.None;
   }
 
-  generateScrobbleEvents() {
-    this.scrobblingService.triggerScrobbleEventGeneration().subscribe(_ => {
-      this.toastr.info(translate('toasts.scrobble-gen-init'))
-    });
-  }
-
   bulkDelete() {
     if (!this.selections().hasAnySelected()) {
       return;

@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit} fro
 import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provider-settings";
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
@@ -12,6 +12,7 @@ import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -36,6 +37,7 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly modal = inject(NgbActiveModal);
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly toastr = inject(ToastrService);
 
   userScrobbleProvider = model.required<UserScrobbleProvider>();
 
@@ -48,7 +50,15 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
     }
 
     return null;
-  })
+  });
+
+  canGenerateEvents = computed(() => {
+    if (this.userScrobbleProvider().provider === ScrobbleProvider.Mal) {
+      return false;
+    }
+
+    return this.userScrobbleProvider().authenticationToken !== '';
+  });
 
   formGroup!: FormGroup;
 
@@ -56,6 +66,13 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
     this.formGroup = this.fb.group({
       userName: [this.userScrobbleProvider().userName],
       authenticationToken: [this.userScrobbleProvider().authenticationToken],
+    });
+  }
+
+  generateEvents() {
+    this.scrobblingService.triggerScrobbleEventGeneration(this.userScrobbleProvider().provider).subscribe(_ => {
+      this.toastr.info(translate('toasts.scrobble-gen-init'));
+      this.close();
     });
   }
 

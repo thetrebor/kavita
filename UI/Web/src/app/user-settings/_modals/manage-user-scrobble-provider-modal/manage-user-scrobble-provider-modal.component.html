@@ -88,6 +88,7 @@
   </div>
 
   <div class="modal-footer">
+    <button class="btn btn-secondary" [disabled]="!canGenerateEvents()" (click)="generateEvents()">{{t('generate-scrobble-events')}}</button>
     <button class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
     <button class="btn btn-primary" (click)="save()">{{t('save')}}</button>
   </div>
