@@ -40,7 +40,6 @@ public class ManualMigrationScrobbleRework: ManualMigration
                     ProgressScrobbling = user.UserPreferences.AniListScrobblingEnabled,
                     WantToReadSync = user.UserPreferences.WantToReadSync,
                 },
-                HasRunScrobbleEventGeneration = user.HasRunScrobbleEventGeneration,
                 ScrobbleEventGenerationRan = user.ScrobbleEventGenerationRan,
             };
             user.ScrobbleProviders[ScrobbleProvider.Mal] = new AppUserScrobbleProvider

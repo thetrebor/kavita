@@ -42,6 +42,6 @@ export class ScrobbleAccountCardComponent {
 
 
   goToScrobbling() {
-    this.router.navigate(['/settings'], {fragment: SettingsTabId.Account});
+    this.router.navigate(['/settings'], {fragment: SettingsTabId.ScrobbleSettings});
   }
 }

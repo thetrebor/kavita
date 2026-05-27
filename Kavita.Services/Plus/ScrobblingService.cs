@@ -1359,7 +1359,6 @@ public class ScrobblingService : IScrobblingService
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
             if (user == null) return;
             if (!user.ScrobbleProviders.TryGetValue(scrobbleProvider, out var scrobbleProviderSettings)
-                || scrobbleProviderSettings.HasRunScrobbleEventGeneration
                 || string.IsNullOrEmpty(scrobbleProviderSettings.AuthenticationToken))
             {
                 _logger.LogWarning("User {UserName} has already run scrobble event generation for {Provider}, Kavita will not generate more events", user.UserName, scrobbleProvider);
@@ -1370,7 +1369,6 @@ public class ScrobblingService : IScrobblingService
         var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct))
             .Where(l => userId == 0 || userId == l.Id)
             .Where(u => u.ScrobbleProviders.TryGetValue(scrobbleProvider, out var scrobbleProviderSettings)
-                        && !scrobbleProviderSettings.HasRunScrobbleEventGeneration
                         && !string.IsNullOrEmpty(scrobbleProviderSettings.AuthenticationToken))
             .Select(u => u.Id);
 
@@ -1454,7 +1452,6 @@ public class ScrobblingService : IScrobblingService
         {
             if (user.ScrobbleProviders.TryGetValue(scrobbleProvider, out var scrobbleProviderSettings))
             {
-                scrobbleProviderSettings.HasRunScrobbleEventGeneration = true;
                 scrobbleProviderSettings.ScrobbleEventGenerationRan = DateTime.UtcNow;
 
                 _unitOfWork.UserRepository.Update(user);

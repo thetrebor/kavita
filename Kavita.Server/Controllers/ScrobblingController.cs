@@ -260,24 +260,6 @@ public class ScrobblingController(
     }
 
     /// <summary>
-    /// Has the logged-in user ran scrobble generation
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("has-ran-scrobble-gen")]
-    public async Task<ActionResult<bool>> HasRanScrobbleGen(ScrobbleProvider scrobbleProvider)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
-        if (user == null) return Unauthorized();
-
-        if (user.ScrobbleProviders.TryGetValue(scrobbleProvider, out var settings))
-        {
-            return Ok(settings.HasRunScrobbleEventGeneration);
-        }
-
-        return Ok(false);
-    }
-
-    /// <summary>
     /// Delete the given scrobble events if they belong to that user
     /// </summary>
     /// <param name="eventIds"></param>

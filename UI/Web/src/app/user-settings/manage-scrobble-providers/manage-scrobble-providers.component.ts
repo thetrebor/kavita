@@ -12,7 +12,7 @@ import {
 } from "../../_models/kavitaplus/scrobble-provider-settings";
 import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/publication-status";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, finalize} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {
   NgbAccordionBody,
@@ -41,9 +41,9 @@ import {ModalService} from "../../_services/modal.service";
 import {
   ManageUserScrobbleProviderModalComponent
 } from "../_modals/manage-user-scrobble-provider-modal/manage-user-scrobble-provider-modal.component";
-import {DefaultModalOptions} from "../../_models/modal/modal-options";
 import {ConfirmService} from "../../shared/confirm.service";
 import {fromPromise} from "rxjs/internal/observable/innerFrom";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -94,7 +94,8 @@ const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
     AgeRatingPipe,
     ScrobbleReadStatusPipe,
     Select2,
-    TypeaheadComponent
+    TypeaheadComponent,
+    LoadingComponent
   ],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',
@@ -111,6 +112,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
+  loading = computed(() => this.formGroups().size === 0);
 
   libraries = signal<Library[]>([]);
 

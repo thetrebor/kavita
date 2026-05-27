@@ -2,6 +2,8 @@
 <ng-container *transloco="let t; prefix: 'scrobble-provider-settings-manager'">
   <p class="ps-2">{{t('description')}}</p>
 
+  <app-loading [loading]="loading()" />
+
   @if (formGroups().size > 0) {
     <div class="row g-0" ngbAccordion>
 

@@ -238,13 +238,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var evt = await CreateScrobbleEvent(unitOfWork, 1);
 
-        await service.PostScrobbleUpdate(new ScrobbleV3Dto
+        await Assert.ThrowsAsync<KavitaException>(() => service.PostScrobbleUpdate(new ScrobbleV3Dto
         {
             AuthenticationToken = null,
             Provider = ScrobbleProvider.AniList,
             SeriesName = null,
             Format = (PlusMediaFormat)0,
-        }, string.Empty, evt);
+        }, string.Empty, evt));
         await unitOfWork.CommitAsync();
         Assert.True(evt.IsErrored);
 
@@ -731,7 +731,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
         Assert.Empty(reloaded.ScrobbleProviders.Values
-            .Where(p => p.HasRunScrobbleEventGeneration)
+            .Where(p => p.ScrobbleEventGenerationRan >= DateTime.UtcNow.AddDays(-1))
             .ToList());
     }
 
@@ -766,79 +766,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.False(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].HasRunScrobbleEventGeneration);
-    }
-
-    [Fact]
-    public async Task CreateEventsFromExistingHistory_SpecificUser_AlreadyRan_DoesNothing()
-    {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
-
-        licenseService.HasActiveLicense().Returns(true);
-
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
-        Assert.NotNull(user);
-        user.ScrobbleProviders[ScrobbleProvider.AniList].HasRunScrobbleEventGeneration = true;
-        await unitOfWork.CommitAsync();
-
-        // Seed a rating that would otherwise create an event
-        context.AppUserRating.Add(new AppUserRating
-        {
-            AppUserId = 1,
-            SeriesId = 1,
-            Rating = 3f,
-            HasBeenRated = true,
-        });
-        await unitOfWork.CommitAsync();
-
-        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
-
-        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
-        Assert.Empty(events);
-    }
-
-    [Fact]
-    public async Task CreateEventsFromExistingHistory_AllUsers_SkipsUsersAlreadyProcessed()
-    {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
-
-        licenseService.HasActiveLicense().Returns(true);
-
-        var secondUser = new AppUserBuilder("testuser2", "testuser2").Build();
-        secondUser.ScrobbleProviders[ScrobbleProvider.AniList] = new AppUserScrobbleProvider()
-        {
-            AuthenticationToken = ValidJwtToken,
-            HasRunScrobbleEventGeneration = true,
-        };
-        unitOfWork.UserRepository.Add(secondUser);
-        await unitOfWork.CommitAsync();
-
-        // Seed a rating for the already-ran second user, should be ignored
-        context.AppUserRating.Add(new AppUserRating
-        {
-            AppUserId = secondUser.Id,
-            SeriesId = 1,
-            Rating = 5f,
-            HasBeenRated = true,
-        });
-        await unitOfWork.CommitAsync();
-
-        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList);
-
-        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
-        Assert.Empty(events);
-
-        // First user had no data but is still marked as processed by the loop
-        var first = await unitOfWork.UserRepository.GetUserByIdAsync(1);
-        Assert.NotNull(first);
-        Assert.True(first.ScrobbleProviders[ScrobbleProvider.AniList].HasRunScrobbleEventGeneration);
-
-        // Second user was skipped by the HasRunScrobbleEventGeneration filter, flag stays true
-        var second = await unitOfWork.UserRepository.GetUserByIdAsync(secondUser.Id);
-        Assert.NotNull(second);
-        Assert.True(second.ScrobbleProviders[ScrobbleProvider.AniList].HasRunScrobbleEventGeneration);
+        Assert.False(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].ScrobbleEventGenerationRan > DateTime.UtcNow.AddDays(-1));
     }
 
     [Fact]
@@ -867,7 +795,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].HasRunScrobbleEventGeneration);
         Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].ScrobbleEventGenerationRan >= before);
     }
 
@@ -980,7 +907,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].HasRunScrobbleEventGeneration);
+        Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].ScrobbleEventGenerationRan > DateTime.UtcNow.AddDays(-1));
     }
 
     [Fact]
@@ -1001,7 +928,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].HasRunScrobbleEventGeneration);
         Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].ScrobbleEventGenerationRan >= before);
     }
 
