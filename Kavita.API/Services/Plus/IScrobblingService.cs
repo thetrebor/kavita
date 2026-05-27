@@ -207,7 +207,7 @@ public static class ScrobblingHelper
     {
         if (series.MalId != 0) return series.MalId;
 
-        return WeblinkParser.GetMalId(series.Metadata.WebLinks) ?? series.ExternalSeriesMetadata?.MalId;
+        return ExternalIdParser.GetMalId(series.Metadata.WebLinks) ?? series.ExternalSeriesMetadata?.MalId;
     }
 
 
@@ -215,7 +215,7 @@ public static class ScrobblingHelper
     {
         if (seriesWithExternalMetadata.AniListId != 0) return seriesWithExternalMetadata.AniListId;
 
-        var aniListId = WeblinkParser.GetAniListId(seriesWithExternalMetadata.Metadata.WebLinks);
+        var aniListId = ExternalIdParser.GetAniListId(seriesWithExternalMetadata.Metadata.WebLinks);
         return aniListId ?? seriesWithExternalMetadata.ExternalSeriesMetadata?.AniListId;
     }
 
