@@ -175,4 +175,11 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
             .Include(e => e.AppUser)
             .ToListAsync(ct);
     }
+
+    public Task ClearEventsForProvider(int userId, ScrobbleProvider provider, CancellationToken ct = default)
+    {
+        return context.ScrobbleEvent
+            .Where(e => e.AppUserId == userId && e.ScrobbleProvider == provider)
+            .ExecuteDeleteAsync(ct);
+    }
 }

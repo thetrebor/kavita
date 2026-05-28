@@ -53,12 +53,13 @@ public class ScrobblingController(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
 
-        if (!user.ScrobbleProviders.ContainsKey(dto.Provider))
+        if (!user.ScrobbleProviders.TryGetValue(dto.Provider, out var value))
         {
-            user.ScrobbleProviders[dto.Provider] = new AppUserScrobbleProvider { Provider = dto.Provider };
+            value = new AppUserScrobbleProvider { Provider = dto.Provider };
+            user.ScrobbleProviders[dto.Provider] = value;
         }
 
-        user.ScrobbleProviders[dto.Provider].Settings = dto.Settings;
+        value.Settings = dto.Settings;
 
         unitOfWork.UserRepository.Update(user);
 
@@ -73,6 +74,11 @@ public class ScrobblingController(
         var service = serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(dto.Provider);
 
         await service.UpdateUserScrobbleProvider(UserId, dto, HttpContext.RequestAborted);
+
+        if (string.IsNullOrEmpty(dto.AuthenticationToken))
+        {
+            await unitOfWork.ScrobbleRepository.ClearEventsForProvider(UserId, dto.Provider);
+        }
 
         BackgroundJob.Enqueue(() => scrobblingService.SyncProviderInfo(UserId, dto.Provider, CancellationToken.None));
 

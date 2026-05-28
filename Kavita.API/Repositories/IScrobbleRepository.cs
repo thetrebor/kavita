@@ -48,4 +48,12 @@ public interface IScrobbleRepository
     Task<PagedList<ScrobbleEventDto>> GetUserEvents(int userId, ScrobbleEventFilter filter, UserParams pagination, CancellationToken ct = default);
     Task<IList<ScrobbleEvent>> GetAllEventsForSeries(int seriesId, CancellationToken ct = default);
     Task<IList<ScrobbleEvent>> GetEvents(CancellationToken ct = default);
+    /// <summary>
+    /// Clears non-processed events for a given provider
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="provider"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task ClearEventsForProvider(int userId, ScrobbleProvider provider, CancellationToken ct = default);
 }
