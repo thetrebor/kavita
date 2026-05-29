@@ -1,5 +1,6 @@
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.UserPreferences;
 
 namespace Kavita.Models.DTOs.KavitaPlus;
 #nullable enable
@@ -17,5 +18,6 @@ public sealed record AuditLogScrobbleParamsDto
     public float? PercentRead { get; init; }
     public float? Rating { get; init; }
     public string? ReviewBody { get; init; }
+    public ScrobbleReadStatus ReadStatus { get; init; }
     public LibraryType LibraryType { get; init; } = LibraryType.Manga;
 }

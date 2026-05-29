@@ -215,6 +215,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                         PercentRead = p.PercentRead,
                         Rating = p.Rating,
                         ReviewBody = p.ReviewBody,
+                        ReadStatus = p.ReadStatus,
                         Provider = p.Provider,
                         LibraryType = p.LibraryType,
                     };

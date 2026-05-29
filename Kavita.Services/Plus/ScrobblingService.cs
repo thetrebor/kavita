@@ -44,6 +44,7 @@ public class ScrobbleSyncContext
     public required List<ScrobbleEvent> ReadEvents {get; init;}
     public required List<ScrobbleEvent> RatingEvents {get; init;}
     public required List<ScrobbleEvent> ReviewEvents {get; init;}
+    public required List<ScrobbleEvent> ReadStatusEvents {get; init;}
     /// <remarks>Do not use this as events to send to K+, use <see cref="Decisions"/></remarks>
     public required List<ScrobbleEvent> AddToWantToRead {get; init;}
     /// <remarks>Do not use this as events to send to K+, use <see cref="Decisions"/></remarks>
@@ -73,7 +74,7 @@ public class ScrobbleSyncContext
     /// <summary>
     /// Sum of all events to process
     /// </summary>
-    public int TotalCount => ReadEvents.Count + RatingEvents.Count + ReviewEvents.Count + AddToWantToRead.Count + RemoveWantToRead.Count;
+    public int TotalCount => ReadEvents.Count + RatingEvents.Count + ReviewEvents.Count + ReadStatusEvents.Count + AddToWantToRead.Count + RemoveWantToRead.Count;
 }
 
 public class ScrobblingService : IScrobblingService
@@ -324,6 +325,7 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType.RemoveWantToRead => s => s.WantToReadSync,
             ScrobbleEventType.ScoreUpdated => s => s.RatingScrobbling,
             ScrobbleEventType.Review => s => s.ReviewsScrobbling,
+            ScrobbleEventType.ReadStatusUpdate => s => true,
             _ => throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null)
         };
 
@@ -716,6 +718,9 @@ public class ScrobblingService : IScrobblingService
         var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review, ct: ct))
             .Where(e => !erroredSeries.Contains(e.SeriesId))
             .ToList();
+        var readStatusEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ReadStatusUpdate, ct: ct))
+            .Where(e => !erroredSeries.Contains(e.SeriesId))
+            .ToList();
 
         return new ScrobbleSyncContext
         {
@@ -724,6 +729,7 @@ public class ScrobblingService : IScrobblingService
             AddToWantToRead = addToWantToRead,
             RemoveWantToRead = removeWantToRead,
             ReviewEvents = reviewEvents,
+            ReadStatusEvents = readStatusEvents,
             Decisions = CalculateNetWantToReadDecisions(addToWantToRead, removeWantToRead),
             RateLimits = [],
             License = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value,
@@ -744,6 +750,7 @@ public class ScrobblingService : IScrobblingService
             .Concat(ctx.RemoveWantToRead.Select(r => r.AppUser))
             .Concat(ctx.RatingEvents.Select(r => r.AppUser))
             .Concat(ctx.ReviewEvents.Select(r => r.AppUser))
+            .Concat(ctx.ReadStatusEvents.Select(r => r.AppUser))
             .DistinctBy(u => u.Id)
             .ToList();
 
@@ -796,12 +803,14 @@ public class ScrobblingService : IScrobblingService
                                "\n  Want to Read Events: {WantToReadEventsCount}" +
                                "\n  Rating Events: {RatingEventsCount}" +
                                "\n  Review Events: {ReviewEventsCount}" +
+                               "\n  Read Status Events: {ReadStatusEventCount}" +
                                "\n  Users to Scrobble: {UsersToScrobbleCount}"  +
                                "\n  Total Events to Process: {TotalEvents}",
             ctx.ReadEvents.Count,
             ctx.Decisions.Count,
             ctx.RatingEvents.Count,
             ctx.ReviewEvents.Count,
+            ctx.ReadStatusEvents.Count,
             ctx.Users.Count,
             ctx.TotalCount);
 
@@ -810,6 +819,7 @@ public class ScrobblingService : IScrobblingService
             await ProcessReadEvents(ctx, ct);
             await ProcessRatingEvents(ctx, ct);
             await ProcessReviewEvents(ctx, ct);
+            await ProcessReadStatusEvents(ctx, ct);
             await ProcessWantToReadRatingEvents(ctx, ct);
         }
         catch (FlurlHttpException ex)
@@ -824,6 +834,65 @@ public class ScrobblingService : IScrobblingService
 
         await CleanupOldOrBuggedEvents();
     }
+
+    public async Task RunReadStatusTransitionRules(CancellationToken ct = default)
+    {
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
+
+        foreach (var user in users)
+        {
+            foreach (var kv in user.ScrobbleProviders.Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken)))
+            {
+                var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(kv.Key);
+                var onHoldStatus = kv.Value.Settings.InactiveSeriesRule.TransitionStatus;
+                var droppedStatus = kv.Value.Settings.DroppedSeriesRule.TransitionStatus;
+
+                if (scrobbleProviderService is ISeriesScrobbleService)
+                {
+                    var onHoldSeries =
+                        (await _unitOfWork.SeriesRepository.GetSeriesForReadStatusTransitionRuleAsync(user.Id,
+                            kv.Value.Settings.InactiveSeriesRule, false, ct))
+                        .Where(s => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, s).Contains(kv.Key));
+
+                    var droppedSeries =
+                        (await _unitOfWork.SeriesRepository.GetSeriesForReadStatusTransitionRuleAsync(user.Id,
+                            kv.Value.Settings.DroppedSeriesRule, true, ct))
+                        .Where(s => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, s).Contains(kv.Key));
+
+                    foreach (var series in onHoldSeries)
+                    {
+                        await scrobbleProviderService.ScrobbleReadStatusUpdates(user, series, null, onHoldStatus, ct);
+                    }
+
+                    foreach (var series in droppedSeries)
+                    {
+                        await scrobbleProviderService.ScrobbleReadStatusUpdates(user, series, null, droppedStatus, ct);
+                    }
+
+                    continue;
+                }
+
+                var onHoldChapters = (await _unitOfWork.ChapterRepository.GetChaptersForReadStatusTransitionRuleAsync(user.Id,
+                    kv.Value.Settings.InactiveSeriesRule, ct))
+                    .Where(c => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, c.Volume.Series).Contains(kv.Key));
+
+                var droppedChapters = (await _unitOfWork.ChapterRepository.GetChaptersForReadStatusTransitionRuleAsync(user.Id,
+                        kv.Value.Settings.DroppedSeriesRule, ct))
+                    .Where(c => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, c.Volume.Series).Contains(kv.Key));
+
+                foreach (var chapter in onHoldChapters)
+                {
+                    await scrobbleProviderService.ScrobbleReadStatusUpdates(user, chapter.Volume.Series, chapter, onHoldStatus, ct);
+                }
+
+                foreach (var chapter in droppedChapters)
+                {
+                    await scrobbleProviderService.ScrobbleReadStatusUpdates(user, chapter.Volume.Series, chapter, droppedStatus, ct);
+                }
+            }
+        }
+    }
+
 
     /// <summary>
     /// Calculates the net want-to-read decisions by considering all events.
@@ -933,6 +1002,32 @@ public class ScrobblingService : IScrobblingService
                 Year = evt.Series.Metadata.ReleaseYear,
                 ReviewBody = evt.ReviewBody,
                 ReviewTitle = evt.ReviewTitle,
+                ReviewScrobbleTarget = scrobbleSettings?.Settings.ReviewScrobbleTarget
+            });
+        }, ct);
+    }
+
+    private async Task ProcessReadStatusEvents(ScrobbleSyncContext ctx, CancellationToken ct)
+    {
+        await ProcessEvents(ctx.ReadStatusEvents, ctx, evt =>
+        {
+            var scrobbleSettings = ctx.Users
+                .FirstOrDefault(u => u.Id == evt.AppUserId)?
+                .ScrobbleProviders.GetValueOrDefault(evt.ScrobbleProvider);
+
+            return Task.FromResult(new ScrobbleV3Dto
+            {
+                Provider = evt.ScrobbleProvider,
+                AuthenticationToken = null,
+                Format = evt.Format,
+                AniListId = evt.AniListId,
+                MalId = (int?)evt.MalId,
+                MangabakaId = evt.MangabakaId,
+                HardcoverId = evt.HardcoverId,
+                ScrobbleEventType = evt.ScrobbleEventType,
+                SeriesName = evt.Series.Name,
+                Year = evt.Series.Metadata.ReleaseYear,
+                ReadStatus = evt.ReadStatus,
                 ReviewScrobbleTarget = scrobbleSettings?.Settings.ReviewScrobbleTarget
             });
         }, ct);
@@ -1071,6 +1166,8 @@ public class ScrobblingService : IScrobblingService
     private async Task ProcessEvents(IEnumerable<ScrobbleEvent> events, ScrobbleSyncContext ctx, Func<ScrobbleEvent, Task<ScrobbleV3Dto>> createEvent, CancellationToken ct)
     {
         var eventList = events.ToList();
+        if (eventList.Count == 0) return;
+
         foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
         {
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
@@ -1532,7 +1629,7 @@ public class ScrobblingService : IScrobblingService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user == null) return;
 
-        if (!user.ScrobbleProviders.TryGetValue(provider, out var scrobbleProviderSettings)) return;
+        var scrobbleProviderSettings = user.GetOrCreateScrobbleProvider(provider);
 
         scrobbleProviderSettings.LastSyncedUtc = DateTime.UtcNow;
 

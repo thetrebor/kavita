@@ -35,6 +35,12 @@ namespace Kavita.Database.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
+                name: "ReadStatus",
+                table: "ScrobbleEvent",
+                type: "INTEGER",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
                 name: "ScrobbleProvider",
                 table: "ScrobbleEvent",
                 type: "INTEGER",
@@ -100,6 +106,10 @@ namespace Kavita.Database.Migrations
 
             migrationBuilder.DropColumn(
                 name: "Progress",
+                table: "ScrobbleEvent");
+
+            migrationBuilder.DropColumn(
+                name: "ReadStatus",
                 table: "ScrobbleEvent");
 
             migrationBuilder.DropColumn(

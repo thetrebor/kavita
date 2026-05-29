@@ -10,6 +10,7 @@ using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
@@ -34,6 +35,62 @@ where T: IScrobbleProviderService
     protected abstract void SetScrobbleIds(ScrobbleEvent evt, Series series);
 
     public abstract Task UpdateUserScrobbleProvider(int userId, ScrobbleProviderDto dto, CancellationToken ct = default);
+
+    public async Task ScrobbleReadStatusUpdates(AppUser user, Series series, Chapter? chapter, ScrobbleReadStatus status,
+        CancellationToken ct = default)
+    {
+        if (!SupportedEvents.Contains(ScrobbleEventType.ReadStatusUpdate) || chapter != null) return;
+
+        var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
+            Provider, user.Id, series.Id, null, ScrobbleEventType.ReadStatusUpdate, true, ct
+        );
+
+        if (existingEvent is { IsProcessed: false })
+        {
+            logger.LogDebug("Overriding scrobble event for {Series} from Read Status {Status} -> {UpdatedStatus}",
+                series.Name, existingEvent.ReadStatus, status);
+
+            existingEvent.ReadStatus = status;
+
+            unitOfWork.ScrobbleRepository.Update(existingEvent);
+            await unitOfWork.CommitAsync(ct);
+
+            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id,
+                new AuditLogScrobbleParamsDto
+                {
+                    Provider = Provider,
+                    ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
+                    ReadStatus = status,
+                }, AuditStatus.Info, userId: user.Id, ct: ct);
+            return;
+        }
+
+        var scrobbleEvent = new ScrobbleEvent
+        {
+            ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
+            ScrobbleProvider = Provider,
+            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+            SeriesId = series.Id,
+            LibraryId = series.LibraryId,
+            AppUserId = user.Id,
+            ReadStatus = status,
+        };
+
+        SetScrobbleIds(scrobbleEvent, series);
+
+        unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
+        await unitOfWork.CommitAsync(ct);
+
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+            new AuditLogScrobbleParamsDto
+            {
+                Provider = Provider,
+                ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
+                ReadStatus = status,
+            }, AuditStatus.Info, userId: user.Id, ct: ct);
+
+        logger.LogDebug("Created new scrobble event for {Series} with Read Status {Status}", series.Name, status);
+    }
 
     public async Task ScrobbleRatingUpdate(AppUser user, Series series, Chapter? chapter, float rating, CancellationToken ct = default)
     {

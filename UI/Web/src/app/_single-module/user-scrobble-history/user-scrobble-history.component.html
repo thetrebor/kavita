@@ -112,6 +112,9 @@
               @case (ScrobbleEventType.ScoreUpdated) {
                 {{t('rating', {r: item.rating})}}
               }
+              @case (ScrobbleEventType.ReadStatusUpdate) {
+                {{t('read-status-update', {status: item.readStatus | scrobbleReadStatus})}}
+              }
               @default {
                 {{t('not-applicable')}}
               }

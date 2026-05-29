@@ -298,6 +298,10 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate<IKavitaPlusAuditService>(PurgeKavitaPlusAuditLogsId,
             service => service.PurgeOldLogsAsync(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate<IScrobblingService>(TaskSchedulerConstants.CreateReadStatusTransitionRuleEventsId,
+            service => service.RunReadStatusTransitionRules(CancellationToken.None),
+            Cron.Daily, RecurringJobOptions);
     }
 
 
@@ -314,6 +318,7 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.RemoveIfExists(KavitaPlusStackSyncId);
         RecurringJob.RemoveIfExists(KavitaPlusWantToReadSyncId);
         RecurringJob.RemoveIfExists(PurgeKavitaPlusAuditLogsId);
+        RecurringJob.RemoveIfExists(TaskSchedulerConstants.CreateReadStatusTransitionRuleEventsId);
     }
 
     #region StatsTasks

@@ -2031,6 +2031,9 @@ namespace Kavita.Database.Migrations
                     b.Property<float?>("Rating")
                         .HasColumnType("REAL");
 
+                    b.Property<int?>("ReadStatus")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ReviewBody")
                         .HasColumnType("TEXT");
 

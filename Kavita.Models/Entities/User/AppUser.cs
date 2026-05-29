@@ -110,6 +110,19 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     public Dictionary<ScrobbleProvider, AppUserScrobbleProvider> ScrobbleProviders { get; set; } = new();
 
+    public AppUserScrobbleProvider GetOrCreateScrobbleProvider(ScrobbleProvider provider)
+    {
+        if (ScrobbleProviders.TryGetValue(provider, out var scrobbleProvider))
+        {
+            return scrobbleProvider;
+        }
+
+        scrobbleProvider = new AppUserScrobbleProvider {Provider = provider};
+        ScrobbleProviders.Add(provider, scrobbleProvider);
+
+        return scrobbleProvider;
+    }
+
     #endregion
 
     /// <summary>

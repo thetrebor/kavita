@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
 
@@ -49,6 +49,10 @@ public class ScrobbleEvent : IEntityDate
     /// The % on the chapter (This is for Chapter-based tracking, i.e. Hardcover)
     /// </summary>
     public float? Progress { get; set; }
+    /// <summary>
+    /// The status to set the entity to
+    /// </summary>
+    public ScrobbleReadStatus? ReadStatus { get; set; }
     /// <summary>
     /// Has this event been processed and pushed to Provider
     /// </summary>

@@ -26,4 +26,5 @@ public static class TaskSchedulerConstants
     public const string EnsureSideNavId = "ensure-sidenav";
     public const string FlushUserActiveTaskId = "flush-user-active";
     public const string PurgeKavitaPlusAuditLogsId = "purge-kavita-plus-audit-logs";
+    public const string CreateReadStatusTransitionRuleEventsId = "create-read-status-transition-rule-events";
 }

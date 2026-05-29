@@ -66,4 +66,5 @@ public record ScrobbleV3Dto: MetadataRequest
     public string? ReviewTitle { get; set; }
     public string? ReviewBody { get; set; }
     public ReviewScrobbleTarget? ReviewScrobbleTarget { get; set; }
+    public ScrobbleReadStatus? ReadStatus { get; set; }
 }

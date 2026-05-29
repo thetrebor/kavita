@@ -34,6 +34,7 @@ import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe
 import {
   ScrobbleProviderImageComponent
 } from "../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
+import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -46,7 +47,7 @@ export interface DataTablePage {
   selector: 'app-user-scrobble-history',
   imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
     DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule,
-    ResponsiveTableComponent, RouterLink, ScrobbleProviderNamePipe, ScrobbleProviderImageComponent],
+    ResponsiveTableComponent, RouterLink, ScrobbleProviderNamePipe, ScrobbleProviderImageComponent, ScrobbleReadStatusPipe],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

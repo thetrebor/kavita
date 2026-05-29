@@ -8,6 +8,7 @@ using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.API.Services.Plus;
@@ -107,6 +108,15 @@ public interface IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ProcessUpdatesSinceLastSync(CancellationToken ct = default);
 
+    /// <summary>
+    /// Run all enabled <see cref="ReadStatusTransitionRule"/>s
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 1, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    Task RunReadStatusTransitionRules(CancellationToken ct = default);
+
     Task CreateEventsFromExistingHistory(ScrobbleProvider scrobbleProvider, int userId = 0, CancellationToken ct = default);
     Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default);
     Task ClearEventsForSeries(int userId, int seriesId, CancellationToken ct = default);
@@ -171,6 +181,8 @@ public interface IScrobbleProviderService
     Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead, CancellationToken ct = default);
 
     Task UpdateUserScrobbleProvider(int userId, ScrobbleProviderDto dto, CancellationToken ct = default);
+
+    Task ScrobbleReadStatusUpdates(AppUser user, Series series, Chapter? chapter, ScrobbleReadStatus status, CancellationToken ct = default);
 }
 
 // TODO: Figure out a place to put this that doesn't cause dependency hell

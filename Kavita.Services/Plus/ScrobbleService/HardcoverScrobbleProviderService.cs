@@ -22,7 +22,7 @@ public class HardcoverScrobbleProviderService(ILogger<HardcoverScrobbleProviderS
     protected override IReadOnlyList<ScrobbleEventType> SupportedEvents =>
     [
         ScrobbleEventType.ChapterRead, ScrobbleEventType.AddWantToRead, ScrobbleEventType.RemoveWantToRead,
-        ScrobbleEventType.ScoreUpdated, ScrobbleEventType.Review
+        ScrobbleEventType.ScoreUpdated, ScrobbleEventType.Review, ScrobbleEventType.ReadStatusUpdate
     ];
 
     protected override void SetScrobbleIds(ScrobbleEvent evt, Series series, Chapter chapter)
@@ -35,10 +35,7 @@ public class HardcoverScrobbleProviderService(ILogger<HardcoverScrobbleProviderS
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user == null) throw new KavitaNotFoundException();
 
-        var scrobbleProvider = user.ScrobbleProviders.GetValueOrDefault(dto.Provider) ?? new AppUserScrobbleProvider()
-        {
-            Provider = dto.Provider
-        };
+        var scrobbleProvider = user.GetOrCreateScrobbleProvider(Provider);
 
         scrobbleProvider.AuthenticationToken = dto.AuthenticationToken;
 

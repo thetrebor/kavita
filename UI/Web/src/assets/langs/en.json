@@ -192,7 +192,8 @@
         "not-processed": "Not Processed",
         "special": "{{entity-title.special}}",
         "token-expired": "Your AniList token is Expired! Scrobbling events will not process until you renew on Accounts page.",
-        "scrobbling-disabled": "Scrobbling is disabled on your Account Settings."
+        "scrobbling-disabled": "Scrobbling is disabled on your Account Settings.",
+        "read-status-update": "Status: {{status}}"
     },
 
     "scrobble-event-type-pipe": {
@@ -200,7 +201,8 @@
         "score-updated": "Rating Update",
         "want-to-read-add": "Want to Read: Add",
         "want-to-read-remove": "Want to Read: Remove",
-        "review": "Review update"
+        "review": "Review update",
+        "read-status-update": "Read Status Update"
     },
 
     "spoiler": {
@@ -1375,7 +1377,8 @@
         "chapter-cover-updated": "Cover updated: {{chapter}}",
         "series-cover-updated": "Series cover updated",
         "series-match-fixed": "Series matched with {{matchName}}",
-        "person-alias-added": "Added alias {{alias}} for {{personName}}"
+        "person-alias-added": "Added alias {{alias}} for {{personName}}",
+        "read-status-update": "Status {{status}}"
     },
 
     "kavita-plus-event-type-pipe": {

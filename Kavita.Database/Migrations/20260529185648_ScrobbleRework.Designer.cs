@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260521134954_ScrobbleRework")]
+    [Migration("20260529185648_ScrobbleRework")]
     partial class ScrobbleRework
     {
         /// <inheritdoc />
@@ -2033,6 +2033,9 @@ namespace Kavita.Database.Migrations
 
                     b.Property<float?>("Rating")
                         .HasColumnType("REAL");
+
+                    b.Property<int?>("ReadStatus")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ReviewBody")
                         .HasColumnType("TEXT");
