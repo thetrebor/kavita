@@ -80,7 +80,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
     column: 'lastModifiedUtc',
     direction: 'desc'
   };
-  hasRunScrobbleGen = signal(false);
 
   selections = signal(new SelectionModel<ScrobbleEvent>(), { equal: () => false });
   selectAll = signal(false);
@@ -102,10 +101,6 @@ export class UserScrobbleHistoryComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.scrobblingService.hasRunScrobbleGen().subscribe(res => {
-      this.hasRunScrobbleGen.set(res);
-    });
-
     this.formGroup.get('filter')?.valueChanges.pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.loadPage();
     });
