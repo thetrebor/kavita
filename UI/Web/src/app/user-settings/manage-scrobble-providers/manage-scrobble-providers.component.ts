@@ -5,14 +5,16 @@ import {filter, map, of, switchMap, tap} from "rxjs";
 import {AgeRating, AgeRatings} from "../../_models/metadata/age-rating";
 import {
   ReadStatusTransitionRule,
-  ReviewScrobbleTarget, ReviewScrobbleTargets,
+  ReviewScrobbleTarget,
+  ReviewScrobbleTargets,
   ScrobbleProviderSettings,
-  ScrobbleReadStatus, ScrobbleReadStatuses,
+  ScrobbleReadStatus,
+  ScrobbleReadStatuses,
   UserScrobbleProvider
 } from "../../_models/kavitaplus/scrobble-provider-settings";
 import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/publication-status";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged, finalize} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {
   NgbAccordionBody,
@@ -44,6 +46,8 @@ import {
 import {ConfirmService} from "../../shared/confirm.service";
 import {fromPromise} from "rxjs/internal/observable/innerFrom";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {ScrobbleProviderUpdatedEvent} from "../../_models/events/scrobble-provider-updated-event";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -109,6 +113,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private readonly destroyRef$ = inject(DestroyRef);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly messageHub = inject(MessageHubService);
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
@@ -127,7 +132,17 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   ngOnInit() {
     this.libraryService.getLibraries().subscribe(libraries => this.libraries.set(libraries));
 
-    this.scrobbleService.getScrobbleProviders()
+    this.loadData().subscribe();
+
+    this.messageHub.messages$.pipe(
+      filter(msg => msg.event === EVENTS.ScrobbleProviderUpdated),
+      map(msg => (msg.payload as ScrobbleProviderUpdatedEvent).provider),
+      switchMap(() => this.loadData())
+    ).subscribe();
+  }
+
+  private loadData() {
+    return this.scrobbleService.getScrobbleProviders()
       .pipe(tap(userScrobbleProviders => {
         const groups: Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup> = new Map();
 
@@ -141,7 +156,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
         this.userScrobbleProviders.set(new Map(userScrobbleProviders.map(p => [p.provider, p])));
         this.formGroups.set(groups);
-      })).subscribe();
+      }));
   }
 
   private listenToChanges(provider: ScrobbleProvider, group: ScrobbleProviderSettingsFormGroup) {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,12 +22,19 @@ namespace Kavita.API.Services.Plus;
 /// </summary>
 public interface IKavitaPlusApiService
 {
+    [Obsolete]
     Task<bool> HasTokenExpiredAsync(string license, string token, ScrobbleProvider provider, CancellationToken ct = default);
+    [Obsolete]
     Task<int> GetRateLimitAsync(string license, string token, CancellationToken ct = default);
+    [Obsolete]
     Task<ScrobbleResponseDto> PostScrobbleUpdateAsync(ScrobbleDto data, string license, CancellationToken ct = default);
+    [Obsolete]
     Task<IList<MalStackDto>> GetMalStacksAsync(string malUsername, string license, CancellationToken ct = default);
+    [Obsolete]
     Task<IList<ExternalSeriesMatchDto>> MatchSeriesAsync(MatchSeriesRequestDto request, CancellationToken ct = default);
+    [Obsolete]
     Task<SeriesDetailPlusApiDto> GetSeriesDetailAsync(PlusSeriesRequestDto request, CancellationToken ct = default);
+    [Obsolete]
     Task<ExternalSeriesDetailDto> GetSeriesDetailByIdAsync(ExternalMetadataIdsDto request, CancellationToken ct = default);
 
     Task<KPlusResult<SeriesDetailPlusApiDto?>> GetSeriesDetailV3Async(SeriesDetailRequestV3Dto request, CancellationToken ct = default);
@@ -36,4 +44,5 @@ public interface IKavitaPlusApiService
     Task<KPlusResult<int>> GetRateLimitForProviderAsync(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
     Task<KPlusResult<IList<ExternalCoverResponseDto>>> GetCoverImagesAsync(ExternalCoverRequestDto request, CancellationToken ct = default);
     Task<KPlusResult<List<ExternalSeriesDetailDto>>> GetWantToRead(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
+    Task<KPlusResult<KavitaPlusUserInfo>> GetUserInfo(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
 }

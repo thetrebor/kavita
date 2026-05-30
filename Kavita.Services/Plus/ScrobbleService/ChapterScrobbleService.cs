@@ -32,8 +32,6 @@ where T: IScrobbleProviderService
 
     protected abstract void SetScrobbleIds(ScrobbleEvent evt, Series series, Chapter chapter);
 
-    public abstract Task UpdateUserScrobbleProvider(int userId, ScrobbleProviderDto dto, CancellationToken ct = default);
-
     public async Task ScrobbleReadStatusUpdates(AppUser user, Series series, Chapter? chapter, ScrobbleReadStatus status,
         CancellationToken ct = default)
     {

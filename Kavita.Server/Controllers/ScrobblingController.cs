@@ -53,16 +53,10 @@ public class ScrobblingController(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
 
-        if (!user.ScrobbleProviders.TryGetValue(dto.Provider, out var value))
-        {
-            value = new AppUserScrobbleProvider { Provider = dto.Provider };
-            user.ScrobbleProviders[dto.Provider] = value;
-        }
-
-        value.Settings = dto.Settings;
+        var scrobbleProvider = user.GetOrCreateScrobbleProvider(dto.Provider);
+        scrobbleProvider.Settings = dto.Settings;
 
         unitOfWork.UserRepository.Update(user);
-
         await unitOfWork.CommitAsync();
 
         return Ok();
@@ -71,9 +65,21 @@ public class ScrobblingController(
     [HttpPost("update-user-scrobble-provider")]
     public async Task<ActionResult> UpdateUserScrobbleProvider([FromBody] ScrobbleProviderDto dto)
     {
-        var service = serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(dto.Provider);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: HttpContext.RequestAborted);
+        if (user == null) return Unauthorized();
 
-        await service.UpdateUserScrobbleProvider(UserId, dto, HttpContext.RequestAborted);
+        var scrobbleProvider = user.GetOrCreateScrobbleProvider(dto.Provider);
+
+        scrobbleProvider.AuthenticationToken = dto.AuthenticationToken;
+
+        // Mal uses UserName & ClientId or something
+        if (dto.Provider is ScrobbleProvider.Mal)
+        {
+            scrobbleProvider.UserName = dto.UserName;
+        }
+
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync(HttpContext.RequestAborted);
 
         if (string.IsNullOrEmpty(dto.AuthenticationToken))
         {

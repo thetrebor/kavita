@@ -1626,6 +1626,8 @@ public class ScrobblingService : IScrobblingService
     {
         _logger.LogDebug("Syncing info for {UserId} for {Provider}", userId, provider);
 
+        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user == null) return;
 
@@ -1633,14 +1635,48 @@ public class ScrobblingService : IScrobblingService
 
         scrobbleProviderSettings.LastSyncedUtc = DateTime.UtcNow;
 
+        if (string.IsNullOrEmpty(scrobbleProviderSettings.AuthenticationToken))
+        {
+            scrobbleProviderSettings.ValidUntilUtc = DateTime.MinValue;
+            scrobbleProviderSettings.UserName = string.Empty;
+
+            _unitOfWork.UserRepository.Update(user);
+            await _unitOfWork.CommitAsync(ct);
+
+            await _eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
+                MessageFactory.ScrobbleProviderUpdatedEvent(provider), userId, ct);
+
+            return;
+        }
+
         // MAL doesn't use JWT tokens
         if (provider != ScrobbleProvider.Mal)
         {
-            scrobbleProviderSettings.ValidUntilUtc = TokenService.GetTokenExpiry(scrobbleProviderSettings.AuthenticationToken);
+            var userInfo = await _kavitaPlusApiService.GetUserInfo(provider, scrobbleProviderSettings.AuthenticationToken, license, ct);
+            if (!userInfo.IsSuccess)
+            {
+                _logger.LogWarning("Failed to sync provider info for {UserId} for {Provider} due to error: {ErrorMessage}", userId, provider, userInfo.ErrorMessage);
+            }
+            else
+            {
+                scrobbleProviderSettings.UserName = userInfo.Data!.Username;
+            }
+
+            try
+            {
+                scrobbleProviderSettings.ValidUntilUtc = TokenService.GetTokenExpiry(scrobbleProviderSettings.AuthenticationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get token expiry for {UserId} for {Provider}", userId, provider);
+            }
         }
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync(ct);
+
+        await _eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
+            MessageFactory.ScrobbleProviderUpdatedEvent(provider), userId, ct);
     }
 
     public async Task<bool> RetryScrobbleAsync(int authUserId, KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default)

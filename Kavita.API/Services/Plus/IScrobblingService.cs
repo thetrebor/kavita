@@ -180,8 +180,6 @@ public interface IScrobbleProviderService
     /// <remarks>Only the result of both WantToRead types is send to K+</remarks>
     Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead, CancellationToken ct = default);
 
-    Task UpdateUserScrobbleProvider(int userId, ScrobbleProviderDto dto, CancellationToken ct = default);
-
     Task ScrobbleReadStatusUpdates(AppUser user, Series series, Chapter? chapter, ScrobbleReadStatus status, CancellationToken ct = default);
 }
 

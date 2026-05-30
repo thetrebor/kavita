@@ -27,18 +27,4 @@ public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProvi
     {
         evt.MalId = series.MalId;
     }
-
-    public override async Task UpdateUserScrobbleProvider(int userId, ScrobbleProviderDto dto, CancellationToken ct = default)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
-        if (user == null) throw new KavitaNotFoundException();
-
-        var scrobbleProvider = user.GetOrCreateScrobbleProvider(Provider);
-
-        scrobbleProvider.AuthenticationToken = dto.AuthenticationToken;
-        scrobbleProvider.UserName = dto.UserName;
-
-        unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
-    }
 }

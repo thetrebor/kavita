@@ -27,6 +27,9 @@
                 @if (userScrobbleProvider.authenticationToken) {
                   <app-tag-badge color="primary">{{t('connected')}}</app-tag-badge>
                 }
+                @if (userScrobbleProvider.userName) {
+                  <app-tag-badge color="secondary">{{userScrobbleProvider.userName}}</app-tag-badge>
+                }
 
               </span>
 

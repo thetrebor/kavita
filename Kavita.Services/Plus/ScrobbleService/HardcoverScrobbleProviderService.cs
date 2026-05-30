@@ -29,17 +29,4 @@ public class HardcoverScrobbleProviderService(ILogger<HardcoverScrobbleProviderS
     {
         evt.HardcoverId = chapter.HardcoverId;
     }
-
-    public override async Task UpdateUserScrobbleProvider(int userId, ScrobbleProviderDto dto, CancellationToken ct = default)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
-        if (user == null) throw new KavitaNotFoundException();
-
-        var scrobbleProvider = user.GetOrCreateScrobbleProvider(Provider);
-
-        scrobbleProvider.AuthenticationToken = dto.AuthenticationToken;
-
-        unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
-    }
 }
