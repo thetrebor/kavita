@@ -7,7 +7,6 @@ import {SettingsTabId} from '../../sidenav/preference-nav/preference-nav.compone
 import {
   ScrobbleProviderImageComponent
 } from '../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
-import {AccountService} from "../../_services/account.service";
 import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-provider-settings";
 
 @Component({
@@ -18,8 +17,8 @@ import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-provider-s
   imports: [TranslocoDirective, ScrobbleProviderNamePipe, ScrobbleProviderImageComponent, NgbTooltip],
 })
 export class ScrobbleAccountCardComponent {
+
   private readonly router = inject(Router);
-  private readonly accountService = inject(AccountService);
 
   provider = input.required<UserScrobbleProvider>();
 
@@ -30,15 +29,12 @@ export class ScrobbleAccountCardComponent {
 
   hasExpired = computed(() => {
     const until = this.provider().validUntilUtc;
-    if (!until) return false;
+    if (!until || until === '0001-01-01T00:00:00') return false;
+
     return new Date(until) < new Date();
   });
 
   username = computed(() => this.provider().userName ?? '');
-
-  isScrobbleDisabled = computed(() => {
-    return !this.accountService.currentUser()?.preferences.aniListScrobblingEnabled;
-  })
 
 
   goToScrobbling() {

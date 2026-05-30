@@ -1080,10 +1080,17 @@ public class ScrobblingService : IScrobblingService
     /// <remarks>If the token is not, adds a scrobble error</remarks>
     private async Task<bool> ValidateUserToken(AppUser user, ScrobbleEvent evt)
     {
-        if (user.ScrobbleProviders.TryGetValue(evt.ScrobbleProvider, out var settings)
-            && !TokenService.HasTokenExpired(settings.AuthenticationToken))
+        if (user.ScrobbleProviders.TryGetValue(evt.ScrobbleProvider, out var settings))
         {
-            return true;
+            if (evt.ScrobbleProvider is ScrobbleProvider.Mal or ScrobbleProvider.MangaBaka)
+            {
+                return true;
+            }
+
+            if (!TokenService.HasTokenExpired(settings.AuthenticationToken))
+            {
+                return true;
+            }
         }
 
         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
@@ -1662,14 +1669,22 @@ public class ScrobblingService : IScrobblingService
                 scrobbleProviderSettings.UserName = userInfo.Data!.Username;
             }
 
-            try
+            if (provider is ScrobbleProvider.AniList or ScrobbleProvider.Hardcover)
             {
-                scrobbleProviderSettings.ValidUntilUtc = TokenService.GetTokenExpiry(scrobbleProviderSettings.AuthenticationToken);
+                try
+                {
+                    scrobbleProviderSettings.ValidUntilUtc = TokenService.GetTokenExpiry(scrobbleProviderSettings.AuthenticationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to get token expiry for {UserId} for {Provider}", userId, provider);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Failed to get token expiry for {UserId} for {Provider}", userId, provider);
+                scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
             }
+
         }
 
         _unitOfWork.UserRepository.Update(user);

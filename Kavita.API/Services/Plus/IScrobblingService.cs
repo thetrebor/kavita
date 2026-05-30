@@ -146,7 +146,7 @@ public interface IScrobbleProviderService
     Task ScrobbleRatingUpdate(AppUser user, Series series, Chapter? chapter, float rating, CancellationToken ct = default);
 
     /// <summary>
-    /// NOP, until hardcover support has been worked out
+    /// Leaves a review for the series or chapter
     /// </summary>
     /// <param name="user"></param>
     /// <param name="series"></param>
@@ -180,6 +180,15 @@ public interface IScrobbleProviderService
     /// <remarks>Only the result of both WantToRead types is send to K+</remarks>
     Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead, CancellationToken ct = default);
 
+    /// <summary>
+    ///  Creates an <see cref="ScrobbleEventType.ReadStatusUpdate"/> for the given series (/chapter)
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="series"></param>
+    /// <param name="chapter"></param>
+    /// <param name="status"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     Task ScrobbleReadStatusUpdates(AppUser user, Series series, Chapter? chapter, ScrobbleReadStatus status, CancellationToken ct = default);
 }
 
@@ -195,23 +204,6 @@ public static class ScrobblingHelper
     public const string AniListStaffWebsite = "https://anilist.co/staff/";
     public const string AniListCharacterWebsite = "https://anilist.co/character/";
     public const string HardcoverStaffWebsite = "https://hardcover.app/authors/";
-
-    private static readonly Dictionary<string, int> WeblinkExtractionMap = new()
-    {
-        {AniListWeblinkWebsite, 0},
-        {MalWeblinkWebsite, 0},
-        {GoogleBooksWeblinkWebsite, 0},
-        {MangaDexWeblinkWebsite, 0},
-        {AniListStaffWebsite, 0},
-        {AniListCharacterWebsite, 0},
-    };
-
-    private static bool IsAniListReviewValid(string reviewTitle, string reviewBody)
-    {
-        return string.IsNullOrEmpty(reviewTitle) || string.IsNullOrEmpty(reviewBody) || (reviewTitle.Length < 2200 ||
-            reviewTitle.Length > 120 ||
-            reviewTitle.Length < 20);
-    }
 
     public static long? GetMalId(Series series)
     {

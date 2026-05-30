@@ -36,8 +36,7 @@ public class ScrobblingController(
     IScrobblingService scrobblingService,
     ILogger<ScrobblingController> logger,
     ILocalizationService localizationService,
-    IKavitaPlusAuditService kavitaPlusAuditService,
-    IServiceProvider serviceProvider)
+    IKavitaPlusAuditService kavitaPlusAuditService)
     : BaseApiController
 {
 
