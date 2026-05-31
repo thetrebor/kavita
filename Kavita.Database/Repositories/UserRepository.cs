@@ -493,31 +493,6 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ToListAsync(ct);
     }
 
-    public async Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default)
-    {
-        var users = await context.AppUser
-            .Select(u => new
-            {
-                u.Id,
-                u.UserName,
-                u.AniListAccessToken, // JWT Token
-                u.MalAccessToken // JWT Token
-            })
-            .ToListAsync(ct);
-
-        var userTokenInfos = users.Select(user => new UserTokenInfo
-        {
-            UserId = user.Id,
-            Username = user.UserName,
-            IsAniListTokenSet = !string.IsNullOrEmpty(user.AniListAccessToken),
-            AniListValidUntilUtc = JwtHelper.GetTokenExpiry(user.AniListAccessToken),
-            IsAniListTokenValid = JwtHelper.IsTokenValid(user.AniListAccessToken),
-            IsMalTokenSet = !string.IsNullOrEmpty(user.MalAccessToken),
-        });
-
-        return userTokenInfos;
-    }
-
     /// <summary>
     /// Returns the first user with a device email matching
     /// </summary>

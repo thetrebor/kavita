@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
 using Kavita.Common;
+using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
@@ -28,5 +29,10 @@ public class HardcoverScrobbleProviderService(ILogger<HardcoverScrobbleProviderS
     protected override void SetScrobbleIds(ScrobbleEvent evt, Series series, Chapter chapter)
     {
         evt.HardcoverId = chapter.HardcoverId;
+    }
+
+    public override bool IsTokenValid(string token)
+    {
+        return JwtHelper.IsTokenValid(token);
     }
 }

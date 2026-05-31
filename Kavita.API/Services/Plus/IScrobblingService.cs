@@ -5,6 +5,7 @@ using Hangfire;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Account;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -17,6 +18,7 @@ public interface IScrobblingService
 {
 
     Task<List<ScrobbleProviderDto>> GetScrobbleProviderDtosForUser(int userId, CancellationToken ct = default);
+    Task<List<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default);
 
     /// <summary>
     /// An automated job that will run against all user's tokens and validate if they are still active
@@ -190,6 +192,13 @@ public interface IScrobbleProviderService
     /// <param name="ct"></param>
     /// <returns></returns>
     Task ScrobbleReadStatusUpdates(AppUser user, Series series, Chapter? chapter, ScrobbleReadStatus status, CancellationToken ct = default);
+
+    /// <summary>
+    /// Check if the token is valid and not expired (No api calls made)
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    bool IsTokenValid(string token);
 }
 
 // TODO: Figure out a place to put this that doesn't cause dependency hell

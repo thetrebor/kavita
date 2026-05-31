@@ -28,7 +28,7 @@ public class UsersController(
     IMapper mapper,
     IEventHub eventHub,
     ILocalizationService localizationService,
-    ILicenseService licenseService)
+    IScrobblingService scrobblingService)
     : BaseApiController
 {
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
@@ -207,6 +207,6 @@ public class UsersController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
     {
-        return Ok(await unitOfWork.UserRepository.GetUserTokenInfo());
+        return Ok(await scrobblingService.GetUserTokenInfo());
     }
 }

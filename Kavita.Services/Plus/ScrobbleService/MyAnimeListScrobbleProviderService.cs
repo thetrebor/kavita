@@ -27,4 +27,10 @@ public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProvi
     {
         evt.MalId = series.MalId;
     }
+
+    public override bool IsTokenValid(string token)
+    {
+        // I don't actually know what Mal uses, but it's always valid whatever
+        return true;
+    }
 }

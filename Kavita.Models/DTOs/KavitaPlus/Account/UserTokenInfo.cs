@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Account;
 
@@ -9,8 +11,11 @@ public sealed record UserTokenInfo
 {
     public int UserId { get; set; }
     public string Username { get; set; }
-    public bool IsAniListTokenSet { get; set; }
-    public bool IsAniListTokenValid { get; set; }
-    public DateTime AniListValidUntilUtc { get; set; }
-    public bool IsMalTokenSet { get; set; }
+    public List<TokenValidityInfo> Tokens { get; set; }
+}
+
+public sealed record TokenValidityInfo
+{
+    public ScrobbleProvider Provider { get; set; }
+    public DateTime ValidUntilUtc { get; set; }
 }

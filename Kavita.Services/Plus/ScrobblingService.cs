@@ -17,6 +17,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Account;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SignalR;
@@ -172,6 +173,22 @@ public class ScrobblingService : IScrobblingService
 
     }
 
+    public async Task<List<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default)
+    {
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
+
+        return users.Select(user => new UserTokenInfo
+        {
+            UserId = user.Id,
+            Username = user.UserName ?? string.Empty,
+            Tokens = user.ScrobbleProviders.Select(kv => new TokenValidityInfo
+            {
+                Provider = kv.Key,
+                ValidUntilUtc = kv.Value.ValidUntilUtc,
+            }).ToList(),
+        }).ToList();
+    }
+
     #region Access token checks
 
     /// <summary>
@@ -190,7 +207,9 @@ public class ScrobblingService : IScrobblingService
             {
                 if (string.IsNullOrEmpty(settings.AuthenticationToken)) continue;
 
-                var tokenExpiry = JwtHelper.GetTokenExpiry(settings.AuthenticationToken);
+                var providerService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
+
+                var tokenExpiry = settings.ValidUntilUtc;
 
                 // Send early reminder 5 days before token expiry
                 if (await ShouldSendEarlyReminder(user.Id, tokenExpiry))
@@ -205,7 +224,7 @@ public class ScrobblingService : IScrobblingService
                 }
 
                 // Check token validity
-                if (JwtHelper.IsTokenValid(settings.AuthenticationToken)) continue;
+                if (providerService.IsTokenValid(settings.AuthenticationToken)) continue;
 
                 _logger.LogInformation(
                     "User {UserName}'s authentication token for {Provider} has expired or is expiring in a few days! They need to regenerate it for scrobbling to work",
@@ -271,7 +290,9 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<bool> HasTokenExpired(string token, ScrobbleProvider provider)
     {
-        if (string.IsNullOrEmpty(token) || !TokenService.HasTokenExpired(token)) return false;
+        var providerService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
+
+        if (string.IsNullOrEmpty(token) || providerService.IsTokenValid(token)) return false;
 
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         if (string.IsNullOrEmpty(license.Value)) return true;
@@ -1080,23 +1101,19 @@ public class ScrobblingService : IScrobblingService
     /// <remarks>If the token is not, adds a scrobble error</remarks>
     private async Task<bool> ValidateUserToken(AppUser user, ScrobbleEvent evt)
     {
-        if (user.ScrobbleProviders.TryGetValue(evt.ScrobbleProvider, out var settings))
-        {
-            if (evt.ScrobbleProvider is ScrobbleProvider.Mal or ScrobbleProvider.MangaBaka)
-            {
-                return true;
-            }
+        var providerService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(evt.ScrobbleProvider);
+        var userProvider = user.ScrobbleProviders.GetValueOrDefault(evt.ScrobbleProvider);
+        if (userProvider is null) return false;
 
-            if (!TokenService.HasTokenExpired(settings.AuthenticationToken))
-            {
-                return true;
-            }
+        if (providerService.IsTokenValid(userProvider.AuthenticationToken))
+        {
+            return true;
         }
 
         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
         {
-            Comment = "AniList token has expired and needs rotating. Scrobbling wont work until then",
-            Details = $"User: {evt.AppUser.UserName}, Expired: {TokenService.GetTokenExpiry(settings?.AuthenticationToken)}",
+            Comment = $"{evt.ScrobbleProvider} token has expired and needs rotating. Scrobbling wont work until then",
+            Details = $"User: {evt.AppUser.UserName}, Expired: {userProvider.ValidUntilUtc}",
             LibraryId = evt.LibraryId,
             SeriesId = evt.SeriesId
         });

@@ -27,4 +27,10 @@ public class MangabakaScrobbleProviderService(ILogger<MangabakaScrobbleProviderS
     {
         evt.MangabakaId = series.MangaBakaId;
     }
+
+    public override bool IsTokenValid(string token)
+    {
+        // We're using ApiKeys, always valid
+        return true;
+    }
 }

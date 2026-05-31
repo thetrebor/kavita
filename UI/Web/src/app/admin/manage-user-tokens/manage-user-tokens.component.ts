@@ -5,8 +5,13 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UserTokenInfo} from "../../_models/kavitaplus/user-token-info";
-import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
+import {
+  ScrobbleProviderImageComponent
+} from "../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 
 @Component({
   selector: 'app-manage-user-tokens',
@@ -16,7 +21,9 @@ import {ResponsiveTableComponent} from "../../shared/_components/responsive-tabl
     UtcToLocalTimePipe,
     VirtualScrollerModule,
     NgxDatatableModule,
-    ResponsiveTableComponent
+    ResponsiveTableComponent,
+    ScrobbleProviderNamePipe,
+    ScrobbleProviderImageComponent
   ],
   templateUrl: './manage-user-tokens.component.html',
   styleUrl: './manage-user-tokens.component.scss',
@@ -26,9 +33,11 @@ export class ManageUserTokensComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly memberService = inject(MemberService);
+  protected readonly scrobblingService = inject(ScrobblingService);
 
   isLoading = true;
   users: UserTokenInfo[] = [];
+
   trackBy = (idx: number, item: UserTokenInfo) => item;
 
   ngOnInit() {
@@ -46,5 +55,7 @@ export class ManageUserTokensComponent implements OnInit {
     });
   }
 
-    protected readonly ColumnMode = ColumnMode;
+  getTokenValidityInfo(user: UserTokenInfo, provider: ScrobbleProvider) {
+    return user.tokens.find(token => token.provider == provider);
+  }
 }

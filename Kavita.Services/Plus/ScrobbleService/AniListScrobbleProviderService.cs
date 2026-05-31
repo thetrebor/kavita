@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
 using Kavita.Common;
+using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
@@ -26,5 +27,10 @@ public class AniListScrobbleProviderService(ILogger<AniListScrobbleProviderServi
     protected override void SetScrobbleIds(ScrobbleEvent evt, Series series)
     {
         evt.AniListId = series.AniListId;
+    }
+
+    public override bool IsTokenValid(string token)
+    {
+        return JwtHelper.IsTokenValid(token);
     }
 }

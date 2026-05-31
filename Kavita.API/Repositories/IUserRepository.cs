@@ -73,7 +73,6 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true, CancellationToken ct = default);
     Task<AppUser?> GetUserByConfirmationToken(string token, CancellationToken ct = default);
     Task<AppUser> GetDefaultAdminUser(AppUserIncludes includes = AppUserIncludes.None, CancellationToken ct = default);
-    Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default);
     Task<AppUser?> GetUserByDeviceEmail(string deviceEmail, CancellationToken ct = default);
     Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None, CancellationToken ct = default);
     #endregion
