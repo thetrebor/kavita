@@ -48,9 +48,11 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
   generateTokenLink = computed<string | null>(() => {
     switch (this.userScrobbleProvider().provider) {
       case ScrobbleProvider.AniList:
-        return "https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token"
+        return "https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token";
       case ScrobbleProvider.Hardcover:
-        return "https://hardcover.app/account/api"
+        return "https://hardcover.app/account/api";
+      case ScrobbleProvider.MangaBaka:
+        return "https://mangabaka.org/my/settings/api-and-apps";
     }
 
     return null;

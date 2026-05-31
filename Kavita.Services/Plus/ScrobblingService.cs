@@ -109,7 +109,7 @@ public class ScrobblingService : IScrobblingService
     ];
     private static readonly IList<ScrobbleProvider> LightNovelProviders =
     [
-        ScrobbleProvider.AniList, ScrobbleProvider.Hardcover
+        ScrobbleProvider.AniList, ScrobbleProvider.Hardcover, ScrobbleProvider.MangaBaka
     ];
     private static readonly IList<ScrobbleProvider> ComicProviders = [
         ScrobbleProvider.Hardcover
