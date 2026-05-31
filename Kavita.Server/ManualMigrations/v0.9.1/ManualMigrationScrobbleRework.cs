@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
@@ -19,17 +21,20 @@ public class ManualMigrationScrobbleRework: ManualMigration
 
     protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
     {
+        var librariesWithScrobbleEnables = await context.Library
+            .Where(l => l.AllowScrobbling)
+            .Select(l => l.Id)
+            .ToListAsync();
+
         var users = await context.AppUser
             .Includes(AppUserIncludes.UserPreferences)
             .ToListAsync();
 
-        var hasValidScrobbleProviders = false;
+        List<int> usersToSync = [];
 
         foreach (var user in users)
         {
             logger.LogTrace("Migrating scrobble info for user {UserName}", user.UserName);
-
-            hasValidScrobbleProviders |= !string.IsNullOrEmpty(user.AniListAccessToken) && string.IsNullOrEmpty(user.MalAccessToken);
 
             user.ScrobbleProviders[ScrobbleProvider.AniList] = new AppUserScrobbleProvider
             {
@@ -39,6 +44,7 @@ public class ManualMigrationScrobbleRework: ManualMigration
                 {
                     ProgressScrobbling = user.UserPreferences.AniListScrobblingEnabled,
                     WantToReadSync = user.UserPreferences.WantToReadSync,
+                    Libraries = librariesWithScrobbleEnables
                 },
                 ScrobbleEventGenerationRan = user.ScrobbleEventGenerationRan,
             };
@@ -49,16 +55,25 @@ public class ManualMigrationScrobbleRework: ManualMigration
                 UserName = user.MalAccessToken,
                 Settings = new ScrobbleProviderSettingsDto() {
                     WantToReadSync = user.UserPreferences.WantToReadSync,
+                    Libraries = librariesWithScrobbleEnables
                 }
             };
 
             context.AppUser.Update(user);
             context.AppUserPreferences.Update(user.UserPreferences);
+
+            if (!string.IsNullOrEmpty(user.AniListAccessToken))
+                usersToSync.Add(user.Id);
         }
 
         if (context.ChangeTracker.HasChanges())
         {
             await context.SaveChangesAsync();
+        }
+
+        foreach (var userId in usersToSync)
+        {
+            BackgroundJob.Enqueue<IScrobblingService>(s => s.SyncProviderInfo(userId, ScrobbleProvider.AniList, CancellationToken.None));
         }
     }
 }
