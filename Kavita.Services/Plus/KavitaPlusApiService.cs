@@ -13,6 +13,7 @@ using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
+using Kavita.Models.DTOs.KavitaPlus.License;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Metadata.Matching;
@@ -235,6 +236,76 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             logger.LogError(ex, "There was an issue getting user info from Kavita+ for provider {Provider}", provider);
             return KPlusResult<KavitaPlusUserInfo>.Failure(ex.Message);
         }
+    }
+
+    public async Task<LicenseInfoDto?> GetLicenseInfo(CancellationToken ct = default)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/info")
+                .WithKavitaPlusHeaders(license)
+                .GetJsonAsync<LicenseInfoDto>(cancellationToken: ct);
+
+            return response;
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Gets a snapshot of the Metadata providers operational health (average response time, last incident, overall status)
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<IList<KavitaPlusProviderHealthSnapshotDto>> GetProviderHealthSnapshot(CancellationToken ct = default)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/providerhealth/snapshot")
+                .WithKavitaPlusHeaders(license)
+                .GetJsonAsync<IList<KavitaPlusProviderHealthSnapshotDto>>(cancellationToken: ct);
+
+            return response;
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return [];
+    }
+
+
+    /// <summary>
+    /// Gets a snapshot of the amount of usage this server has with Kavita+
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns>Returns an empty object on errors</returns>
+    public async Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/stats/")
+                .WithKavitaPlusHeaders(license)
+                .GetJsonAsync<KPlusResult<KavitaPlusLicenseUsageDto>>(cancellationToken: ct);
+
+            if (response.IsSuccess) return response.Data!;
+            logger.LogError(response.ErrorMessage, "Unable to pull license usage data from Kavita+ API");
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return new KavitaPlusLicenseUsageDto()
+        {
+            GeneratedAtUtc =  DateTime.UtcNow,
+            Stats = []
+        };
     }
 
     /// <summary>

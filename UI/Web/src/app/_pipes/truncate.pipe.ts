@@ -1,17 +1,13 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {inject, Pipe, PipeTransform} from '@angular/core';
+import {BreakpointService} from '../_services/breakpoint.service';
 
-@Pipe({
-  name: 'truncate',
-  standalone: true
-})
+@Pipe({ name: 'truncate', standalone: true, pure: false })
 export class TruncatePipe implements PipeTransform {
+  private readonly breakpointService = inject(BreakpointService);
 
-  transform(value: string, limit: number = 20): string {
-    if (!value) return '';
-
-    return value.length > limit
-      ? value.substring(0, limit) + '...'
-      : value;
+  transform(value: string | null | undefined, length = 35): string {
+    if (!value) return value ?? '';
+    if (!this.breakpointService.isMobileOrBelow()) return value;
+    return value.length > length ? `${value.slice(0, length).trim()}…` : value;
   }
-
 }

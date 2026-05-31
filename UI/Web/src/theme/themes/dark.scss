@@ -29,7 +29,7 @@
   --elevation-layer11-dark: rgba(0, 0, 0, 0.6);
 
   --elevation-layer0-dark-solid: #121212;
-  --elevation-layer1-dark-solid: #1D1D1D;
+  --elevation-layer1-dark-solid: #1D1D1D; // This is a good base for cards
   --elevation-layer2-dark-solid: #212121;
   --elevation-layer3-dark-solid: #242424;
   --elevation-layer4-dark-solid: #272727;
@@ -95,7 +95,9 @@
 
   /* Global Common Colors */
   --success-color: #22c55e; // Success, Online, Connected
-  // --text-muted-color (we can alias this)
+
+  /** Override bs styles **/
+  --bs-success-rgb: 34, 197, 94;
 
 
   /* Should we render the series cover as background on mobile */
@@ -184,6 +186,12 @@
   --bs-btn-disabled-border-color: transparent;
   --btn-actions-border-radius: 0.375rem;
   --btn-actions-hover-bg: rgb(255 255 255 / 18%);
+
+  /* Discord (brand colors) */
+  --discord-bg-color: #5865F2;
+  --discord-text-color: #fff;
+  --discord-hover-bg-color: #4752C4;
+  --discord-active-bg-color: #3C45A5;
 
 
   /* Nav (Tabs) */
@@ -533,5 +541,4 @@
   --media-format-pill-light-novel-color: #a5bbff;
   --media-format-pill-comic-color: #fc8452;
   --media-format-pill-book-color: #fac858;
-
 }

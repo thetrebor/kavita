@@ -124,7 +124,7 @@
         "name-label": "Name",
         "key-length-label": "Key Length",
         "expiration-label": "Expiration",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "total-key-length": "Total Key Length: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -413,6 +413,10 @@
     "site-theme-provider-pipe": {
         "system": "System",
         "custom": "{{device-platform-pipe.custom}}"
+    },
+
+    "search-input": {
+        "clear": "Clear search"
     },
 
     "manage-devices": {
@@ -875,7 +879,7 @@
     "invite-user": {
         "title": "Invite User",
         "close": "{{common.close}}",
-        "description": "Invite a user to your server by entering their email. They'll receive an email to create an account. For this to work you must have the Host Name and Email setting fields set in the <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> tab, otherwise a link will be presented to you to setup on the user's behalf.<br/><br/>The email is not required to be valid.",
+        "description": "Invite a user to your server by entering their email. They'll receive an email to create an account. For this to work you must have the Host Name and Email setting fields set in the <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> tab, otherwise a link will be presented to you to setup on the user's behalf.<br/><br/>The email is not required to be valid.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "User invited",
@@ -899,66 +903,222 @@
         "no-data": "There are no libraries setup yet."
     },
 
-    "license": {
-        "title": "Kavita+ License",
-        "kavita+-warning": "Kavita+ is separate from Kavita. Uninstalling without first cancelling your subscription will continue the billing cycle.",
-        "manage": "Manage",
-        "invalid-license-tooltip": "If your subscription has ended, you must email support to get a new subscription created",
-        "check": "Check",
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "buy": "Buy",
-        "activate": "Activate",
-        "renew": "Renew",
-        "no-license-key": "No license key",
-        "license-valid": "License is Valid",
-        "license-not-valid": "License Not Valid",
-        "loading": "{{common.loading}}",
-        "help-label": "{{common.help}}",
-        "info-title": "License Info",
-        "actions-title": "Actions",
-        "license-active-label": "License Active",
-        "supported-version-label": "On Supported Kavita version",
-        "expiration-label": "Expiration",
-        "valid-tooltip": "Valid",
-        "invalid-tooltip": "Invalid",
-        "reset-label": "Reset",
-        "reset-tooltip": "This will reset the server instance Kavita+ license is tied to. Requires Email and License Key",
-        "delete-label": "Remove License",
-        "delete-tooltip": "This will remove the license from Kavita to stop Kavita from talking to Kavita+. Does not unsubscribe you. Use 'manage' first to cancel the subscription.",
-        "manage-tooltip": "Update payment info, Cancel/Pause subscription, etc",
-        "cancel-label": "Cancel Subscription",
-        "cancel-tooltip": "Cancel your subscription and delete the license within Kavita.",
-        "resend-license-email": "Send License to email",
-        "resend-license-email-tooltip": "Resend Kavita+ license to email. License must be bound to this server to work.",
-        "faq-title": "FAQ",
-        "total-subbed-months-label": "Total Months Subscribed",
-        "email-label": "Registered Email",
-        "supportId-label": "Support Id",
 
-        "license-mismatch": "License may be registered to another Kavita instance. Re-register to fix.",
-        "k+-license-overwrite": "License is registered to another Kavita instance. This can happen on re-installation and rarely due to system updates. Select overwrite to force this instance to register with Kavita+.",
-        "k+-already-registered-header": "License already registered",
-        "overwrite": "Overwrite",
-
-        "k+-unlocked": "Kavita+ unlocked!",
-        "k+-unlocked-description": "Welcome to Kavita+! Kavita will generate scrobble events from your progress, ratings and want to read once you register your Scrobbling Providers under account. Take some time to ensure you place scrobbling holds for any series you don't want to scrobble.",
-
-        "activate-description": "Enter the License Key and Email used to register with Stripe",
+    "edit-license-key": {
         "activate-license-label": "License Key",
         "activate-email-label": "{{common.email}}",
-        "activate-discordId-label": "Discord User Id",
+        "activate-discordId-label": "Discord User ID",
         "activate-discordId-tooltip": "Link your Discord Account with Kavita+. This grants you access to hidden channels to help shape Kavita.",
         "discord-validation": "This is not a valid Discord User Id. Your user id is not your discord username.",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "Reset License",
-        "activate-reset-tooltip": "Invalidate a previous registration using your license. Requires both License and Email",
-        "activate-save": "{{common.save}}",
+        "email-help": "This is the email registered with Stripe",
+        "license-help": "For your security, the stored key is encrypted on disk, re-enter it to update.",
+        "help-label": "{{common.help}}",
+        "required-field-validation": "{{validation.required-field}}",
+        "license-length-validation": "License key is expected to be 19 characters long",
+        "license-format-validation": "License is expected to be formatted as: XXXX-XXXX-XXXX-XXXX",
+        "discord-format-validation": "Discord ID expected to be 19 number user id",
+        "email-format-validation": "Must be a valid email address",
+        "connect-with-discord": "Connect with Discord",
+        "connect-with-discord-help": "Or {{connectWithDiscordBtn}} to fill this out automatically"
+    },
 
-        "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
-        "kavita+-desc-part-2": "premium benefits",
-        "kavita+-desc-part-3": "today!",
-        "kavita+-requirement": "Kavita+ is designed to work only with the latest 3 releases. Anything outside of that is subject to not functioning."
+    "manage-license-key-modal": {
+        "title": "Kavita+ License",
+        "last-validated": "last validated {{timeAgo}}",
+        "activate-license": "Activate License",
+        "close": "{{common.close}}",
+        "delete-license": "Delete license",
+        "reset-license": "Reset license",
+        "save": "{{common.save}}"
+    },
+
+    "register-license-key": {
+        "title": "Already have a license?",
+        "description": "Enter the key from your purchase email to activate Kavita+ on this server.",
+        "activate-license": "Activate License"
+    },
+
+    "kavita-plus-registration-error-code-pipe": {
+        "registration-failed": "License activation failed. Verify your license key and email are correct.",
+        "already-registered": "This license is registered to another server. Use 'Reset license' first.",
+        "subscription-inactive": "Your subscription is not active. Renew at kavitareader.com.",
+        "internal-error": "An internal error occurred. Please contact Kavita+ support."
+    },
+
+    "kavita-plus-subscription-status-pipe": {
+        "active-label": "Active",
+        "paused-label": "Paused",
+        "cancelled-label": "Cancelled"
+    },
+
+    "kavita-plus-provider-health-status-pipe": {
+        "unknown-label": "Unknown",
+        "operational-label": "Operational",
+        "degraded-label": "Degraded",
+        "down-label": "Down"
+    },
+
+    "kavita-plus-api-name-title-desc-pipe": {
+        "cover-requests-title": "Cover Requests",
+        "cover-requests-description": "Series, chapters, and volume covers",
+        "metadata-sync-title": "Metadata Syncs",
+        "metadata-sync-description": "Series detail refreshes",
+        "series-matched-title": "Series Matched",
+        "series-matched-description": "Matched to upstream providers",
+        "scrobbles-title": "Scrobbles",
+        "scrobbles-description": "Progress pushed to providers",
+        "mal-stack-import-title": "MAL Stacks Imported",
+        "mal-stack-import-description": "Interest stacks ingested",
+        "want-to-read-title": "Want-to-Read Syncs",
+        "want-to-read-description": "Synced from MAL/AniList/Hardcover/MangaBaka",
+        "recommendations-title": "Recommendations",
+        "recommendations-description": "External recs loaded",
+        "reviews-title": "Reviews",
+        "reviews-description": "External reviews loaded"
+    },
+
+    "scrobble-provider-media-title-pipe": {
+        "anilist-label": "Manga + Light Novels",
+        "mal-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "mangabaka-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "hardcover-label": "Books",
+        "cbr-label": "Comics"
+    },
+
+    "scrobble-health": {
+        "title-label": "Upstream Providers",
+        "checked-ago-label": "checked {{time}} ago",
+        "live-label": "live",
+        "refresh-alt": "Refresh provider health",
+        "no-data-label": "No provider health data available"
+    },
+
+    "kavita-plus-billing-interval-pipe": {
+        "day-label": "daily",
+        "week-label": "weekly",
+        "month-label": "monthly",
+        "year-label": "yearly",
+        "day-unit-label": "day",
+        "week-unit-label": "week",
+        "month-unit-label": "month",
+        "year-unit-label": "year"
+    },
+
+    "kavita-plus-upsell": {
+        "title": "Unlock Kavita+",
+        "description": "A premium subscription that unlocks metadata, scrobbling, and recommendations for every user on this Kavita instance.",
+        "wiki-link-label": "Read the wiki",
+        "faq-btn-label": "FAQ",
+        "hero-headline-label": "Metadata, scrobbling, and recommendations.",
+        "hero-subtitle-label": "Auto-sync reading progress, pull in rich metadata, and connect to AniList, MyAnimeList, Hardcover, and MangaBaka - all from one subscription, server-wide.",
+        "start-cta-label": "Start Kavita+",
+        "feature-list-link-label": "See full feature list",
+        "price-label": "$4",
+        "price-per-month-label": "/ month",
+        "price-promo-label": "$2 your first month",
+        "pricing-feature-1-label": "One subscription - server-wide",
+        "pricing-feature-2-label": "Every user on this instance benefits",
+        "pricing-feature-3-label": "Cancel any time through Stripe",
+        "pricing-feature-4-label": "Node-locked - no per-seat charge",
+        "providers-label": "Connects to",
+        "providers-more-label": "+ more coming",
+        "benefits-section-label": "What's in the box",
+        "benefit-1-title-label": "Auto-sync reading progress",
+        "benefit-1-body-label": "Push progress to AniList, MangaBaka, Hardcover and more - no manual tracking.",
+        "benefit-2-title-label": "Ratings & reviews",
+        "benefit-2-body-label": "Pull ratings and reviews from AniList, MyAnimeList, and ComicBookRoundup straight into Kavita.",
+        "benefit-3-title-label": "Rich metadata, no tagging",
+        "benefit-3-body-label": "Automatic metadata for Manga, Books, and Comics. Cover art, summaries, genres, and people.",
+        "benefit-4-title-label": "Import & sync MAL Stacks",
+        "benefit-4-body-label": "Pull in Interest Stacks and keep them synced. More provider integrations coming.",
+        "benefit-5-title-label": "Reading lists, anywhere",
+        "benefit-5-body-label": "Two-way sync your reading lists with upstream providers like MAL and AniList.",
+        "benefit-6-title-label": "Server-wide unlock",
+        "benefit-6-body-label": "One subscription, node-locked to your server. Every user on this instance benefits.",
+        "faq-section-title-label": "FAQ",
+        "faq-1-question-label": "Is Kavita+ separate from Kavita?",
+        "faq-1-answer-label": "Yes. Kavita stays free and open-source. Kavita+ adds premium services - uninstalling Kavita does not cancel your subscription.",
+        "faq-2-question-label": "What if I have multiple servers?",
+        "faq-2-answer-label": "Each Kavita+ license is node-locked to a single server. Contact support to migrate.",
+        "faq-3-question-label": "How do I cancel?",
+        "faq-3-answer-label": "Use the Manage button to open the Stripe portal - cancel or pause any time.",
+        "faq-wiki-link-label": "Full FAQ on the wiki"
+    },
+
+    "kavita-plus-connect-providers": {
+        "title": "You're all set - One last step",
+        "description": "Connect the providers you scrobble to. Kavita+ will backfill your existing reading history and keep progress in sync (one way) going forward.",
+        "faq-btn-label": "FAQ",
+        "activated-title-label": "License activated",
+        "activated-body-label": "Premium features are unlocked for every user on this server.",
+        "skip-to-dashboard-label": "Skip to dashboard",
+        "backfill-title-label": "Backfill your reading history",
+        "backfill-body-label": "Connecting now lets Kavita+ pull your existing progress from these services so series in your library show as already-read. You can connect more later, but backfill is easiest right after activation.",
+        "step-2-of-2-label": "Step 2 of 2",
+        "skip-for-now-label": "Skip for now",
+        "go-to-dashboard-label": "Go to dashboard",
+        "footer-hint-label": "You can connect more providers later under Settings → Kavita+ → Linked accounts."
+    },
+
+    "license-api-stats": {
+        "title": "API Usage",
+        "description": "Calls this server has made to Kavita+. Purely informational, there are no caps.",
+        "last-30-days": "Last 30 days",
+        "lifetime": "Lifetime",
+        "range-toggle-alt": "Toggle API usage range"
+    },
+
+    "expired-license-api-stats": {
+        "title": "Final Usage Snapshot"
+    },
+
+    "license-dashboard": {
+        "title": "License & Kavita+",
+        "description-inactive": "Your Kavita+ subscription has lapsed. Renew to restore metadata sync, scrobbling, recommendations, and more.",
+        "description-active": "Subscription, integrations, and usage for this server.",
+        "faq-label": "FAQ",
+        "support-label": "Help"
+    },
+
+    "discord-connect-card": {
+        "connect-title": "Connect Discord",
+        "connect-subtitle": "Access exclusive channels and show your flair",
+        "connect-button": "Connect",
+        "connected-label": "Discord Connected"
+    },
+
+    "expired-license-info-card": {
+        "title-label": "Last Subscription",
+        "status-label": "Status",
+        "expired-on-label": "Expired on",
+        "member-since-label": "Member since",
+        "total-months-label": "Total months"
+    },
+
+    "license-info-panel": {
+        "desc-active-label": "Premium subscription · server-wide",
+        "desc-inactive-label": "Premium features paused for all users",
+        "next-charge-label": "Next Charge",
+        "member-since-label": "Member Since",
+        "months-subscribed-label": "{{count}} months subscribed",
+        "version-label": "Kavita Version",
+        "supported-label": "Supported",
+        "unsupported-label": "Unsupported",
+        "version-sub-label": "on v{{version}}",
+        "expired-label": "Expired",
+        "expires-label": "Expires",
+        "days-ago-label": "{{count}} days ago",
+        "days-remaining-label": "{{count}} days left",
+        "last-plan-label": "Last Plan",
+        "impacted-label": "Active Users Impacted",
+        "impacted-value-label": "{{count}} users",
+        "impacted-sub-label": "premium features paused",
+        "days-left-label": "Days Left",
+        "manage-label": "Manage",
+        "renew-label": "Renew",
+        "edit-license-label": "Edit license",
+        "check-license-label": "Check",
+        "support-id-label": "Support Id"
     },
 
     "manage-matched-metadata": {
@@ -1332,13 +1492,21 @@
         "retry": "Retry",
         "load-more-label": "Load more",
         "empty-title": "Nothing found",
-        "empty-description": "Try a different filter or perform some matches/reading to populate"
+        "empty-description": "Try a different filter or perform some matches/reading to populate",
+        "system": "{{manage-kavitaplus-activity.system}}"
     },
 
     "audit-status-title-pipe": {
         "success": "Success",
         "failure": "Failure",
         "info": "Info"
+    },
+
+    "metadata-fetch-trigger-title-pipe": {
+        "series-added": "Auto on add",
+        "on-demand": "On page visit",
+        "manual-match": "Manual",
+        "scheduled-refresh": "Scheduled"
     },
 
     "audit-subject-title-pipe": {
@@ -1377,7 +1545,13 @@
         "chapter-cover-updated": "Cover updated: {{chapter}}",
         "series-cover-updated": "Series cover updated",
         "series-match-fixed": "Series matched with {{matchName}}",
-        "person-alias-added": "Added alias {{alias}} for {{personName}}",
+        "collection-synced": "{{collectionName}}: {{itemCount}} items synced, {{missingCount}} missing",
+        "collection-item-added": "Added to {{collectionName}}",
+        "person-cover-updated": "Cover updated for {{personName}}",
+        "person-alias-added": "Alias '{{aliasAdded}}' added for {{personName}}",
+        "sync-started-collection": "Starting sync of {{collectionName}} ({{itemCount}} items)",
+        "sync-failed-collection": "Sync failed for {{collectionName}}",
+        "sync-completed-want-to-read": "{{seriesMatched}} series matched for {{userName}}",
         "read-status-update": "Status {{status}}"
     },
 
@@ -1449,13 +1623,17 @@
         "no-results-description": "Nothing came back for \"{{ query }}\". Try a shorter query, romanized title, or a direct ID.",
         "dont-match-active-title": "Do not match enabled",
         "dont-match-active-description": "This series is opted out of Kavita+ matching and scrobbling.",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "volume-count": "{{match-series-result-item.volume-count}}",
+        "chapter-count": "{{match-series-result-item.chapter-count}}"
     },
 
     "match-series-result-item": {
         "matched-alt": "Matched alt:",
         "more": "more",
         "matched-alt-count": "matched alt titles",
+        "alt-titles": "Alt titles",
+        "more-titles": "+{{count}} more",
         "selected-alt": "Selected",
         "volume-count": "{{ num }} vol",
         "chapter-count": "{{ num }} ch",
