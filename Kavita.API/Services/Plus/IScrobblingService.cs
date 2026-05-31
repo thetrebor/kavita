@@ -147,6 +147,8 @@ public interface IScrobblingService
     /// <param name="ct"></param>
     /// <returns></returns>
     Task SyncProviderInfo(int userId, ScrobbleProvider provider, CancellationToken ct = default);
+
+    Task<List<int>> FilterLibrariesForProvider(ScrobbleProvider provider, int userId, List<int> libraryIds, CancellationToken ct = default);
 }
 
 public interface IScrobbleProviderService

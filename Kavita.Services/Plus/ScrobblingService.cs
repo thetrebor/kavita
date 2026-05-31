@@ -104,6 +104,7 @@ public class ScrobblingService : IScrobblingService
     private const int ScrobbleSleepTime = 1000; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
     private const SeriesIncludes ScrobbleSeriesIncludes = SeriesIncludes.Library | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata;
 
+    // When adjusting these, also adjust in ManageScrobbleProvidersComponent in the UI
     private static readonly IList<ScrobbleProvider> BookProviders = [
         ScrobbleProvider.Hardcover
     ];
@@ -111,14 +112,12 @@ public class ScrobblingService : IScrobblingService
     [
         ScrobbleProvider.AniList, ScrobbleProvider.Hardcover, ScrobbleProvider.MangaBaka
     ];
-    private static readonly IList<ScrobbleProvider> ComicProviders = [
-        ScrobbleProvider.Hardcover
-    ];
+    private static readonly IList<ScrobbleProvider> ComicProviders = Array.Empty<ScrobbleProvider>();
     private static readonly IList<ScrobbleProvider> MangaProviders = [
-        ScrobbleProvider.AniList, ScrobbleProvider.Hardcover, ScrobbleProvider.MangaBaka, ScrobbleProvider.Mal
+        ScrobbleProvider.AniList, ScrobbleProvider.MangaBaka, ScrobbleProvider.Mal
     ];
 
-    private static readonly IList<ScrobbleProvider> AllProviders = BookProviders
+    private static readonly IReadOnlyCollection<ScrobbleProvider> AllProviders = BookProviders
         .Concat(LightNovelProviders)
         .Concat(ComicProviders)
         .Concat(MangaProviders)
@@ -316,6 +315,20 @@ public class ScrobblingService : IScrobblingService
 
     #region Scrobble ingest
 
+    private static bool IsLibraryTypeSupported(ScrobbleProvider provider, LibraryType libraryType)
+    {
+        return libraryType switch
+        {
+            LibraryType.Manga => MangaProviders.Contains(provider),
+            LibraryType.Comic => ComicProviders.Contains(provider),
+            LibraryType.Book => BookProviders.Contains(provider),
+            LibraryType.Image => false,
+            LibraryType.LightNovel => LightNovelProviders.Contains(provider),
+            LibraryType.ComicVine => ComicProviders.Contains(provider),
+            _ => throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null)
+        };
+    }
+
     /// <summary>
     /// Returns the providers for which an
     /// </summary>
@@ -359,6 +372,11 @@ public class ScrobblingService : IScrobblingService
             }
 
             if (settings.HighestAgeRating != AgeRating.NotApplicable && series.Metadata.AgeRating > settings.HighestAgeRating)
+            {
+                continue;
+            }
+
+            if (!IsLibraryTypeSupported(provider, series.Library.Type))
             {
                 continue;
             }
@@ -1704,6 +1722,17 @@ public class ScrobblingService : IScrobblingService
 
         await _eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
             MessageFactory.ScrobbleProviderUpdatedEvent(provider), userId, ct);
+    }
+
+    public async Task<List<int>> FilterLibrariesForProvider(ScrobbleProvider provider, int userId, List<int> libraryIds, CancellationToken ct = default)
+    {
+        var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId, ct);
+
+        return libraries
+            .Where(l => IsLibraryTypeSupported(provider, l.Type))
+            .Select(l => l.Id)
+            .ToList();
+
     }
 
     public async Task<bool> RetryScrobbleAsync(int authUserId, KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default)

@@ -32,7 +32,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ReviewScrobbleTargetNamePipe} from "../../_pipes/review-scrobble-target-name.pipe";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
-import {Library} from "../../_models/library/library";
+import {Library, LibraryType} from "../../_models/library/library";
 import {LibraryService} from "../../_services/library.service";
 import {PublicationStatusPipe} from "../../_pipes/publication-status.pipe";
 import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
@@ -75,6 +75,15 @@ const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
   [ScrobbleProvider.Mal]: [ScrobbleEventType.AddWantToRead],
   [ScrobbleProvider.MangaBaka]: [ScrobbleEventType.ScoreUpdated, ScrobbleEventType.Review, ScrobbleEventType.ChapterRead, ScrobbleEventType.AddWantToRead],
   [ScrobbleProvider.Cbr]: [],
+  [ScrobbleProvider.Kavita]: []
+}
+
+const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
+  [ScrobbleProvider.AniList]: [LibraryType.Manga, LibraryType.LightNovel],
+  [ScrobbleProvider.Hardcover]: [LibraryType.LightNovel, LibraryType.Book],
+  [ScrobbleProvider.Mal]: [LibraryType.Manga, LibraryType.LightNovel],
+  [ScrobbleProvider.MangaBaka]: [LibraryType.Manga, LibraryType.LightNovel],
+  [ScrobbleProvider.Cbr]: [LibraryType.Comic],
   [ScrobbleProvider.Kavita]: []
 }
 
@@ -209,7 +218,9 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   }
 
   protected libraryTypeaheadSettings(provider: ScrobbleProvider): TypeaheadSettings<Library> {
-    const libraries = this.libraries();
+    const libraries = this.libraries()
+      .filter(l => ProvidersSupportLibraryTypes[provider].includes(l.type));
+
     const userScrobbleProvider = this.userScrobbleProviders().get(provider)!;
 
     const settings = new TypeaheadSettings<Library>();

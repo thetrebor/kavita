@@ -55,6 +55,12 @@ public class ScrobblingController(
         var scrobbleProvider = user.GetOrCreateScrobbleProvider(dto.Provider);
         scrobbleProvider.Settings = dto.Settings;
 
+        if (scrobbleProvider.Settings.Libraries.Count > 0)
+        {
+            scrobbleProvider.Settings.Libraries = await scrobblingService
+                .FilterLibrariesForProvider(dto.Provider, UserId, scrobbleProvider.Settings.Libraries);
+        }
+
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync();
 
