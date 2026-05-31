@@ -91,7 +91,7 @@ public class ScrobblingController(
     }
 
     /// <summary>
-    /// When a user request to generate scrobble events from history. Should only be ran once per user.
+    /// Generate scrobble events from history. Should only be ran once per user.
     /// </summary>
     /// <returns></returns>
     [HttpPost("generate-scrobble-events")]
@@ -109,6 +109,30 @@ public class ScrobblingController(
         BackgroundJob.Enqueue(() => scrobblingService.CreateEventsFromExistingHistory(scrobbleProvider, UserId));
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Generate scrobble events from history for all valid providers.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("generate-scrobble-events-all")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<bool>> GenerateScrobbleEventsAll()
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
+        if (user == null) return Unauthorized();
+
+        var providers = user.ScrobbleProviders
+            .Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken) && kv.Value.ValidUntilUtc > DateTime.UtcNow)
+            .Select(kv => kv.Key)
+            .ToList();
+
+        if (providers.Count > 0)
+        {
+            BackgroundJob.Enqueue(() => scrobblingService.CreateEventsFromExistingHistory(providers, UserId, CancellationToken.None));
+        }
+
+        return Ok(providers.Count > 0);
     }
 
     /// <summary>

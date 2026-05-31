@@ -119,6 +119,21 @@ public interface IScrobblingService
     [AutomaticRetry(Attempts = 1, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task RunReadStatusTransitionRules(CancellationToken ct = default);
 
+    /// <summary>
+    /// Runs <see cref="CreateEventsFromExistingHistory(ScrobbleProvider, int, CancellationToken)"/> in sequence
+    /// </summary>
+    /// <param name="scrobbleProviders"></param>
+    /// <param name="userId"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task CreateEventsFromExistingHistory(List<ScrobbleProvider> scrobbleProviders, int userId, CancellationToken ct = default);
+    /// <summary>
+    /// This will backfill events from existing progress history, ratings, and want to read for users that have a valid license
+    /// </summary>
+    /// <param name="scrobbleProvider"></param>
+    /// <param name="userId">Defaults to 0 meaning all users. Allows a userId to be set if a scrobble key is added to a user</param>
+    /// <param name="ct"></param>
+
     Task CreateEventsFromExistingHistory(ScrobbleProvider scrobbleProvider, int userId = 0, CancellationToken ct = default);
     Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default);
     Task ClearEventsForSeries(int userId, int seriesId, CancellationToken ct = default);

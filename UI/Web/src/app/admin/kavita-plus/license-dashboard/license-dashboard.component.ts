@@ -14,9 +14,10 @@ import {ExpiredLicenseInfoCardComponent} from '../expired-license-info-card/expi
 import {
   ScrobbleAccountCardComponent
 } from "../../../user-settings/scrobble-account-card/scrobble-account-card.component";
-import {ScrobblingService, UserScrobbleProvider} from "../../../_services/scrobbling.service";
+import {ScrobblingService} from "../../../_services/scrobbling.service";
 import {LicenseApiStatsComponent} from "../license-api-stats/license-api-stats.component";
 import {ExpiredLicenseApiStatsComponent} from "../expired-license-api-stats/expired-license-api-stats.component";
+import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provider-settings";
 
 @Component({
   selector: 'app-license-dashboard',

@@ -1451,12 +1451,14 @@ public class ScrobblingService : IScrobblingService
 
     #region BackFill
 
-    /// <summary>
-    /// This will backfill events from existing progress history, ratings, and want to read for users that have a valid license
-    /// </summary>
-    /// <param name="scrobbleProvider"></param>
-    /// <param name="userId">Defaults to 0 meaning all users. Allows a userId to be set if a scrobble key is added to a user</param>
-    /// <param name="ct"></param>
+    public async Task CreateEventsFromExistingHistory(List<ScrobbleProvider> scrobbleProviders, int userId, CancellationToken ct = default)
+    {
+        foreach (var scrobbleProvider in scrobbleProviders)
+        {
+            await CreateEventsFromExistingHistory(scrobbleProvider, userId, ct);
+        }
+    }
+
     public async Task CreateEventsFromExistingHistory(ScrobbleProvider scrobbleProvider, int userId = 0,
         CancellationToken ct = default)
     {
