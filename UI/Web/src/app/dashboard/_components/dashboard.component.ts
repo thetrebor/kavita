@@ -51,6 +51,7 @@ import {FilterEntityType} from "../../_models/metadata/v2/filter-entity-type";
 import {ReadingListService} from "../../_services/reading-list.service";
 import {PersonService} from "../../_services/person.service";
 import {AnnotationService} from "../../_services/annotation.service";
+import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 
 enum StreamId {
   OnDeck,
@@ -89,6 +90,8 @@ export class DashboardComponent {
   private readonly readerService = inject(ReaderService);
   private readonly licenseService = inject(LicenseService);
   private readonly cardConfigFactory = inject(CardConfigFactory);
+
+  private readonly scrobbleProviderNamePipe = new ScrobbleProviderNamePipe();
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = signal<boolean>(true);
@@ -149,12 +152,12 @@ export class DashboardComponent {
     this.licenseService.hasAnyLicense()
       .pipe(
         filter((hasLic: boolean) => hasLic),
-        switchMap(_ => this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList)),
-      ).subscribe((hasExpired: boolean) => {
-      if (hasExpired) {
-        this.toastr.error(translate('toasts.anilist-token-expired'));
-      }
-    });
+        switchMap(_ => this.scrobblingService.expiredTokens()),
+        filter(providers => providers.length > 0),
+        map(providers => providers.map(this.scrobbleProviderNamePipe.transform).join(', ')),
+        switchMap(providerNames => this.toastr.error(providerNames, translate('toasts.tokens-expired')).onTap),
+        tap(() => this.router.navigateByUrl('/settings#' + SettingsTabId.ScrobbleSettings).catch(console.error))
+      ).subscribe();
   }
 
   smartFilterNextPage(stream: DashboardStream) {

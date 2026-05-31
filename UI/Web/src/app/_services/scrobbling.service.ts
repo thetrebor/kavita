@@ -48,7 +48,13 @@ export class ScrobblingService {
   }
 
   hasTokenExpired(provider: ScrobbleProvider) {
-    return of(false);
+    return this.httpClient.get<string>(this.baseUrl + 'scrobbling/token-expired?provider=' + provider, TextResonse).pipe(
+      map(s => s === 'true')
+    );
+  }
+
+  expiredTokens() {
+    return this.httpClient.get<ScrobbleProvider[]>(this.baseUrl + 'scrobbling/expired-tokens');
   }
 
   getMalToken() {

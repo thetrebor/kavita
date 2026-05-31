@@ -123,6 +123,23 @@ public class ScrobblingController(
     }
 
     /// <summary>
+    /// Returns all expired tokens for the current user
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("expired-tokens")]
+    public async Task<ActionResult<List<ScrobbleProvider>>> GetExpiredTokens()
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
+        if (user == null) return Unauthorized();
+
+        return Ok(user.ScrobbleProviders
+            .Where(kv => kv.Value.ValidUntilUtc < DateTime.UtcNow && !string.IsNullOrEmpty(kv.Value.AuthenticationToken))
+            .Select(kv => kv.Key)
+            .ToList()
+        );
+    }
+
+    /// <summary>
     /// Returns all scrobbling errors for the instance
     /// </summary>
     /// <remarks>Requires admin</remarks>
