@@ -100,6 +100,11 @@ public sealed record LicenseInfoDto
     public string InstallId { get; set; }
 
     /// <summary>
+    /// In a Past Due state which we treat as cancelling
+    /// </summary>
+    public bool PastDue { get; set; }
+
+    /// <summary>
     /// Discord UserId if set
     /// </summary>
     public string? DiscordId { get; set; }
@@ -108,4 +113,5 @@ public sealed record LicenseInfoDto
     /// Has Discord Set
     /// </summary>
     public bool HasDiscordSet => DiscordId is not null;
+
 }

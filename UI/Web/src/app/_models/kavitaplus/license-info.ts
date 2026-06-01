@@ -33,6 +33,7 @@ export class LicenseInfo {
   installId!: string;
   discordId!: string | null;
   hasDiscordSet!: boolean;
+  pastDue!: boolean;
 
   get daysRemaining(): number {
     if (!this.nextChargeDate) return 0;

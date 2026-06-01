@@ -74,7 +74,7 @@
           </div>
           <div class="data-col">
             <span class="data-label">{{ t('impacted-label') }}</span>
-            <span class="data-value">{{ t('impacted-value-label') }}</span>
+            <span class="data-value">{{ t('impacted-value-label', {count: usersCount()}) }}</span>
             <span class="data-sub">{{ t('impacted-sub-label') }}</span>
           </div>
         } @else {
