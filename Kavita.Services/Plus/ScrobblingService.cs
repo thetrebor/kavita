@@ -72,6 +72,24 @@ public class ScrobbleSyncContext
     /// </summary>
     public int ProgressCounter { get; set; }
 
+    public IEnumerable<ScrobbleEvent> GetEventsToProcess()
+    {
+        return ReadEvents
+            .Concat(RatingEvents)
+            .Concat(ReviewEvents)
+            .Concat(ReadStatusEvents)
+            .Concat(Decisions);
+    }
+
+    public List<ScrobbleProvider> ProvidersForUser(int userId)
+    {
+        return GetEventsToProcess()
+            .Where(e => e.AppUserId == userId)
+            .Select(e => e.ScrobbleProvider)
+            .Distinct()
+            .ToList();
+    }
+
     /// <summary>
     /// Sum of all events to process
     /// </summary>
@@ -777,18 +795,14 @@ public class ScrobblingService : IScrobblingService
     private async Task PrepareUsersToScrobble(ScrobbleSyncContext ctx, CancellationToken ct)
     {
         // For all userIds, ensure that we can connect and have access
-        var usersToScrobble = ctx.ReadEvents.Select(r => r.AppUser)
-            .Concat(ctx.AddToWantToRead.Select(r => r.AppUser))
-            .Concat(ctx.RemoveWantToRead.Select(r => r.AppUser))
-            .Concat(ctx.RatingEvents.Select(r => r.AppUser))
-            .Concat(ctx.ReviewEvents.Select(r => r.AppUser))
-            .Concat(ctx.ReadStatusEvents.Select(r => r.AppUser))
+        var usersToScrobble = ctx.GetEventsToProcess()
+            .Select(u => u.AppUser)
             .DistinctBy(u => u.Id)
             .ToList();
 
         foreach (var user in usersToScrobble)
         {
-            await SetAndCheckRateLimit(ctx.RateLimits, user, ctx.License, ct);
+            await SetAndCheckRateLimit(ctx, user, ct);
         }
 
         ctx.Users = usersToScrobble;
@@ -1851,20 +1865,22 @@ public class ScrobblingService : IScrobblingService
             .ToList();
     }
 
-    private async Task SetAndCheckRateLimit(IDictionary<int, Dictionary<ScrobbleProvider, int>> userRateLimits,
-        AppUser user, string license, CancellationToken ct)
+    private async Task SetAndCheckRateLimit(ScrobbleSyncContext ctx, AppUser user, CancellationToken ct)
     {
+        var allUserProviders = ctx.ProvidersForUser(user.Id);
+
         var providersToCheck = user.ScrobbleProviders
             .Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken))
+            .Where(kv => allUserProviders.Contains(kv.Key))
             .ToList();
 
-        if (!userRateLimits.ContainsKey(user.Id))
-            userRateLimits[user.Id] = [];
+        if (!ctx.RateLimits.ContainsKey(user.Id))
+            ctx.RateLimits[user.Id] = [];
 
-        foreach (var kv in providersToCheck.Where(kv => !userRateLimits[user.Id].ContainsKey(kv.Key)))
+        foreach (var kv in providersToCheck.Where(kv => !ctx.RateLimits[user.Id].ContainsKey(kv.Key)))
         {
-            var result = await GetRateLimit(kv.Key, license, kv.Value.AuthenticationToken, ct);
-            userRateLimits[user.Id][kv.Key] = result;
+            var result = await GetRateLimit(kv.Key, ctx.License, kv.Value.AuthenticationToken, ct);
+            ctx.RateLimits[user.Id][kv.Key] = result;
 
             if (result == 0)
             {
