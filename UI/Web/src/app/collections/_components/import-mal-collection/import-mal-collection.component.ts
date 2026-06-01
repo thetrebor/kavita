@@ -36,8 +36,8 @@ export class ImportMalCollectionComponent {
 
   constructor() {
     this.scrobblingService.getScrobbleProviders().subscribe(async res => {
-      const mal = res.filter(r => r.provider === ScrobbleProvider.Mal)[0]; // MAL Will always exist
-      if (mal.authenticationToken === '') {
+      const potentialMal = res.filter(r => r.provider === ScrobbleProvider.Mal);
+      if (potentialMal.length === 0 || potentialMal[0].authenticationToken === '') {
         await this.confirmService.alert(translate('toasts.mal-token-required'));
         return;
       }
