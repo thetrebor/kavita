@@ -48,7 +48,7 @@
               {{ formGroup.get('userName')?.value | defaultValue }}
             </ng-template>
             <ng-template #edit>
-              <input class="form-control" formControlName="userName">
+              <input class="form-control" formControlName="userName" [attr.aria-label]="t('username-label')">
             </ng-template>
           </app-setting-item>
         </div>
@@ -56,12 +56,12 @@
         <div class="col-12 mt-4">
           <app-setting-item [title]="t('authentication-token-label')">
             <ng-template #view>
-            <span class="font-monospace text-muted small">
-              {{ formGroup.get('authenticationToken')?.value | truncate:50:true | defaultValue }}
-            </span>
+              <span class="font-monospace text-muted small">
+                {{ formGroup.get('authenticationToken')?.value | truncate:50:true | defaultValue }}
+              </span>
             </ng-template>
             <ng-template #edit>
-              <textarea class="form-control" formControlName="authenticationToken"></textarea>
+              <textarea class="form-control" formControlName="authenticationToken" [attr.aria-label]="t('authentication-token-label')"></textarea>
             </ng-template>
           </app-setting-item>
         </div>
@@ -71,7 +71,8 @@
             <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
               <a class="flex-fill btn btn-secondary me-2"
                  [href]="tokenLink"
-                 target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
+                 target="_blank" rel="noopener noreferrer"
+                 [attr.aria-label]="t('generate')">{{t('generate')}}</a>
             </div>
           </div>
         }
@@ -82,8 +83,8 @@
   </div>
 
   <div class="modal-footer">
-    <button class="btn btn-outline-secondary me-auto" [disabled]="!canGenerateEvents()" (click)="generateEvents()">{{t('generate-scrobble-events')}}</button>
-    <button class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-    <button class="btn btn-primary" [disabled]="!formGroup.dirty || formGroup.invalid" (click)="save()">{{t('save')}}</button>
+    <button class="btn btn-outline-secondary me-auto" [disabled]="!canGenerateEvents()" (click)="generateEvents()" [attr.aria-label]="t('generate-scrobble-events')">{{t('generate-scrobble-events')}}</button>
+    <button class="btn btn-secondary" (click)="close()" [attr.aria-label]="t('close')">{{t('close')}}</button>
+    <button class="btn btn-primary" [disabled]="!formGroup.dirty || formGroup.invalid" (click)="save()" [attr.aria-label]="t('save')">{{t('save')}}</button>
   </div>
 </ng-container>

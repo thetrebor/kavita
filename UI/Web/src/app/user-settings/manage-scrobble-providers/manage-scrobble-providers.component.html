@@ -1,4 +1,3 @@
-
 <ng-container *transloco="let t; prefix: 'scrobble-provider-settings-manager'">
   <p class="ps-2">{{t('description')}}</p>
 
@@ -14,8 +13,8 @@
         <app-accordion [headingLevel]="2">
 
           <img accLead fill
-            [ngSrc]="userScrobbleProvider.provider | providerImage"
-            [alt]="userScrobbleProvider.provider | scrobbleProviderName">
+               [ngSrc]="userScrobbleProvider.provider | providerImage"
+               [alt]="userScrobbleProvider.provider | scrobbleProviderName">
 
           <span accTitle>{{ userScrobbleProvider.provider | scrobbleProviderName }}</span>
           <span accSubtitle>{{ provider | scrobbleProviderDescription }}</span>
@@ -29,15 +28,15 @@
 
           @if (userScrobbleProvider.authenticationToken) {
             <div accCta class="d-flex gap-2">
-              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="connectScrobbleProvider(provider)" [title]="t('regenerate')">
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="connectScrobbleProvider(provider)" [title]="t('regenerate')" [attr.aria-label]="t('regenerate')">
                 <i class="fa-solid fa-rotate-right"></i><span class="d-none d-sm-inline ms-1">{{ t('regenerate') }}</span>
               </button>
-              <button type="button" class="btn btn-outline-danger btn-sm" (click)="disconnectScrobbleProvider(provider)" [title]="t('disconnect')">
+              <button type="button" class="btn btn-outline-danger btn-sm" (click)="disconnectScrobbleProvider(provider)" [title]="t('disconnect')" [attr.aria-label]="t('disconnect')">
                 <i class="fa-solid fa-plug-circle-xmark"></i><span class="d-none d-sm-inline ms-1">{{ t('disconnect') }}</span>
               </button>
             </div>
           } @else {
-            <button accCta type="button" class="btn btn-outline-primary btn-sm" (click)="connectScrobbleProvider(provider)">
+            <button accCta type="button" class="btn btn-outline-primary btn-sm" (click)="connectScrobbleProvider(provider)" [attr.aria-label]="t('connect')">
               <i class="fa-solid fa-plug me-1"></i>{{ t('connect') }}
             </button>
           }
@@ -93,7 +92,7 @@
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="age-ratings-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="progressScrobbling" role="switch">
+                      <input id="age-ratings-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="progressScrobbling" role="switch" [attr.aria-label]="t('progress-sync-label')">
                     </div>
                   </div>
                 }
@@ -107,7 +106,7 @@
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="rating-sync-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="ratingScrobbling" role="switch">
+                      <input id="rating-sync-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="ratingScrobbling" role="switch" [attr.aria-label]="t('rating-sync-label')">
                     </div>
                   </div>
                 }
@@ -121,7 +120,7 @@
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="want-to-read-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="wantToReadSync" role="switch">
+                      <input id="want-to-read-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="wantToReadSync" role="switch" [attr.aria-label]="t('want-to-read-sync-label')">
                     </div>
                   </div>
                 }
@@ -135,7 +134,7 @@
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="reviews-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="reviewsScrobbling" role="switch">
+                      <input id="reviews-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="reviewsScrobbling" role="switch" [attr.aria-label]="t('reviews-sync-label')">
                     </div>
                   </div>
 
@@ -147,7 +146,7 @@
                       </div>
                     </div>
                     <div class="mb-0 flex-shrink-0">
-                      <select class="form-select" formControlName="reviewScrobbleTarget">
+                      <select class="form-select" formControlName="reviewScrobbleTarget" [attr.aria-label]="t('reviews-target-label')">
                         @for (opt of ReviewScrobbleTargets; track opt) {
                           <option [ngValue]="opt">{{opt | reviewScrobbleTargetName}}</option>
                         }
@@ -176,7 +175,7 @@
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="all-libraries-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="allLibraries" role="switch">
+                      <input id="all-libraries-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="allLibraries" role="switch" [attr.aria-label]="t('all-libraries-label')">
                     </div>
                   </div>
                   <div>
@@ -204,7 +203,7 @@
                     </div>
                   </div>
                   <div class="mb-0 flex-shrink-0">
-                    <select class="form-select" formControlName="highestAgeRating">
+                    <select class="form-select" formControlName="highestAgeRating" [attr.aria-label]="t('highest-age-rating-label')">
                       @for (opt of AgeRatings; track opt) {
                         <option [ngValue]="opt">{{opt | ageRating}}</option>
                       }
@@ -232,11 +231,11 @@
                       <div class="d-flex align-items-center flex-wrap gap-2 small text-muted mt-1">
                         <span>{{t('inactive-series-rule-condition')}}</span>
 
-                        <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days"/>
+                        <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days" [attr.aria-label]="t('inactive-series-rule-days-aria')"/>
 
                         <span>{{t('rule-days-mark')}}</span>
 
-                        <select class="form-select form-select-sm" style="width: auto;" formControlName="transitionStatus">
+                        <select class="form-select form-select-sm" style="width: auto;" formControlName="transitionStatus" [attr.aria-label]="t('inactive-series-rule-status-aria')">
                           @for (opt of ScrobbleReadStatuses; track opt) {
                             <option [ngValue]="opt">{{ opt | scrobbleReadStatus }}</option>
                           }
@@ -244,12 +243,12 @@
 
                         <span>{{t('rule-publication-exception')}}</span>
 
-                        <select2 formControlName="excludedPublicationStatus" multiple [data]="publicationStatusOptions" class="d-flex col-12 col-lg-3">
+                        <select2 formControlName="excludedPublicationStatus" multiple [data]="publicationStatusOptions" class="d-flex col-12 col-lg-3" [attr.aria-label]="t('inactive-series-rule-excluded-publication-aria')">
                         </select2>
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch">
+                      <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch" [attr.aria-label]="t('inactive-series-rule-label')">
                     </div>
                   </div>
 
@@ -260,11 +259,11 @@
                       <div class="d-flex align-items-center flex-wrap gap-2 small text-muted mt-1">
                         <span>{{t('dropped-series-rule-condition')}}</span>
 
-                        <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days"/>
+                        <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days" [attr.aria-label]="t('dropped-series-rule-days-aria')"/>
 
                         <span>{{t('rule-days-mark')}}</span>
 
-                        <select class="form-select form-select-sm" style="width: auto;" formControlName="transitionStatus">
+                        <select class="form-select form-select-sm" style="width: auto;" formControlName="transitionStatus" [attr.aria-label]="t('dropped-series-rule-status-aria')">
                           @for (opt of ScrobbleReadStatuses; track opt) {
                             <option [ngValue]="opt">{{ opt | scrobbleReadStatus }}</option>
                           }
@@ -272,12 +271,12 @@
 
                         <span>{{t('rule-publication-exception')}}</span>
 
-                        <select2 formControlName="excludedPublicationStatus" multiple [data]="publicationStatusOptions" class="d-flex col-12 col-lg-3">
+                        <select2 formControlName="excludedPublicationStatus" multiple [data]="publicationStatusOptions" class="d-flex col-12 col-lg-3" [attr.aria-label]="t('dropped-series-rule-excluded-publication-aria')">
                         </select2>
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch">
+                      <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch" [attr.aria-label]="t('dropped-series-rule-label')">
                     </div>
                   </div>
 

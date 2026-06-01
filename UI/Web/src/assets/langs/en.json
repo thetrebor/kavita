@@ -2532,7 +2532,13 @@
         "dropped-series-rule-condition": "If a series/chapter hasn't been read for",
         "all-libraries-label": "All libraries",
         "all-libraries-tooltip": "If enabled, scrobble will run on all libraries. And the below selection does not take effect",
-        "confirm-delete": "Are you sure want to disconnect {{provider}}"
+        "confirm-delete": "Are you sure want to disconnect {{provider}}",
+        "inactive-series-rule-days-aria": "Inactive series threshold in days",
+        "inactive-series-rule-status-aria": "Inactive series transition status",
+        "inactive-series-rule-excluded-publication-aria": "Excluded publication statuses for inactive series rule",
+        "dropped-series-rule-days-aria": "Dropped series threshold in days",
+        "dropped-series-rule-status-aria": "Dropped series transition status",
+        "dropped-series-rule-excluded-publication-aria": "Excluded publication statuses for dropped series rule"
     },
 
     "manage-user-scrobble-provider-modal": {
