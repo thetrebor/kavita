@@ -272,8 +272,7 @@ public class StatsService : IStatsService
 
         try
         {
-            var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-            dto.ActiveKavitaPlusSubscription = await _licenseService.HasActiveSubscription(license);
+            dto.ActiveKavitaPlusSubscription = await _licenseService.HasActiveLicense();
         }
         catch (Exception)
         {
