@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
 using Kavita.Models.DTOs.KavitaPlus;
-using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -23,7 +22,7 @@ public interface ISeriesScrobbleService : IScrobbleProviderService;
 
 /// <summary>
 /// A <see cref="IScrobbleProviderService"/> implementation for <see cref="ScrobbleProvider"/>'s that track data
-/// based on series. (Mangabaka, AniList, etc)
+/// based on series. (Mangabaka, AniList, etc.)
 /// </summary>
 public abstract class SeriesScrobbleService<T>(ILogger<T> logger, IUnitOfWork unitOfWork, IKavitaPlusAuditService auditService): ISeriesScrobbleService
 where T: IScrobbleProviderService
@@ -102,8 +101,8 @@ where T: IScrobbleProviderService
 
         if (existingEvent is { IsProcessed: false })
         {
-            logger.LogDebug("[{Provider}] Overriding scrobble event for {Series} from Rating {Rating} -> {UpdatedRating}",
-                Provider, series.Name, existingEvent.Rating, rating);
+            logger.LogDebug("Overriding scrobble event for {Series} from Rating {Rating} -> {UpdatedRating}",
+                series.Name, existingEvent.Rating, rating);
 
             existingEvent.Rating = rating;
 
@@ -146,7 +145,7 @@ where T: IScrobbleProviderService
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-        logger.LogDebug("[{Provider}] Created new scrobble event for {Series} with Rating {Rating}", Provider, series.Name, rating);
+        logger.LogDebug("Created new scrobble event for {Series} with Rating {Rating}", series.Name, rating);
     }
 
     public async Task ScrobbleReviewUpdate(AppUser user, Series series, Chapter? chapter, string? reviewTitle, string reviewBody,
@@ -160,8 +159,8 @@ where T: IScrobbleProviderService
 
         if (existingEvent is { IsProcessed: false })
         {
-            logger.LogDebug("[{Provider}] Overriding scrobble event for {Series} from Review Title {Title} -> {UpdatedTitle}",
-                Provider, series.Name, existingEvent.ReviewTitle, reviewTitle);
+            logger.LogDebug("Overriding scrobble event for {Series} from Review Title {Title} -> {UpdatedTitle}",
+                series.Name, existingEvent.ReviewTitle, reviewTitle);
 
             existingEvent.ReviewTitle = reviewTitle;
             existingEvent.ReviewBody = reviewBody;
@@ -207,7 +206,7 @@ where T: IScrobbleProviderService
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-        logger.LogDebug("[{Provider}] Created new review scrobble event for {Series}", Provider, series.Name);
+        logger.LogDebug("Created new review scrobble event for {Series}", series.Name);
     }
 
     public async Task ScrobbleReadingUpdate(AppUser user, Series series, Chapter chapter, CancellationToken ct = default)
@@ -231,7 +230,7 @@ where T: IScrobbleProviderService
         {
             if (!isAnyProgressOnSeries)
             {
-                logger.LogDebug("[{Provider}] Removing scrobble event for {Series} as there is no reading progress", Provider, series.Name);
+                logger.LogDebug("Removing scrobble event for {Series} as there is no reading progress", series.Name);
 
                 unitOfWork.ScrobbleRepository.Remove(existingEvent);
 
@@ -258,8 +257,8 @@ where T: IScrobbleProviderService
                     LibraryType = series.Library.Type,
                 }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-            logger.LogDebug("[{Provider}] Updated scrobble event for {Series} from Volume {PrevVolume} -> {Volume}, Chapter {PrevChapter} -> {Chapter}",
-                Provider, series.Name, prevVolumeNumber, volumeNumber, prevChapterNumber, chapterNumber);
+            logger.LogDebug("Updated scrobble event for {Series} from Volume {PrevVolume} -> {Volume}, Chapter {PrevChapter} -> {Chapter}",
+                series.Name, prevVolumeNumber, volumeNumber, prevChapterNumber, chapterNumber);
             return;
         }
 
@@ -299,8 +298,8 @@ where T: IScrobbleProviderService
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-        logger.LogDebug("[{Provider}] Created new scrobble read event for {Series} with Volume {Volume}, Chapter {Chapter} for User: {UserId}",
-            Provider, series.Name, volumeNumber, chapterNumber, user.Id);
+        logger.LogDebug("Created new scrobble read event for {Series} with Volume {Volume}, Chapter {Chapter} for User: {UserId}",
+            series.Name, volumeNumber, chapterNumber, user.Id);
 
     }
 
@@ -340,7 +339,7 @@ where T: IScrobbleProviderService
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-        logger.LogDebug("[{Provider}] Created new scrobble {Event} event for {Series} for User: {UserId}",
-            Provider, eventType, series.Name, user.Id);
+        logger.LogDebug("Created new scrobble {Event} event for {Series} for User: {UserId}",
+            eventType, series.Name, user.Id);
     }
 }

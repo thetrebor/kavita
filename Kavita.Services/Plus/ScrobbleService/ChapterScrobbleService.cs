@@ -101,8 +101,8 @@ where T: IScrobbleProviderService
 
         if (existingEvent is { IsProcessed: false })
         {
-            logger.LogDebug("[{Provider}] Overriding scrobble event for {Series}, ChapterId: {ChapterId} from Rating {Rating} -> {UpdatedRating}",
-                Provider, series.Name, chapter.Id, existingEvent.Rating, rating);
+            logger.LogDebug("Overriding scrobble event for {Series}, ChapterId: {ChapterId} from Rating {Rating} -> {UpdatedRating}",
+                series.Name, chapter.Id, existingEvent.Rating, rating);
 
             existingEvent.Rating = rating;
 
@@ -147,8 +147,8 @@ where T: IScrobbleProviderService
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-        logger.LogDebug("[{Provider}] Created new scrobble event for {Series}, ChapterId: {ChapterId} with Rating {Rating}",
-            Provider, series.Name, chapter.Id, rating);
+        logger.LogDebug("Created new scrobble event for {Series}, ChapterId: {ChapterId} with Rating {Rating}",
+            series.Name, chapter.Id, rating);
     }
 
     public async Task ScrobbleReviewUpdate(AppUser user, Series series, Chapter? chapter, string? reviewTitle, string reviewBody,
@@ -162,8 +162,8 @@ where T: IScrobbleProviderService
 
         if (existingEvent is { IsProcessed: false })
         {
-            logger.LogDebug("[{Provider}] Overriding scrobble event for {Series} - ChapterId: {ChapterId} from Review Title {Title} -> {UpdatedTitle}",
-                Provider, series.Name, chapter.Id, existingEvent.ReviewTitle, reviewTitle);
+            logger.LogDebug("Overriding scrobble event for {Series} - ChapterId: {ChapterId} from Review Title {Title} -> {UpdatedTitle}",
+                series.Name, chapter.Id, existingEvent.ReviewTitle, reviewTitle);
 
             existingEvent.ReviewTitle = reviewTitle;
             existingEvent.ReviewBody = reviewBody;
@@ -210,8 +210,8 @@ where T: IScrobbleProviderService
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-        logger.LogDebug("[{Provider}] Created new scrobble event for {Series} - ChapterId: {ChapterId} with Review Title {Title}",
-            Provider, series.Name, chapter.Id, reviewTitle);
+        logger.LogDebug("Created new scrobble event for {Series} - ChapterId: {ChapterId} with Review Title {Title}",
+            series.Name, chapter.Id, reviewTitle);
 
     }
 
@@ -246,19 +246,20 @@ where T: IScrobbleProviderService
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
 
-            // TODO: Decide if we want to include this. This gets rather spammy as ChapterScrobbleProviders update
-            // on every page change!
-            /*await auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id, chapter.Id,
+            // Note that this will generate a lot of events if the book has very short pages
+            // Hardcover is only enabled for Light Novel & Book libraries, so I think this should be alright
+            // and is worth it having a correct view of the events
+            await auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id, chapter.Id,
                 new AuditLogScrobbleParamsDto
                 {
                     Provider = Provider,
                     ScrobbleEventType = ScrobbleEventType.ChapterRead,
                     PercentRead = currentProgress,
                     LibraryType = series.Library.Type,
-                }, AuditStatus.Info, userId: user.Id, ct: ct);*/
+                }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-            logger.LogDebug("[{Provider}] Overriding scrobble event for {Series} - ChapterId: {ChapterId} from {PrevProgress}% -> {Progress}%",
-                Provider, series.Name, chapter.Id, prevProgress, currentProgress);
+            logger.LogDebug("Overriding scrobble event for {Series} - ChapterId: {ChapterId} from {PrevProgress}% -> {Progress}%",
+                series.Name, chapter.Id, prevProgress, currentProgress);
             return;
         }
 
@@ -294,8 +295,8 @@ where T: IScrobbleProviderService
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-        logger.LogDebug("[{Provider}] Created new scrobble event for {Series} - ChapterId: {ChapterId} with {Progress}%",
-            Provider, series.Name, chapter.Id, currentProgress);
+        logger.LogDebug("Created new scrobble event for {Series} - ChapterId: {ChapterId} with {Progress}%",
+            series.Name, chapter.Id, currentProgress);
     }
 
     public async Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead,
@@ -335,8 +336,8 @@ where T: IScrobbleProviderService
                 LibraryType = series.Library.Type,
             }, AuditStatus.Info, userId: user.Id, ct: ct);
 
-        logger.LogDebug("[{Provider}] Created new scrobble {EventType} event for {Series} - ChapterId: {ChapterId}",
-            Provider, eventType, series.Name, chapter.Id);
+        logger.LogDebug("Created new scrobble {EventType} event for {Series} - ChapterId: {ChapterId}",
+            eventType, series.Name, chapter.Id);
 
     }
 }

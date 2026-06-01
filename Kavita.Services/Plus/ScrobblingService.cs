@@ -1514,33 +1514,40 @@ public class ScrobblingService : IScrobblingService
     /// <param name="ct"></param>
     private async Task CreateEventsFromExistingHistoryForUser(ScrobbleProvider scrobbleProvider, int userId, CancellationToken ct)
     {
+        _logger.LogDebug("Creating events for user {UserId} from existing history for {Provider}", userId, scrobbleProvider);
+
         List<ScrobbleProvider> providers = [scrobbleProvider];
 
         var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(userId, ct);
+        _logger.LogTrace("Found {Count} wantToRead entries for user {UserId}", wantToRead.Count, userId);
         foreach (var wtr in wantToRead)
         {
             await ScrobbleWantToReadUpdate(providers, userId, wtr.Id, true, ct);
         }
 
-        var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(userId, ct);
+        var ratings = (await _unitOfWork.UserRepository.GetSeriesWithRatings(userId, ct)).ToList();
+        _logger.LogTrace("Found {Count} series ratings entries for user {UserId}", ratings.Count, userId);
         foreach (var rating in ratings)
         {
             await ScrobbleRatingUpdate(providers, userId, rating.SeriesId, null, rating.Rating, ct);
         }
 
         var chapterRatings = await _unitOfWork.UserRepository.GetChaptersWithRatings(userId, ct);
+        _logger.LogTrace("Found {Count} chapter ratings entries for user {UserId}", chapterRatings.Count, userId);
         foreach (var chapterRating in chapterRatings)
         {
             await ScrobbleRatingUpdate(providers, userId, chapterRating.SeriesId, chapterRating.ChapterId, chapterRating.Rating, ct);
         }
 
-        var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(userId, ct);
+        var reviews = (await _unitOfWork.UserRepository.GetSeriesWithReviews(userId, ct)).ToList();
+        _logger.LogTrace("Found {Count} series reviews entries for user {UserId}", reviews.Count, userId);
         foreach (var review in reviews)
         {
             await ScrobbleReviewUpdate(providers, userId, review.SeriesId, null, string.Empty, review.Review!, ct);
         }
 
         var chapterReviews = await _unitOfWork.UserRepository.GetChaptersWithReviews(userId, ct);
+        _logger.LogTrace("Found {Count} chapter reviews entries for user {UserId}", chapterReviews.Count, userId);
         foreach (var chapterReview in chapterReviews)
         {
             await ScrobbleReviewUpdate(providers, userId, chapterReview.SeriesId, chapterReview.ChapterId, string.Empty,
@@ -1570,6 +1577,7 @@ public class ScrobblingService : IScrobblingService
         var seriesWithProgress =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, new UserParams(), filter, ct: ct);
 
+        _logger.LogTrace("Found {Count} series with progress entries for user {UserId}", seriesWithProgress.Count, userId);
         foreach (var series in seriesWithProgress.Where(series => series.PagesRead > 0))
         {
             await ScrobbleReadingUpdateForSeries(providers, userId, series.Id, ct);
