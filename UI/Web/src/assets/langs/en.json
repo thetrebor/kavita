@@ -3060,7 +3060,8 @@
         "description": "Import your MAL Interest Stacks and create Collections within Kavita",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
-        "nothing-found": "Nothing found",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Make sure you have a valid MAL token and have followed some Stacks",
         "track": "Track",
         "by-author": "by {{author}}"
     },

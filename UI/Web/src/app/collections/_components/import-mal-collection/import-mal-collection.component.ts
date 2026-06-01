@@ -9,14 +9,16 @@ import {UserCollection} from "../../../_models/collection-tag";
 import {forkJoin} from "rxjs";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {DecimalPipe} from "@angular/common";
+import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty-state.component";
 
 @Component({
     selector: 'app-import-mal-collection',
-    imports: [
-        TranslocoDirective,
-        LoadingComponent,
-        DecimalPipe
-    ],
+  imports: [
+    TranslocoDirective,
+    LoadingComponent,
+    DecimalPipe,
+    EmptyStateComponent
+  ],
     templateUrl: './import-mal-collection.component.html',
     styleUrl: './import-mal-collection.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,13 +35,15 @@ export class ImportMalCollectionComponent {
   collectionMap: {[key: string]: UserCollection | MalStack} = {};
 
   constructor() {
-    this.scrobblingService.getMalToken().subscribe(async token => {
-      if (token.accessToken === '') {
+    this.scrobblingService.getScrobbleProviders().subscribe(async res => {
+      const mal = res.filter(r => r.provider === ScrobbleProvider.Mal)[0]; // MAL Will always exist
+      if (mal.authenticationToken === '') {
         await this.confirmService.alert(translate('toasts.mal-token-required'));
         return;
       }
+
       this.setup();
-    });
+    })
   }
 
   setup() {

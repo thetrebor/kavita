@@ -9,9 +9,8 @@ import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
 import {PaginatedResult} from "../_models/pagination";
 import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
 import {UtilityService} from "../shared/_services/utility.service";
-import {forkJoin, of} from "rxjs";
 import {KavitaPlusAuditEntry} from "../_models/kavitaplus/kavita-plus-audit-entry";
-import {ScrobbleProviderSettings, UserScrobbleProvider,} from "../_models/kavitaplus/scrobble-provider-settings";
+import {UserScrobbleProvider,} from "../_models/kavitaplus/scrobble-provider-settings";
 
 export enum ScrobbleProvider {
   Kavita = 0,
@@ -55,10 +54,6 @@ export class ScrobblingService {
 
   expiredTokens() {
     return this.httpClient.get<ScrobbleProvider[]>(this.baseUrl + 'scrobbling/expired-tokens');
-  }
-
-  getMalToken() {
-    return this.httpClient.get<{username: string, accessToken: string}>(this.baseUrl + 'scrobbling/mal-token');
   }
 
   /**
