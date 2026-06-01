@@ -703,6 +703,51 @@
         "years-ago": "{{value}} years ago"
     },
 
+    "time-difference-pipe": {
+        "never": "Never",
+        "just-now": "just now",
+        "min": {
+            "ago": "a minute ago",
+            "in": "in a minute"
+        },
+        "mins": {
+            "ago": "{{value}} minutes ago",
+            "in": "in {{value}} minutes"
+        },
+        "hour": {
+            "ago": "an hour ago",
+            "in": "in an hour"
+        },
+        "hours": {
+            "ago": "{{value}} hours ago",
+            "in": "in {{value}} hours"
+        },
+        "day": {
+            "ago": "a day ago",
+            "in": "in a day"
+        },
+        "days": {
+            "ago": "{{value}} days ago",
+            "in": "in {{value}} days"
+        },
+        "month": {
+            "ago": "a month ago",
+            "in": "in a month"
+        },
+        "months": {
+            "ago": "{{value}} months ago",
+            "in": "in {{value}} months"
+        },
+        "year": {
+            "ago": "a year ago",
+            "in": "in a year"
+        },
+        "years": {
+            "ago": "{{value}} years ago",
+            "in": "in {{value}} years"
+        }
+    },
+
     "duration-pipe": {
         "seconds": "{{num}} seconds",
         "minutes": "{{num}} minutes",
@@ -2456,7 +2501,7 @@
         "description": "Manage what, when, and where things are scrobbled to",
         "none-setup": "You do not have any scrobble providers setup yet! Click the add button above to start",
         "select-provider-title": "New Scrobble Provider",
-        "authentication": "Authentication",
+        "info": "User Info",
         "connect": "Connect",
         "connected": "Connected",
         "regenerate": "Regenerate",

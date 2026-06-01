@@ -11,33 +11,32 @@
 
     <div class="row g-2 mb-3">
       <div class="col-4">
-        <div>
-          <p>{{t('valid-until-label')}}</p>
-          <p>{{ userScrobbleProvider().validUntilUtc | utcToLocalTime | defaultValue }}</p>
-        </div>
+        <dl>
+          <dt class="text-muted small">{{t('valid-until-label')}}</dt>
+          <dd [ngbTooltip]="userScrobbleProvider().validUntilUtc | utcToLocalTime">{{ userScrobbleProvider().validUntilUtc | utcToLocalDate | timeDifference | defaultValue }}</dd>
+        </dl>
       </div>
       <div class="col-4">
-        <div>
-          <p>{{t('last-synced-label')}}</p>
+        <dl>
+          <dt class="text-muted small">{{t('last-synced-label')}}</dt>
           @let lastSyncedUtc = userScrobbleProvider().lastSyncedUtc | utcToLocalTime;
           @if (lastSyncedUtc) {
-            <p>{{ userScrobbleProvider().lastSyncedUtc | utcToLocalTime }}</p>
-            <p class="text-muted">{{ userScrobbleProvider().lastSyncedUtc | utcToLocalDate | timeAgo }}</p>
+            <dd [ngbTooltip]="lastSyncedUtc">{{ userScrobbleProvider().lastSyncedUtc | utcToLocalDate | timeAgo }}</dd>
           } @else {
-            <p>{{t('not-synced')}}</p>
+            <dd>{{t('not-synced')}}</dd>
           }
-        </div>
+        </dl>
       </div>
       <div class="col-4">
-        <div>
-          <p>{{t('event-generation-label')}}</p>
+        <dl>
+          <dt class="text-muted small">{{t('event-generation-label')}}</dt>
           @let scrobbleEventGenerationRan = userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalTime;
           @if (scrobbleEventGenerationRan) {
-            <p class="text-muted">{{ scrobbleEventGenerationRan}}</p>
+            <dd [ngbTooltip]="scrobbleEventGenerationRan">{{ userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalDate | timeAgo }}</dd>
           } @else {
-            <p class="text-muted">{{t('event-generation-not-run')}}</p>
+            <dd>{{t('event-generation-not-run')}}</dd>
           }
-        </div>
+        </dl>
       </div>
     </div>
 
@@ -58,7 +57,7 @@
           <app-setting-item [title]="t('authentication-token-label')">
             <ng-template #view>
             <span class="font-monospace text-muted small">
-              {{ formGroup.get('authenticationToken')?.value | truncate:50 | defaultValue }}
+              {{ formGroup.get('authenticationToken')?.value | truncate:50:true | defaultValue }}
             </span>
             </ng-template>
             <ng-template #edit>
@@ -83,8 +82,8 @@
   </div>
 
   <div class="modal-footer">
-    <button class="btn btn-secondary" [disabled]="!canGenerateEvents()" (click)="generateEvents()">{{t('generate-scrobble-events')}}</button>
+    <button class="btn btn-outline-secondary me-auto" [disabled]="!canGenerateEvents()" (click)="generateEvents()">{{t('generate-scrobble-events')}}</button>
     <button class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-    <button class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+    <button class="btn btn-primary" [disabled]="!formGroup.dirty || formGroup.invalid" (click)="save()">{{t('save')}}</button>
   </div>
 </ng-container>

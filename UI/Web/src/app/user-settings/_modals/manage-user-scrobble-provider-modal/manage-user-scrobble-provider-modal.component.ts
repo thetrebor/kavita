@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit} from '@angular/core';
 import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provider-settings";
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
@@ -16,6 +16,7 @@ import {ToastrService} from "ngx-toastr";
 import {
   ScrobbleProviderImageComponent
 } from "../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
+import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -30,7 +31,9 @@ import {
     TimeAgoPipe,
     ProviderImagePipe,
     UtcToLocalDatePipe,
-    ScrobbleProviderImageComponent
+    ScrobbleProviderImageComponent,
+    NgbTooltip,
+    TimeDifferencePipe
   ],
   templateUrl: './manage-user-scrobble-provider-modal.component.html',
   styleUrl: './manage-user-scrobble-provider-modal.component.scss',

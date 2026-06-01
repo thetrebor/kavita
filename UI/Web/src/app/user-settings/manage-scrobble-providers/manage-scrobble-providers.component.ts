@@ -42,6 +42,10 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScrobbleProviderUpdatedEvent} from "../../_models/events/scrobble-provider-updated-event";
 import {NgOptimizedImage} from "@angular/common";
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
+import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -98,7 +102,11 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
     Select2,
     TypeaheadComponent,
     LoadingComponent,
-    NgOptimizedImage
+    NgOptimizedImage,
+    UtcToLocalDatePipe,
+    TimeAgoPipe,
+    NgbTooltip,
+    TimeDifferencePipe
   ],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',

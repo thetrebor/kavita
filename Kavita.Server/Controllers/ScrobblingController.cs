@@ -9,6 +9,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Plus;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
@@ -75,7 +76,7 @@ public class ScrobblingController(
 
         var scrobbleProvider = user.GetOrCreateScrobbleProvider(dto.Provider);
 
-        scrobbleProvider.AuthenticationToken = dto.AuthenticationToken;
+        scrobbleProvider.AuthenticationToken = dto.AuthenticationToken.TrimPrefix("Bearer").Trim();
 
         // Mal uses UserName & ClientId or something
         if (dto.Provider is ScrobbleProvider.Mal)

@@ -46,22 +46,25 @@
 
             <div>
               <div class="text-secondary fw-bold text-uppercase small px-1 mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                {{ t('authentication') }}
+                {{ t('info') }}
               </div>
 
               <div class="px-1">
                 @if (userScrobbleProvider.authenticationToken) {
                   <div class="d-flex flex-column min-w-0">
-                    <span class="fw-semibold text-truncate">{{ userScrobbleProvider.userName }}</span>
                     <div class="d-flex flex-column flex-wrap gap-x-3 gap-y-1 small text-muted">
+                       <span class="text-nowrap">
+                        <i class="fa-regular fa-user me-1"></i>
+                        <span>{{ userScrobbleProvider.userName }}</span>
+                      </span>
                       <span class="text-nowrap">
                         <i class="fa-regular fa-clock me-1"></i>
-                        {{ t('expires', {time: userScrobbleProvider.validUntilUtc | utcToLocalTime}) }}
+                        <span [ngbTooltip]="userScrobbleProvider.validUntilUtc | utcToLocalTime">{{ t('expires', {time: userScrobbleProvider.validUntilUtc | utcToLocalDate | timeDifference}) }}</span>
                       </span>
                       @if (userScrobbleProvider.lastSyncedUtc) {
                         <span class="text-nowrap">
                           <i class="fa-solid fa-rotate me-1"></i>
-                          {{ t('last-synced', { time: userScrobbleProvider.lastSyncedUtc | utcToLocalTime }) }}
+                          <span [ngbTooltip]="userScrobbleProvider.lastSyncedUtc | utcToLocalTime">{{ t('last-synced', { time: userScrobbleProvider.lastSyncedUtc | utcToLocalDate | timeAgo }) }}</span>
                         </span>
                       }
                     </div>
@@ -72,7 +75,7 @@
               </div>
             </div>
 
-            <hr class="my-2 text-muted opacity-25">
+            <hr class="my-1 text-muted opacity-25">
 
             <div>
               <div class="text-secondary fw-bold text-uppercase small px-1 mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
