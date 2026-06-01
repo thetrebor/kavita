@@ -149,15 +149,15 @@ export class DashboardComponent {
       }
     });
 
-    this.licenseService.hasAnyLicense()
-      .pipe(
-        filter((hasLic: boolean) => hasLic),
-        switchMap(_ => this.scrobblingService.expiredTokens()),
-        filter(providers => providers.length > 0),
-        map(providers => providers.map(this.scrobbleProviderNamePipe.transform).join(', ')),
-        switchMap(providerNames => this.toastr.error(providerNames, translate('toasts.tokens-expired')).onTap),
-        tap(() => this.router.navigateByUrl('/settings#' + SettingsTabId.ScrobbleSettings).catch(console.error))
-      ).subscribe();
+    if (this.licenseService.hasActiveLicense()) {
+      this.scrobblingService.expiredTokens()
+        .pipe(
+          filter(providers => providers.length > 0),
+          map(providers => providers.map(this.scrobbleProviderNamePipe.transform).join(', ')),
+          switchMap(providerNames => this.toastr.error(providerNames, translate('toasts.tokens-expired')).onTap),
+          tap(() => this.router.navigateByUrl('/settings#' + SettingsTabId.ScrobbleSettings).catch(console.error))
+        ).subscribe();
+    }
   }
 
   smartFilterNextPage(stream: DashboardStream) {
