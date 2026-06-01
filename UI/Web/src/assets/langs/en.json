@@ -991,9 +991,10 @@
     },
 
     "kavita-plus-subscription-status-pipe": {
-        "active-label": "Active",
-        "paused-label": "Paused",
-        "cancelled-label": "Cancelled"
+        "active": "Active",
+        "paused": "Paused",
+        "cancelling": "Cancelling",
+        "expired": "Cancelled"
     },
 
     "kavita-plus-provider-health-status-pipe": {

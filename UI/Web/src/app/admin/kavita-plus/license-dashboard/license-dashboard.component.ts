@@ -18,6 +18,7 @@ import {ScrobblingService} from "../../../_services/scrobbling.service";
 import {LicenseApiStatsComponent} from "../license-api-stats/license-api-stats.component";
 import {ExpiredLicenseApiStatsComponent} from "../expired-license-api-stats/expired-license-api-stats.component";
 import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provider-settings";
+import {KavitaPlusSubscriptionState} from "../../../_models/kavitaplus/license-info";
 
 @Component({
   selector: 'app-license-dashboard',
@@ -57,4 +58,5 @@ export class LicenseDashboardComponent {
   }
 
   protected readonly WikiLink = WikiLink;
+  protected readonly KavitaPlusSubscriptionState = KavitaPlusSubscriptionState;
 }

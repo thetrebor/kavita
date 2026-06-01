@@ -1,8 +1,9 @@
 export enum KavitaPlusSubscriptionState
 {
   Active = 0,
-  Cancelled = 1,
-  Paused = 2
+  Paused = 2,
+  Cancelling = 3,
+  Expired = 4
 }
 
 export enum KavitaPlusBillingInterval
@@ -39,11 +40,6 @@ export class LicenseInfo {
     if (!this.nextChargeDate) return 0;
     const diff = Math.ceil((new Date(this.nextChargeDate).getTime() - Date.now()) / 86_400_000);
     return Math.max(0, diff);
-  }
-
-  get isExpired(): boolean {
-    if (!this.expirationDate) return true;
-    return new Date(this.expirationDate).getTime() < Date.now();
   }
 
   get daysUntilExpiry(): number {
