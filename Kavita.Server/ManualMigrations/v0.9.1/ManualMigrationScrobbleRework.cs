@@ -75,5 +75,9 @@ public class ManualMigrationScrobbleRework: ManualMigration
         {
             BackgroundJob.Enqueue<IScrobblingService>(s => s.SyncProviderInfo(userId, ScrobbleProvider.AniList, CancellationToken.None));
         }
+
+        await context.ScrobbleEvent
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(e => e.ScrobbleProvider, ScrobbleProvider.AniList));
     }
 }
