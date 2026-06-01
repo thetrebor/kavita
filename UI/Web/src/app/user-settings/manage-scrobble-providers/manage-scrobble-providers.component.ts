@@ -16,14 +16,7 @@ import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/pub
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective,
-  NgbAccordionHeader,
-  NgbAccordionItem
-} from "@ng-bootstrap/ng-bootstrap";
+import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
@@ -48,6 +41,7 @@ import {fromPromise} from "rxjs/internal/observable/innerFrom";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScrobbleProviderUpdatedEvent} from "../../_models/events/scrobble-provider-updated-event";
+import {NgOptimizedImage} from "@angular/common";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -91,15 +85,10 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
   selector: 'app-manage-scrobble-providers',
   imports: [
     TranslocoDirective,
-    NgbAccordionDirective,
-    NgbAccordionItem,
-    NgbAccordionHeader,
-    NgbAccordionBody,
+    AccordionComponent,
     ScrobbleProviderNamePipe,
     ProviderImagePipe,
     ReactiveFormsModule,
-    NgbAccordionCollapse,
-    NgbAccordionButton,
     TagBadgeComponent,
     ScrobbleProviderDescriptionPipe,
     UtcToLocalTimePipe,
@@ -108,7 +97,8 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
     ScrobbleReadStatusPipe,
     Select2,
     TypeaheadComponent,
-    LoadingComponent
+    LoadingComponent,
+    NgOptimizedImage
   ],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',
