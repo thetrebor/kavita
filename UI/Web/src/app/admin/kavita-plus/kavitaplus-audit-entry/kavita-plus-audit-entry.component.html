@@ -71,7 +71,7 @@
           </button>
         }
         <span class="time text-muted text-nowrap">
-          {{entry().createdUtc | utcToLocalTime | timeAgo}}
+          {{entry().createdUtc | utcToLocalDate | timeAgo}}
         </span>
         @if (showUser() && entry().userId) {
           <div class="d-flex align-items-center gap-1 phone-hidden">
