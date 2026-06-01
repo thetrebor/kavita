@@ -356,7 +356,7 @@ public class ScrobblingService : IScrobblingService
     /// <param name="user">Should include UserPreferences</param>
     /// <param name="series"></param>
     /// <returns></returns>
-    private static List<ScrobbleProvider> GetProvidersForScrobbleEvent(
+    private List<ScrobbleProvider> GetProvidersForScrobbleEvent(
         List<ScrobbleProvider>? scrobbleProviders,
         ScrobbleEventType eventType,
         AppUser user,
@@ -381,27 +381,37 @@ public class ScrobblingService : IScrobblingService
             if (!user.ScrobbleProviders.TryGetValue(provider, out var scrobbleProvider)
                 || string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken))
             {
+                _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} as no authentication token is set",
+                    provider, user.Id, eventType, series.Id);
                 continue;
             }
 
             var settings = scrobbleProvider.Settings;
             if (!guard(settings))
             {
+                _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} because the event is disabled is disabled",
+                    provider, user.Id, eventType, series.Id);
                 continue;
             }
 
             if (settings.HighestAgeRating != AgeRating.NotApplicable && series.Metadata.AgeRating > settings.HighestAgeRating)
             {
+                _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} because the series's Age Rating is too high {SeriesAgeRating} > {ProviderAgeRating}",
+                    provider, user.Id, eventType, series.Id, series.Metadata.AgeRating, settings.HighestAgeRating);
                 continue;
             }
 
             if (!IsLibraryTypeSupported(provider, series.Library.Type))
             {
+                _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} because the series's library type ({LibraryType}) is not supported",
+                    provider, user.Id, eventType, series.Id, series.Library.Type);
                 continue;
             }
 
             if (!settings.AllLibraries && !settings.Libraries.Contains(series.LibraryId))
             {
+                _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} because the series's library ({LibraryId}) is not in the list of libraries to scrobble",
+                    provider, user.Id, eventType, series.Id, series.LibraryId);
                 continue;
             }
 
@@ -449,7 +459,11 @@ public class ScrobblingService : IScrobblingService
         var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
 
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.Review, user, series);
-        if (providers.Count == 0) return;
+        if (providers.Count == 0)
+        {
+            _logger.LogDebug("Ignoring scrobble review update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
+            return;
+        }
 
         _logger.LogInformation("Processing Scrobbling review event for {AppUserId} on {SeriesName}", userId, series.Name);
 
@@ -491,7 +505,11 @@ public class ScrobblingService : IScrobblingService
         var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
 
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ScoreUpdated, user, series);
-        if (providers.Count == 0) return;
+        if (providers.Count == 0)
+        {
+            _logger.LogDebug("Ignoring scrobble rating update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
+            return;
+        }
 
         _logger.LogInformation("Processing Scrobbling rating event for {AppUserId} on {SeriesName}", userId, series.Name);
 
@@ -523,7 +541,11 @@ public class ScrobblingService : IScrobblingService
         var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
 
         var providers = GetProvidersForScrobbleEvent(null, ScrobbleEventType.ChapterRead, user, series);
-        if (providers.Count == 0) return;
+        if (providers.Count == 0)
+        {
+            _logger.LogDebug("Ignoring scrobble reading update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
+            return;
+        }
 
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
 
@@ -603,7 +625,11 @@ public class ScrobblingService : IScrobblingService
     private async Task ScrobbleReadingUpdatesForChaptersSmart(List<ScrobbleProvider>? scrobbleProviders, AppUser user, Series series, List<Chapter> chapters, CancellationToken ct = default)
     {
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ChapterRead, user, series);
-        if (providers.Count == 0) return;
+        if (providers.Count == 0)
+        {
+            _logger.LogDebug("Ignoring scrobble reading update on {SeriesId} - {ChapterId}, no providers matched", series.Id, chapters.Select(c => c.Id));
+            return;
+        }
 
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName} for {Count} chapters",
             user.Id, series.Name, chapters.Count);
@@ -652,7 +678,11 @@ public class ScrobblingService : IScrobblingService
         var eventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead;
 
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, eventType, user, series);
-        if (providers.Count == 0) return;
+        if (providers.Count == 0)
+        {
+            _logger.LogDebug("Ignoring scrobble want to read update on {SeriesId} - {ChapterId}, no providers matched", seriesId, onWantToRead);
+            return;
+        }
 
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
 
