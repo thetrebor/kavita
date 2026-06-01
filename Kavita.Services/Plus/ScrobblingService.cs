@@ -198,13 +198,14 @@ public class ScrobblingService : IScrobblingService
     /// <returns></returns>
     public async Task CheckExternalAccessTokens(CancellationToken ct = default)
     {
-        // Validate AniList
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
         foreach (var user in users)
         {
             foreach (var (provider, settings) in user.ScrobbleProviders)
             {
                 if (string.IsNullOrEmpty(settings.AuthenticationToken)) continue;
+
+                if (settings.ValidUntilUtc.Equals(DateTime.MinValue) || settings.LastSyncedUtc.Equals(DateTime.MinValue)) continue;
 
                 var providerService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
