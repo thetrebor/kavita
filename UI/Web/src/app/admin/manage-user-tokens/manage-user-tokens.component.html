@@ -1,11 +1,11 @@
 <ng-container *transloco="let t; prefix:'manage-user-tokens'">
   <p>{{t('description')}}</p>
 
-  <app-responsive-table [rows]="users" [trackByFn]="trackBy">
+  <app-responsive-table [rows]="users()" [trackByFn]="trackBy">
     <ng-template #tableTemplate>
       <ngx-datatable
         class="bootstrap"
-        [rows]="users"
+        [rows]="users()"
         [columnMode]="'force'"
         rowHeight="auto"
         [footerHeight]="50"
@@ -28,7 +28,7 @@
             </ng-template>
             <ng-template let-item="row" ngx-datatable-cell-template>
               @let info = getTokenValidityInfo(item, provider);
-              @if (info) {
+              @if (info && info.validUntilUtc !== NULL_DATE) {
                 {{t('token-set-label')}} <span class="text-muted ms-1">{{t('expires-label', {date: info.validUntilUtc | utcToLocalTime:'shortDate'})}}</span>
               } @else {
                 {{null | defaultValue}}
@@ -54,7 +54,7 @@
                 </div>
                 <div>
                   @let info = getTokenValidityInfo(item, provider);
-                  @if (info) {
+                  @if (info && info.validUntilUtc != NULL_DATE) {
                     {{t('token-set-label')}}
                     <span class="text-muted ms-1">{{t('expires-label', {date: info.validUntilUtc | utcToLocalTime:'shortDate'})}}</span>
                   } @else {
