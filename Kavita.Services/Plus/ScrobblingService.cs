@@ -1179,6 +1179,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = evt.SeriesId
         });
         await _unitOfWork.CommitAsync();
+
         await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
             new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
             AuditStatus.Failure, "token-expired", evt.AppUserId);
@@ -1277,7 +1278,7 @@ public class ScrobblingService : IScrobblingService
 
             if (!ctx.RateLimits[evt.AppUserId].TryGetValue(evt.ScrobbleProvider, out var rateLimit) || rateLimit == 0)
             {
-                _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded");
+                _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded, provider: {Provider}", evt.ScrobbleProvider);
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
                     new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
                     AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
@@ -1612,12 +1613,6 @@ public class ScrobblingService : IScrobblingService
             [
                 new SeriesFilterStatementDto
                 {
-                    Comparison = FilterComparison.LessThan,
-                    Field = SeriesFilterField.ReadProgress,
-                    Value = "100"
-                },
-                new SeriesFilterStatementDto
-                {
                     Comparison = FilterComparison.GreaterThan,
                     Field = SeriesFilterField.ReadProgress,
                     Value = "0"
@@ -1626,7 +1621,7 @@ public class ScrobblingService : IScrobblingService
         };
 
         var seriesWithProgress =
-            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, new UserParams(), filter, ct: ct);
+            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, UserParams.Infinite, filter, ct: ct);
 
         _logger.LogTrace("Found {Count} series with progress entries for user {UserId}", seriesWithProgress.Count, userId);
         foreach (var series in seriesWithProgress.Where(series => series.PagesRead > 0))
