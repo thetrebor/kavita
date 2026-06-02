@@ -151,64 +151,63 @@ public interface IScrobblingService
     Task<List<int>> FilterLibrariesForProvider(ScrobbleProvider provider, int userId, List<int> libraryIds, CancellationToken ct = default);
 }
 
+public sealed record ScrobbleUpdateContext
+{
+    public required AppUser User { get; init; }
+    public required Series Series { get; init; }
+    public Chapter? Chapter { get; set; }
+    public bool IsBackfill { get; init; } = false;
+
+}
+
 public interface IScrobbleProviderService
 {
     /// <summary>
     /// Create, or update a non-processed, <see cref="ScrobbleEventType.ScoreUpdated"/> event, for the given series
     /// </summary>
-    /// <param name="user"></param>
-    /// <param name="series"></param>
-    /// <param name="chapter"></param>
+    /// <param name="ctx"></param>
     /// <param name="rating"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task ScrobbleRatingUpdate(AppUser user, Series series, Chapter? chapter, float rating, CancellationToken ct = default);
+    Task ScrobbleRatingUpdate(ScrobbleUpdateContext ctx, float rating, CancellationToken ct = default);
 
     /// <summary>
     /// Leaves a review for the series or chapter
     /// </summary>
-    /// <param name="user"></param>
-    /// <param name="series"></param>
-    /// <param name="chapter"></param>
+    /// <param name="ctx"></param>
     /// <param name="reviewTitle"></param>
     /// <param name="reviewBody"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task ScrobbleReviewUpdate(AppUser user, Series series, Chapter? chapter, string? reviewTitle, string reviewBody, CancellationToken ct = default);
+    Task ScrobbleReviewUpdate(ScrobbleUpdateContext ctx, string? reviewTitle, string reviewBody, CancellationToken ct = default);
 
     /// <summary>
     /// Create, or update a non-processed, <see cref="ScrobbleEventType.ChapterRead"/> event, for the given series
     /// </summary>
-    /// <param name="user"></param>
-    /// <param name="series"></param>
-    /// <param name="chapter"></param>
+    /// <param name="ctx"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task ScrobbleReadingUpdate(AppUser user, Series series, Chapter chapter, CancellationToken ct = default);
+    Task ScrobbleReadingUpdate(ScrobbleUpdateContext ctx, CancellationToken ct = default);
 
     /// <summary>
     /// Creates an <see cref="ScrobbleEventType.AddWantToRead"/> or <see cref="ScrobbleEventType.RemoveWantToRead"/> for
     /// the given series
     /// </summary>
-    /// <param name="user"></param>
-    /// <param name="series"></param>
-    /// <param name="chapter"></param>
+    /// <param name="ctx"></param>
     /// <param name="onWantToRead"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
     /// <remarks>Only the result of both WantToRead types is send to K+</remarks>
-    Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead, CancellationToken ct = default);
+    Task ScrobbleWantToReadUpdate(ScrobbleUpdateContext ctx, bool onWantToRead, CancellationToken ct = default);
 
     /// <summary>
     ///  Creates an <see cref="ScrobbleEventType.ReadStatusUpdate"/> for the given series (/chapter)
     /// </summary>
-    /// <param name="user"></param>
-    /// <param name="series"></param>
-    /// <param name="chapter"></param>
+    /// <param name="ctx"></param>
     /// <param name="status"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task ScrobbleReadStatusUpdates(AppUser user, Series series, Chapter? chapter, ScrobbleReadStatus status, CancellationToken ct = default);
+    Task ScrobbleReadStatusUpdates(ScrobbleUpdateContext ctx, ScrobbleReadStatus status, CancellationToken ct = default);
 
     /// <summary>
     /// Check if the token is valid and not expired (No api calls made)

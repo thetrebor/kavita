@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260529185648_ScrobbleRework")]
+    [Migration("20260602183131_ScrobbleRework")]
     partial class ScrobbleRework
     {
         /// <inheritdoc />
@@ -2002,6 +2002,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("HardcoverId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsBackFill")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsErrored")

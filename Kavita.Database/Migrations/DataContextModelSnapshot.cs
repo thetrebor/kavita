@@ -2001,6 +2001,9 @@ namespace Kavita.Database.Migrations
                     b.Property<int?>("HardcoverId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsBackFill")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsErrored")
                         .HasColumnType("INTEGER");
 

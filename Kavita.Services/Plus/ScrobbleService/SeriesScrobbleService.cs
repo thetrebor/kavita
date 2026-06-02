@@ -35,32 +35,33 @@ where T: IScrobbleProviderService
 
     public abstract bool IsTokenValid(string token);
 
-    public async Task ScrobbleReadStatusUpdates(AppUser user, Series series, Chapter? chapter, ScrobbleReadStatus status,
+    public async Task ScrobbleReadStatusUpdates(ScrobbleUpdateContext ctx, ScrobbleReadStatus status,
         CancellationToken ct = default)
     {
-        if (!SupportedEvents.Contains(ScrobbleEventType.ReadStatusUpdate) || chapter != null) return;
+        if (!SupportedEvents.Contains(ScrobbleEventType.ReadStatusUpdate) || ctx.Chapter != null) return;
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
-            Provider, user.Id, series.Id, null, ScrobbleEventType.ReadStatusUpdate, true, ct
+            Provider, ctx.User.Id, ctx.Series.Id, null, ScrobbleEventType.ReadStatusUpdate, true, ct
         );
 
         if (existingEvent is { IsProcessed: false })
         {
             logger.LogDebug("Overriding scrobble event for {Series} from Read Status {Status} -> {UpdatedStatus}",
-                series.Name, existingEvent.ReadStatus, status);
+                ctx.Series.Name, existingEvent.ReadStatus, status);
 
             existingEvent.ReadStatus = status;
+            existingEvent.IsBackFill &= ctx.IsBackfill;
 
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
 
-            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id,
+            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, ctx.Series.Id,
                 new AuditLogScrobbleParamsDto
                 {
                     Provider = Provider,
                     ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
                     ReadStatus = status,
-                }, AuditStatus.Info, userId: user.Id, ct: ct);
+                }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -68,55 +69,57 @@ where T: IScrobbleProviderService
         {
             ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
             ScrobbleProvider = Provider,
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
-            SeriesId = series.Id,
-            LibraryId = series.LibraryId,
-            AppUserId = user.Id,
+            Format = ctx.Series.Library.Type.ConvertToPlusMediaFormat(ctx.Series.Format),
+            SeriesId = ctx.Series.Id,
+            LibraryId = ctx.Series.LibraryId,
+            AppUserId = ctx.User.Id,
             ReadStatus = status,
+            IsBackFill = ctx.IsBackfill,
         };
 
-        SetScrobbleIds(scrobbleEvent, series);
+        SetScrobbleIds(scrobbleEvent, ctx.Series);
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
 
-        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, ctx.Series.Id,
             new AuditLogScrobbleParamsDto
             {
                 Provider = Provider,
                 ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
                 ReadStatus = status,
-            }, AuditStatus.Info, userId: user.Id, ct: ct);
+            }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
-        logger.LogDebug("Created new scrobble event for {Series} with Read Status {Status}", series.Name, status);
+        logger.LogDebug("Created new scrobble event for {Series} with Read Status {Status}", ctx.Series.Name, status);
     }
 
-    public async Task ScrobbleRatingUpdate(AppUser user, Series series, Chapter? chapter, float rating, CancellationToken ct = default)
+    public async Task ScrobbleRatingUpdate(ScrobbleUpdateContext ctx, float rating, CancellationToken ct = default)
     {
-        if (!SupportedEvents.Contains(ScrobbleEventType.ScoreUpdated) || chapter != null) return;
+        if (!SupportedEvents.Contains(ScrobbleEventType.ScoreUpdated) || ctx.Chapter != null) return;
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
-            Provider, user.Id, series.Id, null, ScrobbleEventType.ScoreUpdated, true, ct
+            Provider, ctx.User.Id, ctx.Series.Id, null, ScrobbleEventType.ScoreUpdated, true, ct
         );
 
         if (existingEvent is { IsProcessed: false })
         {
             logger.LogDebug("Overriding scrobble event for {Series} from Rating {Rating} -> {UpdatedRating}",
-                series.Name, existingEvent.Rating, rating);
+                ctx.Series.Name, existingEvent.Rating, rating);
 
             existingEvent.Rating = rating;
+            existingEvent.IsBackFill &= ctx.IsBackfill;
 
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
 
-            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id,
+            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, ctx.Series.Id,
                 new AuditLogScrobbleParamsDto
                 {
                     Provider = Provider,
                     ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
                     Rating = rating,
-                    LibraryType = series.Library.Type,
-                }, AuditStatus.Info, userId: user.Id, ct: ct);
+                    LibraryType = ctx.Series.Library.Type,
+                }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -124,58 +127,60 @@ where T: IScrobbleProviderService
         {
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
             ScrobbleProvider = Provider,
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
-            SeriesId = series.Id,
-            LibraryId = series.LibraryId,
-            AppUserId = user.Id,
+            Format = ctx.Series.Library.Type.ConvertToPlusMediaFormat(ctx.Series.Format),
+            SeriesId = ctx.Series.Id,
+            LibraryId = ctx.Series.LibraryId,
+            AppUserId = ctx.User.Id,
             Rating = rating,
+            IsBackFill = ctx.IsBackfill,
         };
 
-        SetScrobbleIds(scrobbleEvent, series);
+        SetScrobbleIds(scrobbleEvent, ctx.Series);
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
 
-        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, ctx.Series.Id,
             new AuditLogScrobbleParamsDto
             {
                 Provider = Provider,
                 ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
                 Rating = rating,
-                LibraryType = series.Library.Type,
-            }, AuditStatus.Info, userId: user.Id, ct: ct);
+                LibraryType = ctx.Series.Library.Type,
+            }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
-        logger.LogDebug("Created new scrobble event for {Series} with Rating {Rating}", series.Name, rating);
+        logger.LogDebug("Created new scrobble event for {Series} with Rating {Rating}", ctx.Series.Name, rating);
     }
 
-    public async Task ScrobbleReviewUpdate(AppUser user, Series series, Chapter? chapter, string? reviewTitle, string reviewBody,
+    public async Task ScrobbleReviewUpdate(ScrobbleUpdateContext ctx, string? reviewTitle, string reviewBody,
         CancellationToken ct = default)
     {
-        if (!SupportedEvents.Contains(ScrobbleEventType.Review) || chapter != null) return;
+        if (!SupportedEvents.Contains(ScrobbleEventType.Review) || ctx.Chapter != null) return;
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
-            Provider, user.Id, series.Id, null, ScrobbleEventType.Review, true, ct
+            Provider, ctx.User.Id, ctx.Series.Id, null, ScrobbleEventType.Review, true, ct
         );
 
         if (existingEvent is { IsProcessed: false })
         {
             logger.LogDebug("Overriding scrobble event for {Series} from Review Title {Title} -> {UpdatedTitle}",
-                series.Name, existingEvent.ReviewTitle, reviewTitle);
+                ctx.Series.Name, existingEvent.ReviewTitle, reviewTitle);
 
             existingEvent.ReviewTitle = reviewTitle;
             existingEvent.ReviewBody = reviewBody;
+            existingEvent.IsBackFill &= ctx.IsBackfill;
 
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
 
-            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id,
+            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, ctx.Series.Id,
                 new AuditLogScrobbleParamsDto
                 {
                     Provider = Provider,
                     ScrobbleEventType = ScrobbleEventType.Review,
                     ReviewBody = reviewBody,
-                    LibraryType = series.Library.Type,
-                }, AuditStatus.Info, userId: user.Id, ct: ct);
+                    LibraryType = ctx.Series.Library.Type,
+                }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
             return;
         }
@@ -184,53 +189,54 @@ where T: IScrobbleProviderService
         {
             ScrobbleEventType = ScrobbleEventType.Review,
             ScrobbleProvider = Provider,
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
-            SeriesId = series.Id,
-            LibraryId = series.LibraryId,
-            AppUserId = user.Id,
+            Format = ctx.Series.Library.Type.ConvertToPlusMediaFormat(ctx.Series.Format),
+            SeriesId = ctx.Series.Id,
+            LibraryId = ctx.Series.LibraryId,
+            AppUserId = ctx.User.Id,
             ReviewTitle = reviewTitle,
             ReviewBody = reviewBody,
+            IsBackFill = ctx.IsBackfill,
         };
 
-        SetScrobbleIds(scrobbleEvent, series);
+        SetScrobbleIds(scrobbleEvent, ctx.Series);
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
 
-        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, ctx.Series.Id,
             new AuditLogScrobbleParamsDto
             {
                 Provider = Provider,
                 ScrobbleEventType = ScrobbleEventType.Review,
                 ReviewBody = reviewBody,
-                LibraryType = series.Library.Type,
-            }, AuditStatus.Info, userId: user.Id, ct: ct);
+                LibraryType = ctx.Series.Library.Type,
+            }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
-        logger.LogDebug("Created new review scrobble event for {Series}", series.Name);
+        logger.LogDebug("Created new review scrobble event for {Series}", ctx.Series.Name);
     }
 
-    public async Task ScrobbleReadingUpdate(AppUser user, Series series, Chapter chapter, CancellationToken ct = default)
+    public async Task ScrobbleReadingUpdate(ScrobbleUpdateContext ctx, CancellationToken ct = default)
     {
-        if (!SupportedEvents.Contains(ScrobbleEventType.ChapterRead)) return;
+        if (!SupportedEvents.Contains(ScrobbleEventType.ChapterRead) || ctx.Chapter == null) return;
 
         // Series should only create scrobble events for completed chapters
-        var chapterProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, user.Id, ct);
-        if (chapterProgress?.PagesRead != 0 && chapterProgress?.PagesRead < chapter.Pages) return;
+        var chapterProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(ctx.Chapter.Id, ctx.User.Id, ct);
+        if (chapterProgress?.PagesRead != 0 && chapterProgress?.PagesRead < ctx.Chapter.Pages) return;
 
-        var isAnyProgressOnSeries = await unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(series.Id, user.Id, ct);
+        var isAnyProgressOnSeries = await unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(ctx.Series.Id, ctx.User.Id, ct);
 
-        var volumeNumber = (int) await unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(series.Id, user.Id, ct);
-        var chapterNumber = await unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(series.Id, user.Id, ct);
+        var volumeNumber = (int) await unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(ctx.Series.Id, ctx.User.Id, ct);
+        var chapterNumber = await unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(ctx.Series.Id, ctx.User.Id, ct);
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
-            Provider, user.Id, series.Id, null, ScrobbleEventType.ChapterRead, true, ct
+            Provider, ctx.User.Id, ctx.Series.Id, null, ScrobbleEventType.ChapterRead, true, ct
         );
 
         if (existingEvent is { IsProcessed: false })
         {
             if (!isAnyProgressOnSeries)
             {
-                logger.LogDebug("Removing scrobble event for {Series} as there is no reading progress", series.Name);
+                logger.LogDebug("Removing scrobble event for {Series} as there is no reading progress", ctx.Series.Name);
 
                 unitOfWork.ScrobbleRepository.Remove(existingEvent);
 
@@ -243,22 +249,23 @@ where T: IScrobbleProviderService
 
             existingEvent.VolumeNumber = volumeNumber;
             existingEvent.ChapterNumber = chapterNumber;
+            existingEvent.IsBackFill &= ctx.IsBackfill;
 
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
 
-            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, series.Id,
+            await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, ctx.Series.Id,
                 new AuditLogScrobbleParamsDto
                 {
                     Provider = Provider,
                     ScrobbleEventType = ScrobbleEventType.ChapterRead,
                     ChapterNumber = chapterNumber,
                     VolumeNumber = volumeNumber,
-                    LibraryType = series.Library.Type,
-                }, AuditStatus.Info, userId: user.Id, ct: ct);
+                    LibraryType = ctx.Series.Library.Type,
+                }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
             logger.LogDebug("Updated scrobble event for {Series} from Volume {PrevVolume} -> {Volume}, Chapter {PrevChapter} -> {Chapter}",
-                series.Name, prevVolumeNumber, volumeNumber, prevChapterNumber, chapterNumber);
+                ctx.Series.Name, prevVolumeNumber, volumeNumber, prevChapterNumber, chapterNumber);
             return;
         }
 
@@ -267,17 +274,18 @@ where T: IScrobbleProviderService
 
         var evt = new ScrobbleEvent
         {
-            SeriesId = series.Id,
-            LibraryId = series.LibraryId,
+            SeriesId = ctx.Series.Id,
+            LibraryId = ctx.Series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.ChapterRead,
             ScrobbleProvider = Provider,
-            AppUserId = user.Id,
+            AppUserId = ctx.User.Id,
             VolumeNumber = volumeNumber,
             ChapterNumber = chapterNumber,
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+            Format = ctx.Series.Library.Type.ConvertToPlusMediaFormat(ctx.Series.Format),
+            IsBackFill = ctx.IsBackfill,
         };
 
-        SetScrobbleIds(evt, series);
+        SetScrobbleIds(evt, ctx.Series);
 
         if (evt.VolumeNumber is Parser.SpecialVolumeNumber)
         {
@@ -288,29 +296,29 @@ where T: IScrobbleProviderService
         unitOfWork.ScrobbleRepository.Attach(evt);
         await unitOfWork.CommitAsync(ct);
 
-        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, ctx.Series.Id,
             new AuditLogScrobbleParamsDto
             {
                 Provider = Provider,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
                 ChapterNumber = chapterNumber,
                 VolumeNumber = volumeNumber,
-                LibraryType = series.Library.Type,
-            }, AuditStatus.Info, userId: user.Id, ct: ct);
+                LibraryType = ctx.Series.Library.Type,
+            }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
         logger.LogDebug("Created new scrobble read event for {Series} with Volume {Volume}, Chapter {Chapter} for User: {UserId}",
-            series.Name, volumeNumber, chapterNumber, user.Id);
+            ctx.Series.Name, volumeNumber, chapterNumber, ctx.User.Id);
 
     }
 
-    public async Task ScrobbleWantToReadUpdate(AppUser user, Series series, Chapter chapter, bool onWantToRead,
+    public async Task ScrobbleWantToReadUpdate(ScrobbleUpdateContext ctx, bool onWantToRead,
         CancellationToken ct = default)
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.AddWantToRead) || !SupportedEvents.Contains(ScrobbleEventType.RemoveWantToRead)) return;
 
         var eventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead;
 
-        var existingEvents = (await unitOfWork.ScrobbleRepository.GetUserEventsForSeries(user.Id, series.Id, ct))
+        var existingEvents = (await unitOfWork.ScrobbleRepository.GetUserEventsForSeries(ctx.User.Id, ctx.Series.Id, ct))
             .Where(e => e.ScrobbleProvider == Provider)
             .Where(e => e.ScrobbleEventType is ScrobbleEventType.AddWantToRead or ScrobbleEventType.RemoveWantToRead);
 
@@ -319,27 +327,28 @@ where T: IScrobbleProviderService
         var scrobbleEvent = new ScrobbleEvent
         {
             ScrobbleProvider = Provider,
-            AppUserId = user.Id,
-            LibraryId = series.LibraryId,
-            SeriesId = series.Id,
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+            AppUserId = ctx.User.Id,
+            LibraryId = ctx.Series.LibraryId,
+            SeriesId = ctx.Series.Id,
+            Format = ctx.Series.Library.Type.ConvertToPlusMediaFormat(ctx.Series.Format),
             ScrobbleEventType = eventType,
+            IsBackFill = ctx.IsBackfill,
         };
 
-        SetScrobbleIds(scrobbleEvent, series);
+        SetScrobbleIds(scrobbleEvent, ctx.Series);
 
         unitOfWork.ScrobbleRepository.Attach(scrobbleEvent);
         await unitOfWork.CommitAsync(ct);
 
-        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, series.Id,
+        await auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, ctx.Series.Id,
             new AuditLogScrobbleParamsDto
             {
                 Provider = Provider,
                 ScrobbleEventType = eventType,
-                LibraryType = series.Library.Type,
-            }, AuditStatus.Info, userId: user.Id, ct: ct);
+                LibraryType = ctx.Series.Library.Type,
+            }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
         logger.LogDebug("Created new scrobble {Event} event for {Series} for User: {UserId}",
-            eventType, series.Name, user.Id);
+            eventType, ctx.Series.Name, ctx.User.Id);
     }
 }

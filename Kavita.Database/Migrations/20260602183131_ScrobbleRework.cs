@@ -22,6 +22,13 @@ namespace Kavita.Database.Migrations
                 type: "INTEGER",
                 nullable: true);
 
+            migrationBuilder.AddColumn<bool>(
+                name: "IsBackFill",
+                table: "ScrobbleEvent",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.AddColumn<long>(
                 name: "MangabakaId",
                 table: "ScrobbleEvent",
@@ -98,6 +105,10 @@ namespace Kavita.Database.Migrations
 
             migrationBuilder.DropColumn(
                 name: "HardcoverId",
+                table: "ScrobbleEvent");
+
+            migrationBuilder.DropColumn(
+                name: "IsBackFill",
                 table: "ScrobbleEvent");
 
             migrationBuilder.DropColumn(

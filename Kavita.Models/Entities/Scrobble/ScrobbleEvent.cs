@@ -54,6 +54,11 @@ public class ScrobbleEvent : IEntityDate
     /// </summary>
     public ScrobbleReadStatus? ReadStatus { get; set; }
     /// <summary>
+    /// True if the event was created due to a backfill
+    /// </summary>
+    /// <remarks>When overriding by a non backfill event should be set to false</remarks>
+    public bool IsBackFill { get; set; }
+    /// <summary>
     /// Has this event been processed and pushed to Provider
     /// </summary>
     public bool IsProcessed { get; set; }

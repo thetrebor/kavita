@@ -358,6 +358,11 @@ public class ScrobblingService : IScrobblingService
         };
     }
 
+    private List<ScrobbleProvider> GetProvidersForScrobbleEvent(List<ScrobbleProvider>? scrobbleProviders, ScrobbleEventType eventType, ScrobbleUpdateContext ctx)
+    {
+        return GetProvidersForScrobbleEvent(scrobbleProviders, eventType, ctx.User, ctx.Series);
+    }
+
     /// <summary>
     /// Returns the providers that are applicable for the ScrobbleEventType
     /// </summary>
@@ -433,8 +438,7 @@ public class ScrobblingService : IScrobblingService
         return providers;
     }
 
-    private async Task<(AppUser, Series, Chapter?)> LoadScrobbleEventData(int userId, int seriesId, int? chapterId,
-        CancellationToken ct)
+    private async Task<ScrobbleUpdateContext> CreateScrobbleUpdateContext(int userId, int seriesId, int? chapterId, bool isBackfill, CancellationToken ct)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ScrobbleSeriesIncludes, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
@@ -449,49 +453,55 @@ public class ScrobblingService : IScrobblingService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "user-doesnt-exist"));
 
-        return (user, series, chapter);
+        return new ScrobbleUpdateContext
+        {
+            User = user,
+            Series = series,
+            Chapter = chapter,
+            IsBackfill = isBackfill
+        };
     }
 
     #region Review
 
     public Task ScrobbleSeriesReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody, CancellationToken ct = default)
     {
-        return ScrobbleReviewUpdate(null, userId, seriesId, null, reviewTitle, reviewBody, ct);
+        return ScrobbleReviewUpdate(null, userId, seriesId, null, reviewTitle, reviewBody, false, ct);
     }
 
     public Task ScrobbleChapterReviewUpdate(int userId, int seriesId, int chapterId, string? reviewTitle, string reviewBody, CancellationToken ct = default)
     {
-        return ScrobbleReviewUpdate(null, userId, seriesId, chapterId, reviewTitle, reviewBody, ct);
+        return ScrobbleReviewUpdate(null, userId, seriesId, chapterId, reviewTitle, reviewBody, false, ct);
     }
 
-    private async Task ScrobbleReviewUpdate(List<ScrobbleProvider>? scrobbleProviders, int userId, int seriesId, int? chapterId, string? reviewTitle, string reviewBody, CancellationToken ct = default)
+    private async Task ScrobbleReviewUpdate(List<ScrobbleProvider>? scrobbleProviders, int userId, int seriesId, int? chapterId, string? reviewTitle, string reviewBody, bool isBackFill, CancellationToken ct = default)
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
+        var ctx = await CreateScrobbleUpdateContext(userId, seriesId, chapterId, isBackFill, ct);
 
-        var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.Review, user, series);
+        var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.Review, ctx);
         if (providers.Count == 0)
         {
             _logger.LogDebug("Ignoring scrobble review update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
             return;
         }
 
-        _logger.LogInformation("Processing Scrobbling review event for {AppUserId} on {SeriesName}", userId, series.Name);
+        _logger.LogInformation("Processing Scrobbling review event for {AppUserId} on {SeriesName}", userId, ctx.Series.Name);
 
         foreach (var provider in providers)
         {
-            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.Review, userId, seriesId, series)) continue;
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.Review, userId, seriesId, ctx.Series)) continue;
 
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
             try
             {
-                await scrobbleProviderService.ScrobbleReviewUpdate(user, series, chapter, reviewTitle, reviewBody, ct);
+                await scrobbleProviderService.ScrobbleReviewUpdate(ctx, reviewTitle, reviewBody, ct);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error happened while trying to scrobble an review event for {UserId} - {Provider}", user.Id, provider);
+                _logger.LogError(ex, "An error happened while trying to scrobble an review event for {UserId} - {Provider}", ctx.User.Id, provider);
             }
         }
     }
@@ -502,42 +512,42 @@ public class ScrobblingService : IScrobblingService
 
     public Task ScrobbleSeriesRatingUpdate(int userId, int seriesId, float rating, CancellationToken ct = default)
     {
-        return ScrobbleRatingUpdate(null, userId, seriesId, null, rating, ct);
+        return ScrobbleRatingUpdate(null, userId, seriesId, null, rating, false, ct);
     }
 
     public Task ScrobbleChapterRatingUpdate(int userId, int seriesId, int chapterId, float rating, CancellationToken ct = default)
     {
-        return ScrobbleRatingUpdate(null, userId, seriesId, chapterId, rating, ct);
+        return ScrobbleRatingUpdate(null, userId, seriesId, chapterId, rating, false, ct);
     }
 
-    private async Task ScrobbleRatingUpdate(List<ScrobbleProvider>? scrobbleProviders, int userId, int seriesId, int? chapterId, float rating, CancellationToken ct = default)
+    private async Task ScrobbleRatingUpdate(List<ScrobbleProvider>? scrobbleProviders, int userId, int seriesId, int? chapterId, float rating, bool isBackfill, CancellationToken ct = default)
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
+        var ctx = await CreateScrobbleUpdateContext(userId, seriesId, chapterId, isBackfill, ct);
 
-        var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ScoreUpdated, user, series);
+        var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ScoreUpdated, ctx);
         if (providers.Count == 0)
         {
             _logger.LogDebug("Ignoring scrobble rating update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
             return;
         }
 
-        _logger.LogInformation("Processing Scrobbling rating event for {AppUserId} on {SeriesName}", userId, series.Name);
+        _logger.LogInformation("Processing Scrobbling rating event for {AppUserId} on {SeriesName}", userId, ctx.Series.Name);
 
         foreach (var provider in providers)
         {
-            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ScoreUpdated, userId, seriesId, series)) continue;
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ScoreUpdated, userId, seriesId, ctx.Series)) continue;
 
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
             try
             {
-                await scrobbleProviderService.ScrobbleRatingUpdate(user, series, chapter, rating, ct);
+                await scrobbleProviderService.ScrobbleRatingUpdate(ctx, rating, ct);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error happened while trying to scrobble an rating event for {UserId} - {Provider}", user.Id, provider);
+                _logger.LogError(ex, "An error happened while trying to scrobble an rating event for {UserId} - {Provider}", ctx.User.Id, provider);
             }
         }
     }
@@ -546,45 +556,49 @@ public class ScrobblingService : IScrobblingService
 
     #region Reading
 
-    public async Task ScrobbleReadingUpdate(int userId, int seriesId, int chapterId, CancellationToken ct = default)
+    public Task ScrobbleReadingUpdate(int userId, int seriesId, int chapterId, CancellationToken ct = default)
+    {
+        return ScrobbleReadingUpdate(userId, seriesId, chapterId, false, ct);
+    }
+
+    private async Task ScrobbleReadingUpdate(int userId, int seriesId, int chapterId, bool isBackfill, CancellationToken ct = default)
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var (user, series, chapter) = await LoadScrobbleEventData(userId, seriesId, chapterId, ct);
+        var ctx = await CreateScrobbleUpdateContext(userId, seriesId, chapterId, isBackfill, ct);
 
-        var providers = GetProvidersForScrobbleEvent(null, ScrobbleEventType.ChapterRead, user, series);
+        var providers = GetProvidersForScrobbleEvent(null, ScrobbleEventType.ChapterRead, ctx);
         if (providers.Count == 0)
         {
             _logger.LogDebug("Ignoring scrobble reading update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
             return;
         }
 
-        _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
+        _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, ctx.Series.Name);
 
         foreach (var provider in providers)
         {
-            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ChapterRead, userId, seriesId, series)) continue;
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ChapterRead, userId, seriesId, ctx.Series)) continue;
 
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
             try
             {
-                // We know chapter isn't null because chapterId isn't null
-                await scrobbleProviderService.ScrobbleReadingUpdate(user, series, chapter!, ct);
+                await scrobbleProviderService.ScrobbleReadingUpdate(ctx, ct);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error happened while trying to scrobble an reading event for {UserId} - {Provider}", user.Id, provider);
+                _logger.LogError(ex, "An error happened while trying to scrobble an reading event for {UserId} - {Provider}", ctx.User.Id, provider);
             }
         }
     }
 
     public Task ScrobbleReadingUpdateForSeries(int userId, int seriesId, CancellationToken ct = default)
     {
-        return ScrobbleReadingUpdateForSeries(null, userId, seriesId, ct);
+        return ScrobbleReadingUpdateForSeries(null, userId, seriesId, false, ct);
     }
 
-    private async Task ScrobbleReadingUpdateForSeries(List<ScrobbleProvider>? providers, int userId, int seriesId, CancellationToken ct = default)
+    private async Task ScrobbleReadingUpdateForSeries(List<ScrobbleProvider>? providers, int userId, int seriesId, bool isBackfill, CancellationToken ct = default)
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
@@ -596,7 +610,7 @@ public class ScrobblingService : IScrobblingService
 
         var allChapters = series.Volumes.SelectMany(v => v.Chapters).ToList();
 
-        await ScrobbleReadingUpdatesForChaptersSmart(providers, user, series, allChapters, ct);
+        await ScrobbleReadingUpdatesForChaptersSmart(providers, user, series, allChapters, isBackfill, ct);
     }
 
     public async Task ScrobbleReadingUpdateForVolume(int userId, int volumeId, CancellationToken ct = default)
@@ -614,7 +628,7 @@ public class ScrobblingService : IScrobblingService
 
         var allChapters = volume.Chapters.ToList();
 
-        await ScrobbleReadingUpdatesForChaptersSmart(null, user, series, allChapters, ct);
+        await ScrobbleReadingUpdatesForChaptersSmart(null, user, series, allChapters, false, ct);
     }
 
     public async Task ScrobbleReadingUpdateForChapters(int userId, int seriesId, List<int> chapterIds, CancellationToken ct = default)
@@ -631,12 +645,25 @@ public class ScrobblingService : IScrobblingService
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ct: ct);
 
-        await ScrobbleReadingUpdatesForChaptersSmart(null, user, series, chapters.ToList(), ct);
+        await ScrobbleReadingUpdatesForChaptersSmart(null, user, series, chapters.ToList(), false, ct);
     }
 
-    private async Task ScrobbleReadingUpdatesForChaptersSmart(List<ScrobbleProvider>? scrobbleProviders, AppUser user, Series series, List<Chapter> chapters, CancellationToken ct = default)
+    private async Task ScrobbleReadingUpdatesForChaptersSmart(
+        List<ScrobbleProvider>? scrobbleProviders,
+        AppUser user,
+        Series series,
+        List<Chapter> chapters,
+        bool isBackfill,
+        CancellationToken ct = default)
     {
-        var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ChapterRead, user, series);
+        var ctx = new ScrobbleUpdateContext
+        {
+            User = user,
+            Series = series,
+            IsBackfill = isBackfill
+        };
+
+        var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ChapterRead, ctx);
         if (providers.Count == 0)
         {
             _logger.LogDebug("Ignoring scrobble reading update on {SeriesId} - {ChapterId}, no providers matched", series.Id, chapters.Select(c => c.Id));
@@ -656,14 +683,16 @@ public class ScrobblingService : IScrobblingService
                 var firstChapter = chapters.FirstOrDefault();
                 if (firstChapter != null)
                 {
-                    await scrobbleProviderService.ScrobbleReadingUpdate(user, series, firstChapter, ct);
+                    ctx.Chapter = firstChapter;
+                    await scrobbleProviderService.ScrobbleReadingUpdate(ctx, ct);
                 }
             }
             else
             {
                 foreach (var chapter in chapters)
                 {
-                    await scrobbleProviderService.ScrobbleReadingUpdate(user, series, chapter, ct);
+                    ctx.Chapter = chapter;
+                    await scrobbleProviderService.ScrobbleReadingUpdate(ctx, ct);
                 }
             }
         }
@@ -671,13 +700,12 @@ public class ScrobblingService : IScrobblingService
 
     #endregion
 
-    public Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead,
-        CancellationToken ct = default)
+    public Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead, CancellationToken ct = default)
     {
-        return ScrobbleWantToReadUpdate(null, userId, seriesId, onWantToRead, ct);
+        return ScrobbleWantToReadUpdate(null, userId, seriesId, onWantToRead, false, ct);
     }
 
-    private async Task ScrobbleWantToReadUpdate(List<ScrobbleProvider>? scrobbleProviders, int userId, int seriesId, bool onWantToRead, CancellationToken ct = default)
+    private async Task ScrobbleWantToReadUpdate(List<ScrobbleProvider>? scrobbleProviders, int userId, int seriesId, bool onWantToRead, bool isBackFill, CancellationToken ct = default)
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
@@ -687,9 +715,17 @@ public class ScrobblingService : IScrobblingService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ScrobbleSeriesIncludes | SeriesIncludes.Chapters, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
+        var ctx = new ScrobbleUpdateContext
+        {
+            User = user,
+            Series = series,
+            Chapter = null,
+            IsBackfill = isBackFill
+        };
+
         var eventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead;
 
-        var providers = GetProvidersForScrobbleEvent(scrobbleProviders, eventType, user, series);
+        var providers = GetProvidersForScrobbleEvent(scrobbleProviders, eventType, ctx);
         if (providers.Count == 0)
         {
             _logger.LogDebug("Ignoring scrobble want to read update on {SeriesId} - {ChapterId}, no providers matched", seriesId, onWantToRead);
@@ -714,13 +750,15 @@ public class ScrobblingService : IScrobblingService
                 // As WantToRead updates are always at a series level, we split here to avoid DB calls
                 if (scrobbleProviderService is ISeriesScrobbleService)
                 {
-                    await scrobbleProviderService.ScrobbleWantToReadUpdate(user, series, firstChapter, onWantToRead, ct);
+                    ctx.Chapter = firstChapter;
+                    await scrobbleProviderService.ScrobbleWantToReadUpdate(ctx, onWantToRead, ct);
                 }
                 else
                 {
                     foreach (var chapter in allChapters)
                     {
-                        await scrobbleProviderService.ScrobbleWantToReadUpdate(user, series, chapter, onWantToRead, ct);
+                        ctx.Chapter = chapter;
+                        await scrobbleProviderService.ScrobbleWantToReadUpdate(ctx, onWantToRead, ct);
                     }
                 }
             }
@@ -955,12 +993,16 @@ public class ScrobblingService : IScrobblingService
 
                     foreach (var series in onHoldSeries)
                     {
-                        await scrobbleProviderService.ScrobbleReadStatusUpdates(user, series, null, onHoldStatus, ct);
+                        var ctx = new ScrobbleUpdateContext { User = user, Series = series };
+
+                        await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, onHoldStatus, ct);
                     }
 
                     foreach (var series in droppedSeries)
                     {
-                        await scrobbleProviderService.ScrobbleReadStatusUpdates(user, series, null, droppedStatus, ct);
+                        var ctx = new ScrobbleUpdateContext { User = user, Series = series };
+
+                        await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, droppedStatus, ct);
                     }
 
                     continue;
@@ -976,12 +1018,16 @@ public class ScrobblingService : IScrobblingService
 
                 foreach (var chapter in onHoldChapters)
                 {
-                    await scrobbleProviderService.ScrobbleReadStatusUpdates(user, chapter.Volume.Series, chapter, onHoldStatus, ct);
+                    var ctx = new ScrobbleUpdateContext { User = user, Series = chapter.Volume.Series, Chapter = chapter};
+
+                    await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, onHoldStatus, ct);
                 }
 
                 foreach (var chapter in droppedChapters)
                 {
-                    await scrobbleProviderService.ScrobbleReadStatusUpdates(user, chapter.Volume.Series, chapter, droppedStatus, ct);
+                    var ctx = new ScrobbleUpdateContext { User = user, Series = chapter.Volume.Series, Chapter = chapter };
+
+                    await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, droppedStatus, ct);
                 }
             }
         }
@@ -1263,7 +1309,11 @@ public class ScrobblingService : IScrobblingService
     /// <param name="ct"></param>
     private async Task ProcessEvents(IEnumerable<ScrobbleEvent> events, ScrobbleSyncContext ctx, Func<ScrobbleEvent, Task<ScrobbleV3Dto>> createEvent, CancellationToken ct)
     {
-        var eventList = events.ToList();
+        // Process backfill events last
+        var eventList = events
+            .OrderBy(evt => evt.IsBackFill)
+            .ToList();
+
         if (eventList.Count == 0) return;
 
         foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
@@ -1581,28 +1631,28 @@ public class ScrobblingService : IScrobblingService
         _logger.LogTrace("Found {Count} wantToRead entries for user {UserId}", wantToRead.Count, userId);
         foreach (var wtr in wantToRead)
         {
-            await ScrobbleWantToReadUpdate(providers, userId, wtr.Id, true, ct);
+            await ScrobbleWantToReadUpdate(providers, userId, wtr.Id, true, true, ct);
         }
 
         var ratings = (await _unitOfWork.UserRepository.GetSeriesWithRatings(userId, ct)).ToList();
         _logger.LogTrace("Found {Count} series ratings entries for user {UserId}", ratings.Count, userId);
         foreach (var rating in ratings)
         {
-            await ScrobbleRatingUpdate(providers, userId, rating.SeriesId, null, rating.Rating, ct);
+            await ScrobbleRatingUpdate(providers, userId, rating.SeriesId, null, rating.Rating, true, ct);
         }
 
         var chapterRatings = await _unitOfWork.UserRepository.GetChaptersWithRatings(userId, ct);
         _logger.LogTrace("Found {Count} chapter ratings entries for user {UserId}", chapterRatings.Count, userId);
         foreach (var chapterRating in chapterRatings)
         {
-            await ScrobbleRatingUpdate(providers, userId, chapterRating.SeriesId, chapterRating.ChapterId, chapterRating.Rating, ct);
+            await ScrobbleRatingUpdate(providers, userId, chapterRating.SeriesId, chapterRating.ChapterId, chapterRating.Rating, true, ct);
         }
 
         var reviews = (await _unitOfWork.UserRepository.GetSeriesWithReviews(userId, ct)).ToList();
         _logger.LogTrace("Found {Count} series reviews entries for user {UserId}", reviews.Count, userId);
         foreach (var review in reviews)
         {
-            await ScrobbleReviewUpdate(providers, userId, review.SeriesId, null, string.Empty, review.Review!, ct);
+            await ScrobbleReviewUpdate(providers, userId, review.SeriesId, null, string.Empty, review.Review!, true, ct);
         }
 
         var chapterReviews = await _unitOfWork.UserRepository.GetChaptersWithReviews(userId, ct);
@@ -1610,7 +1660,7 @@ public class ScrobblingService : IScrobblingService
         foreach (var chapterReview in chapterReviews)
         {
             await ScrobbleReviewUpdate(providers, userId, chapterReview.SeriesId, chapterReview.ChapterId, string.Empty,
-                chapterReview.Review!, ct);
+                chapterReview.Review!, true, ct);
         }
 
         var filter = new SeriesFilterV2Dto
@@ -1633,7 +1683,7 @@ public class ScrobblingService : IScrobblingService
         _logger.LogTrace("Found {Count} series with progress entries for user {UserId}", seriesWithProgress.Count, userId);
         foreach (var series in seriesWithProgress.Where(series => series.PagesRead > 0))
         {
-            await ScrobbleReadingUpdateForSeries(providers, userId, series.Id, ct);
+            await ScrobbleReadingUpdateForSeries(providers, userId, series.Id, true, ct);
         }
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
