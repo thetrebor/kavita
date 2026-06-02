@@ -17,7 +17,7 @@ import {
 import {ScrobblingService} from "../../../_services/scrobbling.service";
 import {LicenseApiStatsComponent} from "../license-api-stats/license-api-stats.component";
 import {ExpiredLicenseApiStatsComponent} from "../expired-license-api-stats/expired-license-api-stats.component";
-import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provider-settings";
+import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 import {KavitaPlusSubscriptionState} from "../../../_models/kavitaplus/license-info";
 
 @Component({

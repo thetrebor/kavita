@@ -10,11 +10,9 @@ import {PaginatedResult} from "../_models/pagination";
 import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
 import {UtilityService} from "../shared/_services/utility.service";
 import {KavitaPlusAuditEntry} from "../_models/kavitaplus/kavita-plus-audit-entry";
-import {
-  ScrobbleProviderSettings,
-  UpdateScrobbleProviderDto,
-  UserScrobbleProvider,
-} from "../_models/kavitaplus/scrobble-provider-settings";
+import {ScrobbleProviderSettings} from "../_models/kavitaplus/scrobble-providers/scrobble-provider-settings";
+import {UpdateScrobbleProvider} from "../_models/kavitaplus/scrobble-providers/update-scrobble-provider";
+import {UserScrobbleProvider} from "../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 
 export enum ScrobbleProvider {
   Kavita = 0,
@@ -46,7 +44,7 @@ export class ScrobblingService {
     return this.httpClient.post(this.baseUrl + 'scrobbling/update-scrobble-settings?provider=' + provider, settings);
   }
 
-  saveUserScrobbleProvider(updateDto: UpdateScrobbleProviderDto) {
+  saveUserScrobbleProvider(updateDto: UpdateScrobbleProvider) {
     return this.httpClient.post(this.baseUrl + 'scrobbling/update-user-scrobble-provider', updateDto);
   }
 

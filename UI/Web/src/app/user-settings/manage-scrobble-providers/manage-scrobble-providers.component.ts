@@ -3,15 +3,17 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {filter, map, of, switchMap, tap} from "rxjs";
 import {AgeRating, AgeRatings} from "../../_models/metadata/age-rating";
+import {ReadStatusTransitionRule} from "../../_models/kavitaplus/scrobble-providers/read-status-transition-rule";
 import {
-  ReadStatusTransitionRule,
   ReviewScrobbleTarget,
-  ReviewScrobbleTargets,
-  ScrobbleProviderSettings,
+  ReviewScrobbleTargets
+} from "../../_models/kavitaplus/scrobble-providers/review-scrobble-target.enum";
+import {ScrobbleProviderSettings} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider-settings";
+import {
   ScrobbleReadStatus,
-  ScrobbleReadStatuses,
-  UserScrobbleProvider
-} from "../../_models/kavitaplus/scrobble-provider-settings";
+  ScrobbleReadStatuses
+} from "../../_models/kavitaplus/scrobble-providers/scrobble-read-status.enum";
+import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/publication-status";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged} from "rxjs/operators";
@@ -253,6 +255,10 @@ export class ManageScrobbleProvidersComponent implements OnInit {
       centered: true, fullscreen: "sm"
     });
     modal.setInput('userScrobbleProvider', userScrobbleProvider);
+  }
+
+  protected backfillEvents(provider: ScrobbleProvider) {
+    
   }
 
   protected readonly ProviderSupportedEvents = ProviderSupportedEvents;

@@ -7,7 +7,7 @@ import {
 import {ScrobblingService} from "../../../_services/scrobbling.service";
 import {BannerComponent} from "../../../shared/_components/banner/banner.component";
 import {ToastrService} from "ngx-toastr";
-import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provider-settings";
+import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 import {tap} from "rxjs";
 
 @Component({

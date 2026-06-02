@@ -16,7 +16,7 @@ import {KavitaPlusEventType} from "../../_models/kavitaplus/kavita-plus-event-ty
 import {Tabs} from "../../_models/tabs";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Pagination} from '../../_models/pagination';
-import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-provider-settings";
+import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 
 @Component({
   selector: 'app-kavitaplus-activity',

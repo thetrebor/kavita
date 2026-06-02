@@ -28,10 +28,13 @@
 
           @if (userScrobbleProvider.authenticationToken) {
             <div accCta class="d-flex gap-2">
-              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="connectScrobbleProvider(provider)" [title]="t('regenerate')" [attr.aria-label]="t('regenerate')">
+              <button type="button" class="btn btn-outline-secondary btn-sm phone-hidden" (click)="backfillEvents(provider)" [title]="t('backfill')">
                 <i class="fa-solid fa-rotate-right"></i><span class="d-none d-sm-inline ms-1">{{ t('regenerate') }}</span>
               </button>
-              <button type="button" class="btn btn-outline-danger btn-sm" (click)="disconnectScrobbleProvider(provider)" [title]="t('disconnect')" [attr.aria-label]="t('disconnect')">
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="connectScrobbleProvider(provider)" [title]="t('regenerate')">
+                <i class="fa-solid fa-rotate-right"></i><span class="d-none d-sm-inline ms-1">{{ t('regenerate') }}</span>
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-sm" (click)="disconnectScrobbleProvider(provider)" [title]="t('disconnect')">
                 <i class="fa-solid fa-plug-circle-xmark"></i><span class="d-none d-sm-inline ms-1">{{ t('disconnect') }}</span>
               </button>
             </div>

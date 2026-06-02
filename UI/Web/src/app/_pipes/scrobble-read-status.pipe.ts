@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {ScrobbleReadStatus} from "../_models/kavitaplus/scrobble-provider-settings";
+import {ScrobbleReadStatus} from "../_models/kavitaplus/scrobble-providers/scrobble-read-status.enum";
 import {translate} from "@jsverse/transloco";
 
 @Pipe({

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit} from '@angular/core';
-import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provider-settings";
+import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";

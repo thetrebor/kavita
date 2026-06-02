@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {ReviewScrobbleTarget} from "../_models/kavitaplus/scrobble-provider-settings";
+import {ReviewScrobbleTarget} from "../_models/kavitaplus/scrobble-providers/review-scrobble-target.enum";
 import {translate} from "@jsverse/transloco";
 
 @Pipe({

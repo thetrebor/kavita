@@ -7,7 +7,7 @@ import {SettingsTabId} from '../../sidenav/preference-nav/preference-nav.compone
 import {
   ScrobbleProviderImageComponent
 } from '../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
-import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-provider-settings";
+import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 
 @Component({
   selector: 'app-scrobble-account-card',
