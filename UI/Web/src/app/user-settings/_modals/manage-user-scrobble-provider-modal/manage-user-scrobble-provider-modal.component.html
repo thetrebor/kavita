@@ -21,7 +21,7 @@
           <dt class="text-muted small">{{t('last-synced-label')}}</dt>
           @let lastSyncedUtc = userScrobbleProvider().lastSyncedUtc | utcToLocalTime;
           @if (lastSyncedUtc) {
-            <dd [ngbTooltip]="lastSyncedUtc">{{ userScrobbleProvider().lastSyncedUtc | utcToLocalDate | timeAgo }}</dd>
+            <dd [ngbTooltip]="lastSyncedUtc">{{ userScrobbleProvider().lastSyncedUtc | utcToLocalDate | timeDifference }}</dd>
           } @else {
             <dd>{{t('not-synced')}}</dd>
           }
@@ -32,7 +32,7 @@
           <dt class="text-muted small">{{t('event-generation-label')}}</dt>
           @let scrobbleEventGenerationRan = userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalTime;
           @if (scrobbleEventGenerationRan) {
-            <dd [ngbTooltip]="scrobbleEventGenerationRan">{{ userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalDate | timeAgo }}</dd>
+            <dd [ngbTooltip]="scrobbleEventGenerationRan">{{ userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalDate | timeDifference }}</dd>
           } @else {
             <dd>{{t('event-generation-not-run')}}</dd>
           }

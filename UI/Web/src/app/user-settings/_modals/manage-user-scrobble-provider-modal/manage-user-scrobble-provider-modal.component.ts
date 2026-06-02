@@ -9,7 +9,6 @@ import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
-import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {ToastrService} from "ngx-toastr";
 import {
@@ -28,7 +27,6 @@ import {ConfirmService} from "../../../shared/confirm.service";
     ScrobbleProviderNamePipe,
     TruncatePipe,
     UtcToLocalTimePipe,
-    TimeAgoPipe,
     UtcToLocalDatePipe,
     ScrobbleProviderImageComponent,
     NgbTooltip,
