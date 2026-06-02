@@ -148,6 +148,12 @@ public class ScrobblingService : IScrobblingService
     private const string ReviewFailedErrorMessage = "Review was unable to be saved due to upstream requirements";
     private const string BadPayLoadErrorMessage = "Bad payload from Scrobble Provider";
 
+    /// <summary>
+    /// Everything but Kavita (internal)
+    /// </summary>
+    private static readonly List<ScrobbleProvider> AllScrobbleProviders =
+        Enum.GetValues<ScrobbleProvider>().Where(k => k == ScrobbleProvider.Kavita).ToList();
+
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
         ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService,
@@ -176,7 +182,7 @@ public class ScrobblingService : IScrobblingService
             .Select(s => _mapper.Map<ScrobbleProviderDto>(s))
             .ToList();
 
-        var missingProviders = Enum.GetValues<ScrobbleProvider>()
+        var missingProviders = AllScrobbleProviders
             .Where(p => AllProviders.Contains(p) && !user.ScrobbleProviders.ContainsKey(p) )
             .ToList();
 
@@ -380,7 +386,7 @@ public class ScrobblingService : IScrobblingService
 
         List<ScrobbleProvider> providers = [];
 
-        foreach (var provider in Enum.GetValues<ScrobbleProvider>())
+        foreach (var provider in AllScrobbleProviders)
         {
             if (!user.ScrobbleProviders.TryGetValue(provider, out var scrobbleProvider)
                 || string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken))
@@ -412,8 +418,8 @@ public class ScrobblingService : IScrobblingService
                 continue;
             }
 
-            // If the user has no libraries, then we assume all libraries are allowed, otherwise do an explicit check
-            if (settings.Libraries.Count > 0 && !settings.AllLibraries && !settings.Libraries.Contains(series.LibraryId))
+
+            if (!settings.AllLibraries && !settings.Libraries.Contains(series.LibraryId))
             {
                 _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} because the series's library ({LibraryId}) is not in the list of libraries to scrobble",
                     provider, user.Id, eventType, series.Id, series.LibraryId);
