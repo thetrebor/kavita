@@ -3,7 +3,7 @@ using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Scrobble;
 
-public class ScrobbleProviderDto
+public sealed record ScrobbleProviderDto
 {
     public ScrobbleProvider Provider { get; set; }
 

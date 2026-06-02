@@ -187,6 +187,11 @@ public class ScrobblingService : IScrobblingService
         {
             Provider = p,
             Settings = new ScrobbleProviderSettingsDto()
+            {
+                ProgressScrobbling = true,
+                RatingScrobbling = true,
+                WantToReadSync = true
+            }
         })).ToList();
 
     }

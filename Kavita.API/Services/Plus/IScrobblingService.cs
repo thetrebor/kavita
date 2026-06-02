@@ -43,7 +43,7 @@ public interface IScrobblingService
     /// Create, or update a non-processed, <see cref="ScrobbleEventType.ScoreUpdated"/> event, for the given series
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="seriesId"></param> </param>
+    /// <param name="seriesId"></param>
     /// <param name="rating"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
