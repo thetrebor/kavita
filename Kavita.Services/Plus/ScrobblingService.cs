@@ -173,15 +173,15 @@ public class ScrobblingService : IScrobblingService
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
 
-    public async Task<List<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default)
+    public async Task<List<UserTokenInfoDto>> GetUserTokenInfo(CancellationToken ct = default)
     {
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
 
-        return users.Select(user => new UserTokenInfo
+        return users.Select(user => new UserTokenInfoDto
         {
             UserId = user.Id,
             Username = user.UserName ?? string.Empty,
-            Tokens = user.ScrobbleProviders.Select(kv => new TokenValidityInfo
+            Tokens = user.ScrobbleProviders.Select(kv => new TokenValidityInfoDto
             {
                 Provider = kv.Key,
                 ValidUntilUtc = kv.Value.ValidUntilUtc,

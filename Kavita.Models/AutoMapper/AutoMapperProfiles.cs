@@ -12,6 +12,7 @@ using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Device.EmailDevice;
 using Kavita.Models.DTOs.Email;
 using Kavita.Models.DTOs.Font;
+using Kavita.Models.DTOs.KavitaPlus.Account;
 using Kavita.Models.DTOs.KavitaPlus.Manage;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
@@ -414,11 +415,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserAuthKey, AuthKeyDto>();
         CreateMap<AppUserScrobbleProvider, ScrobbleProviderDto>();
 
-
-        #region Deprecated Code
-
-
-        #endregion
 
     }
 }

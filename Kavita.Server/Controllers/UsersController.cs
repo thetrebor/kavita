@@ -205,7 +205,7 @@ public class UsersController(
     [KPlus]
     [HttpGet("tokens")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
+    public async Task<ActionResult<IEnumerable<UserTokenInfoDto>>> GetUserTokens()
     {
         return Ok(await scrobblingService.GetUserTokenInfo());
     }

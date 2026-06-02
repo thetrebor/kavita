@@ -356,6 +356,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ToListAsync(ct);
     }
 
+
     public async Task<string> GetLocale(int userId, CancellationToken ct = default)
     {
         return await context.AppUserPreferences.Where(p => p.AppUserId == userId)

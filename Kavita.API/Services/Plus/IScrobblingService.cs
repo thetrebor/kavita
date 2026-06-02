@@ -16,7 +16,7 @@ namespace Kavita.API.Services.Plus;
 
 public interface IScrobblingService
 {
-    Task<List<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default);
+    Task<List<UserTokenInfoDto>> GetUserTokenInfo(CancellationToken ct = default);
 
     /// <summary>
     /// An automated job that will run against all user's tokens and validate if they are still active
