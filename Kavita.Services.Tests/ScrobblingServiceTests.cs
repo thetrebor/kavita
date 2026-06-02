@@ -305,11 +305,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
 
-        // Ensure CanProcessScrobbleEvent returns true
-        user.AniListAccessToken = ValidJwtToken;
-        unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
-
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(4);
         Assert.NotNull(chapter);
 
@@ -335,11 +330,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
-
-        // Ensure CanProcessScrobbleEvent returns true
-        user.AniListAccessToken = ValidJwtToken;
-        unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
 
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(4);
         Assert.NotNull(chapter);
@@ -806,11 +796,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         licenseService.HasActiveLicense().Returns(true);
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
-        Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
-        await unitOfWork.CommitAsync();
-
         context.AppUserRating.Add(new AppUserRating
         {
             AppUserId = 1,
@@ -841,8 +826,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
-        await unitOfWork.CommitAsync();
 
         var chapter1 = await unitOfWork.ChapterRepository.GetChapterAsync(1);
         Assert.NotNull(chapter1);
@@ -873,7 +856,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.WantToRead);
         Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
         user.WantToRead.Add(new AppUserWantToRead { SeriesId = 1 });
         await unitOfWork.CommitAsync();
 

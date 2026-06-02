@@ -109,7 +109,12 @@ public class WantToReadSyncService(
                 KavitaPlusEventType.SyncCompleted,
                 AuditStatus.Success,
                 userId: user.Id,
-                payload: new AuditLogWantToReadSyncCompletedParamsDto { UserName = user.UserName, SeriesMatched = user.WantToRead.Count, HasMal = !string.IsNullOrEmpty(user.MalUserName), HasAniList = !string.IsNullOrEmpty(user.AniListAccessToken) },
+                payload: new AuditLogWantToReadSyncCompletedParamsDto
+                {
+                    UserName = user.UserName,
+                    SeriesMatched = user.WantToRead.Count,
+                    Providers = userScrobbleProviders.Select(kv => kv.Key).ToList()
+                },
                 ct: ct);
 
             RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);
