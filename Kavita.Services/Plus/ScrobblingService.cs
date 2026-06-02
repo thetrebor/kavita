@@ -1290,6 +1290,7 @@ public class ScrobblingService : IScrobblingService
 
             if (!ctx.RateLimits[evt.AppUserId].TryGetValue(evt.ScrobbleProvider, out var rateLimit) || rateLimit == 0)
             {
+                // TODO: This isn't recording the original payload, so we don't know exactly what the rating/etc were
                 _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded, provider: {Provider}", evt.ScrobbleProvider);
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
                     new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
