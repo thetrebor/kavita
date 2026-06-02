@@ -151,6 +151,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var user = new AppUserBuilder("testuser", "testuser")
             .Build();
 
+        AccountService.AddScrobbleProvidersToUser(user);
+
         user.ScrobbleProviders[ScrobbleProvider.AniList] = new AppUserScrobbleProvider
         {
             AuthenticationToken = ValidJwtToken,

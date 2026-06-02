@@ -151,7 +151,7 @@ public class ScrobblingService : IScrobblingService
     /// <summary>
     /// Everything but Kavita (internal)
     /// </summary>
-    private static readonly List<ScrobbleProvider> AllScrobbleProviders =
+    public static readonly List<ScrobbleProvider> AllScrobbleProviders =
         Enum.GetValues<ScrobbleProvider>().Where(k => k != ScrobbleProvider.Kavita).ToList();
 
 
