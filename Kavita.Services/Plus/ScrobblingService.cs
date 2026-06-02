@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -27,8 +26,6 @@ using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
-using Kavita.Models.Extensions;
-using Kavita.Services.Helpers;
 using Kavita.Services.Plus.ScrobbleService;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
@@ -190,7 +187,8 @@ public class ScrobblingService : IScrobblingService
             {
                 ProgressScrobbling = true,
                 RatingScrobbling = true,
-                WantToReadSync = true
+                WantToReadSync = true,
+                AllLibraries = true
             }
         })).ToList();
 
@@ -414,7 +412,8 @@ public class ScrobblingService : IScrobblingService
                 continue;
             }
 
-            if (!settings.AllLibraries && !settings.Libraries.Contains(series.LibraryId))
+            // If the user has no libraries, then we assume all libraries are allowed, otherwise do an explicit check
+            if (settings.Libraries.Count > 0 && !settings.AllLibraries && !settings.Libraries.Contains(series.LibraryId))
             {
                 _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} because the series's library ({LibraryId}) is not in the list of libraries to scrobble",
                     provider, user.Id, eventType, series.Id, series.LibraryId);
@@ -740,7 +739,13 @@ public class ScrobblingService : IScrobblingService
     private async Task<bool> CheckIfCannotScrobble(ScrobbleProvider provider, ScrobbleEventType eventType, int userId, int seriesId, Series series)
     {
         // TODO: This needs updating to take the provider into account (Dict?)
-        if (series.DontMatch) return true;
+        if (series.DontMatch)
+        {
+            _logger.LogInformation("Series {SeriesName} is marked don't match. Not scrobbling", series.Name);
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
+                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "series-dont-match", userId);
+            return true;
+        }
 
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
@@ -1538,12 +1543,6 @@ public class ScrobblingService : IScrobblingService
         {
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
             if (user == null) return;
-            if (!user.ScrobbleProviders.TryGetValue(scrobbleProvider, out var scrobbleProviderSettings)
-                || string.IsNullOrEmpty(scrobbleProviderSettings.AuthenticationToken))
-            {
-                _logger.LogWarning("User {UserName} has already run scrobble event generation for {Provider}, Kavita will not generate more events", user.UserName, scrobbleProvider);
-                return;
-            }
         }
 
         var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct))
