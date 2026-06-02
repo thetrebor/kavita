@@ -107,7 +107,6 @@ import {
     ManageRemapRulesComponent,
     KavitaplusActivityComponent,
     ManageKavitaplusActivityComponent,
-    ManageRemapRulesComponent,
     ManageScrobbleProvidersComponent
   ],
   templateUrl: './settings.component.html',

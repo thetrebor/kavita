@@ -29,7 +29,7 @@ export class UserScrobbleProvider {
       return false;
     }
 
-    return this.authenticationToken !== '';
+    return (this.authenticationToken ?? '') !== '';
   }
 
 

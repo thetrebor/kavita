@@ -21,7 +21,6 @@ export class EntityTitleService {
    */
   scrobbleDetailLabel(details: KavitaPlusScrobbleDetails): string {
     if (details.scrobbleEventType === ScrobbleEventType.ChapterRead) {
-      console.log(details)
       const parts: string[] = [];
       if (details.volumeNumber != null && details.volumeNumber !== LooseLeafOrDefaultNumber && details.volumeNumber !== SpecialVolumeNumber) {
         parts.push(this.translocoService.translate('common.volume-num-shorthand', {num: details.volumeNumber}));
@@ -30,7 +29,7 @@ export class EntityTitleService {
         parts.push(this.translocoService.translate(this.chapterKey(details.libraryType), {num: details.chapterNumber}));
       }
       if (details.percentRead != null) {
-        parts.push((parts.length > 0 ? ' - ' : '') +  `${details.percentRead}%`);
+        parts.push((parts.length > 0 ? ' - ' : '') + `${details.percentRead}%`);
       }
 
       return parts.join(' ');

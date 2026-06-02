@@ -52,7 +52,7 @@ public class ManualMigrationScrobbleRework: ManualMigration
             {
                 Provider = ScrobbleProvider.Mal,
                 AuthenticationToken = user.MalAccessToken,
-                UserName = user.MalAccessToken,
+                UserName = user.MalUserName,
                 Settings = new ScrobbleProviderSettingsDto() {
                     WantToReadSync = user.UserPreferences.WantToReadSync,
                     Libraries = librariesWithScrobbleEnables

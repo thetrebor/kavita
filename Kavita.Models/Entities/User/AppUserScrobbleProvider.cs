@@ -12,12 +12,12 @@ public class AppUserScrobbleProvider
     /// <summary>
     /// Username on the provider's platform
     /// </summary>
-    public string UserName { get; set; }
+    public string UserName { get; set; } = string.Empty;
 
     /// <summary>
     /// Authentication Token for the provider
     /// </summary>
-    public string AuthenticationToken { get; set; }
+    public string AuthenticationToken { get; set; } = string.Empty;
 
     /// <summary>
     /// Token valid until

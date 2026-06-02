@@ -24,7 +24,7 @@ public class ScrobbleEvent : IEntityDate
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
     public long? MangabakaId { get; set; }
-    /// <remarks>This **MUST** be the book id, not series id!</remarks>>
+    /// <remarks>This **MUST** be the book id, not series id!</remarks>
     public int? HardcoverId { get; set; }
 
     /// <summary>
