@@ -3,14 +3,13 @@ import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provide
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
-import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {ToastrService} from "ngx-toastr";
 import {
@@ -47,26 +46,8 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
 
   userScrobbleProvider = model.required<UserScrobbleProvider>();
 
-  generateTokenLink = computed<string | null>(() => {
-    switch (this.userScrobbleProvider().provider) {
-      case ScrobbleProvider.AniList:
-        return "https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token";
-      case ScrobbleProvider.Hardcover:
-        return "https://hardcover.app/account/api";
-      case ScrobbleProvider.MangaBaka:
-        return "https://mangabaka.org/my/settings/api-and-apps";
-    }
-
-    return null;
-  });
-
-  canGenerateEvents = computed(() => {
-    if (this.userScrobbleProvider().provider === ScrobbleProvider.Mal) {
-      return false;
-    }
-
-    return this.userScrobbleProvider().authenticationToken !== '';
-  });
+  generateTokenLink = computed<string | null>(() => this.userScrobbleProvider().generateTokenLink);
+  canGenerateEvents = computed(() => this.userScrobbleProvider().canGenerateEvents);
 
   formGroup!: FormGroup<{
     userName: FormControl<string>,

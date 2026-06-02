@@ -2539,7 +2539,8 @@
         "inactive-series-rule-excluded-publication-aria": "Excluded publication statuses for inactive series rule",
         "dropped-series-rule-days-aria": "Dropped series threshold in days",
         "dropped-series-rule-status-aria": "Dropped series transition status",
-        "dropped-series-rule-excluded-publication-aria": "Excluded publication statuses for dropped series rule"
+        "dropped-series-rule-excluded-publication-aria": "Excluded publication statuses for dropped series rule",
+        "backfill-events": "{{manage-user-scrobble-provider-modal.generate-scrobble-events}}"
     },
 
     "manage-user-scrobble-provider-modal": {

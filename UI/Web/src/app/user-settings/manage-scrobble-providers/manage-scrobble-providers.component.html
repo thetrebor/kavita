@@ -28,19 +28,19 @@
 
           @if (userScrobbleProvider.authenticationToken) {
             <div accCta class="d-flex gap-2">
-              <button type="button" class="btn btn-outline-secondary btn-sm phone-hidden" (click)="backfillEvents(provider)" [title]="t('backfill')">
-                <i class="fa-solid fa-rotate-right"></i><span class="d-none d-sm-inline ms-1">{{ t('regenerate') }}</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm phone-hidden" (click)="backfillEvents(provider)" [title]="t('backfill-events')">
+                <i class="fa-solid fa-calendar-check" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">{{ t('backfill-events') }}</span>
               </button>
               <button type="button" class="btn btn-outline-secondary btn-sm" (click)="connectScrobbleProvider(provider)" [title]="t('regenerate')">
-                <i class="fa-solid fa-rotate-right"></i><span class="d-none d-sm-inline ms-1">{{ t('regenerate') }}</span>
+                <i class="fa-solid fa-rotate-right" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">{{ t('regenerate') }}</span>
               </button>
               <button type="button" class="btn btn-outline-danger btn-sm" (click)="disconnectScrobbleProvider(provider)" [title]="t('disconnect')">
-                <i class="fa-solid fa-plug-circle-xmark"></i><span class="d-none d-sm-inline ms-1">{{ t('disconnect') }}</span>
+                <i class="fa-solid fa-plug-circle-xmark" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">{{ t('disconnect') }}</span>
               </button>
             </div>
           } @else {
-            <button accCta type="button" class="btn btn-outline-primary btn-sm" (click)="connectScrobbleProvider(provider)" [attr.aria-label]="t('connect')">
-              <i class="fa-solid fa-plug me-1"></i>{{ t('connect') }}
+            <button accCta type="button" class="btn btn-outline-primary btn-sm" (click)="connectScrobbleProvider(provider)">
+              <i class="fa-solid fa-plug me-1" aria-hidden="true"></i>{{ t('connect') }}
             </button>
           }
 

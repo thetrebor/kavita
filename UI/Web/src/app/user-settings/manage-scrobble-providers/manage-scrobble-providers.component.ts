@@ -48,6 +48,7 @@ import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
+import {ToastrService} from "ngx-toastr";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -123,6 +124,8 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
   private readonly messageHub = inject(MessageHubService);
+  private readonly scrobblingService = inject(ScrobblingService);
+  private readonly toastr = inject(ToastrService);
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
@@ -258,7 +261,9 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   }
 
   protected backfillEvents(provider: ScrobbleProvider) {
-    
+    this.scrobblingService.triggerScrobbleEventGeneration(provider).subscribe(_ => {
+      this.toastr.info(translate('toasts.scrobble-gen-init'));
+    });
   }
 
   protected readonly ProviderSupportedEvents = ProviderSupportedEvents;

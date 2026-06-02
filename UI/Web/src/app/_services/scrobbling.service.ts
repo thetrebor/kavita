@@ -37,7 +37,9 @@ export class ScrobblingService {
   }
 
   getScrobbleProviders() {
-    return this.httpClient.get<UserScrobbleProvider[]>(this.baseUrl + 'scrobbling/scrobble-settings');
+    return this.httpClient.get<UserScrobbleProvider[]>(this.baseUrl + 'scrobbling/scrobble-settings').pipe(
+      map(providers => providers.map(p => UserScrobbleProvider.From(p)))
+    );
   }
 
   saveScrobbleSettings(provider: ScrobbleProvider, settings: ScrobbleProviderSettings) {
