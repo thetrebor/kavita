@@ -265,7 +265,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   }
 
   protected async backfillEvents(provider: ScrobbleProvider) {
-    if (this.backfillAttempts.has(provider)) {
+    if (this.backfillAttempts.has(provider) && this.backfillAttempts.get(provider)! > 0) {
       // Alert the user they have already run this X times before
       if (!await this.confirmService.confirm(translate('toasts.confirm-rerun-backfill', {provider: this.scrobbleProviderNamePipe.transform(provider)}))) return;
     }

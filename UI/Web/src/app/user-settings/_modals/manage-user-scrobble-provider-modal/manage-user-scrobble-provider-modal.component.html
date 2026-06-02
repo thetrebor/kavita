@@ -31,7 +31,7 @@
         <dl>
           <dt class="text-muted small">{{t('event-generation-label')}}</dt>
           @let scrobbleEventGenerationRan = userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalTime;
-          @if (scrobbleEventGenerationRan) {
+          @if (scrobbleEventGenerationRan && scrobbleEventGenerationRan !== NULL_DATE) {
             <dd [ngbTooltip]="scrobbleEventGenerationRan">{{ userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalDate | timeDifference }}</dd>
           } @else {
             <dd>{{t('event-generation-not-run')}}</dd>

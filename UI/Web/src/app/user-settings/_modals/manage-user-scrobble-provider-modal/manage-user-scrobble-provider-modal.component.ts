@@ -16,6 +16,7 @@ import {
 } from "../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {ConfirmService} from "../../../shared/confirm.service";
+import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -86,4 +87,5 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
   }
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly NULL_DATE = NULL_DATE;
 }
