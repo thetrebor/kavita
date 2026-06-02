@@ -2499,7 +2499,7 @@
     },
 
     "scrobble-provider-settings-manager": {
-        "description": "Manage what, when, and where things are scrobbled to",
+        "description": "Manage what, when, and where things are scrobbled to. Scrobbling runs hourly.",
         "none-setup": "You do not have any scrobble providers setup yet! Click the add button above to start",
         "select-provider-title": "New Scrobble Provider",
         "info": "User Info",
@@ -2532,7 +2532,7 @@
         "dropped-series-rule-label": "Dropped series rule",
         "dropped-series-rule-condition": "If a series/chapter hasn't been read for",
         "all-libraries-label": "All libraries",
-        "all-libraries-tooltip": "If enabled, scrobble will run on all libraries. And the below selection does not take effect",
+        "all-libraries-tooltip": "When enabled, scrobbling runs on all applicable libraries. Disable to restrict it to specific libraries using the selection below.",
         "confirm-delete": "Are you sure want to disconnect {{provider}}",
         "inactive-series-rule-days-aria": "Inactive series threshold in days",
         "inactive-series-rule-status-aria": "Inactive series transition status",

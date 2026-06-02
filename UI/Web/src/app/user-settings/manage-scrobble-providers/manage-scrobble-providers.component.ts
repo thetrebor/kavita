@@ -49,6 +49,7 @@ import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {ToastrService} from "ngx-toastr";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -109,7 +110,8 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
     UtcToLocalDatePipe,
     TimeAgoPipe,
     NgbTooltip,
-    TimeDifferencePipe
+    TimeDifferencePipe,
+    DefaultValuePipe
   ],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',

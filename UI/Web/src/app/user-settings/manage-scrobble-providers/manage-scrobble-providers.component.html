@@ -57,7 +57,7 @@
                     <div class="d-flex flex-column flex-wrap gap-x-3 gap-y-1 small text-muted">
                        <span class="text-nowrap">
                         <i class="fa-regular fa-user me-1"></i>
-                        <span>{{ userScrobbleProvider.userName }}</span>
+                        <span>{{ userScrobbleProvider.userName | defaultValue }}</span>
                       </span>
                       <span class="text-nowrap">
                         <i class="fa-regular fa-clock me-1"></i>
@@ -186,6 +186,7 @@
                       [settings]="libraryTypeaheadSettings(provider)"
                       (selectedData)="updateLibrarySelection(provider, $event!)"
                       [disabled]="formGroup.get('allLibraries')?.value ?? false"
+
                     >
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}

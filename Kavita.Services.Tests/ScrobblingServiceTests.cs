@@ -149,7 +149,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         context.Library.Add(library);
 
         var user = new AppUserBuilder("testuser", "testuser")
-            //.WithPreferences(new UserPreferencesBuilder().WithAniListScrobblingEnabled(true).Build())
             .Build();
 
         user.ScrobbleProviders[ScrobbleProvider.AniList] = new AppUserScrobbleProvider
