@@ -132,9 +132,10 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   loading = computed(() => this.formGroups().size === 0);
 
   libraries = signal<Library[]>([]);
+  backfillAttempts: Map<ScrobbleProvider, number> = new Map();
 
-  private publicationStatusPipe = new PublicationStatusPipe();
-  private scrobbleProviderNamePipe = new ScrobbleProviderNamePipe();
+  private readonly publicationStatusPipe = new PublicationStatusPipe();
+  private readonly scrobbleProviderNamePipe = new ScrobbleProviderNamePipe();
 
   publicationStatusOptions: Select2Data = PublicationStatuses.map(p => ({
     value: p,
@@ -164,6 +165,9 @@ export class ManageScrobbleProvidersComponent implements OnInit {
           groups.set(p.provider, group);
 
           this.listenToChanges(p.provider, group);
+
+          // Build up backfill attempt map (we only keep track of if it ran, it's only important to tell the user it was run)
+          this.backfillAttempts.set(p.provider, p.hasRunScrobbleEventGeneration ? 1 : 0);
         }
 
         this.userScrobbleProviders.set(new Map(userScrobbleProviders.map(p => [p.provider, p])));
@@ -260,8 +264,14 @@ export class ManageScrobbleProvidersComponent implements OnInit {
     modal.setInput('userScrobbleProvider', userScrobbleProvider);
   }
 
-  protected backfillEvents(provider: ScrobbleProvider) {
+  protected async backfillEvents(provider: ScrobbleProvider) {
+    if (this.backfillAttempts.has(provider)) {
+      // Alert the user they have already run this X times before
+      if (!await this.confirmService.confirm(translate('toasts.confirm-rerun-backfill', {provider: this.scrobbleProviderNamePipe.transform(provider)}))) return;
+    }
+
     this.scrobblingService.triggerScrobbleEventGeneration(provider).subscribe(_ => {
+      this.backfillAttempts.set(provider, (this.backfillAttempts.get(provider) ?? 0) + 1);
       this.toastr.info(translate('toasts.scrobble-gen-init'));
     });
   }

@@ -16,6 +16,7 @@ import {
   ScrobbleProviderImageComponent
 } from "../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
+import {ConfirmService} from "../../../shared/confirm.service";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -43,6 +44,7 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
   private readonly modal = inject(NgbActiveModal);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
 
   userScrobbleProvider = model.required<UserScrobbleProvider>();
 
@@ -61,7 +63,13 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
     });
   }
 
-  generateEvents() {
+  async generateEvents() {
+
+    if (this.userScrobbleProvider().hasRunScrobbleEventGeneration) {
+      // Alert the user they have already run this X times before
+      if (!await this.confirmService.confirm(translate('toasts.confirm-rerun-backfill', {provider: this.userScrobbleProvider().provider}))) return;
+    }
+
     this.scrobblingService.triggerScrobbleEventGeneration(this.userScrobbleProvider().provider).subscribe(_ => {
       this.toastr.info(translate('toasts.scrobble-gen-init'));
       this.close();
