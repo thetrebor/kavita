@@ -152,7 +152,7 @@ public class ScrobblingService : IScrobblingService
     /// Everything but Kavita (internal)
     /// </summary>
     private static readonly List<ScrobbleProvider> AllScrobbleProviders =
-        Enum.GetValues<ScrobbleProvider>().Where(k => k == ScrobbleProvider.Kavita).ToList();
+        Enum.GetValues<ScrobbleProvider>().Where(k => k != ScrobbleProvider.Kavita).ToList();
 
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
@@ -384,9 +384,10 @@ public class ScrobblingService : IScrobblingService
             _ => throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null)
         };
 
+        var providerCandidates = scrobbleProviders ?? AllScrobbleProviders;
         List<ScrobbleProvider> providers = [];
 
-        foreach (var provider in AllScrobbleProviders)
+        foreach (var provider in providerCandidates)
         {
             if (!user.ScrobbleProviders.TryGetValue(provider, out var scrobbleProvider)
                 || string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken))
@@ -429,7 +430,7 @@ public class ScrobblingService : IScrobblingService
             providers.Add(provider);
         }
 
-        return scrobbleProviders == null ? providers : providers.Intersect(scrobbleProviders).ToList();
+        return providers;
     }
 
     private async Task<(AppUser, Series, Chapter?)> LoadScrobbleEventData(int userId, int seriesId, int? chapterId,
