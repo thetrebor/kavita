@@ -89,13 +89,13 @@
                 @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.ChapterRead)) {
                   <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
                     <div>
-                      <span>{{t('progress-sync-label')}}</span>
+                      <label for="progress-sync-enabled-{{provider}}">{{t('progress-sync-label')}}</label>
                       <div class="form-text text-muted small mt-1">
                         {{t('progress-sync-tooltip')}}
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="age-ratings-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="progressScrobbling" role="switch" [attr.aria-label]="t('progress-sync-label')">
+                      <input id="progress-sync-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="progressScrobbling" role="switch">
                     </div>
                   </div>
                 }
@@ -103,13 +103,13 @@
                 @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.ScoreUpdated)) {
                   <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
                     <div>
-                      <span>{{t('rating-sync-label')}}</span>
+                      <label for="rating-sync-enabled-{{provider}}">{{t('rating-sync-label')}}</label>
                       <div class="form-text text-muted small mt-1">
                         {{t('rating-sync-tooltip')}}
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="rating-sync-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="ratingScrobbling" role="switch" [attr.aria-label]="t('rating-sync-label')">
+                      <input id="rating-sync-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="ratingScrobbling" role="switch">
                     </div>
                   </div>
                 }
@@ -117,13 +117,13 @@
                 @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.AddWantToRead)) {
                   <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
                     <div>
-                      <span>{{t('want-to-read-sync-label')}}</span>
+                      <label for="want-to-read-enabled-{{provider}}">{{t('want-to-read-sync-label')}}</label>
                       <div class="form-text text-muted small mt-1">
                         {{t('want-to-read-sync-tooltip')}}
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="want-to-read-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="wantToReadSync" role="switch" [attr.aria-label]="t('want-to-read-sync-label')">
+                      <input id="want-to-read-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="wantToReadSync" role="switch">
                     </div>
                   </div>
                 }
@@ -131,25 +131,25 @@
                 @if (ProviderSupportedEvents[provider].includes(ScrobbleEventType.Review)) {
                   <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
                     <div>
-                      <span>{{t('reviews-sync-label')}}</span>
+                      <label for="reviews-enabled-{{provider}}">{{t('reviews-sync-label')}}</label>
                       <div class="form-text text-muted small mt-1">
                         {{t('reviews-sync-tooltip')}}
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="reviews-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="reviewsScrobbling" role="switch" [attr.aria-label]="t('reviews-sync-label')">
+                      <input id="reviews-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="reviewsScrobbling" role="switch">
                     </div>
                   </div>
 
                   <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
                     <div>
-                      <span>{{t('reviews-target-label')}}</span>
+                      <label for="review-scrobble-target-{{provider}}">{{t('reviews-target-label')}}</label>
                       <div class="form-text text-muted small mt-1">
                         {{t('reviews-target-tooltip')}}
                       </div>
                     </div>
                     <div class="mb-0 flex-shrink-0">
-                      <select class="form-select" formControlName="reviewScrobbleTarget" [attr.aria-label]="t('reviews-target-label')">
+                      <select class="form-select" id="review-scrobble-target-{{provider}}" formControlName="reviewScrobbleTarget" [attr.aria-label]="t('reviews-target-label')">
                         @for (opt of ReviewScrobbleTargets; track opt) {
                           <option [ngValue]="opt">{{opt | reviewScrobbleTargetName}}</option>
                         }
@@ -172,7 +172,7 @@
                 <div class="mt-4 d-flex flex-column gap-3">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <span>{{t('all-libraries-label')}}</span>
+                      <label for="all-libraries-enabled-{{provider}}">{{t('all-libraries-label')}}</label>
                       <div class="form-text text-muted small mt-1">
                         {{t('all-libraries-tooltip')}}
                       </div>
@@ -200,13 +200,13 @@
 
                 <div class="mt-4 d-flex justify-content-between align-items-center gap-3">
                   <div>
-                    <span>{{t('highest-age-rating-label')}}</span>
+                    <label for="highest-age-rating-{{provider}}">{{t('highest-age-rating-label')}}</label>
                     <div class="form-text text-muted small mt-1">
                       {{t('highest-age-rating-tooltip')}}
                     </div>
                   </div>
                   <div class="mb-0 flex-shrink-0">
-                    <select class="form-select" formControlName="highestAgeRating" [attr.aria-label]="t('highest-age-rating-label')">
+                    <select class="form-select" id="highest-age-rating-{{provider}}" formControlName="highestAgeRating">
                       @for (opt of AgeRatings; track opt) {
                         <option [ngValue]="opt">{{opt | ageRating}}</option>
                       }
@@ -230,7 +230,7 @@
                   @let inactiveSeriesRuleGroup = inactiveSeriesRule(formGroup);
                   <div class="mt-4 d-flex justify-content-between align-items-center gap-3" [formGroup]="inactiveSeriesRuleGroup">
                     <div class="flex-grow-1">
-                      <span>{{t('inactive-series-rule-label')}}</span>
+                      <label for="inactive-series-rule-enabled-{{provider}}">{{t('inactive-series-rule-label')}}</label>
                       <div class="d-flex align-items-center flex-wrap gap-2 small text-muted mt-1">
                         <span>{{t('inactive-series-rule-condition')}}</span>
 
@@ -251,14 +251,14 @@
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch" [attr.aria-label]="t('inactive-series-rule-label')">
+                      <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch">
                     </div>
                   </div>
 
                   @let droppedSeriesRuleGroup = droppedSeriesRule(formGroup);
                   <div class="mt-4 d-flex justify-content-between align-items-center gap-3" [formGroup]="droppedSeriesRuleGroup">
                     <div class="flex-grow-1">
-                      <span>{{t('dropped-series-rule-label')}}</span>
+                      <label for="dropped-series-rule-enabled-{{provider}}">{{t('dropped-series-rule-label')}}</label>
                       <div class="d-flex align-items-center flex-wrap gap-2 small text-muted mt-1">
                         <span>{{t('dropped-series-rule-condition')}}</span>
 
@@ -279,7 +279,7 @@
                       </div>
                     </div>
                     <div class="form-check form-switch mb-0 flex-shrink-0">
-                      <input id="inactive-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch" [attr.aria-label]="t('dropped-series-rule-label')">
+                      <input id="dropped-series-rule-enabled-{{provider}}" type="checkbox" class="form-check-input" formControlName="enabled" role="switch">
                     </div>
                   </div>
 

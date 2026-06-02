@@ -181,8 +181,8 @@ export class ManageScrobbleProvidersComponent implements OnInit {
     group.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef$),
       distinctUntilChanged(),
-      debounceTime(500),
       tap(s => this.applyCustomFormRules(group)),
+      debounceTime(500),
       switchMap(s => this.scrobbleService.saveScrobbleSettings(provider, group.getRawValue()))
     ).subscribe();
   }
