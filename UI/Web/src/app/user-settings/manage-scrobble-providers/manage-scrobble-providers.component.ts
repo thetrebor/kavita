@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {filter, map, of, switchMap, tap} from "rxjs";
+import {filter, map, of, startWith, switchMap, tap} from "rxjs";
 import {AgeRating, AgeRatings} from "../../_models/metadata/age-rating";
 import {ReadStatusTransitionRule} from "../../_models/kavitaplus/scrobble-providers/read-status-transition-rule";
 import {
@@ -16,7 +16,7 @@ import {
 import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/publication-status";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged} from "rxjs/operators";
+import {catchError, debounceTime, distinctUntilChanged} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
@@ -166,12 +166,25 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
           groups.set(p.provider, group);
 
-          this.listenToChanges(p.provider, group);
+          group.valueChanges.pipe(
+            tap(() => console.log('hellO??'))
+          ).subscribe();
 
-          this.applyCustomFormRules(group);
+          group.get('reviewsScrobbling')!.valueChanges.pipe(
+            takeUntilDestroyed(this.destroyRef$),
+            startWith(group.get('reviewsScrobbling')!.value), // apply immediately on init
+          ).subscribe(value => {
+            if (!value) {
+              group.get('reviewScrobbleTarget')?.disable({ emitEvent: false });
+            } else {
+              group.get('reviewScrobbleTarget')?.enable({ emitEvent: false });
+            }
+          });
 
           // Build up backfill attempt map (we only keep track of if it ran, it's only important to tell the user it was run)
           this.backfillAttempts.set(p.provider, p.hasRunScrobbleEventGeneration ? 1 : 0);
+
+          this.listenToChanges(p.provider, group);
         }
 
         this.userScrobbleProviders.set(new Map(userScrobbleProviders.map(p => [p.provider, p])));
@@ -183,9 +196,9 @@ export class ManageScrobbleProvidersComponent implements OnInit {
     group.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef$),
       distinctUntilChanged(),
-      tap(s => this.applyCustomFormRules(group)),
       debounceTime(500),
-      switchMap(s => this.scrobbleService.saveScrobbleSettings(provider, group.getRawValue()))
+      switchMap(s => this.scrobbleService.saveScrobbleSettings(provider, group.getRawValue())),
+      catchError(() => of(null))
     ).subscribe();
   }
 
@@ -202,14 +215,6 @@ export class ManageScrobbleProvidersComponent implements OnInit {
       inactiveSeriesRule: this.buildReadStatusTransitionRuleFromGroup(scrobbleSettings.inactiveSeriesRule),
       droppedSeriesRule: this.buildReadStatusTransitionRuleFromGroup(scrobbleSettings.droppedSeriesRule),
     });
-  }
-
-  private applyCustomFormRules(group: FormGroup) {
-    if (group.get('reviewsScrobbling')?.value === false) {
-      group.get('reviewScrobbleTarget')?.disable()
-    } else {
-      group.get('reviewScrobbleTarget')?.enable()
-    }
   }
 
   private buildReadStatusTransitionRuleFromGroup(rule: ReadStatusTransitionRule): ReadStatusTransitionRuleFromGroup {
