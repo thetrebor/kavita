@@ -139,6 +139,7 @@ public class ScrobblingService : IScrobblingService
         .Concat(LightNovelProviders)
         .Concat(ComicProviders)
         .Concat(MangaProviders)
+        .Concat(BookProviders)
         .Distinct()
         .ToList()
         .AsReadOnly();

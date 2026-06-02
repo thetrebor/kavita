@@ -3,7 +3,7 @@ import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-provide
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
@@ -29,7 +29,6 @@ import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
     TruncatePipe,
     UtcToLocalTimePipe,
     TimeAgoPipe,
-    ProviderImagePipe,
     UtcToLocalDatePipe,
     ScrobbleProviderImageComponent,
     NgbTooltip,
@@ -69,12 +68,15 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
     return this.userScrobbleProvider().authenticationToken !== '';
   });
 
-  formGroup!: FormGroup;
+  formGroup!: FormGroup<{
+    userName: FormControl<string>,
+    authenticationToken: FormControl<string>,
+  }>;
 
   ngOnInit() {
     this.formGroup = this.fb.group({
-      userName: [this.userScrobbleProvider().userName],
-      authenticationToken: [this.userScrobbleProvider().authenticationToken],
+      userName: this.fb.control(this.userScrobbleProvider().userName),
+      authenticationToken: this.fb.control(this.userScrobbleProvider().authenticationToken),
     });
   }
 
@@ -91,8 +93,8 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
 
   save() {
     this.scrobblingService.saveUserScrobbleProvider({
-      ...this.userScrobbleProvider(),
-      ...this.formGroup.value,
+      provider: this.userScrobbleProvider().provider,
+      ...this.formGroup.getRawValue(),
     }).subscribe(() => this.close());
   }
 

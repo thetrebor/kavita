@@ -37,25 +37,36 @@ public class ScrobblingController(
     : BaseApiController
 {
 
+    /// <summary>
+    /// Returns all scrobble providers for a user. This list is guaranteed to contain an entry for each currently
+    /// valid scrobble provider. If the user has none setup, returns the empty default values.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("scrobble-settings")]
     public async Task<ActionResult<List<ScrobbleProviderDto>>> GetScrobbleSettings()
     {
         return Ok(await scrobblingService.GetScrobbleProviderDtosForUser(UserId, HttpContext.RequestAborted));
     }
 
+    /// <summary>
+    /// Updates the scrobble settings for a given provider. Libraries are filtered on supported types
+    /// </summary>
+    /// <param name="provider"></param>
+    /// <param name="scrobbleSettings"></param>
+    /// <returns></returns>
     [HttpPost("update-scrobble-settings")]
-    public async Task<ActionResult> UpdateScrobbleSettings([FromBody] ScrobbleProviderDto dto)
+    public async Task<ActionResult> UpdateScrobbleSettings([FromQuery] ScrobbleProvider provider, [FromBody] ScrobbleProviderSettingsDto scrobbleSettings)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
 
-        var scrobbleProvider = user.GetOrCreateScrobbleProvider(dto.Provider);
-        scrobbleProvider.Settings = dto.Settings;
+        var scrobbleProvider = user.GetOrCreateScrobbleProvider(provider);
+        scrobbleProvider.Settings = scrobbleSettings;
 
         if (scrobbleProvider.Settings.Libraries.Count > 0)
         {
             scrobbleProvider.Settings.Libraries = await scrobblingService
-                .FilterLibrariesForProvider(dto.Provider, UserId, scrobbleProvider.Settings.Libraries);
+                .FilterLibrariesForProvider(provider, UserId, scrobbleProvider.Settings.Libraries);
         }
 
         unitOfWork.UserRepository.Update(user);
@@ -64,8 +75,14 @@ public class ScrobblingController(
         return Ok();
     }
 
+    /// <summary>
+    /// Update authentication details for the given provider
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    /// <remarks>Kicks of a sync background job, listen on signalr for when it completes</remarks>
     [HttpPost("update-user-scrobble-provider")]
-    public async Task<ActionResult> UpdateUserScrobbleProvider([FromBody] ScrobbleProviderDto dto)
+    public async Task<ActionResult> UpdateUserScrobbleProvider([FromBody] UpdateScrobbleProviderDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: HttpContext.RequestAborted);
         if (user == null) return Unauthorized();

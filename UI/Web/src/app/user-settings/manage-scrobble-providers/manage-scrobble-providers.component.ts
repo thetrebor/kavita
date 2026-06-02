@@ -171,15 +171,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef$),
       distinctUntilChanged(),
       debounceTime(500),
-      map(() => {
-        const userScrobbleProvider = this.userScrobbleProviders().get(provider)!;
-
-        return {
-          ...userScrobbleProvider,
-          settings: group.getRawValue(),
-        }
-      }),
-      switchMap(s => this.scrobbleService.saveScrobbleSettings(s))
+      switchMap(s => this.scrobbleService.saveScrobbleSettings(provider, group.getRawValue()))
     ).subscribe();
   }
 
@@ -240,16 +232,15 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   }
 
   protected async disconnectScrobbleProvider(provider: ScrobbleProvider) {
-    const userScrobbleProvider = this.userScrobbleProviders().get(provider);
-    if (!userScrobbleProvider) return;
-
     fromPromise(this.confirmService.confirm(translate('scrobble-provider-settings-manager.confirm-delete',
       {provider: this.scrobbleProviderNamePipe.transform(provider)}))).pipe(
       filter(confirmed => confirmed),
       switchMap(() => {
-        userScrobbleProvider.authenticationToken = '';
-
-        return this.scrobbleService.saveUserScrobbleProvider(userScrobbleProvider);
+        return this.scrobbleService.saveUserScrobbleProvider({
+          provider: provider,
+          authenticationToken: '',
+          userName: '',
+        });
       }),
     ).subscribe();
   }

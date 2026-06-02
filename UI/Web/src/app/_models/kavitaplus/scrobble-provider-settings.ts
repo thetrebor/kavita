@@ -13,6 +13,12 @@ export type UserScrobbleProvider = {
   settings: ScrobbleProviderSettings;
 }
 
+export type UpdateScrobbleProviderDto = {
+  provider: ScrobbleProvider;
+  userName: string;
+  authenticationToken: string;
+}
+
 export type ScrobbleProviderSettings = {
   progressScrobbling: boolean;
   wantToReadSync: boolean;

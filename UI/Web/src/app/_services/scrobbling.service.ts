@@ -10,7 +10,11 @@ import {PaginatedResult} from "../_models/pagination";
 import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
 import {UtilityService} from "../shared/_services/utility.service";
 import {KavitaPlusAuditEntry} from "../_models/kavitaplus/kavita-plus-audit-entry";
-import {UserScrobbleProvider,} from "../_models/kavitaplus/scrobble-provider-settings";
+import {
+  ScrobbleProviderSettings,
+  UpdateScrobbleProviderDto,
+  UserScrobbleProvider,
+} from "../_models/kavitaplus/scrobble-provider-settings";
 
 export enum ScrobbleProvider {
   Kavita = 0,
@@ -38,12 +42,12 @@ export class ScrobblingService {
     return this.httpClient.get<UserScrobbleProvider[]>(this.baseUrl + 'scrobbling/scrobble-settings');
   }
 
-  saveScrobbleSettings(settings: UserScrobbleProvider) {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/update-scrobble-settings', settings);
+  saveScrobbleSettings(provider: ScrobbleProvider, settings: ScrobbleProviderSettings) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/update-scrobble-settings?provider=' + provider, settings);
   }
 
-  saveUserScrobbleProvider(userScrobbleProvider: UserScrobbleProvider) {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/update-user-scrobble-provider', userScrobbleProvider);
+  saveUserScrobbleProvider(updateDto: UpdateScrobbleProviderDto) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/update-user-scrobble-provider', updateDto);
   }
 
   hasTokenExpired(provider: ScrobbleProvider) {
