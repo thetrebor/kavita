@@ -359,7 +359,7 @@ public class ScrobblingService : IScrobblingService
     }
 
     /// <summary>
-    /// Returns the providers for which an
+    /// Returns the providers that are applicable for the ScrobbleEventType
     /// </summary>
     /// <param name="scrobbleProviders">If not null, returned providers are guaranteed to be in this list</param>
     /// <param name="eventType"></param>

@@ -166,6 +166,8 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
           this.listenToChanges(p.provider, group);
 
+          this.applyCustomFormRules(group);
+
           // Build up backfill attempt map (we only keep track of if it ran, it's only important to tell the user it was run)
           this.backfillAttempts.set(p.provider, p.hasRunScrobbleEventGeneration ? 1 : 0);
         }
@@ -180,6 +182,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef$),
       distinctUntilChanged(),
       debounceTime(500),
+      tap(s => this.applyCustomFormRules(group)),
       switchMap(s => this.scrobbleService.saveScrobbleSettings(provider, group.getRawValue()))
     ).subscribe();
   }
@@ -197,6 +200,14 @@ export class ManageScrobbleProvidersComponent implements OnInit {
       inactiveSeriesRule: this.buildReadStatusTransitionRuleFromGroup(scrobbleSettings.inactiveSeriesRule),
       droppedSeriesRule: this.buildReadStatusTransitionRuleFromGroup(scrobbleSettings.droppedSeriesRule),
     });
+  }
+
+  private applyCustomFormRules(group: FormGroup) {
+    if (group.get('reviewsScrobbling')?.value === false) {
+      group.get('reviewScrobbleTarget')?.disable()
+    } else {
+      group.get('reviewScrobbleTarget')?.enable()
+    }
   }
 
   private buildReadStatusTransitionRuleFromGroup(rule: ReadStatusTransitionRule): ReadStatusTransitionRuleFromGroup {
