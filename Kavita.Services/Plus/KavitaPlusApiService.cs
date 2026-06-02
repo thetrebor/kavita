@@ -60,7 +60,9 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         CancellationToken ct = default)
     {
         var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-        var token = GetTokenForUser(await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct), ScrobbleProvider.AniList);
+        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct))
+            .ScrobbleProviders[ScrobbleProvider.AniList]
+            .AuthenticationToken;
 
         return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/match-series")
             .WithKavitaPlusHeaders(license, token)
@@ -71,7 +73,9 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
     public async Task<SeriesDetailPlusApiDto> GetSeriesDetailAsync(PlusSeriesRequestDto request, CancellationToken ct = default)
     {
         var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-        var token = GetTokenForUser(await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct), ScrobbleProvider.AniList);
+        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct))
+            .ScrobbleProviders[ScrobbleProvider.AniList]
+            .AuthenticationToken;
 
         return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
             .WithKavitaPlusHeaders(license, token)
@@ -83,7 +87,9 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         CancellationToken ct = default)
     {
         var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-        var token = GetTokenForUser(await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct), ScrobbleProvider.AniList);
+        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct))
+            .ScrobbleProviders[ScrobbleProvider.AniList]
+            .AuthenticationToken;
 
         return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
             .WithKavitaPlusHeaders(license, token)
@@ -187,8 +193,9 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         try
         {
             var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-            var adminUser = await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct);
-            var token = adminUser.ScrobbleProviders.GetValueOrDefault(ScrobbleProvider.AniList)?.AuthenticationToken;
+            var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct))
+                .ScrobbleProviders[ScrobbleProvider.AniList]
+                .AuthenticationToken;
 
             return await (Configuration.KavitaPlusApiUrl + "/api/v3/metadata/covers")
                 .WithKavitaPlusHeaders(license, token)
@@ -338,16 +345,6 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .WithKavitaPlusHeaders(license, aniListToken)
             .PostJsonAsync(body)
             .ReceiveJson<T>();
-    }
-
-    private static string GetTokenForUser(AppUser user, ScrobbleProvider provider)
-    {
-        if (user.ScrobbleProviders.TryGetValue(provider, out var value))
-        {
-            return value.AuthenticationToken;
-        }
-
-        return string.Empty;
     }
 
 }

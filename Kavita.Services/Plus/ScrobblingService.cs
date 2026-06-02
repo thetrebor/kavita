@@ -173,33 +173,6 @@ public class ScrobblingService : IScrobblingService
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
 
-    public async Task<List<ScrobbleProviderDto>> GetScrobbleProviderDtosForUser(int userId, CancellationToken ct = default)
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
-        if (user == null) throw new KavitaUnauthenticatedUserException();
-
-        var settings = user.ScrobbleProviders.Values
-            .Select(s => _mapper.Map<ScrobbleProviderDto>(s))
-            .ToList();
-
-        var missingProviders = AllScrobbleProviders
-            .Where(p => AllProviders.Contains(p) && !user.ScrobbleProviders.ContainsKey(p) )
-            .ToList();
-
-        return settings.Concat(missingProviders.Select(p => new ScrobbleProviderDto
-        {
-            Provider = p,
-            Settings = new ScrobbleProviderSettingsDto()
-            {
-                ProgressScrobbling = true,
-                RatingScrobbling = true,
-                WantToReadSync = true,
-                AllLibraries = true
-            }
-        })).ToList();
-
-    }
-
     public async Task<List<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default)
     {
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
@@ -301,7 +274,10 @@ public class ScrobblingService : IScrobblingService
 
     public async Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider, CancellationToken ct = default)
     {
-        var token = await GetTokenForProvider(userId, provider);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
+        if (user == null) return false;
+
+        var token = user.ScrobbleProviders[provider].AuthenticationToken;
 
         if (string.IsNullOrEmpty(token)) return false;
 
@@ -325,19 +301,6 @@ public class ScrobblingService : IScrobblingService
         }
 
         return result.Data;
-    }
-
-    private async Task<string> GetTokenForProvider(int userId, ScrobbleProvider provider)
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return string.Empty;
-
-        if (user.ScrobbleProviders.TryGetValue(provider, out var scrobbleProviderSettings))
-        {
-            return scrobbleProviderSettings.AuthenticationToken;
-        }
-
-        return string.Empty;
     }
 
     #endregion
@@ -394,8 +357,9 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var provider in providerCandidates)
         {
-            if (!user.ScrobbleProviders.TryGetValue(provider, out var scrobbleProvider)
-                || string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken))
+            var scrobbleProvider = user.ScrobbleProviders[provider];
+
+            if (string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken))
             {
                 _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} as no authentication token is set",
                     provider, user.Id, eventType, series.Id);
@@ -1126,7 +1090,7 @@ public class ScrobblingService : IScrobblingService
         {
             var scrobbleSettings = ctx.Users
                 .FirstOrDefault(u => u.Id == evt.AppUserId)?
-                .ScrobbleProviders.GetValueOrDefault(evt.ScrobbleProvider);
+                .ScrobbleProviders[evt.ScrobbleProvider];
 
             return Task.FromResult(new ScrobbleV3Dto
             {
@@ -1153,7 +1117,7 @@ public class ScrobblingService : IScrobblingService
         {
             var scrobbleSettings = ctx.Users
                 .FirstOrDefault(u => u.Id == evt.AppUserId)?
-                .ScrobbleProviders.GetValueOrDefault(evt.ScrobbleProvider);
+                .ScrobbleProviders[evt.ScrobbleProvider];
 
             return Task.FromResult(new ScrobbleV3Dto
             {
@@ -1221,8 +1185,7 @@ public class ScrobblingService : IScrobblingService
     private async Task<bool> ValidateUserToken(AppUser user, ScrobbleEvent evt)
     {
         var providerService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(evt.ScrobbleProvider);
-        var userProvider = user.ScrobbleProviders.GetValueOrDefault(evt.ScrobbleProvider);
-        if (userProvider is null) return false;
+        var userProvider = user.ScrobbleProviders[evt.ScrobbleProvider];
 
         if (providerService.IsTokenValid(userProvider.AuthenticationToken))
         {
@@ -1605,8 +1568,7 @@ public class ScrobblingService : IScrobblingService
 
         var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct))
             .Where(l => userId == 0 || userId == l.Id)
-            .Where(u => u.ScrobbleProviders.TryGetValue(scrobbleProvider, out var scrobbleProviderSettings)
-                        && !string.IsNullOrEmpty(scrobbleProviderSettings.AuthenticationToken))
+            .Where(u => !string.IsNullOrEmpty(u.ScrobbleProviders[scrobbleProvider].AuthenticationToken))
             .Select(u => u.Id);
 
         foreach (var uId in userIds)
@@ -1689,12 +1651,7 @@ public class ScrobblingService : IScrobblingService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user != null)
         {
-            if (user.ScrobbleProviders.TryGetValue(scrobbleProvider, out var scrobbleProviderSettings))
-            {
-                scrobbleProviderSettings.ScrobbleEventGenerationRan = DateTime.UtcNow;
-
-                _unitOfWork.UserRepository.Update(user);
-            }
+            user.ScrobbleProviders[scrobbleProvider].ScrobbleEventGenerationRan = DateTime.UtcNow;
 
             await _unitOfWork.CommitAsync(ct);
         }
@@ -1779,7 +1736,7 @@ public class ScrobblingService : IScrobblingService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user == null) return;
 
-        var scrobbleProviderSettings = user.GetOrCreateScrobbleProvider(provider);
+        var scrobbleProviderSettings = user.ScrobbleProviders[provider];
 
         scrobbleProviderSettings.LastSyncedUtc = DateTime.UtcNow;
 

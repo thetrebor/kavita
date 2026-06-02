@@ -163,9 +163,9 @@ public class ExternalMetadataService : IExternalMetadataService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user == null) return ArraySegment<MalStackDto>.Empty;
 
-        var scrobbleSettings = user?.ScrobbleProviders.GetValueOrDefault(ScrobbleProvider.Mal);
+        var scrobbleSettings = user.ScrobbleProviders[ScrobbleProvider.Mal];
 
-        if (scrobbleSettings == null || string.IsNullOrEmpty(scrobbleSettings.UserName) || string.IsNullOrEmpty(scrobbleSettings.AuthenticationToken))
+        if (string.IsNullOrEmpty(scrobbleSettings.UserName) || string.IsNullOrEmpty(scrobbleSettings.AuthenticationToken))
         {
             _logger.LogInformation("User is attempting to fetch MAL Stacks, but missing information on their account");
             return ArraySegment<MalStackDto>.Empty;

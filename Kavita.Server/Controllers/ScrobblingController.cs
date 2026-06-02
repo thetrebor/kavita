@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -33,7 +34,8 @@ public class ScrobblingController(
     IScrobblingService scrobblingService,
     ILogger<ScrobblingController> logger,
     ILocalizationService localizationService,
-    IKavitaPlusAuditService kavitaPlusAuditService)
+    IKavitaPlusAuditService kavitaPlusAuditService,
+    IMapper mapper)
     : BaseApiController
 {
 
@@ -45,7 +47,14 @@ public class ScrobblingController(
     [HttpGet("scrobble-settings")]
     public async Task<ActionResult<List<ScrobbleProviderDto>>> GetScrobbleSettings()
     {
-        return Ok(await scrobblingService.GetScrobbleProviderDtosForUser(UserId, HttpContext.RequestAborted));
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
+        if (user == null) return Unauthorized();
+
+        var providers = user.ScrobbleProviders.Values
+            .Select(s => mapper.Map<ScrobbleProviderDto>(s))
+            .ToList();
+
+        return Ok(providers);
     }
 
     /// <summary>
@@ -60,7 +69,7 @@ public class ScrobblingController(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences);
         if (user == null) return Unauthorized();
 
-        var scrobbleProvider = user.GetOrCreateScrobbleProvider(provider);
+        var scrobbleProvider = user.ScrobbleProviders[provider];
         scrobbleProvider.Settings = scrobbleSettings;
 
         if (scrobbleProvider.Settings.Libraries.Count > 0)
@@ -87,7 +96,7 @@ public class ScrobblingController(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: HttpContext.RequestAborted);
         if (user == null) return Unauthorized();
 
-        var scrobbleProvider = user.GetOrCreateScrobbleProvider(dto.Provider);
+        var scrobbleProvider = user.ScrobbleProviders[dto.Provider];
 
         scrobbleProvider.AuthenticationToken = dto.AuthenticationToken.TrimPrefix("Bearer").Trim();
 
@@ -120,11 +129,6 @@ public class ScrobblingController(
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
         if (user == null) return Unauthorized();
-
-        if (!user.ScrobbleProviders.ContainsKey(scrobbleProvider))
-        {
-            return BadRequest(await localizationService.TranslateAsync(UserId, "scrobble-provider-not-setup", scrobbleProvider.ToString()));
-        }
 
         BackgroundJob.Enqueue(() => scrobblingService.CreateEventsFromExistingHistory(scrobbleProvider, UserId));
 

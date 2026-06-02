@@ -16,8 +16,6 @@ namespace Kavita.API.Services.Plus;
 
 public interface IScrobblingService
 {
-
-    Task<List<ScrobbleProviderDto>> GetScrobbleProviderDtosForUser(int userId, CancellationToken ct = default);
     Task<List<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default);
 
     /// <summary>

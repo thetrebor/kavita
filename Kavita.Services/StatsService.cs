@@ -337,8 +337,8 @@ public class StatsService : IStatsService
         {
             var userDto = new UserStatV3
             {
-                HasMALToken = !string.IsNullOrEmpty(user.ScrobbleProviders.GetValueOrDefault(ScrobbleProvider.Mal)?.AuthenticationToken),
-                HasAniListToken = !string.IsNullOrEmpty(user.ScrobbleProviders.GetValueOrDefault(ScrobbleProvider.AniList)?.AuthenticationToken),
+                HasMALToken = !string.IsNullOrEmpty(user.ScrobbleProviders[ScrobbleProvider.Mal].AuthenticationToken),
+                HasAniListToken = !string.IsNullOrEmpty(user.ScrobbleProviders[ScrobbleProvider.AniList].AuthenticationToken),
                 AgeRestriction = new AgeRestriction()
                 {
                     AgeRating = user.AgeRestriction,
