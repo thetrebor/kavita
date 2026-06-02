@@ -103,7 +103,6 @@ public class ScrobblingService : IScrobblingService
     private readonly IEmailService _emailService;
     private readonly IKavitaPlusApiService _kavitaPlusApiService;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IMapper _mapper;
     private readonly IKavitaPlusAuditService _auditService;
 
     public const string AniListWeblinkWebsite = ScrobblingHelper.AniListWeblinkWebsite;
@@ -152,12 +151,12 @@ public class ScrobblingService : IScrobblingService
     /// Everything but Kavita (internal)
     /// </summary>
     public static readonly List<ScrobbleProvider> AllScrobbleProviders =
-        Enum.GetValues<ScrobbleProvider>().Where(k => k != ScrobbleProvider.Kavita).ToList();
+        Enum.GetValues<ScrobbleProvider>().Where(k => k != ScrobbleProvider.Kavita && k != ScrobbleProvider.Cbr).ToList();
 
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
         ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService,
-        IKavitaPlusApiService kavitaPlusApiService, IServiceProvider serviceProvider, IMapper mapper, IKavitaPlusAuditService auditService)
+        IKavitaPlusApiService kavitaPlusApiService, IServiceProvider serviceProvider, IKavitaPlusAuditService auditService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -167,7 +166,6 @@ public class ScrobblingService : IScrobblingService
         _emailService = emailService;
         _kavitaPlusApiService = kavitaPlusApiService;
         _serviceProvider = serviceProvider;
-        _mapper = mapper;
         _auditService = auditService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);

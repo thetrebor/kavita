@@ -291,7 +291,7 @@ public static class Seed
         foreach (var user in allUsers)
         {
             var missingProviders = Enum.GetValues<ScrobbleProvider>()
-                .Where(p => p != ScrobbleProvider.Kavita)
+                .Where(p => p != ScrobbleProvider.Kavita && p != ScrobbleProvider.Cbr)
                 .Where(p => !user.ScrobbleProviders.ContainsKey(p))
                 .ToList();
 
