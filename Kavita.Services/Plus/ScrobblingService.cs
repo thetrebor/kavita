@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using Flurl.Http;
 using Hangfire;
 using Kavita.API.Database;
@@ -952,6 +951,8 @@ public class ScrobblingService : IScrobblingService
                         (await _unitOfWork.SeriesRepository.GetSeriesForReadStatusTransitionRuleAsync(user.Id,
                             kv.Value.Settings.DroppedSeriesRule, true, ct))
                         .Where(s => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, s).Contains(kv.Key));
+
+
 
                     foreach (var series in onHoldSeries)
                     {

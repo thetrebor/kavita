@@ -106,6 +106,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
     public DbSet<KavitaPlusAuditLog> KavitaPlusAuditLogs { get; set; } = null!;
 
+    public DbSet<ScrobbleRuleHistory> ScrobbleRuleHistory { get; set; } = null!;
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -573,6 +575,35 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<ScrobbleRuleHistory>(entity =>
+        {
+            // One delivered row per (user, provider, rule, series, chapter). ChapterId is null for series-based providers.
+            entity.HasIndex(e => new { e.AppUserId, e.Provider, e.RuleKind, e.SeriesId, e.ChapterId })
+                .IsUnique()
+                .HasDatabaseName("IX_ScrobbleRuleHistory_User_Provider_Rule_Series_Chapter");
+            // Reset/purge lookups by user + series
+            entity.HasIndex(e => new { e.AppUserId, e.SeriesId })
+                .HasDatabaseName("IX_ScrobbleRuleHistory_AppUserId_SeriesId");
+
+            entity.HasOne(e => e.AppUser)
+                .WithMany()
+                .HasForeignKey(e => e.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Series)
+                .WithMany()
+                .HasForeignKey(e => e.SeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Chapter)
+                .WithMany()
+                .HasForeignKey(e => e.ChapterId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // The event is reaped ~7 days after processing while this row must outlive it.
+            entity.HasOne(e => e.ScrobbleEvent)
+                .WithMany()
+                .HasForeignKey(e => e.ScrobbleEventId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
 

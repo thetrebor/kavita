@@ -59,6 +59,17 @@ public class ScrobbleEvent : IEntityDate
     /// <remarks>When overriding by a non backfill event should be set to false</remarks>
     public bool IsBackFill { get; set; }
     /// <summary>
+    /// Which read-status transition rule produced this event. Null when the event did not originate from
+    /// <c>RunReadStatusTransitionRules</c>. Carried across the create -> deliver gap so the delivery step can
+    /// write a <see cref="History.ScrobbleRuleHistory"/> row.
+    /// </summary>
+    public TransitionRuleKind? TransitionRuleKind { get; set; }
+    /// <summary>
+    /// Snapshot of the rule's configuration hash at fire-time, pinned so the ledger row records the exact
+    /// configuration that triggered it (rather than whatever the config is at delivery time).
+    /// </summary>
+    public string? RuleHashSnapshot { get; set; }
+    /// <summary>
     /// Has this event been processed and pushed to Provider
     /// </summary>
     public bool IsProcessed { get; set; }

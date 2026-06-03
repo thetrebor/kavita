@@ -51,7 +51,7 @@ public sealed record ScrobbleProviderSettingsDto
     public ReadStatusTransitionRule DroppedSeriesRule { get; set; } = new();
 }
 
-public class ReadStatusTransitionRule
+public sealed record ReadStatusTransitionRule
 {
     /// <summary>
     /// Should Kavita update read status for inactive series?
