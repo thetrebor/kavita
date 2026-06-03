@@ -36,7 +36,7 @@ where T: IScrobbleProviderService
     public abstract bool IsTokenValid(string token);
 
     public async Task ScrobbleReadStatusUpdates(ScrobbleUpdateContext ctx, ScrobbleReadStatus status,
-        CancellationToken ct = default)
+        TransitionRuleKind? ruleKind = null, string? ruleHash = null, CancellationToken ct = default)
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.ReadStatusUpdate) || ctx.Chapter != null) return;
 
@@ -51,6 +51,8 @@ where T: IScrobbleProviderService
 
             existingEvent.ReadStatus = status;
             existingEvent.IsBackFill &= ctx.IsBackfill;
+            existingEvent.TransitionRuleKind = ruleKind;
+            existingEvent.RuleHashSnapshot = ruleHash;
 
             unitOfWork.ScrobbleRepository.Update(existingEvent);
             await unitOfWork.CommitAsync(ct);
@@ -61,6 +63,7 @@ where T: IScrobbleProviderService
                     Provider = Provider,
                     ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
                     ReadStatus = status,
+                    TransitionRuleKind = ruleKind,
                 }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
             return;
         }
@@ -75,6 +78,8 @@ where T: IScrobbleProviderService
             AppUserId = ctx.User.Id,
             ReadStatus = status,
             IsBackFill = ctx.IsBackfill,
+            TransitionRuleKind = ruleKind,
+            RuleHashSnapshot = ruleHash,
         };
 
         SetScrobbleIds(scrobbleEvent, ctx.Series);
@@ -88,6 +93,7 @@ where T: IScrobbleProviderService
                 Provider = Provider,
                 ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
                 ReadStatus = status,
+                TransitionRuleKind = ruleKind,
             }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
         logger.LogDebug("Created new scrobble event for {Series} with Read Status {Status}", ctx.Series.Name, status);

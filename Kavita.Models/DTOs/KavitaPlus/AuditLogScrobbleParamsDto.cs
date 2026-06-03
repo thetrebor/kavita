@@ -20,4 +20,8 @@ public sealed record AuditLogScrobbleParamsDto
     public string? ReviewBody { get; init; }
     public ScrobbleReadStatus ReadStatus { get; init; }
     public LibraryType LibraryType { get; init; } = LibraryType.Manga;
+    /// <summary>
+    /// Set when the event was produced by a read-status transition rule, identifying which rule fired.
+    /// </summary>
+    public TransitionRuleKind? TransitionRuleKind { get; init; }
 }

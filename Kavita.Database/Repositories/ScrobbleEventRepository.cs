@@ -10,6 +10,7 @@ using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.History;
 using Kavita.Models.Entities.Scrobble;
 using Microsoft.EntityFrameworkCore;
 
@@ -182,4 +183,56 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
             .Where(e => e.AppUserId == userId && e.ScrobbleProvider == provider)
             .ExecuteDeleteAsync(ct);
     }
+
+    #region ScrobbleRuleHistory
+
+    public void AttachRuleHistory(ScrobbleRuleHistory row)
+    {
+        context.ScrobbleRuleHistory.Attach(row);
+    }
+
+    public Task<ScrobbleRuleHistory?> GetRuleHistory(int userId, ScrobbleProvider provider, TransitionRuleKind ruleKind,
+        int seriesId, int? chapterId, CancellationToken ct = default)
+    {
+        return context.ScrobbleRuleHistory
+            .FirstOrDefaultAsync(h => h.AppUserId == userId && h.Provider == provider && h.RuleKind == ruleKind
+                                      && h.SeriesId == seriesId && h.ChapterId == chapterId, ct);
+    }
+
+    public async Task<IList<ScrobbleRuleHistory>> GetRuleHistoryForProviderKind(int userId, ScrobbleProvider provider,
+        TransitionRuleKind ruleKind, CancellationToken ct = default)
+    {
+        return await context.ScrobbleRuleHistory
+            .Where(h => h.AppUserId == userId && h.Provider == provider && h.RuleKind == ruleKind)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public Task PurgeReadSinceDeliveryRuleHistory(int userId, CancellationToken ct = default)
+    {
+        return context.ScrobbleRuleHistory
+            .Where(h => h.AppUserId == userId)
+            .Where(h => context.AppUserProgresses.Any(p => p.AppUserId == userId && p.SeriesId == h.SeriesId
+                        && (h.ChapterId == null || p.ChapterId == h.ChapterId)
+                        && p.LastModifiedUtc > h.CreatedUtc))
+            .ExecuteDeleteAsync(ct);
+    }
+
+    public Task PurgeRuleHistoryByHashMismatch(int userId, ScrobbleProvider provider, TransitionRuleKind ruleKind,
+        string currentHash, CancellationToken ct = default)
+    {
+        return context.ScrobbleRuleHistory
+            .Where(h => h.AppUserId == userId && h.Provider == provider && h.RuleKind == ruleKind
+                        && h.RuleHash != currentHash)
+            .ExecuteDeleteAsync(ct);
+    }
+
+    public Task PurgeRuleHistoryForProvider(int userId, ScrobbleProvider provider, CancellationToken ct = default)
+    {
+        return context.ScrobbleRuleHistory
+            .Where(h => h.AppUserId == userId && h.Provider == provider)
+            .ExecuteDeleteAsync(ct);
+    }
+
+    #endregion
 }

@@ -32,6 +32,7 @@ namespace Kavita.Server.Controllers;
 public class ScrobblingController(
     IUnitOfWork unitOfWork,
     IScrobblingService scrobblingService,
+    IScrobbleRuleService ruleService,
     ILogger<ScrobblingController> logger,
     ILocalizationService localizationService,
     IKavitaPlusAuditService kavitaPlusAuditService,
@@ -81,6 +82,9 @@ public class ScrobblingController(
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync();
 
+        // We don't want this on a background thread to ensure clearance from quick updates
+        await ruleService.PurgeStaleForSettingsAsync(UserId, provider, scrobbleSettings);
+
         return Ok();
     }
 
@@ -112,6 +116,7 @@ public class ScrobblingController(
         if (string.IsNullOrEmpty(dto.AuthenticationToken))
         {
             await unitOfWork.ScrobbleRepository.ClearEventsForProvider(UserId, dto.Provider);
+            await ruleService.PurgeForProviderAsync(UserId, dto.Provider);
         }
 
         BackgroundJob.Enqueue(() => scrobblingService.SyncProviderInfo(UserId, dto.Provider, CancellationToken.None));

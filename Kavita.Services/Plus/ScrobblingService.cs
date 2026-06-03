@@ -103,6 +103,7 @@ public class ScrobblingService : IScrobblingService
     private readonly IKavitaPlusApiService _kavitaPlusApiService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IKavitaPlusAuditService _auditService;
+    private readonly IScrobbleRuleService _ruleService;
 
     public const string AniListWeblinkWebsite = ScrobblingHelper.AniListWeblinkWebsite;
     public const string MalWeblinkWebsite = ScrobblingHelper.MalWeblinkWebsite;
@@ -155,7 +156,8 @@ public class ScrobblingService : IScrobblingService
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
         ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService,
-        IKavitaPlusApiService kavitaPlusApiService, IServiceProvider serviceProvider, IKavitaPlusAuditService auditService)
+        IKavitaPlusApiService kavitaPlusApiService, IServiceProvider serviceProvider, IKavitaPlusAuditService auditService,
+        IScrobbleRuleService ruleService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -166,6 +168,7 @@ public class ScrobblingService : IScrobblingService
         _kavitaPlusApiService = kavitaPlusApiService;
         _serviceProvider = serviceProvider;
         _auditService = auditService;
+        _ruleService = ruleService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -934,63 +937,80 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var user in users)
         {
+            // Read-reset: drop ledger rows for series/chapters the user has read since delivery, so a series that
+            // went re-inactive can fire again. Done once per user before evaluating candidates.
+            await _ruleService.ResetReadSeriesAsync(user.Id, ct);
+
             foreach (var kv in user.ScrobbleProviders.Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken)))
             {
                 var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(kv.Key);
-                var onHoldStatus = kv.Value.Settings.InactiveSeriesRule.TransitionStatus;
-                var droppedStatus = kv.Value.Settings.DroppedSeriesRule.TransitionStatus;
+                var inactiveRule = kv.Value.Settings.InactiveSeriesRule;
+                var droppedRule = kv.Value.Settings.DroppedSeriesRule;
+                var onHoldStatus = inactiveRule.TransitionStatus;
+                var droppedStatus = droppedRule.TransitionStatus;
+
+                var inactiveHash = _ruleService.ComputeHash(inactiveRule);
+                var droppedHash = _ruleService.ComputeHash(droppedRule);
+
+                // Keys already delivered under the current config - these are skipped to avoid re-sending
+                var inactiveDelivered = await _ruleService.GetDeliveredKeysAsync(user.Id, kv.Key, TransitionRuleKind.Inactive, inactiveHash, ct);
+                var droppedDelivered = await _ruleService.GetDeliveredKeysAsync(user.Id, kv.Key, TransitionRuleKind.Dropped, droppedHash, ct);
 
                 if (scrobbleProviderService is ISeriesScrobbleService)
                 {
                     var onHoldSeries =
                         (await _unitOfWork.SeriesRepository.GetSeriesForReadStatusTransitionRuleAsync(user.Id,
-                            kv.Value.Settings.InactiveSeriesRule, false, ct))
+                            inactiveRule, false, ct))
                         .Where(s => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, s).Contains(kv.Key));
 
                     var droppedSeries =
                         (await _unitOfWork.SeriesRepository.GetSeriesForReadStatusTransitionRuleAsync(user.Id,
-                            kv.Value.Settings.DroppedSeriesRule, true, ct))
+                            droppedRule, true, ct))
                         .Where(s => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, s).Contains(kv.Key));
 
 
 
                     foreach (var series in onHoldSeries)
                     {
+                        if (inactiveDelivered.Contains((series.Id, null))) continue;
                         var ctx = new ScrobbleUpdateContext { User = user, Series = series };
 
-                        await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, onHoldStatus, ct);
+                        await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, onHoldStatus, TransitionRuleKind.Inactive, inactiveHash, ct);
                     }
 
                     foreach (var series in droppedSeries)
                     {
+                        if (droppedDelivered.Contains((series.Id, null))) continue;
                         var ctx = new ScrobbleUpdateContext { User = user, Series = series };
 
-                        await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, droppedStatus, ct);
+                        await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, droppedStatus, TransitionRuleKind.Dropped, droppedHash, ct);
                     }
 
                     continue;
                 }
 
                 var onHoldChapters = (await _unitOfWork.ChapterRepository.GetChaptersForReadStatusTransitionRuleAsync(user.Id,
-                    kv.Value.Settings.InactiveSeriesRule, ct))
+                    inactiveRule, ct))
                     .Where(c => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, c.Volume.Series).Contains(kv.Key));
 
                 var droppedChapters = (await _unitOfWork.ChapterRepository.GetChaptersForReadStatusTransitionRuleAsync(user.Id,
-                        kv.Value.Settings.DroppedSeriesRule, ct))
+                        droppedRule, ct))
                     .Where(c => GetProvidersForScrobbleEvent(null, ScrobbleEventType.ReadStatusUpdate, user, c.Volume.Series).Contains(kv.Key));
 
                 foreach (var chapter in onHoldChapters)
                 {
+                    if (inactiveDelivered.Contains((chapter.Volume.Series.Id, chapter.Id))) continue;
                     var ctx = new ScrobbleUpdateContext { User = user, Series = chapter.Volume.Series, Chapter = chapter};
 
-                    await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, onHoldStatus, ct);
+                    await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, onHoldStatus, TransitionRuleKind.Inactive, inactiveHash, ct);
                 }
 
                 foreach (var chapter in droppedChapters)
                 {
+                    if (droppedDelivered.Contains((chapter.Volume.Series.Id, chapter.Id))) continue;
                     var ctx = new ScrobbleUpdateContext { User = user, Series = chapter.Volume.Series, Chapter = chapter };
 
-                    await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, droppedStatus, ct);
+                    await scrobbleProviderService.ScrobbleReadStatusUpdates(ctx, droppedStatus, TransitionRuleKind.Dropped, droppedHash, ct);
                 }
             }
         }
@@ -1323,6 +1343,10 @@ public class ScrobblingService : IScrobblingService
                 evt.IsProcessed = true;
                 evt.ProcessDateUtc = DateTime.UtcNow;
                 _unitOfWork.ScrobbleRepository.Update(evt);
+
+                // Record the durable ledger row only on confirmed delivery. No-op for non-rule events.
+                // Committed alongside the event update by the SaveToDb below.
+                await _ruleService.RecordDeliveredAsync(evt, ct);
             }
             catch (FlurlHttpException)
             {

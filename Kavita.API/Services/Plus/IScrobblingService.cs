@@ -203,9 +203,12 @@ public interface IScrobbleProviderService
     /// </summary>
     /// <param name="ctx"></param>
     /// <param name="status"></param>
+    /// <param name="ruleKind">Which transition rule produced this, when fired from <see cref="IScrobblingService.RunReadStatusTransitionRules"/>. Pins onto the event for the delivery-time ledger write.</param>
+    /// <param name="ruleHash">Snapshot of the rule's configuration hash at fire-time.</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task ScrobbleReadStatusUpdates(ScrobbleUpdateContext ctx, ScrobbleReadStatus status, CancellationToken ct = default);
+    Task ScrobbleReadStatusUpdates(ScrobbleUpdateContext ctx, ScrobbleReadStatus status,
+        TransitionRuleKind? ruleKind = null, string? ruleHash = null, CancellationToken ct = default);
 
     /// <summary>
     /// Check if the token is valid and not expired (No api calls made)
