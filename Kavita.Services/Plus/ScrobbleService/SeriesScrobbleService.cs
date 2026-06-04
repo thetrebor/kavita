@@ -46,6 +46,7 @@ where T: IScrobbleProviderService
 
         if (existingEvent is { IsProcessed: false })
         {
+            // NOTE: I'm seeing this when statuses align, maybe we should gate the log to avoid extra noise
             logger.LogDebug("Overriding scrobble event for {Series} from Read Status {Status} -> {UpdatedStatus}",
                 ctx.Series.Name, existingEvent.ReadStatus, status);
 

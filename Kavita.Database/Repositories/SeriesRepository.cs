@@ -1841,7 +1841,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                     : x.LastProgressUtc < cutoffDate)
             .WhereIf(requireUnReadChapters, x => x.ReadChapters < x.TotalChapters)
             .Select(x => x.Series)
-            .Includes(SeriesIncludes.Chapters | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata)
+            .Includes(SeriesIncludes.Chapters | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata | SeriesIncludes.Library)
             .ToListAsync(ct);
     }
 }

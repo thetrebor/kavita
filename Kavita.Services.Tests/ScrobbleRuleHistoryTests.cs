@@ -165,6 +165,41 @@ public class ScrobbleRuleHistoryTests(ITestOutputHelper outputHelper) : Abstract
     }
 
     [Fact]
+    public async Task RecordDeliveredAsync_Twice_UpsertsSingleRow_ForNullChapterKey()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (userId, seriesId, _, _, libraryId) = await SeedUserAndSeries(unitOfWork, context);
+
+        async Task Deliver(string hash)
+        {
+            var evt = new ScrobbleEvent
+            {
+                ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
+                ScrobbleProvider = ScrobbleProvider.AniList,
+                Format = PlusMediaFormat.Manga,
+                SeriesId = seriesId,
+                LibraryId = libraryId,
+                AppUserId = userId,
+                ReadStatus = ScrobbleReadStatus.OnHold,
+                TransitionRuleKind = TransitionRuleKind.Inactive,
+                RuleHashSnapshot = hash,
+            };
+            unitOfWork.ScrobbleRepository.Attach(evt);
+            await unitOfWork.CommitAsync();
+
+            await Sut(unitOfWork).RecordDeliveredAsync(evt);
+            await unitOfWork.CommitAsync();
+        }
+
+        await Deliver(Hash1);
+        await Deliver(Hash2); // same (series, null-chapter) key -> must update, not insert a second row
+
+        var rows = await context.ScrobbleRuleHistory.ToListAsync();
+        Assert.Single(rows);
+        Assert.Equal(Hash2, rows[0].RuleHash);
+    }
+
+    [Fact]
     public async Task RecordDeliveredAsync_IgnoresNonRuleEvents()
     {
         var (unitOfWork, context, _) = await CreateDatabase();

@@ -11,6 +11,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
@@ -361,8 +362,9 @@ public class ScrobblingService : IScrobblingService
 
             if (string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken))
             {
-                _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} as no authentication token is set",
-                    provider, user.Id, eventType, series.Id);
+                // NOTE: I don't think we need this, it's very noisy and is essentially saying Provider is not setup
+                // _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} as no authentication token is set",
+                //     provider, user.Id, eventType, series.Id);
                 continue;
             }
 
@@ -939,6 +941,7 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var user in users)
         {
+            _logger.LogInformation("Processing Scrobble rules for User {UserName} ({UserId})", user.UserName?.Sanitize(), user.Id);
             await _ruleService.ResetReadSeriesAsync(user.Id, ct);
 
             foreach (var kv in user.ScrobbleProviders.Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken)))
@@ -1014,6 +1017,8 @@ public class ScrobblingService : IScrobblingService
                 }
             }
         }
+
+        _logger.LogInformation("Scrobble rules completed processing");
     }
 
 

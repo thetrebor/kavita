@@ -14,6 +14,7 @@ using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
@@ -1113,6 +1114,76 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         Assert.Single(events);
         Assert.Equal(ScrobbleEventType.ScoreUpdated, events[0].ScrobbleEventType);
         Assert.Equal(series.Id, events[0].SeriesId);
+    }
+
+    #endregion
+
+    #region Read Status Transition Rule Dedup
+
+    [Fact]
+    public async Task RunReadStatusTransitionRules_DoesNotResendTransition_AfterDelivery()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, kavitaPlusApiService, readerService, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(Task.FromResult(true));
+        kavitaPlusApiService.GetRateLimitForProviderAsync(ScrobbleProvider.AniList, Arg.Any<string>(), Arg.Any<string>())
+            .Returns(KPlusResult<int>.Success(100));
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(Arg.Any<ScrobbleV3Dto>(), Arg.Any<string>())
+            .Returns(new ScrobbleResponseDto { Successful = true, RateLeft = 100 });
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        // Enable the inactive-series rule
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.InactiveSeriesRule = new ReadStatusTransitionRule
+        {
+            Enabled = true,
+            Days = 30,
+            TransitionStatus = ScrobbleReadStatus.OnHold,
+            ExcludedPublicationStatus = [],
+        };
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        // Give the series some progress, then age it past the rule window so it qualifies as "inactive"
+        var chapter1 = await unitOfWork.ChapterRepository.GetChapterAsync(1);
+        Assert.NotNull(chapter1);
+        await readerService.MarkChaptersAsRead(user, 1, [chapter1]);
+        await unitOfWork.CommitAsync();
+
+        var aged = await context.AppUserProgresses
+            .Where(p => p.AppUserId == 1 && p.SeriesId == 1)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.LastModifiedUtc, DateTime.UtcNow.AddDays(-60)));
+        Assert.Equal(1, aged);
+
+        // First run: the rule fires and creates a single read-status event stamped with the rule kind + hash
+        await service.RunReadStatusTransitionRules();
+
+        // Clearing the tracker forces the assertions below to read the persisted columns, not in-memory copies
+        context.ChangeTracker.Clear();
+        var afterFirstRun = (await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1))
+            .Where(e => e.ScrobbleEventType == ScrobbleEventType.ReadStatusUpdate)
+            .ToList();
+        Assert.Single(afterFirstRun);
+        Assert.Equal(TransitionRuleKind.Inactive, afterFirstRun[0].TransitionRuleKind);
+        Assert.False(string.IsNullOrEmpty(afterFirstRun[0].RuleHashSnapshot));
+
+        // Deliver it through the real pipeline -> writes the durable ledger row
+        await service.ProcessUpdatesSinceLastSync();
+
+        await kavitaPlusApiService.Received().PostScrobbleV3UpdateAsync(
+            Arg.Is<ScrobbleV3Dto>(d => d.ScrobbleEventType == ScrobbleEventType.ReadStatusUpdate), Arg.Any<string>());
+        Assert.Equal(1, await context.ScrobbleRuleHistory.CountAsync());
+
+        // Second run: the series is still inactive, but the ledger must suppress a re-send
+        await service.RunReadStatusTransitionRules();
+
+        var afterSecondRun = (await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1))
+            .Where(e => e.ScrobbleEventType == ScrobbleEventType.ReadStatusUpdate)
+            .ToList();
+        Assert.Single(afterSecondRun);
+        Assert.Equal(afterFirstRun[0].Id, afterSecondRun[0].Id);
     }
 
     #endregion
