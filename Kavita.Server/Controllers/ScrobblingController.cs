@@ -52,7 +52,7 @@ public class ScrobblingController(
         if (user == null) return Unauthorized();
 
         var providers = user.ScrobbleProviders.Values
-            .Select(s => mapper.Map<ScrobbleProviderDto>(s))
+            .Select(mapper.Map<ScrobbleProviderDto>)
             .ToList();
 
         return Ok(providers);
