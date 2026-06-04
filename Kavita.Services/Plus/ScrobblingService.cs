@@ -931,14 +931,14 @@ public class ScrobblingService : IScrobblingService
         await CleanupOldOrBuggedEvents();
     }
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 1, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task RunReadStatusTransitionRules(CancellationToken ct = default)
     {
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
 
         foreach (var user in users)
         {
-            // Read-reset: drop ledger rows for series/chapters the user has read since delivery, so a series that
-            // went re-inactive can fire again. Done once per user before evaluating candidates.
             await _ruleService.ResetReadSeriesAsync(user.Id, ct);
 
             foreach (var kv in user.ScrobbleProviders.Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken)))
