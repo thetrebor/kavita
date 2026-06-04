@@ -91,5 +91,13 @@ public interface IScrobbleRepository
     /// </summary>
     Task PurgeRuleHistoryForProvider(int userId, ScrobbleProvider provider, CancellationToken ct = default);
 
+    /// <summary>
+    /// Deletes queued (unprocessed) rule-generated events for a user/provider/rule so a changed rule does not
+    /// deliver transitions computed under the old configuration.
+    /// </summary>
+    /// <param name="keepHash">When set, only events whose <see cref="ScrobbleEvent.RuleHashSnapshot"/> differs are
+    /// deleted (config changed). When null, all queued events for the rule are deleted (rule disabled).</param>
+    Task PurgeUnprocessedRuleEvents(int userId, ScrobbleProvider provider, TransitionRuleKind ruleKind, string? keepHash, CancellationToken ct = default);
+
     #endregion
 }

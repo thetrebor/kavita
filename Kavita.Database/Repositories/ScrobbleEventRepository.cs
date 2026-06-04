@@ -234,5 +234,21 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
             .ExecuteDeleteAsync(ct);
     }
 
+    public Task PurgeUnprocessedRuleEvents(int userId, ScrobbleProvider provider, TransitionRuleKind ruleKind,
+        string? keepHash, CancellationToken ct = default)
+    {
+        var query = context.ScrobbleEvent
+            .Where(e => e.AppUserId == userId && e.ScrobbleProvider == provider
+                        && e.TransitionRuleKind == ruleKind && !e.IsProcessed);
+
+        // keepHash set => config changed, drop only the now-stale events; null => rule disabled, drop them all
+        if (keepHash != null)
+        {
+            query = query.Where(e => e.RuleHashSnapshot != keepHash);
+        }
+
+        return query.ExecuteDeleteAsync(ct);
+    }
+
     #endregion
 }

@@ -200,6 +200,84 @@ public class ScrobbleRuleHistoryTests(ITestOutputHelper outputHelper) : Abstract
     }
 
     [Fact]
+    public async Task PurgeStaleForSettingsAsync_DropsStaleQueuedEvents_KeepsCurrentAndProcessed()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (userId, seriesId, _, _, libraryId) = await SeedUserAndSeries(unitOfWork, context);
+        var sut = Sut(unitOfWork);
+
+        var currentRule = new ReadStatusTransitionRule
+        {
+            Enabled = true, Days = 30, TransitionStatus = ScrobbleReadStatus.OnHold, ExcludedPublicationStatus = [],
+        };
+        var currentHash = sut.ComputeHash(currentRule);
+        var staleHash = sut.ComputeHash(currentRule with { Days = 14 });
+
+        void AddEvent(string hash, bool processed) => context.ScrobbleEvent.Add(new ScrobbleEvent
+        {
+            ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
+            ScrobbleProvider = ScrobbleProvider.AniList,
+            Format = PlusMediaFormat.Manga,
+            SeriesId = seriesId,
+            LibraryId = libraryId,
+            AppUserId = userId,
+            ReadStatus = ScrobbleReadStatus.OnHold,
+            TransitionRuleKind = TransitionRuleKind.Inactive,
+            RuleHashSnapshot = hash,
+            IsProcessed = processed,
+        });
+
+        AddEvent(staleHash, processed: false);   // queued under old config -> drop
+        AddEvent(currentHash, processed: false); // queued under current config -> keep
+        AddEvent(staleHash, processed: true);    // already delivered -> keep
+        await context.SaveChangesAsync();
+
+        var settings = new ScrobbleProviderSettingsDto { InactiveSeriesRule = currentRule };
+        await sut.PurgeStaleForSettingsAsync(userId, ScrobbleProvider.AniList, settings);
+
+        var remaining = await context.ScrobbleEvent.ToListAsync();
+        Assert.Equal(2, remaining.Count);
+        Assert.DoesNotContain(remaining, e => !e.IsProcessed && e.RuleHashSnapshot == staleHash);
+        Assert.Contains(remaining, e => !e.IsProcessed && e.RuleHashSnapshot == currentHash);
+        Assert.Contains(remaining, e => e.IsProcessed && e.RuleHashSnapshot == staleHash);
+    }
+
+    [Fact]
+    public async Task PurgeStaleForSettingsAsync_DisabledRule_DropsAllQueuedEvents()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (userId, seriesId, _, _, libraryId) = await SeedUserAndSeries(unitOfWork, context);
+        var sut = Sut(unitOfWork);
+
+        var rule = new ReadStatusTransitionRule
+        {
+            Enabled = true, Days = 30, TransitionStatus = ScrobbleReadStatus.OnHold, ExcludedPublicationStatus = [],
+        };
+
+        // A queued event whose hash matches the (still-current) config - normally kept...
+        context.ScrobbleEvent.Add(new ScrobbleEvent
+        {
+            ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
+            ScrobbleProvider = ScrobbleProvider.AniList,
+            Format = PlusMediaFormat.Manga,
+            SeriesId = seriesId,
+            LibraryId = libraryId,
+            AppUserId = userId,
+            ReadStatus = ScrobbleReadStatus.OnHold,
+            TransitionRuleKind = TransitionRuleKind.Inactive,
+            RuleHashSnapshot = sut.ComputeHash(rule),
+            IsProcessed = false,
+        });
+        await context.SaveChangesAsync();
+
+        // ...but the rule is now disabled, so recompute yields nothing -> drop the queued event too
+        var settings = new ScrobbleProviderSettingsDto { InactiveSeriesRule = rule with { Enabled = false } };
+        await sut.PurgeStaleForSettingsAsync(userId, ScrobbleProvider.AniList, settings);
+
+        Assert.Equal(0, await context.ScrobbleEvent.CountAsync());
+    }
+
+    [Fact]
     public async Task RecordDeliveredAsync_IgnoresNonRuleEvents()
     {
         var (unitOfWork, context, _) = await CreateDatabase();

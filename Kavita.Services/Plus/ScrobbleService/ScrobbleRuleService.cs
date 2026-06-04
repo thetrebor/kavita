@@ -89,9 +89,21 @@ public class ScrobbleRuleService(IUnitOfWork unitOfWork, ILogger<ScrobbleRuleSer
     public async Task PurgeStaleForSettingsAsync(int userId, ScrobbleProvider provider,
         ScrobbleProviderSettingsDto settings, CancellationToken ct = default)
     {
-        await unitOfWork.ScrobbleRepository.PurgeRuleHistoryByHashMismatch(
-            userId, provider, TransitionRuleKind.Inactive, ComputeHash(settings.InactiveSeriesRule), ct);
-        await unitOfWork.ScrobbleRepository.PurgeRuleHistoryByHashMismatch(
-            userId, provider, TransitionRuleKind.Dropped, ComputeHash(settings.DroppedSeriesRule), ct);
+        await PurgeStaleForRuleAsync(userId, provider, TransitionRuleKind.Inactive, settings.InactiveSeriesRule, ct);
+        await PurgeStaleForRuleAsync(userId, provider, TransitionRuleKind.Dropped, settings.DroppedSeriesRule, ct);
+    }
+
+    private async Task PurgeStaleForRuleAsync(int userId, ScrobbleProvider provider, TransitionRuleKind ruleKind,
+        ReadStatusTransitionRule rule, CancellationToken ct)
+    {
+        var hash = ComputeHash(rule);
+
+        // Remove old historical items if the actual hash changed (enable/disable does not apply)
+        await unitOfWork.ScrobbleRepository.PurgeRuleHistoryByHashMismatch(userId, provider, ruleKind, hash, ct);
+
+        // Drop queued events the old config produced so they don't deliver after the change. A disabled
+        // rule produces nothing on recompute, so all its queued events are dropped (keepHash = null).
+        var enabled = rule is { Enabled: true, Days: > 0 };
+        await unitOfWork.ScrobbleRepository.PurgeUnprocessedRuleEvents(userId, provider, ruleKind, enabled ? hash : null, ct);
     }
 }
