@@ -1907,7 +1907,10 @@ public class ScrobblingService : IScrobblingService
             {
                 scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
             }
-
+        }
+        else
+        {
+            scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
         }
 
         _unitOfWork.UserRepository.Update(user);
