@@ -1918,6 +1918,7 @@ public class ScrobblingService : IScrobblingService
         return libraries
             .Where(l => IsLibraryTypeSupported(provider, l.Type))
             .Select(l => l.Id)
+            .Where(libraryIds.Contains)
             .ToList();
 
     }

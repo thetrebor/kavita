@@ -73,7 +73,11 @@ public class ScrobblingController(
         var scrobbleProvider = user.ScrobbleProviders[provider];
         scrobbleProvider.Settings = scrobbleSettings;
 
-        if (scrobbleProvider.Settings.Libraries.Count > 0)
+        if (scrobbleProvider.Settings.AllLibraries)
+        {
+            scrobbleProvider.Settings.Libraries = [];
+        }
+        else if (scrobbleProvider.Settings.Libraries.Count > 0)
         {
             scrobbleProvider.Settings.Libraries = await scrobblingService
                 .FilterLibrariesForProvider(provider, UserId, scrobbleProvider.Settings.Libraries);
