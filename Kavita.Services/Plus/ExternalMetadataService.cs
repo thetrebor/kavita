@@ -284,9 +284,10 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         if (!IsPlusEligible(libraryType) || !await _licenseService.HasActiveLicense(ct: ct)) return _defaultReturn;
 
-        // Check blacklist (bad matches) or if there is a don't match
+        // Only blacklisted series (no applicable match exists) are excluded from metadata.
+        // Per-provider match exclusions never block metadata - they only gate scrobbling.
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
-        if (series == null || !series.WillScrobble()) return _defaultReturn;
+        if (series == null || !series.CanMatch()) return _defaultReturn;
 
         var needsRefresh =
             await _unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(seriesId, ct);
@@ -385,17 +386,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
         series.DontMatch = dontMatch;
 
-        if (dontMatch)
-        {
-            // When we set as DontMatch, we will clear existing External Metadata
-            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
-            _unitOfWork.ExternalSeriesMetadataRepository.Remove(series.ExternalSeriesMetadata);
-            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
-            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
-            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
-            _fileCacheService.InvalidatePrefix(GetCoversCacheKey(seriesId), FileCacheService.KavitaPlusCacheDirectory);
-        }
-
+        // Note: toggling DontMatch no longer clears external metadata. Metadata is gated by IsBlacklisted
+        // (a true no-match), not by the per-series/per-provider match opt-out.
         _unitOfWork.SeriesRepository.Update(series);
 
         await _unitOfWork.CommitAsync(ct);
@@ -473,6 +465,8 @@ public class ExternalMetadataService : IExternalMetadataService
                     else if (errorMessage.Contains("Unknown Series"))
                     {
                         series.IsBlacklisted = true;
+                        // No applicable match exists - clear any previously cached external metadata
+                        await ClearExternalMetadataForSeries(seriesId);
                         await _unitOfWork.CommitAsync(ct);
                         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesBlacklisted, seriesId,
                             new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = "unknown-series" }, AuditStatus.Failure, ct: ct);
@@ -1982,6 +1976,25 @@ public class ExternalMetadataService : IExternalMetadataService
             .Max();
     }
 
+
+    /// <summary>
+    /// Removes all cached external metadata (reviews, ratings, recommendations) and invalidates the cover cache
+    /// for a series. Used when a series is blacklisted because no applicable match exists.
+    /// </summary>
+    /// <remarks>Does not commit; the caller is responsible for committing the unit of work.</remarks>
+    private async Task ClearExternalMetadataForSeries(int seriesId)
+    {
+        var externalSeriesMetadata = await _unitOfWork.ExternalSeriesMetadataRepository.GetExternalSeriesMetadata(seriesId);
+        if (externalSeriesMetadata != null)
+        {
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata);
+        }
+
+        _fileCacheService.InvalidatePrefix(GetCoversCacheKey(seriesId), FileCacheService.KavitaPlusCacheDirectory);
+    }
 
     /// <summary>
     /// Gets from DB or creates a new one with just SeriesId
