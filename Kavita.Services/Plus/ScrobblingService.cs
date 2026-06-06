@@ -1122,12 +1122,12 @@ public class ScrobblingService : IScrobblingService
     private static List<ScrobbleEvent> CalculateNetWantToReadDecisions(List<ScrobbleEvent> addEvents, List<ScrobbleEvent> removeEvents)
     {
         // Create a dictionary to track the latest event for each user/series combination
-        var latestEvents = new Dictionary<(int SeriesId, int? ChapterID, int AppUserId), ScrobbleEvent>();
+        var latestEvents = new Dictionary<(int SeriesId, int? ChapterID, int AppUserId, ScrobbleProvider Provider), ScrobbleEvent>();
 
         // Process all add events
         foreach (var addEvent in addEvents)
         {
-            var key = (addEvent.SeriesId, addEvent.ChapterId, addEvent.AppUserId);
+            var key = (addEvent.SeriesId, addEvent.ChapterId, addEvent.AppUserId, addEvent.ScrobbleProvider);
 
             if (latestEvents.TryGetValue(key, out var value) && addEvent.CreatedUtc <= value.CreatedUtc) continue;
 
@@ -1138,7 +1138,7 @@ public class ScrobblingService : IScrobblingService
         // Process all remove events
         foreach (var removeEvent in removeEvents)
         {
-            var key = (removeEvent.SeriesId, removeEvent.ChapterId, removeEvent.AppUserId);
+            var key = (removeEvent.SeriesId, removeEvent.ChapterId, removeEvent.AppUserId, removeEvent.ScrobbleProvider);
 
             if (latestEvents.TryGetValue(key, out var value) && removeEvent.CreatedUtc <= value.CreatedUtc) continue;
 
