@@ -23,6 +23,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
@@ -1564,6 +1565,9 @@ public class ScrobblingService : IScrobblingService
                         VolumeNumber = data.VolumeNumber,
                         PercentRead = data.PercentRead,
                         Rating = data.Rating,
+                        ReviewBody = data.ReviewBody,
+                        ReadStatus = data.ReadStatus ?? ScrobbleReadStatus.Ignore,
+                        TransitionRuleKind = evt.TransitionRuleKind,
                         LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga
                     },
                     AuditStatus.Success, userId: evt.AppUserId);
