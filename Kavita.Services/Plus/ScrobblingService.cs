@@ -1159,6 +1159,8 @@ public class ScrobblingService : IScrobblingService
                 Format = evt.Format,
                 AniListId = evt.AniListId,
                 MalId = (int?) evt.MalId,
+                MangabakaId = evt.MangabakaId,
+                HardcoverId = evt.HardcoverId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = (int?) evt.VolumeNumber,
