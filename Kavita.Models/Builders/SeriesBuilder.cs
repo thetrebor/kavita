@@ -118,6 +118,15 @@ public class SeriesBuilder : API.Helpers.Builders.IEntityBuilder<Series>
         return this;
     }
 
+    public SeriesBuilder WithExternalIds(int aniListId = 0, long malId = 0, int hardcoverId = 0, long mangaBakaId = 0)
+    {
+        _series.AniListId = aniListId;
+        _series.MalId = malId;
+        _series.HardcoverId = hardcoverId;
+        _series.MangaBakaId = mangaBakaId;
+        return this;
+    }
+
 
     public SeriesBuilder WithRelationship(int targetSeriesId, RelationKind kind)
     {

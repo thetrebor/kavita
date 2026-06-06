@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Metadata;
@@ -129,6 +130,11 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public SeriesMetadata Metadata { get; set; } = null!;
     public ExternalSeriesMetadata ExternalSeriesMetadata { get; set; } = null!;
 
+    /// <summary>
+    /// Metadata providers this Series is excluded from being matched against.
+    /// </summary>
+    public ICollection<SeriesMetadataProviderExclusion> MetadataProviderExclusions { get; set; } = null!;
+
     public ICollection<AppUserRating> Ratings { get; set; } = null!;
     public ICollection<AppUserProgress> Progress { get; set; } = null!;
     public ICollection<AppUserCollection> Collections { get; set; } = null!;
@@ -181,5 +187,37 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public bool WillScrobble()
     {
         return !IsBlacklisted && !DontMatch;
+    }
+
+    /// <summary>
+    /// Is this Series eligible to be matched against an external metadata service.
+    /// </summary>
+    public bool CanMatch()
+    {
+        return !IsBlacklisted;
+    }
+
+    /// <summary>
+    /// Does this Series have an external id set for the given scrobble provider.
+    /// </summary>
+    public bool HasExternalId(ScrobbleProvider provider)
+    {
+        return provider switch
+        {
+            ScrobbleProvider.AniList => AniListId != 0,
+            ScrobbleProvider.Mal => MalId != 0,
+            ScrobbleProvider.Hardcover => HardcoverId != 0,
+            ScrobbleProvider.MangaBaka => MangaBakaId != 0,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// Is this Series excluded from being matched against the given metadata provider.
+    /// </summary>
+    /// <remarks>Requires <see cref="MetadataProviderExclusions"/> to be loaded.</remarks>
+    public bool IsExcluded(MetadataProvider provider)
+    {
+        return MetadataProviderExclusions != null && MetadataProviderExclusions.Any(e => e.Provider == provider);
     }
 }

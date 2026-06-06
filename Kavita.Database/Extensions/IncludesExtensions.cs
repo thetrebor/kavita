@@ -167,6 +167,12 @@ public static class IncludesExtensions
                 .Include(s => s.ExternalSeriesMetadata);
         }
 
+        if (includeFlags.HasFlag(SeriesIncludes.MetadataProviderExclusions))
+        {
+            query = query
+                .Include(s => s.MetadataProviderExclusions);
+        }
+
         if (includeFlags.HasFlag(SeriesIncludes.ExternalRecommendations))
         {
             query = query

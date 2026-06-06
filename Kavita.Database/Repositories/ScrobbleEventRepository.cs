@@ -59,6 +59,8 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
             .ThenInclude(s => s.Library)
             .Include(s => s.Series)
             .ThenInclude(s => s.Metadata)
+            .Include(s => s.Series)
+            .ThenInclude(s => s.MetadataProviderExclusions)
             .Include(s => s.AppUser)
             .ThenInclude(u => u.UserPreferences)
             .Where(s => s.ScrobbleEventType == type)

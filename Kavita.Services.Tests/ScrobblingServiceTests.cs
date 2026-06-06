@@ -15,6 +15,7 @@ using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.UserPreferences;
+using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
@@ -117,6 +118,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     {
         var series = new SeriesBuilder("Test Series")
             .WithFormat(MangaFormat.Archive)
+            .WithExternalIds(aniListId: 1, malId: 1, hardcoverId: 1, mangaBakaId: 1)
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolume(new VolumeBuilder("Volume 1")
                 .WithChapters([
@@ -364,6 +366,133 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                 data.VolumeNumber == (int)volume.MaxNumber
             ),
             Arg.Any<string>());
+    }
+
+    #endregion
+
+    #region Per-Provider Exclusion Gate
+
+    [Fact]
+    public async Task Scrobble_MissingProviderId_DoesNotCreateEvent()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
+        licenseService.HasActiveLicense().Returns(true);
+
+        // Clear the AniList id so the (only tokened) provider has no match
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series);
+        series.AniListId = 0;
+        unitOfWork.SeriesRepository.Update(series);
+        await unitOfWork.CommitAsync();
+
+        await service.ScrobbleWantToReadUpdate(1, 1, true);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+    }
+
+    [Fact]
+    public async Task Scrobble_ProviderExcluded_BlocksOnlyExcludedProvider()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
+        licenseService.HasActiveLicense().Returns(true);
+
+        // Give the user a MangaBaka token alongside AniList
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        user.ScrobbleProviders[ScrobbleProvider.MangaBaka] = new AppUserScrobbleProvider
+        {
+            AuthenticationToken = ValidJwtToken,
+            Settings = new ScrobbleProviderSettingsDto { AllLibraries = true, WantToReadSync = true }
+        };
+        unitOfWork.UserRepository.Update(user);
+
+        // Exclude Mangabaka as a metadata provider for the series
+        context.SeriesMetadataProviderExclusion.Add(new SeriesMetadataProviderExclusion
+        {
+            SeriesId = 1, Provider = MetadataProvider.Mangabaka
+        });
+        await unitOfWork.CommitAsync();
+
+        await service.ScrobbleWantToReadUpdate(1, 1, true);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        // AniList (no controlling metadata provider) is unaffected; MangaBaka is muted by the Mangabaka exclusion
+        Assert.Contains(events, e => e.ScrobbleProvider == ScrobbleProvider.AniList);
+        Assert.DoesNotContain(events, e => e.ScrobbleProvider == ScrobbleProvider.MangaBaka);
+    }
+
+    [Fact]
+    public async Task ProcessReadEvents_ProviderExcluded_DoesNotPoisonOtherProviders()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, kavitaPlusApiService, readerService, _, _) = await Setup(unitOfWork, context);
+        licenseService.HasActiveLicense().Returns(true);
+        kavitaPlusApiService.GetRateLimitForProviderAsync(Arg.Any<ScrobbleProvider>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(KPlusResult<int>.Success(100));
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(Arg.Any<ScrobbleV3Dto>(), Arg.Any<string>())
+            .Returns(new ScrobbleResponseDto { Successful = true, RateLeft = 100 });
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        user.ScrobbleProviders[ScrobbleProvider.MangaBaka] = new AppUserScrobbleProvider
+        {
+            AuthenticationToken = ValidJwtToken,
+            Settings = new ScrobbleProviderSettingsDto { AllLibraries = true, ProgressScrobbling = true }
+        };
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        // Create read events for BOTH AniList and MangaBaka while neither is excluded
+        var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(1, VolumeIncludes.Chapters);
+        Assert.NotNull(volume);
+        await readerService.MarkChaptersAsRead(user, 1, volume.Chapters);
+        await unitOfWork.CommitAsync();
+        await service.ScrobbleReadingUpdate(user.Id, 1, volume.Chapters[0].Id);
+
+        var queued = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Contains(queued, e => e.ScrobbleProvider == ScrobbleProvider.AniList);
+        Assert.Contains(queued, e => e.ScrobbleProvider == ScrobbleProvider.MangaBaka);
+
+        // Now exclude Mangabaka and run the send pipeline over the already-queued events
+        context.SeriesMetadataProviderExclusion.Add(new SeriesMetadataProviderExclusion
+        {
+            SeriesId = 1, Provider = MetadataProvider.Mangabaka
+        });
+        await unitOfWork.CommitAsync();
+
+        await service.ProcessUpdatesSinceLastSync();
+        context.ChangeTracker.Clear();
+
+        // AniList is still delivered; MangaBaka is not
+        await kavitaPlusApiService.Received().PostScrobbleV3UpdateAsync(
+            Arg.Is<ScrobbleV3Dto>(d => d.Provider == ScrobbleProvider.AniList), Arg.Any<string>());
+        await kavitaPlusApiService.DidNotReceive().PostScrobbleV3UpdateAsync(
+            Arg.Is<ScrobbleV3Dto>(d => d.Provider == ScrobbleProvider.MangaBaka), Arg.Any<string>());
+
+        // The per-provider block must NOT write a series-level error (that would drop AniList's events next run)
+        var errors = await unitOfWork.ScrobbleRepository.GetAllScrobbleErrorsForSeries(1);
+        Assert.Empty(errors);
+
+        // The excluded provider's event is removed event-scoped, not left to re-skip every run
+        var remaining = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.DoesNotContain(remaining, e => e.ScrobbleProvider == ScrobbleProvider.MangaBaka);
+    }
+
+    [Fact]
+    public void ScrobbleProviderMap_HasSeriesLevelId_ChapterScopedProviderExcludedFromIdGate()
+    {
+        // Series-scoped providers carry their scrobble id on the Series and are gated on series.<P>Id.
+        Assert.True(ScrobbleProviderMap.HasSeriesLevelId(ScrobbleProvider.AniList));
+        Assert.True(ScrobbleProviderMap.HasSeriesLevelId(ScrobbleProvider.Mal));
+        Assert.True(ScrobbleProviderMap.HasSeriesLevelId(ScrobbleProvider.MangaBaka));
+
+        // Hardcover's id lives on the chapter (chapter.HardcoverId), parsed from a different weblink than
+        // series.HardcoverId. The series-level gate must NOT apply id-presence to it, or a scanner-matched book
+        // series (chapter id set, series.HardcoverId == 0) would have its Hardcover scrobbling silently dropped.
+        Assert.False(ScrobbleProviderMap.HasSeriesLevelId(ScrobbleProvider.Hardcover));
     }
 
     #endregion
@@ -1002,6 +1131,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var series = new SeriesBuilder("Spice and Wolf")
             .WithFormat(MangaFormat.Archive)
+            .WithExternalIds(aniListId: 1, malId: 1, hardcoverId: 1, mangaBakaId: 1)
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolume(new VolumeBuilder("Volume 1")
                 .WithChapters([
@@ -1066,6 +1196,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var series = new SeriesBuilder("Spice and Wolf")
             .WithFormat(MangaFormat.Archive)
+            .WithExternalIds(aniListId: 1, malId: 1, hardcoverId: 1, mangaBakaId: 1)
             .WithMetadata(new SeriesMetadataBuilder()
                 .WithAgeRating(AgeRating.R18Plus)
                 .Build())

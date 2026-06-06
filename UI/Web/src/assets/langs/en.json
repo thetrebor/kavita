@@ -1634,6 +1634,8 @@
         "invalid-token": "Invalid AniList Token",
         "unknown-series": "Unknown Series",
         "series-dont-match": "Series Marked as Do Not Match",
+        "provider-excluded": "Provider Excluded from Matching",
+        "missing-provider-id": "No Match for Provider",
         "scrobble-hold-active": "Series Is on Hold",
         "library-scrobbling-disabled": "Library Scrobbling Disabled",
         "token-expired": "AniList Token Has Expired"

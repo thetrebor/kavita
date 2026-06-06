@@ -107,6 +107,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<KavitaPlusAuditLog> KavitaPlusAuditLogs { get; set; } = null!;
 
     public DbSet<ScrobbleRuleHistory> ScrobbleRuleHistory { get; set; } = null!;
+    public DbSet<SeriesMetadataProviderExclusion> SeriesMetadataProviderExclusion { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -605,6 +606,19 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 .WithMany()
                 .HasForeignKey(e => e.ScrobbleEventId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<SeriesMetadataProviderExclusion>(entity =>
+        {
+            // One row per (series, provider); presence means the series is excluded from matching that provider
+            entity.HasIndex(e => new { e.SeriesId, e.Provider })
+                .IsUnique()
+                .HasDatabaseName("IX_SeriesMetadataProviderExclusion_SeriesId_Provider");
+
+            entity.HasOne(e => e.Series)
+                .WithMany(s => s.MetadataProviderExclusions)
+                .HasForeignKey(e => e.SeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         #endregion

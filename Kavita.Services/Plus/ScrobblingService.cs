@@ -217,7 +217,7 @@ public class ScrobblingService : IScrobblingService
     public const string AniListCharacterWebsite = ScrobblingHelper.AniListCharacterWebsite;
     public const string HardcoverStaffWebsite = ScrobblingHelper.HardcoverStaffWebsite;
 
-    private const SeriesIncludes ScrobbleSeriesIncludes = SeriesIncludes.Library | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata;
+    private const SeriesIncludes ScrobbleSeriesIncludes = SeriesIncludes.Library | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata | SeriesIncludes.MetadataProviderExclusions;
 
     // When adjusting these, also adjust in ManageScrobbleProvidersComponent in the UI
     private static readonly IList<ScrobbleProvider> BookProviders = [
@@ -729,6 +729,8 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var provider in providers)
         {
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ChapterRead, user.Id, series.Id, series)) continue;
+
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
             // Explicit check to reduce DB calls and work done
@@ -826,6 +828,30 @@ public class ScrobblingService : IScrobblingService
     #endregion
 
     /// <summary>
+    /// Determines if a series can scrobble to a provider: the provider id must be present and the controlling
+    /// metadata provider (if any) must not be excluded. <see cref="ScrobbleProviderMap"/> defines the mapping.
+    /// </summary>
+    /// <remarks>Requires <see cref="Series.MetadataProviderExclusions"/> to be loaded.</remarks>
+    private static ProviderScrobbleBlock GetProviderScrobbleBlock(Series series, ScrobbleProvider provider)
+    {
+        var source = ScrobbleProviderMap.SourceOf(provider);
+        if (source.HasValue && series.IsExcluded(source.Value))
+        {
+            return ProviderScrobbleBlock.Excluded;
+        }
+
+        // Only gate on id-presence for providers whose id lives on the Series. Chapter-scoped providers (Hardcover)
+        // carry their id on the chapter, which this series-level gate cannot see; blocking them on a missing series
+        // id would regress scanner-matched book series, and their id is enforced downstream at send.
+        if (ScrobbleProviderMap.HasSeriesLevelId(provider) && !series.HasExternalId(provider))
+        {
+            return ProviderScrobbleBlock.MissingId;
+        }
+
+        return ProviderScrobbleBlock.None;
+    }
+
+    /// <summary>
     /// Returns false if the series cannot be scrobbled for the given provider. I.e. not matched for that provider
     /// series on hold, or the library is not eligible
     /// </summary>
@@ -837,12 +863,14 @@ public class ScrobblingService : IScrobblingService
     /// <returns></returns>
     private async Task<bool> CheckIfCannotScrobble(ScrobbleProvider provider, ScrobbleEventType eventType, int userId, int seriesId, Series series)
     {
-        // TODO: This needs updating to take the provider into account (Dict?)
-        if (series.DontMatch)
+        var block = GetProviderScrobbleBlock(series, provider);
+        if (block != ProviderScrobbleBlock.None)
         {
-            _logger.LogInformation("Series {SeriesName} is marked don't match. Not scrobbling", series.Name);
+            var reason = block == ProviderScrobbleBlock.Excluded ? "provider-excluded" : "missing-provider-id";
+            _logger.LogInformation("Series {SeriesName} cannot scrobble to {Provider} ({Reason}). Not scrobbling",
+                series.Name, provider, reason);
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "series-dont-match", userId);
+                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, reason, userId);
             return true;
         }
 
@@ -1315,27 +1343,48 @@ public class ScrobblingService : IScrobblingService
     /// <remarks>If the series cannot be scrobbled, adds a scrobble error</remarks>
     private async Task<bool> ValidateSeriesCanBeScrobbled(ScrobbleEvent evt)
     {
-        if (evt.Series is { IsBlacklisted: false, DontMatch: false })
-            return true;
-
-        _logger.LogInformation("Series {SeriesName} ({SeriesId}) can't be matched and thus cannot scrobble this event",
-            evt.Series.Name, evt.SeriesId);
-
-        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+        // Series-level block: no applicable match exists, so the series is unknown to K+ for ALL providers.
+        if (evt.Series.IsBlacklisted)
         {
-            Comment = UnknownSeriesErrorMessage,
-            Details = $"User: {evt.AppUser.UserName} Series: {evt.Series.Name}",
-            LibraryId = evt.LibraryId,
-            SeriesId = evt.SeriesId
-        });
+            _logger.LogInformation("Series {SeriesName} ({SeriesId}) can't be matched and thus cannot scrobble this event",
+                evt.Series.Name, evt.SeriesId);
 
-        evt.SetErrorMessage(UnknownSeriesErrorMessage);
-        evt.ProcessDateUtc = DateTime.UtcNow;
-        _unitOfWork.ScrobbleRepository.Update(evt);
-        await _unitOfWork.CommitAsync();
-        await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            ToAuditParams(evt), AuditStatus.Failure, "unknown-series", evt.AppUserId);
-        return false;
+            _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+            {
+                Comment = UnknownSeriesErrorMessage,
+                Details = $"User: {evt.AppUser.UserName} Series: {evt.Series.Name}",
+                LibraryId = evt.LibraryId,
+                SeriesId = evt.SeriesId
+            });
+
+            evt.SetErrorMessage(UnknownSeriesErrorMessage);
+            evt.ProcessDateUtc = DateTime.UtcNow;
+            _unitOfWork.ScrobbleRepository.Update(evt);
+            await _unitOfWork.CommitAsync();
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
+                ToAuditParams(evt), AuditStatus.Failure, "unknown-series", evt.AppUserId);
+            return false;
+        }
+
+        // Per-provider block: this provider can't scrobble (excluded or no id) but the series remains valid for
+        // others. Do NOT attach a series-level ScrobbleError - PrepareScrobbleContext filters errored events by
+        // SeriesId, which would drop every provider's events for the series. Remove just this event (event-scoped):
+        // leaving it unprocessed would re-skip and re-audit on every run. If the provider becomes eligible later
+        // (matched / un-excluded), events are regenerated from reading history via FixSeriesMatch.
+        var block = GetProviderScrobbleBlock(evt.Series, evt.ScrobbleProvider);
+        if (block != ProviderScrobbleBlock.None)
+        {
+            var reason = block == ProviderScrobbleBlock.Excluded ? "provider-excluded" : "missing-provider-id";
+            _logger.LogInformation("Series {SeriesName} ({SeriesId}) cannot scrobble to {Provider} ({Reason})",
+                evt.Series.Name, evt.SeriesId, evt.ScrobbleProvider, reason);
+            _unitOfWork.ScrobbleRepository.Remove(evt);
+            await _unitOfWork.CommitAsync();
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
+                ToAuditParams(evt), AuditStatus.Info, reason, evt.AppUserId);
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -2049,6 +2098,20 @@ public class ScrobblingService : IScrobblingService
                 _logger.LogWarning("User {UserName} has no remaining rate limit for {Provider}", user.UserName, kv.Key);
             }
         }
+    }
+
+
+    /// <summary>
+    /// Whether (and why) a series is blocked from scrobbling to a given provider.
+    /// </summary>
+    private enum ProviderScrobbleBlock
+    {
+        /// <summary>Provider is eligible.</summary>
+        None,
+        /// <summary>The provider's controlling metadata provider is excluded for this series.</summary>
+        Excluded,
+        /// <summary>No external id for this provider yet; the series needs matching first.</summary>
+        MissingId
     }
 
 }

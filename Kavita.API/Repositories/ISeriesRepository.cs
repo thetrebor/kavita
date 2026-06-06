@@ -38,6 +38,7 @@ public enum SeriesIncludes
     ExternalRatings = 1 << 7,
     ExternalRecommendations = 1 << 8,
     ExternalMetadata = 1 << 9,
+    MetadataProviderExclusions = 1 << 10,
 
     ExternalData = ExternalMetadata | ExternalReviews | ExternalRatings | ExternalRecommendations,
 }
