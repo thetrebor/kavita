@@ -1662,7 +1662,7 @@
         "clear": "Clear search",
         "dont-match-label": "Do not match",
         "dont-match-tooltip": "Stop Kavita from auto-matching or scrobbling this series",
-        "match-count": "{{ count }} matches",
+        "match-count": "{{count}} matches",
         "apply-match": "Apply match",
         "close": "{{common.close}}",
         "loading-alt": "Loading results",
@@ -1674,7 +1674,8 @@
         "dont-match-active-description": "This series is opted out of Kavita+ matching and scrobbling.",
         "save": "{{common.save}}",
         "volume-count": "{{match-series-result-item.volume-count}}",
-        "chapter-count": "{{match-series-result-item.chapter-count}}"
+        "chapter-count": "{{match-series-result-item.chapter-count}}",
+        "muted-provider-count": "{{count}} providers muted"
     },
 
     "manage-series-exclusions": {

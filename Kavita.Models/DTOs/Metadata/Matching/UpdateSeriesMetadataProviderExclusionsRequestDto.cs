@@ -6,7 +6,7 @@ namespace Kavita.Models.DTOs.Metadata.Matching;
 /// <summary>
 /// Replaces the full set of <see cref="MetadataProvider"/>s a Series is excluded from being matched against.
 /// </summary>
-public sealed record UpdateSeriesMetadataProviderExclusionsDto
+public sealed record UpdateSeriesMetadataProviderExclusionsRequestDto
 {
     /// <summary>
     /// Series to update

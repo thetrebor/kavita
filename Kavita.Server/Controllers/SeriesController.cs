@@ -605,7 +605,7 @@ public class SeriesController(
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [KPlus]
-    [HttpGet("metadata-blacklist")]
+    [HttpGet("metadata-provider-exclusions")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IList<MetadataProvider>>> GetMetadataBlacklist([FromQuery] int seriesId)
     {
@@ -616,15 +616,15 @@ public class SeriesController(
     /// <summary>
     /// Replaces the set of metadata providers this series is excluded from being matched against (full-set replace).
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="requestDto"></param>
     /// <returns></returns>
     [KPlus]
     [HttpPost("metadata-provider-exclusions")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult> UpdateMetadataProviderExclusions([FromBody] UpdateSeriesMetadataProviderExclusionsDto dto)
+    public async Task<ActionResult> UpdateMetadataProviderExclusions([FromBody] UpdateSeriesMetadataProviderExclusionsRequestDto requestDto)
     {
         var ct = HttpContext.RequestAborted;
-        await externalMetadataService.UpdateSeriesMetadataProviderExclusions(dto.SeriesId, dto.Excluded, ct);
+        await externalMetadataService.UpdateSeriesMetadataProviderExclusions(requestDto.SeriesId, requestDto.Excluded, ct);
         return Ok();
     }
 

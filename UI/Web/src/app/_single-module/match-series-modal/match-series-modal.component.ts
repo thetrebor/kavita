@@ -27,6 +27,7 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
 import {SeriesDetail} from "../../_models/series-detail/series-detail";
 import {ManageSeriesExclusionsComponent} from "../manage-series-exclusions/manage-series-exclusions.component";
+import {MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum";
 
 export enum MatchSeriesModalStep {
   Match = 0,
@@ -56,8 +57,7 @@ export class MatchSeriesModalComponent implements OnInit {
   series = input.required<Series>();
 
   activeStep = signal<MatchSeriesModalStep>(MatchSeriesModalStep.Match);
-
-
+  activeExclusions = signal<MetadataProvider[]>([]);
 
   formGroup = new FormGroup({
     query: new FormControl('', []),
@@ -78,6 +78,11 @@ export class MatchSeriesModalComponent implements OnInit {
   hasSearched = signal<boolean>(false);
   selectedItem = signal<ExternalSeriesMatch | null>(null);
   lastQuery = signal<string>('');
+  coverImageUrl!: Signal<string>;
+
+  protected readonly kavitaVolumeCount!: Signal<number>;
+  protected readonly kavitaChapterCount!: Signal<number>;
+  protected readonly seriesDetail = signal<SeriesDetail | null>(null);
 
   protected bodyState = computed<'empty' | 'dont-match' | 'loading' | 'results' | 'no-results'>(() => {
     if (this.isDontMatch()) return 'dont-match';
@@ -86,15 +91,17 @@ export class MatchSeriesModalComponent implements OnInit {
     return this.matches().length > 0 ? 'results' : 'no-results';
   });
 
-  protected coverImageUrl!: Signal<string>;
-  protected readonly kavitaVolumeCount!: Signal<number>;
-  protected readonly kavitaChapterCount!: Signal<number>;
-  protected readonly seriesDetail = signal<SeriesDetail | null>(null);
 
   constructor() {
     this.coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
     this.kavitaVolumeCount = computed(() => (this.seriesDetail()?.volumes ?? []).length);
     this.kavitaChapterCount = computed(() => (this.seriesDetail()?.chapters ?? []).length);
+
+    effect(() => {
+      this.seriesService.getSeriesMetadataExclusions(this.series().id).subscribe((exclusions) => {
+        this.activeExclusions.set([...exclusions]);
+      });
+    })
 
     effect(() => {
       if (this.isDontMatch()) {

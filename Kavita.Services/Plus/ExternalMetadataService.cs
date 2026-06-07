@@ -318,7 +318,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public async Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default)
     {
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
+            SeriesIncludes.Library | SeriesIncludes.MetadataProviderExclusions, ct);
         if (series == null) return;
 
         // Remove from Blacklist
@@ -355,6 +356,27 @@ public class ExternalMetadataService : IExternalMetadataService
             series.MangaBakaId = ids.MangabakaId ?? 0;
             series.HardcoverId = ids.HardcoverId ?? 0;
             series.CbrId = ids.CbrId ?? 0;
+
+            // Manual match is authoritative: drop any exclusion for a provider this match actually returned an id
+            // for, otherwise the freshly-set id would be muted by a stale exclusion (id present + source excluded =>
+            // cannot scrobble). We never auto-add exclusions for providers the match dropped - clearing their ids
+            // above already stops scrobbling, and an exclusion would wrongly suppress all future matching too.
+            if (series.MetadataProviderExclusions is { Count: > 0 })
+            {
+                var matchedProviders = new List<MetadataProvider>();
+                if (series.HardcoverId != 0) matchedProviders.Add(MetadataProvider.Hardcover);
+                if (series.MangaBakaId != 0) matchedProviders.Add(MetadataProvider.Mangabaka);
+                if (series.CbrId != 0) matchedProviders.Add(MetadataProvider.ComicBookRoundup);
+
+                var staleExclusions = series.MetadataProviderExclusions
+                    .Where(e => matchedProviders.Contains(e.Provider))
+                    .ToList();
+                foreach (var exclusion in staleExclusions)
+                {
+                    series.MetadataProviderExclusions.Remove(exclusion);
+                }
+            }
+
             _unitOfWork.SeriesRepository.Update(series);
 
             // Find all scrobble events and rewrite them to be the correct

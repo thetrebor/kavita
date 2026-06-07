@@ -72,8 +72,8 @@
           </div>
 
           <div>
-            <button class="btn btn-sm btn-outline-warning" (click)="activeStep.set(MatchSeriesModalStep.DontMatch)">
-              1 provider muted
+            <button class="btn btn-sm btn-outline-{{activeExclusions().length > 0 ? 'warning' : 'secondary'}}" (click)="activeStep.set(MatchSeriesModalStep.DontMatch)">
+              {{ t('muted-provider-count', {count: activeExclusions().length}) }}
               <i class="fa fa-arrow-right text-muted" aria-hidden="true"></i>
             </button>
           </div>
