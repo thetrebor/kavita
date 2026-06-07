@@ -347,6 +347,14 @@ public class ExternalMetadataService : IExternalMetadataService
                 return;
             }
 
+            // A fix match is the only place we allow overwriting of the External Ids (which control gating for scrobbling)
+            series.AniListId = ids.AniListId ?? 0;
+            series.MalId = ids.MalId ?? 0;
+            series.MangaBakaId = ids.MangabakaId ?? 0;
+            series.HardcoverId = ids.HardcoverId ?? 0;
+            series.CbrId = ids.CbrId ?? 0;
+            _unitOfWork.SeriesRepository.Update(series);
+
             // Find all scrobble events and rewrite them to be the correct
             var events = await _unitOfWork.ScrobbleRepository.GetAllEventsForSeries(seriesId, ct);
             _unitOfWork.ScrobbleRepository.Remove(events);
@@ -411,7 +419,8 @@ public class ExternalMetadataService : IExternalMetadataService
         bool fromMatchFlow = false, MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
     {
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
+            SeriesIncludes.Library | SeriesIncludes.MetadataProviderExclusions, ct);
         if (series == null)
         {
             return _defaultReturn;
@@ -522,7 +531,11 @@ public class ExternalMetadataService : IExternalMetadataService
             externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
             externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
             externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
-            series.MangaBakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
+
+            if (!series.IsExcluded(MetadataProvider.Mangabaka))
+            {
+                series.MangaBakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
+            }
             var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
             var afterIds = new AuditLogMatchExternalIdsParamsDto { AniListId = externalSeriesMetadata.AniListId, MalId = externalSeriesMetadata.MalId, MangaBakaId = series.MangaBakaId, CbrId = externalSeriesMetadata.CbrId, HardcoverId = hardcoverId };
 
@@ -609,7 +622,8 @@ public class ExternalMetadataService : IExternalMetadataService
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
         if (!settings.Enabled) return false;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Related, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
+            SeriesIncludes.Metadata | SeriesIncludes.Related | SeriesIncludes.MetadataProviderExclusions, ct);
         if (series == null) return false;
 
         var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct);
@@ -1265,19 +1279,21 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = true;
         }
 
-        if (externalMetadata.CbrId is > 0)
+        // AniList/MAL have no backing MetadataProvider, so they are never gated by an exclusion.
+        // Cbr/Mangabaka/Hardcover map to a MetadataProvider - skip writing the id when the series excludes it.
+        if (externalMetadata.CbrId is > 0 && !series.IsExcluded(MetadataProvider.ComicBookRoundup))
         {
             series.CbrId = externalMetadata.CbrId.Value;
             madeModification = true;
         }
 
-        if (externalMetadata.MangabakaId is > 0)
+        if (externalMetadata.MangabakaId is > 0 && !series.IsExcluded(MetadataProvider.Mangabaka))
         {
             series.MangaBakaId = externalMetadata.MangabakaId.Value;
             madeModification = true;
         }
 
-        if (externalMetadata.HardcoverId is > 0)
+        if (externalMetadata.HardcoverId is > 0 && !series.IsExcluded(MetadataProvider.Hardcover))
         {
             series.HardcoverId = externalMetadata.HardcoverId.Value;
             madeModification = true;
