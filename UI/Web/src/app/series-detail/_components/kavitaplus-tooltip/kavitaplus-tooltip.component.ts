@@ -19,9 +19,9 @@ import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.comp
 import {
   ScrobbleProviderImageComponent
 } from "../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',

@@ -79,12 +79,20 @@ public interface IExternalMetadataService
     Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default);
 
     /// <summary>
-    /// Sets a series to Don't Match and removes all previously cached
+    /// Returns the set of <see cref="MetadataProvider"/>s this Series is excluded from being matched against.
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="dontMatch"></param>
     /// <param name="ct"></param>
-    Task UpdateSeriesDontMatch(int seriesId, bool dontMatch, CancellationToken ct = default);
+    Task<IList<MetadataProvider>> GetSeriesMetadataProviderExclusions(int seriesId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Replaces the set of <see cref="MetadataProvider"/>s this Series is excluded from being matched against
+    /// (full-set replace). Un-excluding a provider regenerates scrobble events from existing reading history.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="excluded">The full desired set of excluded providers</param>
+    /// <param name="ct"></param>
+    Task UpdateSeriesMetadataProviderExclusions(int seriesId, IList<MetadataProvider> excluded, CancellationToken ct = default);
 
     /// <summary>
     /// Given external metadata from Kavita+, write as much as possible to the Kavita series as possible

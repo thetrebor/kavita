@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@an
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {ToastrService} from "ngx-toastr";
-import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
+import {ScrobblingService} from "../../../_services/scrobbling.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {MalStack} from "../../../_models/collection/mal-stack";
 import {UserCollection} from "../../../_models/collection-tag";
@@ -10,6 +10,7 @@ import {forkJoin} from "rxjs";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {DecimalPipe} from "@angular/common";
 import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty-state.component";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
     selector: 'app-import-mal-collection',

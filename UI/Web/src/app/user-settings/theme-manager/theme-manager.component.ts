@@ -13,7 +13,6 @@ import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/ca
 import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadableSiteTheme} from "../../_models/theme/downloadable-site-theme";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
 import {ReactiveFormsModule} from "@angular/forms";
@@ -23,6 +22,7 @@ import {ModalService} from "../../_services/modal.service";
 import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
+import {ScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 interface ThemeContainer {
   downloadable?: DownloadableSiteTheme;

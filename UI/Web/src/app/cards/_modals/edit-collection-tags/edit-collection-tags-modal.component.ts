@@ -27,7 +27,6 @@ import {UserCollection} from 'src/app/_models/collection-tag';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
-import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -39,7 +38,6 @@ import {
   CoverImageChooserConfig
 } from "../../../_services/cover-chooser-config-factory.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {AccountService} from "../../../_services/account.service";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
@@ -51,6 +49,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 
 @Component({
@@ -72,7 +71,6 @@ export class EditCollectionTagsModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
-  private readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);

@@ -1,5 +1,5 @@
-import {ScrobbleProvider} from "../_services/scrobbling.service";
 import {AgeRating} from "./metadata/age-rating";
+import {ScrobbleProvider} from "./kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 export interface UserCollection {
   id: number;

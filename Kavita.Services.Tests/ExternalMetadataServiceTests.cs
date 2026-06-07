@@ -3367,6 +3367,112 @@ public class ExternalMetadataServiceTests: AbstractDbTest
 
     #endregion
 
+    #region External Id Provider Exclusion
+
+    /// <summary>
+    /// Phase 2: when a series excludes a metadata provider, a match must not auto-populate that provider's
+    /// external id. AniList/MAL have no backing MetadataProvider so they are never gated; Cbr/Mangabaka/Hardcover
+    /// are skipped only when their provider is excluded. This also exercises the exclusions include being loaded in
+    /// WriteExternalMetadataToSeries - without it, IsExcluded would return false and the excluded id would be written.
+    /// </summary>
+    [Fact]
+    public async Task UpdateExternalIds_ProviderExcluded_DoesNotWriteExcludedProviderIds()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Provider Exclusion";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        // Exclude the two exclusion-backed providers; leave ComicBookRoundup allowed
+        context.SeriesMetadataProviderExclusion.Add(new SeriesMetadataProviderExclusion
+        {
+            SeriesId = series.Id, Provider = MetadataProvider.Hardcover
+        });
+        context.SeriesMetadataProviderExclusion.Add(new SeriesMetadataProviderExclusion
+        {
+            SeriesId = series.Id, Provider = MetadataProvider.Mangabaka
+        });
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AniListId = 111,
+            MALId = 222,
+            CbrId = 333,
+            HardcoverId = 444,
+            MangabakaId = 555,
+        }, series.Id);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id);
+        Assert.NotNull(postSeries);
+        // Not gated (no backing MetadataProvider) - always written
+        Assert.Equal(111, postSeries.AniListId);
+        Assert.Equal(222, postSeries.MalId);
+        // Exclusion-backed but not excluded - written
+        Assert.Equal(333, postSeries.CbrId);
+        // Excluded - must remain unset
+        Assert.Equal(0, postSeries.HardcoverId);
+        Assert.Equal(0, postSeries.MangaBakaId);
+    }
+
+    /// <summary>
+    /// Control: with no exclusions, every returned id is written (guards against the exclusion check
+    /// accidentally blocking ids when no exclusion rows exist).
+    /// </summary>
+    [Fact]
+    public async Task UpdateExternalIds_NoExclusions_WritesAllReturnedIds()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - No Provider Exclusion";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AniListId = 111,
+            MALId = 222,
+            CbrId = 333,
+            HardcoverId = 444,
+            MangabakaId = 555,
+        }, series.Id);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id);
+        Assert.NotNull(postSeries);
+        Assert.Equal(111, postSeries.AniListId);
+        Assert.Equal(222, postSeries.MalId);
+        Assert.Equal(333, postSeries.CbrId);
+        Assert.Equal(444, postSeries.HardcoverId);
+        Assert.Equal(555, postSeries.MangaBakaId);
+    }
+
+    #endregion
+
 
     private static SeriesStaffDto CreateStaff(string first, string last, string role)
     {

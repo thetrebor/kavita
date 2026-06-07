@@ -1,5 +1,5 @@
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ScrobbleReadStatus} from "../kavitaplus/scrobble-providers/scrobble-read-status.enum";
+import {ScrobbleProvider} from "../kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 export enum ScrobbleEventType {
   ChapterRead = 0,

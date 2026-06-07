@@ -13,7 +13,6 @@ import {ProfileIconComponent} from '../../../_single-module/profile-icon/profile
 import {
   ScrobbleProviderImageComponent
 } from '../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
-import {ScrobbleProvider} from '../../../_services/scrobbling.service';
 import {ScrobbleProviderNamePipe} from '../../../_pipes/scrobble-provider-name.pipe';
 import {
   ScrobbleProviderTagBadgeComponent
@@ -28,6 +27,7 @@ import {AuditSubjectType} from "../../../_models/kavitaplus/audit-subject-type.e
 import {MetadataFetchTriggerTitlePipe} from "../../../_pipes/metadata-fetch-trigger-title.pipe";
 import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-kavitaplus-audit-entry',

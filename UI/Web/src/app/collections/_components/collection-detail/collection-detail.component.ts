@@ -45,7 +45,6 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {AccountService} from "../../../_services/account.service";
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {
@@ -66,6 +65,7 @@ import {getWritableResolvedData} from "../../../../libs/route-util";
 import {User} from "../../../_models/user/user";
 import {DrawerService} from "../../../_services/drawer.service";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-collection-detail',
@@ -94,7 +94,7 @@ export class CollectionDetailComponent implements AfterContentChecked {
   protected readonly breakpointService = inject(BreakpointService);
   private readonly scrollService = inject(ScrollService);
   private readonly metadataService = inject(MetadataService);
-
+  
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
   scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');

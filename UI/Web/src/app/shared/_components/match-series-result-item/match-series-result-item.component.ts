@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 import {ExternalSeriesMatch} from "../../../_models/series-detail/external-series-match";
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ImageComponent} from "../../image/image.component";
@@ -8,6 +7,7 @@ import {MediaFormatPillComponent} from "../media-format-pill/media-format-pill.c
 import {ScrobbleProviderTagBadgeComponent} from "../scrobble-provider-tag-badge/scrobble-provider-tag-badge.component";
 import {MatchStatusDotComponent} from "../match-status-dot/match-status-dot.component";
 import {ConfidenceChipComponent} from "../confidence-chip/confidence-chip.component";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-match-series-result-item',
@@ -31,7 +31,6 @@ export class MatchSeriesResultItemComponent {
   query = input<string>('');
   selected = output<ExternalSeriesMatch>();
 
-  protected readonly ScrobbleProvider = ScrobbleProvider;
 
   protected matchedSynonyms = computed(() => {
     const q = this.query().trim().toLowerCase();
@@ -62,4 +61,5 @@ export class MatchSeriesResultItemComponent {
   selectItem() {
     this.selected.emit(this.item());
   }
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }

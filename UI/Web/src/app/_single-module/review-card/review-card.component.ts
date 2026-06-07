@@ -7,12 +7,12 @@ import {ReviewModalCloseEvent, ReviewModalComponent} from "../review-modal/revie
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {RatingAuthority} from "../../_models/rating";
 import {ProfileIconComponent} from "../profile-icon/profile-icon.component";
 import {RouterLink} from "@angular/router";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ModalService} from "../../_services/modal.service";
+import {ScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-review-card',

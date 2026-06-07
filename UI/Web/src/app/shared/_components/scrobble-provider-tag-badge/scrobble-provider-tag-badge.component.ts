@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ScrobbleProviderImageComponent} from "../scrobble-provider-image/scrobble-provider-image.component";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {getProviderUrl} from "../../utils/provider-url.util";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 const PROVIDER_BRAND_COLORS: Partial<Record<ScrobbleProvider, string>> = {
   [ScrobbleProvider.MangaBaka]: '#7c5cff',

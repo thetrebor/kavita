@@ -11,6 +11,7 @@ public enum KavitaPlusEventType
     /// </summary>
     SeriesMatchFixed = 3,
     SeriesDontMatchSet = 4,
+    SeriesMetadataProviderExclusionsSet = 5,
 
     // Metadata - Series
     MetadataFetched = 10,

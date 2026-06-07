@@ -1607,6 +1607,7 @@
         "series-blacklisted": "Blacklisted",
         "series-match-fixed": "Match Fixed",
         "series-dont-match-set": "Don't Match Set",
+        "series-metadata-provider-exclusions-set": "Provider Exclusions Updated",
         "metadata-fetched": "Metadata Fetched",
         "metadata-updated": "Metadata Updated",
         "cover-updated": "Cover Updated",
@@ -1674,6 +1675,20 @@
         "save": "{{common.save}}",
         "volume-count": "{{match-series-result-item.volume-count}}",
         "chapter-count": "{{match-series-result-item.chapter-count}}"
+    },
+
+    "manage-series-exclusions": {
+        "back-alt": "Back to match",
+        "exclusions-title": "Provider exclusions",
+        "exclusions-description": "Kavita matches this series against external metadata providers to pull covers, descriptions and scrobble reading progress. Exclude a provider this series isn't on, or blacklist it everywhere to stop matching entirely.",
+        "blacklist-title": "Blacklist everywhere",
+        "blacklist-description": "Stops Kavita from ever matching this series and removes it from all providers. Use for series you never want tracked.",
+        "exclude-section-label": "Exclude individual providers",
+        "excluded-count": "{{num}} excluded",
+        "excluded-badge": "Excluded",
+        "status-matched": "Kavita matches this series against {{provider}}.",
+        "status-excluded": "Excluded. Kavita won't match this series against {{provider}}.",
+        "status-not-found": "Not found on {{provider}}. Exclude to stop repeated match attempts."
     },
 
     "match-series-result-item": {
@@ -2562,10 +2577,9 @@
     },
 
     "scrobble-provider-description-pipe": {
-        "kavita": "",
-        "ani-list": "Everything Manga & Light Novels",
-        "my-anime-list": "Want To Read & Stacks sync for Manga & Light Novels",
-        "comic-book-roundup": "",
+        "anilist": "Everything Manga & Light Novels",
+        "myanimelist": "Want To Read & Stacks sync for Manga & Light Novels",
+        "comicbookroundup": "Everything Comics",
         "hardcover": "Everything Books, Manga, and Light Novels!",
         "manga-baka": "Everything Manga & Light Novels"
     },

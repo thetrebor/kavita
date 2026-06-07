@@ -1,5 +1,6 @@
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {ScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
+// TODO: Migrate this to a pipe
 export function getProviderUrl(provider: ScrobbleProvider, id: number): string | null {
   switch (provider) {
     case ScrobbleProvider.AniList:   return `https://anilist.co/manga/${id}/`;

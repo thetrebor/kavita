@@ -5,6 +5,7 @@ export enum KavitaPlusEventType {
   SeriesBlacklisted = 2,
   SeriesMatchFixed = 3,
   SeriesDontMatchSet = 4,
+  SeriesMetadataProviderExclusionsSet = 5,
 
   // Metadata - Series
   MetadataFetched = 10,

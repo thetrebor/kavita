@@ -1,5 +1,6 @@
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ScrobbleProviderSettings} from "./scrobble-provider-settings";
+import {ScrobbleProvider} from "./scrobble-provider.enum";
+
 
 export class UserScrobbleProvider {
   provider!: ScrobbleProvider;

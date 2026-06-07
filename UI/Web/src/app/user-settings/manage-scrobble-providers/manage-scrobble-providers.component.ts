@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
-import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobblingService} from "../../_services/scrobbling.service";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {filter, map, of, startWith, switchMap, tap} from "rxjs";
 import {AgeRating, AgeRatings} from "../../_models/metadata/age-rating";
@@ -49,6 +49,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
+import {ScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;

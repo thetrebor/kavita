@@ -1,7 +1,8 @@
 import {LibraryType} from "../library/library";
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
+
 import {ScrobbleEventType} from "../scrobbling/scrobble-event";
 import {ScrobbleReadStatus} from "./scrobble-providers/scrobble-read-status.enum";
+import {ScrobbleProvider} from "./scrobble-providers/scrobble-provider.enum";
 
 export interface KavitaPlusScrobbleDetails {
   scrobbleEventType: ScrobbleEventType | null;

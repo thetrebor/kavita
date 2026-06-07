@@ -7,12 +7,13 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UserTokenInfo} from "../../_models/kavitaplus/user-token-info";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
-import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {
   ScrobbleProviderImageComponent
 } from "../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
+import {ScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-manage-user-tokens',

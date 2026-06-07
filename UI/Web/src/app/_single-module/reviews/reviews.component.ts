@@ -13,7 +13,7 @@ import {Chapter} from "../../_models/chapter";
 import {ModalService} from "../../_services/modal.service";
 import {AccountService} from "../../_services/account.service";
 import {RatingAuthority} from "src/app/_models/rating";
-import {ScrobbleProvider} from "src/app/_services/scrobbling.service";
+import {ScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-reviews',

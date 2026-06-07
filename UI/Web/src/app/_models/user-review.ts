@@ -1,8 +1,8 @@
-import {ScrobbleProvider} from "../_services/scrobbling.service";
 import {RatingAuthority} from "./rating";
 import {Chapter} from "./chapter";
 import {Series} from "./series";
 import {Person} from "./metadata/person";
+import {ScrobbleProvider} from "./kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 
 export interface UserReview {

@@ -7,12 +7,13 @@ import {
   input,
   OnInit,
   signal,
-  Signal
+  Signal,
+  viewChild
 } from '@angular/core';
 import {Series} from "../../_models/series";
 import {SeriesService} from "../../_services/series.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 import {ToastrService} from "ngx-toastr";
@@ -25,16 +26,22 @@ import {
 import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
 import {SeriesDetail} from "../../_models/series-detail/series-detail";
+import {ManageSeriesExclusionsComponent} from "../manage-series-exclusions/manage-series-exclusions.component";
+
+export enum MatchSeriesModalStep {
+  Match = 0,
+  DontMatch = 1
+}
 
 @Component({
   selector: 'app-match-series-modal',
   imports: [
     ReactiveFormsModule,
     TranslocoDirective,
-    NgbTooltip,
     EmptyStateComponent,
     MatchSeriesResultItemComponent,
     ImageComponent,
+    ManageSeriesExclusionsComponent,
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',
@@ -48,6 +55,10 @@ export class MatchSeriesModalComponent implements OnInit {
 
   series = input.required<Series>();
 
+  activeStep = signal<MatchSeriesModalStep>(MatchSeriesModalStep.Match);
+
+
+
   formGroup = new FormGroup({
     query: new FormControl('', []),
     dontMatch: new FormControl(false, []),
@@ -60,7 +71,7 @@ export class MatchSeriesModalComponent implements OnInit {
     { initialValue: false }
   );
 
-  protected readonly canSaveDontMatch!: Signal<boolean>;
+  protected readonly exclusionsCmp = viewChild(ManageSeriesExclusionsComponent);
 
   matches = signal<ExternalSeriesMatch[]>([]);
   isLoading = signal<boolean>(false);
@@ -81,7 +92,6 @@ export class MatchSeriesModalComponent implements OnInit {
   protected readonly seriesDetail = signal<SeriesDetail | null>(null);
 
   constructor() {
-    this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
     this.coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
     this.kavitaVolumeCount = computed(() => (this.seriesDetail()?.volumes ?? []).length);
     this.kavitaChapterCount = computed(() => (this.seriesDetail()?.chapters ?? []).length);
@@ -159,9 +169,9 @@ export class MatchSeriesModalComponent implements OnInit {
     });
   }
 
-  saveDontMatch() {
-    this.seriesService.updateDontMatch(this.series().id, true).subscribe(() => {
-      this.modalService.close(true);
-    });
+  onExclusionsSaved() {
+    this.modalService.close(true);
   }
+
+  protected readonly MatchSeriesModalStep = MatchSeriesModalStep;
 }

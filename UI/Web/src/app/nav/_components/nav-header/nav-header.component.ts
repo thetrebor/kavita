@@ -36,7 +36,6 @@ import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {CollectionOwnerComponent} from "../../../collections/_components/collection-owner/collection-owner.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
@@ -49,6 +48,7 @@ import {AnnotationService} from "../../../_services/annotation.service";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ModalService} from "../../../_services/modal.service";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-nav-header',

@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, Component, output} from '@angular/core';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {WikiLink} from '../../../_models/wiki';
-import {ScrobbleProvider} from '../../../_services/scrobbling.service';
 import {
   ScrobbleProviderImageComponent
 } from '../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
@@ -9,6 +8,7 @@ import {ScrobbleProviderNamePipe} from '../../../_pipes/scrobble-provider-name.p
 import {environment} from "../../../../environments/environment";
 import {RegisterLicenseKeyComponent} from "../register-license-key/register-license-key.component";
 import {KavitaPlusRegistrationStep} from "../license/license.component";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-kavita-plus-upsell',
@@ -33,7 +33,6 @@ export class KavitaPlusUpsellComponent {
     // TODO: Move to Connect Provider page
     this.stepChanged.emit(KavitaPlusRegistrationStep.ConnectProviders);
   }
-
 
 
   protected readonly WikiLink = WikiLink;

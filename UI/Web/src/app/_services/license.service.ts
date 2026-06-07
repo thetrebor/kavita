@@ -6,8 +6,8 @@ import {TextResonse} from '../_types/text-response';
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
 import {KavitaPlusRegisterResult} from "../_models/kavitaplus/registration/kavita-plus-register-result";
 import {KavitaPlusProviderHealthSnapshot} from '../_models/kavitaplus/kavita-plus-provider-health';
-import {ScrobbleProvider} from "./scrobbling.service";
 import {KavitaPlusLicenseUsage} from "../_models/kavitaplus/kavita-plus-license-usage";
+import {ScrobbleProvider} from "../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Injectable({
   providedIn: 'root'

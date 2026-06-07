@@ -600,18 +600,31 @@ public class SeriesController(
     }
 
     /// <summary>
-    /// When true, will not perform a match and will prevent Kavita from attempting to match/scrobble against this series
+    /// Returns the set of metadata providers this series is excluded from being matched against.
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="dontMatch"></param>
     /// <returns></returns>
     [KPlus]
-    [HttpPost("dont-match")]
+    [HttpGet("metadata-blacklist")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult> UpdateDontMatch([FromQuery] int seriesId, [FromQuery] bool dontMatch)
+    public async Task<ActionResult<IList<MetadataProvider>>> GetMetadataBlacklist([FromQuery] int seriesId)
     {
         var ct = HttpContext.RequestAborted;
-        await externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch, ct);
+        return Ok(await externalMetadataService.GetSeriesMetadataProviderExclusions(seriesId, ct));
+    }
+
+    /// <summary>
+    /// Replaces the set of metadata providers this series is excluded from being matched against (full-set replace).
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [KPlus]
+    [HttpPost("metadata-provider-exclusions")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult> UpdateMetadataProviderExclusions([FromBody] UpdateSeriesMetadataProviderExclusionsDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+        await externalMetadataService.UpdateSeriesMetadataProviderExclusions(dto.SeriesId, dto.Excluded, ct);
         return Ok();
     }
 

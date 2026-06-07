@@ -1,4 +1,4 @@
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {ScrobbleProvider} from "../kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 export enum PlusMediaFormat {
   Manga = 1,

@@ -3,7 +3,6 @@ import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, finalize, map, take} from 'rxjs/operators';
 import {ListSelectModalComponent} from '../shared/_components/list-select-modal/list-select-modal.component';
-import {ScrobbleProvider} from './scrobbling.service';
 import {
   EditReadingListModalComponent
 } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
@@ -64,6 +63,7 @@ import {addToModal, editModal} from "../_models/modal/modal-options";
 import {ModalService, TypedModalRef} from "./modal.service";
 import {FilterService} from "src/app/_services/filter.service";
 import {DashboardService} from "./dashboard.service";
+import {ScrobbleProvider} from "../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;

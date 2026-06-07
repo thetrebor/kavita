@@ -226,6 +226,8 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
+        // TODO: This should be able to take a CBR Slug and translate it
+
         // TODO: Match needs to be overhauled
         var matchRequest = new MatchSeriesRequestDto()
         {
@@ -385,26 +387,60 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
-    public async Task UpdateSeriesDontMatch(int seriesId, bool dontMatch, CancellationToken ct = default)
+    public async Task<IList<MetadataProvider>> GetSeriesMetadataProviderExclusions(int seriesId, CancellationToken ct = default)
     {
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.ExternalMetadata, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.MetadataProviderExclusions, ct);
+        if (series?.MetadataProviderExclusions == null) return new List<MetadataProvider>();
+
+        return series.MetadataProviderExclusions.Select(e => e.Provider).ToList();
+    }
+
+    public async Task UpdateSeriesMetadataProviderExclusions(int seriesId, IList<MetadataProvider> excluded, CancellationToken ct = default)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.MetadataProviderExclusions, ct);
         if (series == null) return;
 
-        _logger.LogInformation("User has asked Kavita to stop matching/scrobbling on {SeriesName}", series.Name);
+        series.MetadataProviderExclusions ??= new List<SeriesMetadataProviderExclusion>();
 
-        series.DontMatch = dontMatch;
+        var desired = excluded?.Distinct().ToList() ?? new List<MetadataProvider>();
+        var current = series.MetadataProviderExclusions.Select(e => e.Provider).ToList();
 
-        // Note: toggling DontMatch no longer clears external metadata. Metadata is gated by IsBlacklisted
-        // (a true no-match), not by the per-series/per-provider match opt-out.
+        var toAdd = desired.Except(current).ToList();
+        var toRemove = series.MetadataProviderExclusions.Where(e => !desired.Contains(e.Provider)).ToList();
+
+        if (toAdd.Count == 0 && toRemove.Count == 0) return;
+
+        _logger.LogInformation("Updating metadata provider exclusions for {SeriesName} to [{Providers}]",
+            series.Name, string.Join(", ", desired));
+
+        foreach (var exclusion in toRemove)
+        {
+            series.MetadataProviderExclusions.Remove(exclusion);
+        }
+
+        foreach (var provider in toAdd)
+        {
+            series.MetadataProviderExclusions.Add(new SeriesMetadataProviderExclusion { Provider = provider });
+        }
+
+        // Note: changing exclusions never clears external metadata. Metadata is gated by IsBlacklisted
+        // (a true no-match), not by the per-provider match opt-out.
         _unitOfWork.SeriesRepository.Update(series);
 
         await _unitOfWork.CommitAsync(ct);
 
+        // Un-excluding a provider should re-generate scrobble events from existing reading history so the
+        // newly-allowed provider can scrobble again (reading events also self-heal on the next read).
+        if (toRemove.Count > 0)
+        {
+            BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId, CancellationToken.None));
+        }
+
         // Send a series Update to ensure pages get the new information
         await _eventHub.SendMessageAsync(MessageFactory.SeriesUpdated, MessageFactory.SeriesUpdatedEvent(series.Id), ct: ct);
 
-        await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesDontMatchSet, seriesId,
-            new AuditLogMatchDontMatchParamsDto { SeriesName = series.Name, DontMatch = dontMatch }, ct: ct);
+        await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMetadataProviderExclusionsSet, seriesId,
+            new AuditLogMetadataProviderExclusionsParamsDto { SeriesName = series.Name, Excluded = desired }, ct: ct);
     }
 
     /// <summary>
@@ -526,7 +562,8 @@ public class ExternalMetadataService : IExternalMetadataService
                 .Average(r => r.AverageScore) : 0;
 
             // prefer what was passed in (manual match), fall back to what K+ returned
-            var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId, MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
+            var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId,
+                MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
             externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
             externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
@@ -537,14 +574,17 @@ public class ExternalMetadataService : IExternalMetadataService
                 series.MangaBakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
             }
             var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
-            var afterIds = new AuditLogMatchExternalIdsParamsDto { AniListId = externalSeriesMetadata.AniListId, MalId = externalSeriesMetadata.MalId, MangaBakaId = series.MangaBakaId, CbrId = externalSeriesMetadata.CbrId, HardcoverId = hardcoverId };
+            var afterIds = new AuditLogMatchExternalIdsParamsDto { AniListId = externalSeriesMetadata.AniListId,
+                MalId = externalSeriesMetadata.MalId, MangaBakaId = series.MangaBakaId, CbrId = externalSeriesMetadata.CbrId,
+                HardcoverId = hardcoverId };
 
             await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
-                new AuditLogMatchedParamsDto { SeriesName = series.Name, Before = beforeIds, After = afterIds, MatchedName = result.Series?.Name }, ct: ct);
+                new AuditLogMatchedParamsDto { SeriesName = series.Name, Before = beforeIds,
+                    After = afterIds, MatchedName = result.Series?.Name }, ct: ct);
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
-            if (result.Series != null && (series.Library.AllowMetadataMatching || fromMatchFlow))
+            if (result.Series != null && (series.Library!.AllowMetadataMatching || fromMatchFlow))
             {
                 externalSeriesMetadata.Series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
 
@@ -635,7 +675,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var processedGenres = new List<string>();
         var processedTags = new List<string>();
 
-        // TODO: Clean this up with a helper
+        // TODO: Clean this up with a helper/pipeline
         Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));

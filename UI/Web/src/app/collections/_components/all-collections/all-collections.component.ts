@@ -22,7 +22,6 @@ import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
 import {User} from "../../../_models/user/user";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
@@ -36,6 +35,7 @@ import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 
 @Component({

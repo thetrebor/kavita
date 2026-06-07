@@ -1,4 +1,4 @@
-import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {ScrobbleProvider} from "./scrobble-provider.enum";
 
 export type UpdateScrobbleProvider = {
   provider: ScrobbleProvider;

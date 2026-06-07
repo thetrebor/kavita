@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 
@@ -14,6 +15,12 @@ public sealed record AuditLogMatchDontMatchParamsDto
 {
     public string SeriesName { get; init; } = string.Empty;
     public bool DontMatch { get; init; }
+}
+
+public sealed record AuditLogMetadataProviderExclusionsParamsDto
+{
+    public string SeriesName { get; init; } = string.Empty;
+    public IList<MetadataProvider> Excluded { get; init; } = new List<MetadataProvider>();
 }
 
 public sealed record AuditLogMatchFailureParamsDto

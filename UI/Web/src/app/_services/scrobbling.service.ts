@@ -13,15 +13,8 @@ import {KavitaPlusAuditEntry} from "../_models/kavitaplus/kavita-plus-audit-entr
 import {ScrobbleProviderSettings} from "../_models/kavitaplus/scrobble-providers/scrobble-provider-settings";
 import {UpdateScrobbleProvider} from "../_models/kavitaplus/scrobble-providers/update-scrobble-provider";
 import {UserScrobbleProvider} from "../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
+import {ScrobbleProvider} from "../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
-export enum ScrobbleProvider {
-  Kavita = 0,
-  AniList = 1,
-  Mal = 2,
-  Cbr = 4,
-  Hardcover = 5,
-  MangaBaka = 6,
-}
 
 @Injectable({
   providedIn: 'root'

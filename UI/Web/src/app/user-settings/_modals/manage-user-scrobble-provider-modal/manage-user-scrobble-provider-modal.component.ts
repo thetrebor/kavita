@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit} from '@angular/core';
 import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
-import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
+import {ScrobblingService} from "../../../_services/scrobbling.service";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
@@ -17,6 +17,7 @@ import {
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
+import {ScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -85,7 +86,7 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
       ...this.formGroup.getRawValue(),
     }).subscribe(() => this.close());
   }
-
+  
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly NULL_DATE = NULL_DATE;
 }

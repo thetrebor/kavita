@@ -1,4 +1,4 @@
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {ScrobbleProvider} from "./scrobble-providers/scrobble-provider.enum";
 
 export interface UserTokenInfo {
   userId: number;

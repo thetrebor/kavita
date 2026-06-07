@@ -1,0 +1,85 @@
+<ng-container *transloco="let t; prefix: 'manage-series-exclusions'">
+  <!-- Header -->
+  <div class="exclusions-header d-flex align-items-center gap-2 pt-1">
+    <button type="button" class="btn btn-secondary btn-sm" [attr.aria-label]="t('back-alt')"
+            (click)="back.emit()">
+      <i class="fa fa-arrow-left" aria-hidden="true"></i>
+    </button>
+    <div class="d-flex flex-column gap-0">
+      <span class="exclusions-title fw-bold">{{ t('exclusions-title') }}</span>
+      <span class="text-muted small">{{ series().name }}</span>
+    </div>
+  </div>
+
+  <p class="text-muted small mt-3 mb-3">{{ t('exclusions-description') }}</p>
+
+  <!-- Blacklist everywhere -->
+  <div class="provider-card d-flex align-items-center gap-3 mb-3">
+    <span class="provider-glyph d-flex align-items-center justify-content-center flex-shrink-0">
+      <i class="fa-solid fa-ban" aria-hidden="true"></i>
+    </span>
+    <div class="flex-fill">
+      <div class="fw-bold">{{ t('blacklist-title') }}</div>
+      <div class="text-muted small">{{ t('blacklist-description') }}</div>
+    </div>
+    <div class="form-check form-switch flex-shrink-0 mb-0">
+      <input type="checkbox" class="form-check-input" role="switch"
+             id="blacklist-everywhere" [checked]="blacklisted()" (change)="toggleBlacklist()"
+             [attr.aria-label]="t('blacklist-title')" />
+    </div>
+  </div>
+
+  <!-- Section header -->
+  <div class="section-label d-flex align-items-center justify-content-between">
+    <span>{{ t('exclude-section-label') }}</span>
+    @if (excludedCount() > 0) {
+      <span>{{ t('excluded-count', {num: excludedCount()}) }}</span>
+    }
+  </div>
+
+  <!-- Individual providers -->
+  @for (provider of allMetadataProviders; track provider) {
+    <div class="provider-card d-flex align-items-center gap-3 mb-2"
+         [class.excluded]="isExcluded(provider)">
+      <img class="provider-logo flex-shrink-0" [ngSrc]="provider | metadataProviderImage"
+           width="32" height="32" alt="" />
+      <div class="flex-fill">
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold">{{ provider | metadataProviderName }}</span>
+          @if (isExcluded(provider)) {
+            <span class="badge bg-warning text-uppercase">{{ t('excluded-badge') }}</span>
+          }
+        </div>
+        <div class="provider-status text-muted small">
+          @switch (providerStatus(provider)) {
+            @case ('matched') {
+              <span class="text-success">
+                <i class="fa-solid fa-link" aria-hidden="true"></i>
+                {{ t('status-matched', {provider: (provider | metadataProviderName)}) }}
+              </span>
+            }
+            @case ('excluded') {
+              <span>
+                <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
+                {{ t('status-excluded', {provider: (provider | metadataProviderName)}) }}
+              </span>
+            }
+            @case ('not-found') {
+              <span>
+                <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
+                {{ t('status-not-found', {provider: (provider | metadataProviderName)}) }}
+              </span>
+            }
+          }
+        </div>
+      </div>
+      <div class="form-check form-switch flex-shrink-0 mb-0">
+        <input type="checkbox" class="form-check-input" role="switch"
+               [id]="'exclude-' + provider"
+               [checked]="isExcluded(provider)"
+               (change)="toggleExclusion(provider)"
+               [attr.aria-label]="provider | metadataProviderName" />
+      </div>
+    </div>
+  }
+</ng-container>

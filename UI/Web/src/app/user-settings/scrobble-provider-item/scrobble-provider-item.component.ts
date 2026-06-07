@@ -12,12 +12,13 @@ import {
 import {NgTemplateOutlet} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {
   ScrobbleProviderImageComponent
 } from "../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/scrobble-provider.enum";
 
 @Component({
   selector: 'app-scrobble-provider-item',
