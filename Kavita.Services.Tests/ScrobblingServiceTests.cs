@@ -222,8 +222,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                 AuthenticationToken = null,
                 Provider = ScrobbleProvider.AniList,
                 SeriesName = null,
-                Format = (PlusMediaFormat)0,
-            }, "", evt);
+                Format = PlusMediaFormat.Manga,
+            }, string.Empty, evt);
         });
         Assert.True(evt.IsErrored);
         Assert.Equal("Kavita+ subscription no longer active", evt.ErrorDetails);
@@ -248,7 +248,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             AuthenticationToken = null,
             Provider = ScrobbleProvider.AniList,
             SeriesName = null,
-            Format = (PlusMediaFormat)0,
+            Format = PlusMediaFormat.Manga,
         }, string.Empty, evt));
         await unitOfWork.CommitAsync();
         Assert.True(evt.IsErrored);
@@ -284,8 +284,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                 AuthenticationToken = null,
                 Provider = ScrobbleProvider.AniList,
                 SeriesName = null,
-                Format = (PlusMediaFormat)0,
-            }, "", evt);
+                Format = PlusMediaFormat.Manga,
+            }, string.Empty, evt);
         });
 
         Assert.True(evt.IsErrored);
