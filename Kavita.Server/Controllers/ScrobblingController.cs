@@ -185,8 +185,9 @@ public class ScrobblingController(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
         if (user == null) return Unauthorized();
 
+        // MAL doesn't have a validUntil, thus the date will be 1/1/0001. Just filter that out so it doesn't always proc
         return Ok(user.ScrobbleProviders
-            .Where(kv => kv.Value.ValidUntilUtc < DateTime.UtcNow && !string.IsNullOrEmpty(kv.Value.AuthenticationToken))
+            .Where(kv => kv.Value.ValidUntilUtc.Year != 1 && kv.Value.ValidUntilUtc < DateTime.UtcNow && !string.IsNullOrEmpty(kv.Value.AuthenticationToken))
             .Select(kv => kv.Key)
             .ToList()
         );

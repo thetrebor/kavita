@@ -1848,13 +1848,11 @@ public class ScrobblingService : IScrobblingService
 
     public async Task SyncProviderInfo(int userId, ScrobbleProvider provider, CancellationToken ct = default)
     {
-        _logger.LogDebug("Syncing info for {UserId} for {Provider}", userId, provider);
-
-        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-
+        _logger.LogDebug("Syncing scrobbling info for {UserId} for {Provider}", userId, provider);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user == null) return;
 
+        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
         var scrobbleProviderSettings = user.ScrobbleProviders[provider];
 
         scrobbleProviderSettings.LastSyncedUtc = DateTime.UtcNow;
@@ -1872,6 +1870,8 @@ public class ScrobblingService : IScrobblingService
 
             return;
         }
+
+        // TODO: Call HasTokenExpiredForProviderAsync() so we can validate the token authentication, rather than just assuming
 
         // MAL doesn't use JWT tokens
         if (provider != ScrobbleProvider.Mal)
@@ -1901,7 +1901,10 @@ public class ScrobblingService : IScrobblingService
             {
                 scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
             }
-
+        }
+        else
+        {
+            //
         }
 
         _unitOfWork.UserRepository.Update(user);

@@ -56,7 +56,7 @@ export class ScrobblingService {
     );
   }
 
-  expiredTokens() {
+  checkExpiredTokens() {
     return this.httpClient.get<ScrobbleProvider[]>(this.baseUrl + 'scrobbling/expired-tokens');
   }
 
