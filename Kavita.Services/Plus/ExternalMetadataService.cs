@@ -531,7 +531,8 @@ public class ExternalMetadataService : IExternalMetadataService
             externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
             externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
             externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
-            series.MangaBakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
+            externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
+            series.MangaBakaId = externalSeriesMetadata.MangabakaId;
             var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
             var afterIds = new AuditLogMatchExternalIdsParamsDto { AniListId = externalSeriesMetadata.AniListId, MalId = externalSeriesMetadata.MalId, MangaBakaId = series.MangaBakaId, CbrId = externalSeriesMetadata.CbrId, HardcoverId = hardcoverId };
 

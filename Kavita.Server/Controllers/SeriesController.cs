@@ -637,13 +637,13 @@ public class SeriesController(
         MetadataProvider? provider = null;
 
         // Set AniList as MangaBaka since the next update will fix this
-        if (externalMetadata.MangabakaId > 0 || externalMetadata.AniListId > 0)
+        if (series.MangaBakaId > 0 || series.AniListId > 0)
         {
             provider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        } else if (externalMetadata.HardcoverId > 0)
+        } else if (series.HardcoverId > 0)
         {
             provider = Models.Entities.Enums.MetadataProvider.Hardcover;
-        } else if (externalMetadata.CbrId > 0)
+        } else if (series.CbrId > 0)
         {
             provider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
         }
@@ -652,11 +652,11 @@ public class SeriesController(
         {
             HasMatch = externalMetadata.Id > 0,
             // MangaBaka will always set AniList if set
-            IsLegacy = externalMetadata is {AniListId: > 0, MangabakaId: 0},
-            CbrId = externalMetadata.CbrId,
-            HardcoverId = externalMetadata.HardcoverId,
-            MangaBakaId = (int) externalMetadata.MangabakaId,
-            AniListId = externalMetadata.AniListId,
+            IsLegacy = series is {AniListId: > 0, MangaBakaId: 0},
+            CbrId = series.CbrId,
+            HardcoverId = series.HardcoverId,
+            MangaBakaId = (int) series.MangaBakaId,
+            AniListId = series.AniListId,
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,
             PrimaryProvider = provider,
