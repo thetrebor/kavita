@@ -23,6 +23,8 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
     if (sd) {
       switch (sd.scrobbleEventType) {
         case ScrobbleEventType.ChapterRead: {
+          // Note: there can be a discrepency where creation event says Ch 2 and Sent event says Vol 0 Ch 2 due to
+          // -100000 being overridden to 0 on send
           const chapter = this.entityTitleService.scrobbleDetailLabel(sd);
           return chapter ? this.translocoService.translate(`${PREFIX}.read-progress-sent`, {chapter}) : '';
         }

@@ -59,7 +59,7 @@
             <span class="mx-1 dot-separator"></span>{{desc}}
           }
           @if (entry().errorMessage) {
-            - {{entry().errorMessage! | auditLogError}}
+            <span class="mx-1 dot-separator"></span>{{entry().errorMessage! | auditLogError}}
           }
         </div>
       </div>
@@ -71,7 +71,7 @@
           </button>
         }
         <span class="time text-muted text-nowrap">
-          {{entry().createdUtc | utcToLocalDate | timeAgo}}
+          {{entry().createdUtc | utcToLocalDate | timeDifference}}
         </span>
         @if (showUser() && entry().userId) {
           <div class="d-flex align-items-center gap-1 phone-hidden">

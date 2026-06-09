@@ -1902,10 +1902,6 @@ public class ScrobblingService : IScrobblingService
                 scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
             }
         }
-        else
-        {
-            //
-        }
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync(ct);
