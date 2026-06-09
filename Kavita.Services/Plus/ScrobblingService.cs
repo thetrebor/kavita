@@ -23,6 +23,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
@@ -1122,12 +1123,12 @@ public class ScrobblingService : IScrobblingService
     private static List<ScrobbleEvent> CalculateNetWantToReadDecisions(List<ScrobbleEvent> addEvents, List<ScrobbleEvent> removeEvents)
     {
         // Create a dictionary to track the latest event for each user/series combination
-        var latestEvents = new Dictionary<(int SeriesId, int? ChapterID, int AppUserId), ScrobbleEvent>();
+        var latestEvents = new Dictionary<(int SeriesId, int? ChapterID, int AppUserId, ScrobbleProvider Provider), ScrobbleEvent>();
 
         // Process all add events
         foreach (var addEvent in addEvents)
         {
-            var key = (addEvent.SeriesId, addEvent.ChapterId, addEvent.AppUserId);
+            var key = (addEvent.SeriesId, addEvent.ChapterId, addEvent.AppUserId, addEvent.ScrobbleProvider);
 
             if (latestEvents.TryGetValue(key, out var value) && addEvent.CreatedUtc <= value.CreatedUtc) continue;
 
@@ -1138,7 +1139,7 @@ public class ScrobblingService : IScrobblingService
         // Process all remove events
         foreach (var removeEvent in removeEvents)
         {
-            var key = (removeEvent.SeriesId, removeEvent.ChapterId, removeEvent.AppUserId);
+            var key = (removeEvent.SeriesId, removeEvent.ChapterId, removeEvent.AppUserId, removeEvent.ScrobbleProvider);
 
             if (latestEvents.TryGetValue(key, out var value) && removeEvent.CreatedUtc <= value.CreatedUtc) continue;
 
@@ -1159,6 +1160,8 @@ public class ScrobblingService : IScrobblingService
                 Format = evt.Format,
                 AniListId = evt.AniListId,
                 MalId = (int?) evt.MalId,
+                MangabakaId = evt.MangabakaId,
+                HardcoverId = evt.HardcoverId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = (int?) evt.VolumeNumber,
@@ -1562,6 +1565,9 @@ public class ScrobblingService : IScrobblingService
                         VolumeNumber = data.VolumeNumber,
                         PercentRead = data.PercentRead,
                         Rating = data.Rating,
+                        ReviewBody = data.ReviewBody,
+                        ReadStatus = data.ReadStatus ?? ScrobbleReadStatus.Ignore,
+                        TransitionRuleKind = evt.TransitionRuleKind,
                         LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga
                     },
                     AuditStatus.Success, userId: evt.AppUserId);
@@ -1902,6 +1908,10 @@ public class ScrobblingService : IScrobblingService
                 scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
             }
         }
+        else
+        {
+            scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
+        }
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync(ct);
@@ -1917,6 +1927,7 @@ public class ScrobblingService : IScrobblingService
         return libraries
             .Where(l => IsLibraryTypeSupported(provider, l.Type))
             .Select(l => l.Id)
+            .Where(libraryIds.Contains)
             .ToList();
 
     }
