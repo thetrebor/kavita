@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
+using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Server.Helpers;
@@ -613,6 +614,54 @@ public class SeriesController(
         var ct = HttpContext.RequestAborted;
         await externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch, ct);
         return Ok();
+    }
+
+    /// <summary>
+    /// Returns extra information around an existing match (and series) to display on the Match Screen.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("match-info")]
+    [KPlus]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<MatchSeriesInfoDto>> GetExistingMatchInfo(int seriesId)
+    {
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.ExternalMetadata | SeriesIncludes.Library);
+        if (series == null) return NotFound();
+
+        var plusFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
+        var libraryType = series.Library.Type;
+        var externalMetadata = series.ExternalSeriesMetadata;
+
+        // We need provider derived from the primary id
+        MetadataProvider? provider = null;
+
+        // Set AniList as MangaBaka since the next update will fix this
+        if (externalMetadata.MangabakaId > 0 || externalMetadata.AniListId > 0)
+        {
+            provider = Models.Entities.Enums.MetadataProvider.Mangabaka;
+        } else if (externalMetadata.HardcoverId > 0)
+        {
+            provider = Models.Entities.Enums.MetadataProvider.Hardcover;
+        } else if (externalMetadata.CbrId > 0)
+        {
+            provider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
+        }
+
+        return Ok(new MatchSeriesInfoDto()
+        {
+            HasMatch = externalMetadata.Id > 0,
+            // MangaBaka will always set AniList if set
+            IsLegacy = externalMetadata is {AniListId: > 0, MangabakaId: 0},
+            CbrId = externalMetadata.CbrId,
+            HardcoverId = externalMetadata.HardcoverId,
+            MangaBakaId = (int) externalMetadata.MangabakaId,
+            AniListId = externalMetadata.AniListId,
+            LibraryType = libraryType,
+            PlusMediaFormat = plusFormat,
+            PrimaryProvider = provider,
+            SeriesFormat = series.Format
+        });
     }
 
     /// <summary>

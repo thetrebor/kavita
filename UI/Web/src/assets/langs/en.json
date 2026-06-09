@@ -1671,7 +1671,13 @@
         "dont-match-active-description": "This series is opted out of Kavita+ matching and scrobbling.",
         "save": "{{common.save}}",
         "volume-count": "{{match-series-result-item.volume-count}}",
-        "chapter-count": "{{match-series-result-item.chapter-count}}"
+        "chapter-count": "{{match-series-result-item.chapter-count}}",
+        "matched-to": "Currently matched to",
+        "searching-against": "Searching against {{provider}}",
+        "selected-desc": "Selected because: {{libraryType}} {{format}}",
+        "library-type": "Library Type:",
+        "format-type": "Format:",
+        "provider-help": "One provider per library type"
     },
 
     "match-series-result-item": {
@@ -1684,6 +1690,12 @@
         "volume-count": "{{ num }} vol",
         "chapter-count": "{{ num }} ch",
         "issue-count": "{{ num }} issues"
+    },
+
+    "metadata-provider-title-pipe": {
+        "hardcover": "Hardcover",
+        "mangabaka": "MangaBaka",
+        "cbr": "Comic Book Roundup"
     },
 
     "scrobble-provider-tag-badge": {
