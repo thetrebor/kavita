@@ -354,6 +354,8 @@ public class ExternalMetadataService : IExternalMetadataService
             var errors = await _unitOfWork.ScrobbleRepository.GetAllScrobbleErrorsForSeries(seriesId, ct);
             _unitOfWork.ScrobbleRepository.Remove(errors);
 
+
+
             await _unitOfWork.CommitAsync(ct);
 
             // Regenerate all events for the series for all users
@@ -525,6 +527,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // prefer what was passed in (manual match), fall back to what K+ returned
             var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId, MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
+            // TODO: Need to rewthink how all these Ids work and only write on MetadataFetchTrigger.OnDemand
             externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
             externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
             externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
@@ -537,13 +540,13 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
-            if (result.Series != null && (series.Library.AllowMetadataMatching || fromMatchFlow))
+            if (result.Series != null && (series.Library!.AllowMetadataMatching || fromMatchFlow))
             {
                 externalSeriesMetadata.Series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
 
                 try
                 {
-                    madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId, ct);
+                    madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId, trigger, ct);
                     if (madeMetadataModification)
                     {
                         _unitOfWork.SeriesRepository.Update(series);
@@ -610,7 +613,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return _defaultReturn;
     }
 
-    public async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId, CancellationToken ct = default)
+    public async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId, MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
     {
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
         if (!settings.Enabled) return false;
@@ -632,7 +635,10 @@ public class ExternalMetadataService : IExternalMetadataService
         Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
-        Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, settings, externalMetadata));
+        if (trigger == MetadataFetchTrigger.OnDemand)
+        {
+            Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
+        }
 
         // Apply field mappings
         GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
@@ -1255,7 +1261,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return (false, null);
     }
 
-    private static (bool, MetadataFieldChangeDto?) UpdateExternalIds(Series series, MetadataSettingsDto _, ExternalSeriesDetailDto externalMetadata)
+    private static (bool, MetadataFieldChangeDto?) UpdateExternalIds(Series series, ExternalSeriesDetailDto externalMetadata)
     {
         var madeModification = false;
         var from = new { aniListId = series.AniListId, malId = series.MalId, cbrId = series.CbrId, mangaBakaId = series.MangaBakaId, hardcoverId = series.HardcoverId };
@@ -1289,7 +1295,7 @@ public class ExternalMetadataService : IExternalMetadataService
             madeModification = true;
         }
 
-        // TODO: Add the rest of the Ids (Metron/ComicVine) when Kavita+ has them
+        // Add the rest of the Ids (Metron/ComicVine) when Kavita+ has them
 
         if (!madeModification) return (false, null);
         var to = new { aniListId = series.AniListId, malId = series.MalId, cbrId = series.CbrId, mangaBakaId = series.MangaBakaId, hardcoverId = series.HardcoverId };
