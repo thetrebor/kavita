@@ -18,5 +18,6 @@ public sealed record MatchSeriesRequestDto
     public string? HardcoverSlug { get; set; }
     public int? MangabakaId { get; set; }
     public int? CbrId { get; set; }
+    public string? CbrSlug { get; set; }
     public PlusMediaFormat Format { get; set; }
 }

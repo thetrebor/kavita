@@ -205,11 +205,15 @@ public class ExternalMetadataService : IExternalMetadataService
         var potentialHardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverId)
             ? hardcoverId : null;
 
+        // TODO: Clean this logic up once we move to v3
+        var potentialCbrSlug = query.Contains("comicbookroundup.com/") ? query : null;
+
         // If any ID was extracted (header syntax or URL), the raw query string is meaningless to the backend
         var wasHeaderQuery = potentialAnilistId.HasValue
                              || potentialMalId.HasValue
                              || potentialMangabakaId > 0
-                             || !string.IsNullOrEmpty(potentialHardcoverSlug);
+                             || !string.IsNullOrEmpty(potentialHardcoverSlug)
+                             || !string.IsNullOrEmpty(potentialCbrSlug);
 
         query = wasHeaderQuery ? null : dto.Query;
 
@@ -237,7 +241,8 @@ public class ExternalMetadataService : IExternalMetadataService
             AniListId = potentialAnilistId ?? ScrobblingHelper.GetAniListId(series), // TODO: Opportunity to streamline this with ExternalIdParser and the default > 0/empty string checks
             MalId = potentialMalId ?? ScrobblingHelper.GetMalId(series),
             MangabakaId = potentialMangabakaId > 0 ? (int) potentialMangabakaId : (int?) series.MangaBakaId,
-            HardcoverSlug = potentialHardcoverSlug
+            HardcoverSlug = potentialHardcoverSlug,
+            CbrSlug = potentialCbrSlug
         };
 
         try
