@@ -1,0 +1,2 @@
+import{g as o}from"./chunk-KJX5IEQE.js";import{Fb as n,ma as i}from"./chunk-66GPU3XZ.js";var p=(()=>{class e{constructor(){this.translocoService=i(o)}transform(t,r="default-date-pipe.never"){return t==null||t===""||t===1/0||Number.isNaN(t)||t==="1/1/01"?this.translocoService.translate(r):t}static{this.\u0275fac=function(r){return new(r||e)}}static{this.\u0275pipe=n({name:"defaultDate",type:e,pure:!0})}}return e})();export{p as a};
+//# sourceMappingURL=chunk-7P7OPSOA.js.map

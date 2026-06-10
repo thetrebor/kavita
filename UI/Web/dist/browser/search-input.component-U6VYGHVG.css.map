@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/_components/search-input/search-input.component.scss"],
+  "sourcesContent": [":host {\n  display: block;\n  max-width: 12.5rem;\n\n  @media (max-width: 991.98px) {\n    max-width: none;\n    width: 100%;\n  }\n}\n\n.search-icon {\n  position: absolute;\n  left: 0.75rem;\n  color: var(--text-muted-color);\n  font-size: 0.8125rem;\n  pointer-events: none;\n}\n\n.search-control {\n  padding-left: 2.25rem;\n  padding-right: 2.25rem;\n  width: 100%;\n}\n\n.search-clear {\n  position: absolute;\n  right: 0.5rem;\n  opacity: 0.5;\n\n  &:hover {\n    opacity: 1;\n  }\n}\n"],
+  "mappings": "AAAA,MACE,QAAA,MACA,UAAA,QAEA,OAAA,UAAA,UAJF,MAKI,UAAA,KACA,MAAA,MAIJ,CAAA,YACE,SAAA,SACA,KAAA,OACA,MAAA,IAAA,oBACA,UAAA,SACA,eAAA,KAGF,CAAA,eACE,aAAA,QACA,cAAA,QACA,MAAA,KAGF,CAAA,aACE,SAAA,SACA,MAAA,MACA,QAAA,GAEA,CALF,YAKE,OACE,QAAA",
+  "names": []
+}

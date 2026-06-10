@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/user-settings/change-age-restriction/change-age-restriction.component.scss"],
+  "sourcesContent": [".disabled {\n  color: var(--btn-disabled-text-color);\n}\n"],
+  "mappings": "AAAA,CAAA,SACE,MAAA,IAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/statistics/_components/day-breakdown/day-breakdown.component.scss"],
+  "sourcesContent": [".dashboard-card-content {\n  max-width: 43.75rem;\n  height: auto;\n  box-sizing:border-box;\n}\n\n.day-breakdown-chart {\n  width: 100%;\n  margin: 0 auto;\n  max-width: 43.75rem;\n}\n"],
+  "mappings": "AAAA,CAAA,uBACE,UAAA,SACA,OAAA,KACA,WAAA,WAGF,CAAA,oBACE,MAAA,KAPF,OAQE,EAAA,KACA,UAAA",
+  "names": []
+}

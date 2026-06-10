@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/settings/_components/settings/settings.component.scss"],
+  "sourcesContent": ["@use '../../../../theme/variables' as theme;\n\nh2 {\n  color: var(--side-nav-header-text-color);\n  font-weight: bold;\n}\n\n.main-container {\n  margin-top: 0.625rem;\n  max-width: 120rem;\n  padding: 0 1.25rem;\n}\n\n::ng-deep .content-wrapper:not(.closed) {\n  .scale {\n    width: calc(100dvw - 12.5rem) !important;\n\n\n  }\n}\n\n\n@media (max-width: theme.$grid-breakpoints-lg) {\n  ::ng-deep .content-wrapper:not(.closed) {\n    .scale {\n      width: 100% !important;\n      overflow-x: auto;\n    }\n  }\n}\n"],
+  "mappings": "AAEA,GACE,MAAA,IAAA,8BACA,YAAA,IAGF,CAAA,eACE,WAAA,QACA,UAAA,OAPF,QAQE,EAAA,QAIA,UAAA,CAAA,eAAA,KAAA,CAAA,QAAA,CAAA,MACE,MAAA,KAAA,OAAA,EAAA,mBAOJ,OAAA,UAAA,OAEI,UAAA,CAVF,eAUE,KAAA,CAVF,QAUE,CAVF,MAWI,MAAA,eACA,WAAA",
+  "names": []
+}

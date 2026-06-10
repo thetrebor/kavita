@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/server-devices/server-devices.component.scss"],
+  "sourcesContent": ["::ng-deep .advanced-pie-legend .legend-items-container .legend-items .legend-item:hover {\n  color: var(--primary-color) !important;\n}\n"],
+  "mappings": "AAAA,UAAA,CAAA,oBAAA,CAAA,uBAAA,CAAA,aAAA,CAAA,WAAA,OACE,MAAA,IAAA",
+  "names": []
+}

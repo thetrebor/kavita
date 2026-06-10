@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/_components/empty-state/empty-state.component.scss"],
+  "sourcesContent": [".empty-state-container {\n  font-size: 0.8125rem;\n  color: var(--text-muted-color);\n  line-height: 1.6;\n}\n\n.empty-state-icon {\n  width: 3.5rem;\n  height: 3.5rem;\n  background: rgba(255, 255, 255, 0.04);\n  border: 1px solid var(--hr-color);\n  font-size: 1.125rem;\n  opacity: 0.6;\n\n  &.is-error {\n    background: rgba(189, 54, 47, 0.10);\n    border-color: rgba(189, 54, 47, 0.35);\n    color: var(--match-confidence-chip-doubt-color);\n    opacity: 1;\n  }\n}\n\n.empty-state-title {\n  font-size: 0.875rem;\n  color: var(--body-text-color);\n}\n\n.empty-state-desc {\n  color: var(--text-muted-color);\n}\n"],
+  "mappings": "AAAA,CAAA,sBACE,UAAA,SACA,MAAA,IAAA,oBACA,YAAA,IAGF,CAAA,iBACE,MAAA,OACA,OAAA,OACA,WAAA,UACA,OAAA,IAAA,MAAA,IAAA,YACA,UAAA,SACA,QAAA,GAEA,CARF,gBAQE,CAAA,SACE,WAAA,UACA,aAAA,UACA,MAAA,IAAA,qCACA,QAAA,EAIJ,CAAA,kBACE,UAAA,QACA,MAAA,IAAA,mBAGF,CAAA,iBACE,MAAA,IAAA",
+  "names": []
+}

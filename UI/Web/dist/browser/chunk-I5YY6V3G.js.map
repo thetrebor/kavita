@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/reading-direction.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {ReadingDirection} from \"../_models/preferences/reading-direction\";\nimport {translate} from \"@jsverse/transloco\";\n\n@Pipe({\n  name: 'readingDirection',\n  standalone: true\n})\nexport class ReadingDirectionPipe implements PipeTransform {\n\n  transform(value: ReadingDirection): string {\n    const v = parseInt(value + '', 10) as ReadingDirection;\n    switch (v) {\n      case ReadingDirection.LeftToRight: return translate('preferences.left-to-right');\n      case ReadingDirection.RightToLeft: return translate('preferences.right-to-left');\n    }\n  }\n\n}\n"],
+  "mappings": "qJAQA,IAAaA,GAAoB,IAAA,CAA3B,MAAOA,CAAoB,CAE/BC,UAAUC,EAAuB,CAE/B,OADUC,SAASD,EAAQ,GAAI,EAAE,EACxB,CACP,KAAKE,EAAiBC,YAAa,OAAOC,EAAU,2BAA2B,EAC/E,KAAKF,EAAiBG,YAAa,OAAOD,EAAU,2BAA2B,CACjF,CACF,iDARWN,EAAoB,CAAA,wDAApBA,EAAoBQ,KAAA,EAAA,CAAA,CAAA,SAApBR,CAAoB,GAAA",
+  "names": ["ReadingDirectionPipe", "transform", "value", "parseInt", "ReadingDirection", "LeftToRight", "translate", "RightToLeft", "pure"]
+}

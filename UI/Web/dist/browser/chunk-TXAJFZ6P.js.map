@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/page-split-option.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {translate} from \"@jsverse/transloco\";\nimport {PageSplitOption} from \"../_models/preferences/page-split-option\";\nimport {ScalingOption} from \"../_models/preferences/scaling-option\";\n\n@Pipe({\n  name: 'pageSplitOption',\n  standalone: true\n})\nexport class PageSplitOptionPipe implements PipeTransform {\n\n  transform(value: PageSplitOption): string {\n    const v = parseInt(value + '', 10) as PageSplitOption;\n    switch (v) {\n      case PageSplitOption.FitSplit: return translate('preferences.fit-to-screen');\n      case PageSplitOption.NoSplit: return translate('preferences.no-split');\n      case PageSplitOption.SplitLeftToRight: return translate('preferences.split-left-to-right');\n      case PageSplitOption.SplitRightToLeft: return translate('preferences.split-right-to-left');\n    }\n  }\n\n}\n"],
+  "mappings": "qJASA,IAAaA,GAAmB,IAAA,CAA1B,MAAOA,CAAmB,CAE9BC,UAAUC,EAAsB,CAE9B,OADUC,SAASD,EAAQ,GAAI,EAAE,EACxB,CACP,KAAKE,EAAgBC,SAAU,OAAOC,EAAU,2BAA2B,EAC3E,KAAKF,EAAgBG,QAAS,OAAOD,EAAU,sBAAsB,EACrE,KAAKF,EAAgBI,iBAAkB,OAAOF,EAAU,iCAAiC,EACzF,KAAKF,EAAgBK,iBAAkB,OAAOH,EAAU,iCAAiC,CAC3F,CACF,iDAVWN,EAAmB,CAAA,uDAAnBA,EAAmBU,KAAA,EAAA,CAAA,CAAA,SAAnBV,CAAmB,GAAA",
+  "names": ["PageSplitOptionPipe", "transform", "value", "parseInt", "PageSplitOption", "FitSplit", "translate", "NoSplit", "SplitLeftToRight", "SplitRightToLeft", "pure"]
+}

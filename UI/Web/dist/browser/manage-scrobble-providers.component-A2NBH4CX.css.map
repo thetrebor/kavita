@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/user-settings/manage-scrobble-providers/manage-scrobble-providers.component.scss"],
+  "sourcesContent": [".provider-list {\n  display: flex;\n  flex-direction: column;\n  gap: var(--accordion-gap);\n}\n\n::ng-deep .select2-selection__rendered {\n  padding-top: 0.25rem !important;\n}\n"],
+  "mappings": "AAAA,CAAA,cACE,QAAA,KACA,eAAA,OACA,IAAA,IAAA,iBAGF,UAAA,CAAA,4BACE,YAAA",
+  "names": []
+}

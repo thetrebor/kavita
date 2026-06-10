@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_providers/base-url.provider.ts", "src/environments/environment.prod.ts"],
+  "sourcesContent": ["export function getBaseUrl() : string {\n  return document.getElementsByTagName('base')[0]?.getAttribute('href') || '/';\n}\n", "import {getBaseUrl} from \"src/app/_providers/base-url.provider\";\n\nconst BASE_URL = getBaseUrl();\n\nexport const environment = {\n  production: true,\n  apiUrl: `${BASE_URL}api/`,\n  hubUrl:`${BASE_URL}hubs/`,\n  buyLink: 'https://buy.stripe.com/00gcOQanFajG0hi5ko?prefilled_promo_code=FIRSTTIME',\n  manageLink: 'https://billing.stripe.com/p/login/28oaFRa3HdHWb5ecMM'\n};\n"],
+  "mappings": "AAAM,SAAUA,GAAU,CACxB,OAAOC,SAASC,qBAAqB,MAAM,EAAE,CAAC,GAAGC,aAAa,MAAM,GAAK,GAC3E,CCAA,IAAMC,EAAWC,EAAU,EAEdC,EAAc,CACzBC,WAAY,GACZC,OAAQ,GAAGJ,CAAQ,OACnBK,OAAO,GAAGL,CAAQ,QAClBM,QAAS,2EACTC,WAAY",
+  "names": ["getBaseUrl", "document", "getElementsByTagName", "getAttribute", "BASE_URL", "getBaseUrl", "environment", "production", "apiUrl", "hubUrl", "buyLink", "manageLink"]
+}

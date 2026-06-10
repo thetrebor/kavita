@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_single-module/review-card-modal/review-card-modal.component.scss"],
+  "sourcesContent": [".img-max-width {\n    hr {\n        border: solid 0.125rem rgba(var(--primary-color), 0.5) !important;\n    }\n\n    img {\n        max-width: 100%;\n        max-height: 50rem;\n    }\n\n    h1 {\n        font-size: 1.5rem;\n    }\n}\n"],
+  "mappings": "AACI,CAAA,cAAA,GACI,OAAA,MAAA,QAAA,KAAA,IAAA,gBAAA,CAAA,cAGJ,CAJA,cAIA,IACI,UAAA,KACA,WAAA,MAGJ,CATA,cASA,GACI,UAAA",
+  "names": []
+}

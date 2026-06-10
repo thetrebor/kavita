@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/smart-time-range-picker/smart-time-range-picker.component.scss"],
+  "sourcesContent": [".dropdown {\n  position: relative;\n  z-index: 1045; // Above backdrop\n\n  .dropdown-display-text {\n    color: var(--dropdown-item-text-color);\n  }\n\n  .dropdown-menu {\n    max-height: 31.25rem;\n    overflow-y: auto;\n    padding: 0.5rem 0;\n\n    &.show {\n      display: block;\n    }\n  }\n\n  .dropdown-item {\n    background-color: var(--dropdown-item-bg-color);\n    cursor: pointer;\n\n    &:hover {\n      background-color: var(--dropdown-item-hover-bg-color);\n      cursor: pointer;\n    }\n\n    i {\n      color: var(--dropdown-item-text-color);\n    }\n  }\n}\n\n.dropdown-backdrop {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  z-index: 1040;\n  background: transparent;\n}\n\n.date-picker-text {\n  color: var(--dropdown-item-text-color);\n}\n"],
+  "mappings": "AAAA,CAAA,SACE,SAAA,SACA,QAAA,KAEA,CAJF,SAIE,CAAA,sBACE,MAAA,IAAA,4BAGF,CARF,SAQE,CAAA,cACE,WAAA,SACA,WAAA,KAVJ,QAWI,MAAA,EAEA,CAbJ,SAaI,CALF,aAKE,CAAA,KACE,QAAA,MAIJ,CAlBF,SAkBE,CAAA,cACE,iBAAA,IAAA,0BACA,OAAA,QAEA,CAtBJ,SAsBI,CAJF,aAIE,OACE,iBAAA,IAAA,gCACA,OAAA,QAGF,CA3BJ,SA2BI,CATF,cASE,EACE,MAAA,IAAA,4BAKN,CAAA,kBACE,SAAA,MACA,IAAA,EACA,KAAA,EACA,MAAA,MACA,OAAA,MACA,QAAA,KACA,WAAA,YAGF,CAAA,iBACE,MAAA,IAAA",
+  "names": []
+}

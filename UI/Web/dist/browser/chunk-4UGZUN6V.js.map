@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/default-value.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\n\n@Pipe({\n  name: 'defaultValue',\n  pure: true,\n  standalone: true\n})\nexport class DefaultValuePipe implements PipeTransform {\n\n  transform(value: any, replacementString = '—'): string {\n    if (value === null || value === undefined || value === '' || value === Infinity || Number.isNaN(value)) return replacementString;\n    return value;\n  }\n\n}\n"],
+  "mappings": "yCAOA,IAAaA,GAAgB,IAAA,CAAvB,MAAOA,CAAgB,CAE3BC,UAAUC,EAAYC,EAAoB,SAAG,CAC3C,OAAID,GAAU,MAA+BA,IAAU,IAAMA,IAAUE,KAAYC,OAAOC,MAAMJ,CAAK,EAAUC,EACxGD,CACT,iDALWF,EAAgB,CAAA,oDAAhBA,EAAgBO,KAAA,EAAA,CAAA,CAAA,SAAhBP,CAAgB,GAAA",
+  "names": ["DefaultValuePipe", "transform", "value", "replacementString", "Infinity", "Number", "isNaN", "pure"]
+}

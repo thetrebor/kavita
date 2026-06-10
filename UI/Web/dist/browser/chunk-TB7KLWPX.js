@@ -1,0 +1,2 @@
+import{a as t}from"./chunk-DDQDPGQ7.js";import{f as r}from"./chunk-KJX5IEQE.js";import{Fb as n}from"./chunk-66GPU3XZ.js";import"./chunk-J2SLNJRR.js";var p=(()=>{class e{transform(o){switch(parseInt(o+"",10)){case t.Column1:return r("preferences.1-column");case t.Column2:return r("preferences.2-column");case t.Default:return r("preferences.scroll")}}static{this.\u0275fac=function(a){return new(a||e)}}static{this.\u0275pipe=n({name:"bookPageLayoutMode",type:e,pure:!0})}}return e})();export{p as BookPageLayoutModePipe};
+//# sourceMappingURL=chunk-TB7KLWPX.js.map

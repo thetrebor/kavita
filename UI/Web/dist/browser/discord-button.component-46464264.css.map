@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/kavita-plus/discord-button/discord-button.component.scss"],
+  "sourcesContent": [":host(.block) {\n  display: block;\n\n  .btn-discord {\n    display: flex;\n    width: 100%;\n    justify-content: center;\n  }\n}\n\n.btn-discord {\n  display: inline-flex;\n  align-items: center;\n  gap: 0.5rem;\n  padding: 0.5rem 1rem;\n  background-color: var(--discord-bg-color);\n  color: var(--discord-text-color);\n  font-size: 0.875rem;\n  font-weight: 500;\n  line-height: 1;\n  border: none;\n  border-radius: 0.25rem;\n  text-decoration: none;\n  cursor: pointer;\n  transition: background-color 0.15s ease;\n\n  &:hover,\n  &:focus-visible {\n    background-color: var(--discord-hover-bg-color);\n    color: var(--discord-text-color);\n  }\n\n  &:active {\n    background-color: var(--discord-active-bg-color);\n    color: var(--discord-text-color);\n  }\n}\n\n.discord-logo {\n  width: 1.25rem;\n  height: 1.25rem;\n  object-fit: contain;\n}\n"],
+  "mappings": "AAAA,MAAA,CAAA,OACE,QAAA,MAEA,MAAA,CAAA,OAAA,CAAA,YACE,QAAA,KACA,MAAA,KACA,gBAAA,OAIJ,CAPE,YAQA,QAAA,YACA,YAAA,OACA,IAAA,MAbF,QAcE,MAAA,KACA,iBAAA,IAAA,oBACA,MAAA,IAAA,sBACA,UAAA,QACA,YAAA,IACA,YAAA,EACA,OAAA,KApBF,cAqBE,OACA,gBAAA,KACA,OAAA,QACA,WAAA,iBAAA,KAAA,KAEA,CAvBA,WAuBA,OAAA,CAvBA,WAuBA,eAEE,iBAAA,IAAA,0BACA,MAAA,IAAA,sBAGF,CA7BA,WA6BA,QACE,iBAAA,IAAA,2BACA,MAAA,IAAA,sBAIJ,CAAA,aACE,MAAA,QACA,OAAA,QACA,WAAA",
+  "names": []
+}

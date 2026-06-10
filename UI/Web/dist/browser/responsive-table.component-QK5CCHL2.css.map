@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/_components/responsive-table/responsive-table.component.scss"],
+  "sourcesContent": [":host ::ng-deep ngx-datatable.bootstrap .datatable-header .datatable-header-cell {\n  border-block-end: none;\n}\n"],
+  "mappings": "AAAA,MAAA,UAAA,aAAA,CAAA,UAAA,CAAA,iBAAA,CAAA,sBACE,iBAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/kavita-plus/expired-license-info-card/expired-license-info-card.component.scss"],
+  "sourcesContent": [":host { display: block; }\n\n.card {\n  background: var(--elevation-layer1-dark-solid);\n  border-radius: 0.5rem;\n  padding: 1.25rem;\n}\n\n.status-pill {\n  display: inline-flex;\n  align-items: center;\n  font-size: 0.7rem;\n  font-weight: 600;\n  padding: 0.2rem 0.55rem;\n  border-radius: 9999px;\n  border: 1px solid color-mix(in srgb, var(--error-color) 40%, transparent);\n  background: color-mix(in srgb, var(--error-color) 12%, transparent);\n  color: var(--error-color);\n}\n\n.row-grid {\n  display: grid;\n  grid-template-columns: 8rem 1fr;\n  row-gap: 0.6rem;\n  align-items: center;\n}\n\n.row-label {\n  font-size: 0.85rem;\n  color: var(--text-muted-color);\n}\n\n.row-value {\n  font-size: 0.9rem;\n  font-weight: 600;\n  color: var(--label-card-value-color);\n}\n"],
+  "mappings": "AAAA,MAAQ,QAAA,MAER,CAAA,KACE,WAAA,IAAA,+BAHF,cAIE,MAJF,QAKE,QAGF,CAAA,YACE,QAAA,YACA,YAAA,OACA,UAAA,MACA,YAAA,IAZF,QAaE,MAAA,OAbF,cAcE,OACA,OAAA,IAAA,MAAA,UAAA,GAAA,IAAA,CAAA,IAAA,eAAA,GAAA,CAAA,aACA,WAAA,UAAA,GAAA,IAAA,CAAA,IAAA,eAAA,GAAA,CAAA,aACA,MAAA,IAAA,eAGF,CAAA,SACE,QAAA,KACA,sBAAA,KAAA,IACA,QAAA,MACA,YAAA,OAGF,CAAA,UACE,UAAA,OACA,MAAA,IAAA,oBAGF,CAAA,UACE,UAAA,MACA,YAAA,IACA,MAAA,IAAA",
+  "names": []
+}

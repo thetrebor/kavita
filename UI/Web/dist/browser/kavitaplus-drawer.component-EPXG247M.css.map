@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/series-detail/_components/kavitaplus-drawer/kavitaplus-drawer.component.scss"],
+  "sourcesContent": [".offcanvas-body {\n  overflow-y: auto;\n}\n"],
+  "mappings": "AAAA,CAAA,eACE,WAAA",
+  "names": []
+}

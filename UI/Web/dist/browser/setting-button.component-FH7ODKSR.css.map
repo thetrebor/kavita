@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/settings/_components/setting-button/setting-button.component.scss"],
+  "sourcesContent": [".description {\n    font-size: .9rem; //14px\n}"],
+  "mappings": "AAAA,CAAA,YACI,UAAA",
+  "names": []
+}

@@ -1,0 +1,2 @@
+import{a as r}from"./chunk-AKPBGRK2.js";import{f as t}from"./chunk-KJX5IEQE.js";import{Fb as o}from"./chunk-66GPU3XZ.js";import"./chunk-J2SLNJRR.js";var p=(()=>{class e{transform(i){switch(parseInt(i+"",10)){case r.LeftToRight:return t("preferences.left-to-right");case r.RightToLeft:return t("preferences.right-to-left")}}static{this.\u0275fac=function(n){return new(n||e)}}static{this.\u0275pipe=o({name:"readingDirection",type:e,pure:!0})}}return e})();export{p as ReadingDirectionPipe};
+//# sourceMappingURL=chunk-I5YY6V3G.js.map

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_resolvers/url-filter.resolver.ts"],
+  "sourcesContent": ["import { Injectable, inject } from \"@angular/core\";\nimport {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from \"@angular/router\";\nimport {Observable, of} from \"rxjs\";\nimport {FilterV2} from \"../_models/metadata/v2/filter-v2\";\nimport {FilterUtilitiesService} from \"../shared/_services/filter-utilities.service\";\n\n/**\n * Checks the url for a filter and resolves one if applicable, otherwise returns null.\n * It is up to the consumer to cast appropriately.\n */\n@Injectable({\n  providedIn: 'root'\n})\nexport class UrlFilterResolver implements Resolve<any> {\n  private filterUtilitiesService = inject(FilterUtilitiesService);\n\n\n  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<FilterV2 | null> {\n    if (!state.url.includes('?')) return of(null);\n    return this.filterUtilitiesService.decodeFilter(state.url.split('?')[1]);\n  }\n}\n"],
+  "mappings": "gGAaA,IAAaA,GAAiB,IAAA,CAAxB,MAAOA,CAAiB,CAH9BC,aAAA,CAIU,KAAAC,uBAAyBC,EAAOC,CAAsB,EAG9DC,QAAQC,EAA+BC,EAA0B,CAC/D,OAAKA,EAAMC,IAAIC,SAAS,GAAG,EACpB,KAAKP,uBAAuBQ,aAAaH,EAAMC,IAAIG,MAAM,GAAG,EAAE,CAAC,CAAC,EADlCC,EAAG,IAAI,CAE9C,iDAPWZ,EAAiB,CAAA,iCAAjBA,EAAiBa,QAAjBb,EAAiBc,UAAAC,WAFhB,MAAM,CAAA,CAAA,SAEPf,CAAiB,GAAA",
+  "names": ["UrlFilterResolver", "constructor", "filterUtilitiesService", "inject", "FilterUtilitiesService", "resolve", "route", "state", "url", "includes", "decodeFilter", "split", "of", "factory", "\u0275fac", "providedIn"]
+}

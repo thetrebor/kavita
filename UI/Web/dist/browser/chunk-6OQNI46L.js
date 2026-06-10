@@ -1,0 +1,2 @@
+import{a as u}from"./chunk-J2SLNJRR.js";function i(t,e){let n=!1,c=t.map(o=>{let r=e.get(o.id);return r?(n=!0,u({},r)):o});return n?c:t}function f(t,e){let n=i(t(),e);n!==t()&&t.set([...n])}function d(t,e,n=c=>c.id){let c=n(e),o=t.findIndex(p=>n(p)===c);if(o===-1)return t;let r=[...t];return r[o]=u({},e),r}function a(t,e,n){let c=d(t(),e,n);c!==t()&&t.set(c)}export{f as a,a as b};
+//# sourceMappingURL=chunk-6OQNI46L.js.map

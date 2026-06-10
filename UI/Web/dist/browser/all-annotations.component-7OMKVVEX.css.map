@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/all-annotations/all-annotations.component.scss"],
+  "sourcesContent": ["\n::ng-deep #card-detail-layout-items-container {\n\n  grid-template-columns: repeat(auto-fill, 25rem) !important;\n  justify-content: space-around;\n\n  .card-detail-layout-item {\n    background-color: transparent !important;\n    max-width: 25rem;\n    width: 25rem;\n  }\n\n}\n"],
+  "mappings": "AACA,UAAA,CAAA,mCAEE,sBAAA,OAAA,SAAA,CAAA,iBACA,gBAAA,aAEA,UAAA,CALF,mCAKE,CAAA,wBACE,iBAAA,sBACA,UAAA,MACA,MAAA",
+  "names": []
+}

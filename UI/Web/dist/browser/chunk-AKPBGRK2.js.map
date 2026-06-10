@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/reading-direction.ts"],
+  "sourcesContent": ["/**\n * Direction the user is reading. Maps to the pagination method. Not applicable with ReaderMode.Webtoon\n */\nexport enum ReadingDirection {\n    LeftToRight = 0,\n    RightToLeft = 1\n}\n"],
+  "mappings": "AAGA,IAAYA,GAAZ,SAAYA,EAAgB,CACxBA,OAAAA,EAAAA,EAAA,YAAA,CAAA,EAAA,cACAA,EAAAA,EAAA,YAAA,CAAA,EAAA,cAFQA,CAGZ,GAHYA,GAAgB,CAAA,CAAA",
+  "names": ["ReadingDirection"]
+}

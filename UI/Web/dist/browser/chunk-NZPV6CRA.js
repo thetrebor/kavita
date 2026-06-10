@@ -1,0 +1,2 @@
+import{c as a}from"./chunk-XPB62S7D.js";import{ha as s,ma as f}from"./chunk-66GPU3XZ.js";var u=(()=>{class t{constructor(){this.offcanvas=f(a)}open(e,n){let o=this.offcanvas.open(e,n);return o.setInput=(c,r)=>{o._contentRef.componentRef.setInput(c,r)},o}hasOpenOffcanvas(){return this.offcanvas.hasOpenOffcanvas()}dismiss(){this.offcanvas.dismiss()}static{this.\u0275fac=function(n){return new(n||t)}}static{this.\u0275prov=s({token:t,factory:t.\u0275fac,providedIn:"root"})}}return t})();export{u as a};
+//# sourceMappingURL=chunk-NZPV6CRA.js.map

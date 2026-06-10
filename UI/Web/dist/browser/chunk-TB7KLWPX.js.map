@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/book-page-layout-mode.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {translate} from \"@jsverse/transloco\";\nimport {BookPageLayoutMode} from \"../_models/readers/book-page-layout-mode\";\nimport {ScalingOption} from \"../_models/preferences/scaling-option\";\n\n@Pipe({\n  name: 'bookPageLayoutMode',\n  standalone: true\n})\nexport class BookPageLayoutModePipe implements PipeTransform {\n\n  transform(value: BookPageLayoutMode): string {\n    const v = parseInt(value + '', 10) as BookPageLayoutMode;\n    switch (v) {\n      case BookPageLayoutMode.Column1: return translate('preferences.1-column');\n      case BookPageLayoutMode.Column2: return translate('preferences.2-column');\n      case BookPageLayoutMode.Default: return translate('preferences.scroll');\n    }\n  }\n\n}\n"],
+  "mappings": "qJASA,IAAaA,GAAsB,IAAA,CAA7B,MAAOA,CAAsB,CAEjCC,UAAUC,EAAyB,CAEjC,OADUC,SAASD,EAAQ,GAAI,EAAE,EACxB,CACP,KAAKE,EAAmBC,QAAS,OAAOC,EAAU,sBAAsB,EACxE,KAAKF,EAAmBG,QAAS,OAAOD,EAAU,sBAAsB,EACxE,KAAKF,EAAmBI,QAAS,OAAOF,EAAU,oBAAoB,CACxE,CACF,iDATWN,EAAsB,CAAA,0DAAtBA,EAAsBS,KAAA,EAAA,CAAA,CAAA,SAAtBT,CAAsB,GAAA",
+  "names": ["BookPageLayoutModePipe", "transform", "value", "parseInt", "BookPageLayoutMode", "Column1", "translate", "Column2", "Default", "pure"]
+}

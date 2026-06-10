@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/book-reader/_components/personal-table-of-contents/personal-table-of-contents.component.scss"],
+  "sourcesContent": [".table-of-contents li {\n  cursor: pointer;\n\n  &.active {\n    font-weight: bold;\n  }\n}\n\n.chapter-title {\n  padding-inline-start: 1rem;\n}\n.ellipsis {\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n"],
+  "mappings": "AAAA,CAAA,kBAAA,GACE,OAAA,QAEA,CAHF,kBAGE,EAAA,CAAA,OACE,YAAA,IAIJ,CAAA,cACE,qBAAA,KAEF,CAAA,SACE,SAAA,OACA,cAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/confirm-dialog/confirm-dialog.component.scss"],
+  "sourcesContent": ["\n.book-reader {\n  color: var(--drawer-text-color);\n  background-color: var(--drawer-bg-color);\n}\n"],
+  "mappings": "AACA,CAAA,YACE,MAAA,IAAA,qBACA,iBAAA,IAAA",
+  "names": []
+}

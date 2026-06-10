@@ -1,0 +1,2 @@
+import{a as e}from"./chunk-5TFMVASI.js";import{f as r}from"./chunk-KJX5IEQE.js";import{Fb as a}from"./chunk-66GPU3XZ.js";import"./chunk-J2SLNJRR.js";var c=(()=>{class t{transform(i){switch(parseInt(i+"",10)){case e.Horizontal:return r("preferences.horizontal");case e.Vertical:return r("preferences.vertical")}}static{this.\u0275fac=function(n){return new(n||t)}}static{this.\u0275pipe=a({name:"writingStyle",type:t,pure:!0})}}return t})();export{c as WritingStylePipe};
+//# sourceMappingURL=chunk-DU2TTJAX.js.map

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/pdf-spread-mode.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {PdfSpreadMode} from \"../_models/preferences/pdf-spread-mode\";\nimport {translate} from \"@jsverse/transloco\";\nimport {ScalingOption} from \"../_models/preferences/scaling-option\";\n\n@Pipe({\n  name: 'pdfSpreadMode',\n  standalone: true\n})\nexport class PdfSpreadModePipe implements PipeTransform {\n\n  transform(value: PdfSpreadMode): string {\n    const v = parseInt(value + '', 10) as PdfSpreadMode;\n    switch (v) {\n      case PdfSpreadMode.None: return translate('preferences.pdf-none');\n      case PdfSpreadMode.Odd: return translate('preferences.pdf-odd');\n      case PdfSpreadMode.Even: return translate('preferences.pdf-even');\n    }\n  }\n\n}\n"],
+  "mappings": "qJASA,IAAaA,GAAiB,IAAA,CAAxB,MAAOA,CAAiB,CAE5BC,UAAUC,EAAoB,CAE5B,OADUC,SAASD,EAAQ,GAAI,EAAE,EACxB,CACP,KAAKE,EAAcC,KAAM,OAAOC,EAAU,sBAAsB,EAChE,KAAKF,EAAcG,IAAK,OAAOD,EAAU,qBAAqB,EAC9D,KAAKF,EAAcI,KAAM,OAAOF,EAAU,sBAAsB,CAClE,CACF,iDATWN,EAAiB,CAAA,qDAAjBA,EAAiBS,KAAA,EAAA,CAAA,CAAA,SAAjBT,CAAiB,GAAA",
+  "names": ["PdfSpreadModePipe", "transform", "value", "parseInt", "PdfSpreadMode", "None", "translate", "Odd", "Even", "pure"]
+}

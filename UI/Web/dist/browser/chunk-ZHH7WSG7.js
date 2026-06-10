@@ -1,0 +1,2 @@
+import{a as t}from"./chunk-GJLI5QON.js";import{f as r}from"./chunk-KJX5IEQE.js";import{Fb as i}from"./chunk-66GPU3XZ.js";import"./chunk-J2SLNJRR.js";var c=(()=>{class e{transform(o){switch(parseInt(o+"",10)){case t.UpDown:return r("preferences.up-to-down");case t.Webtoon:return r("preferences.webtoon");case t.LeftRight:return r("preferences.left-to-right")}}static{this.\u0275fac=function(n){return new(n||e)}}static{this.\u0275pipe=i({name:"readerMode",type:e,pure:!0})}}return e})();export{c as ReaderModePipe};
+//# sourceMappingURL=chunk-ZHH7WSG7.js.map

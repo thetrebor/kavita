@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/statistics/_components/publication-status-stats/publication-status-stats.component.scss"],
+  "sourcesContent": ["::ng-deep .pie-label {\n    color: var(--body-text-color) !important;\n}\n\n.dashboard-card-content {\n    width: 100%;\n    height: 15.125rem;\n    display: flex;\n    flex-flow: column;\n    box-sizing: border-box;\n}"],
+  "mappings": "AAAA,UAAA,CAAA,UACI,MAAA,IAAA,6BAGJ,CAAA,uBACI,MAAA,KACA,OAAA,UACA,QAAA,KACA,UAAA,OACA,WAAA",
+  "names": []
+}

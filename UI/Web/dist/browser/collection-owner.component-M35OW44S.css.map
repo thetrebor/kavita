@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/collections/_components/collection-owner/collection-owner.component.scss"],
+  "sourcesContent": [".text-accent {\n  font-size: small;\n  color: var(--accent-text-color);\n}\n"],
+  "mappings": "AAAA,CAAA,YACE,UAAA,MACA,MAAA,IAAA",
+  "names": []
+}

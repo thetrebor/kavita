@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_resolvers/reading-profile.resolver.ts"],
+  "sourcesContent": ["import {inject} from '@angular/core';\nimport {ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot} from '@angular/router';\nimport {Observable} from 'rxjs';\nimport {ReadingProfileService} from \"../_services/reading-profile.service\";\nimport {ReadingProfile} from \"../_models/preferences/reading-profiles\";\n\nexport const readingProfileResolver: ResolveFn<ReadingProfile> = (\n  route: ActivatedRouteSnapshot,\n  state: RouterStateSnapshot\n): Observable<ReadingProfile> => {\n  const readingProfileService = inject(ReadingProfileService);\n\n  // Extract seriesId from route params or parent route\n  const seriesId = route.params['seriesId'] || route.parent?.params['seriesId'];\n  const libraryId = route.params['libraryId'] || route.parent?.params['libraryId'];\n  return readingProfileService.getForSeries(libraryId, seriesId);\n};\n"],
+  "mappings": "iFAMO,IAAMA,EAAoDA,CAC/DC,EACAC,IAC8B,CAC9B,IAAMC,EAAwBC,EAAOC,CAAqB,EAGpDC,EAAWL,EAAMM,OAAO,UAAeN,EAAMO,QAAQD,OAAO,SAC5DE,EAAYR,EAAMM,OAAO,WAAgBN,EAAMO,QAAQD,OAAO,UACpE,OAAOJ,EAAsBO,aAAaD,EAAWH,CAAQ,CAC/D",
+  "names": ["readingProfileResolver", "route", "state", "readingProfileService", "inject", "ReadingProfileService", "seriesId", "params", "parent", "libraryId", "getForSeries"]
+}

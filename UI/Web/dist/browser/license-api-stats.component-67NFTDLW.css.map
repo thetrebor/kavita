@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/kavita-plus/license-api-stats/license-api-stats.component.scss"],
+  "sourcesContent": [".api-stats-container {\n  background-color: var(--elevation-layer1-dark-solid);\n  border-radius: 0.5rem;\n}\n\n.api-icon {\n  width: 2.25rem;\n  height: 2.25rem;\n  border-radius: 0.375rem;\n  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);\n  color: var(--primary-color);\n}\n\n.api-chart {\n  width: 8rem;\n  height: 2.5rem;\n}\n\n.min-width-0 {\n  min-width: 0;\n}\n"],
+  "mappings": "AAAA,CAAA,oBACE,iBAAA,IAAA,+BADF,cAEE,MAGF,CAAA,SACE,MAAA,QACA,OAAA,QAPF,cAQE,QACA,iBAAA,UAAA,GAAA,IAAA,CAAA,IAAA,iBAAA,GAAA,CAAA,aACA,MAAA,IAAA,iBAGF,CAAA,UACE,MAAA,KACA,OAAA,OAGF,CAAA,YACE,UAAA",
+  "names": []
+}

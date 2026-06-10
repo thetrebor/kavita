@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/pdf-scroll-mode.ts"],
+  "sourcesContent": ["export enum PdfScrollMode {\n  Vertical = 0,\n  Horizontal = 1,\n  Wrapped = 2,\n  Page = 3\n}\n"],
+  "mappings": "AAAA,IAAYA,GAAZ,SAAYA,EAAa,CACvBA,OAAAA,EAAAA,EAAA,SAAA,CAAA,EAAA,WACAA,EAAAA,EAAA,WAAA,CAAA,EAAA,aACAA,EAAAA,EAAA,QAAA,CAAA,EAAA,UACAA,EAAAA,EAAA,KAAA,CAAA,EAAA,OAJUA,CAKZ,GALYA,GAAa,CAAA,CAAA",
+  "names": ["PdfScrollMode"]
+}

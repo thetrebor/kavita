@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/announcements/_components/changelog-update-item/changelog-update-item.component.scss"],
+  "sourcesContent": [".update-details {\n  border-radius: 0.5rem;\n}\n\n:host ::ng-deep .blog-content {\n  margin-bottom: 1.5rem;\n  line-height: 1.6;\n  word-wrap: break-word;\n\n  img {\n    max-width: 100% !important;\n    height: auto !important;\n    object-fit: scale-down;\n  }\n}\n"],
+  "mappings": "AAAA,CAAA,eAAA,cACE,MAGF,MAAA,UAAA,CAAA,aACE,cAAA,OACA,YAAA,IACA,UAAA,WAEA,MAAA,UAAA,CALF,aAKE,IACE,UAAA,eACA,OAAA,eACA,WAAA",
+  "names": []
+}

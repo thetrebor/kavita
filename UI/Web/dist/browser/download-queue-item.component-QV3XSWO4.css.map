@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/nav/_components/download-queue-item/download-queue-item.component.scss"],
+  "sourcesContent": [".queue-item {\n  &-info {\n    min-width: 0;\n  }\n\n  &-actions {\n    align-self: flex-start;\n    padding-top: 2px;\n  }\n}\n\n.item-title {\n  display: block;\n  color: inherit;\n  text-decoration: none;\n\n  &:hover {\n    text-decoration: underline;\n  }\n}\n\n.dl-info-row {\n  display: flex;\n  justify-content: space-between;\n  font-variant-numeric: tabular-nums;\n}\n\n.dl-speed {\n  text-align: right;\n}\n"],
+  "mappings": "AACE,CAAA,gBACE,UAAA,EAGF,CAAA,mBACE,WAAA,WACA,YAAA,IAIJ,CAAA,WACE,QAAA,MACA,MAAA,QACA,gBAAA,KAEA,CALF,UAKE,OACE,gBAAA,UAIJ,CAAA,YACE,QAAA,KACA,gBAAA,cACA,qBAAA,aAGF,CAAA,SACE,WAAA",
+  "names": []
+}

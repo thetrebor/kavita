@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/writing-style.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {translate} from \"@jsverse/transloco\";\nimport {WritingStyle} from \"../_models/preferences/writing-style\";\nimport {ScalingOption} from \"../_models/preferences/scaling-option\";\n\n@Pipe({\n  name: 'writingStyle',\n  standalone: true\n})\nexport class WritingStylePipe implements PipeTransform {\n\n  transform(value: WritingStyle): string {\n    const v = parseInt(value + '', 10) as WritingStyle;\n    switch (v) {\n      case WritingStyle.Horizontal: return translate('preferences.horizontal');\n      case WritingStyle.Vertical: return translate('preferences.vertical');\n    }\n  }\n\n}\n"],
+  "mappings": "qJASA,IAAaA,GAAgB,IAAA,CAAvB,MAAOA,CAAgB,CAE3BC,UAAUC,EAAmB,CAE3B,OADUC,SAASD,EAAQ,GAAI,EAAE,EACxB,CACP,KAAKE,EAAaC,WAAY,OAAOC,EAAU,wBAAwB,EACvE,KAAKF,EAAaG,SAAU,OAAOD,EAAU,sBAAsB,CACrE,CACF,iDARWN,EAAgB,CAAA,oDAAhBA,EAAgBQ,KAAA,EAAA,CAAA,CAAA,SAAhBR,CAAgB,GAAA",
+  "names": ["WritingStylePipe", "transform", "value", "parseInt", "WritingStyle", "Horizontal", "translate", "Vertical", "pure"]
+}

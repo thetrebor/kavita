@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/series-format/series-format.component.scss"],
+  "sourcesContent": ["i {\n    padding: 0 0.3125rem;\n}"],
+  "mappings": "AAAA,UACI,EAAA",
+  "names": []
+}

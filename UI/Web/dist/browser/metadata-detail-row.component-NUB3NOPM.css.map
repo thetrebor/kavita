@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/series-detail/_components/metadata-detail-row/metadata-detail-row.component.scss"],
+  "sourcesContent": [".publisher-img-container {\n    background-color: var(--card-bg-color);\n    border-radius: 0.1875rem;\n    padding: 0.125rem 0.3125rem;\n    font-size: 0.8rem;\n    vertical-align: middle;\n\n    div {\n        min-height: 2rem;\n        line-height: 2rem;\n    }\n}\n\n.small-text {\n  font-size: 0.8rem;\n}\n"],
+  "mappings": "AAAA,CAAA,wBACI,iBAAA,IAAA,iBADJ,cAEI,SAFJ,QAGI,QAAA,SACA,UAAA,MACA,eAAA,OAEA,CAPJ,wBAOI,IACI,WAAA,KACA,YAAA,KAIR,CAAA,WACE,UAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/sentence-case.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\n\n@Pipe({\n  name: 'sentenceCase',\n  standalone: true\n})\nexport class SentenceCasePipe implements PipeTransform {\n\n  transform(value: string | null): string {\n    if (value === null || value === undefined) return '';\n\n    return value.charAt(0).toUpperCase() + value.substring(1);\n  }\n\n}\n"],
+  "mappings": "yCAMA,IAAaA,GAAgB,IAAA,CAAvB,MAAOA,CAAgB,CAE3BC,UAAUC,EAAoB,CAC5B,OAAIA,GAAU,KAAoC,GAE3CA,EAAMC,OAAO,CAAC,EAAEC,YAAW,EAAKF,EAAMG,UAAU,CAAC,CAC1D,iDANWL,EAAgB,CAAA,oDAAhBA,EAAgBM,KAAA,EAAA,CAAA,CAAA,SAAhBN,CAAgB,GAAA",
+  "names": ["SentenceCasePipe", "transform", "value", "charAt", "toUpperCase", "substring", "pure"]
+}

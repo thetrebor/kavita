@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/collections/_components/collection-detail/collection-detail.component.scss"],
+  "sourcesContent": [".main-container {\n  margin-top: 0.625rem;\n  padding: 0 0 0 0.625rem;\n}\n\n\n.poster {\n  width: 100%;\n  max-width: 18.75rem;\n}\n\n@media(max-width: var(--grid-breakpoints-sm)) {\n  .poster {\n    display: none;\n  }\n}\n\n@media(max-width: var(--grid-breakpoints-sm)) {\n  .read-btn--text {\n    display: none;\n  }\n}\n\n.card-container {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, 10rem);\n  grid-gap: 0.5rem;\n  justify-content: space-around;\n  padding-bottom: 1.25rem;\n}\n\n\n.virtual-scroller, virtual-scroller {\n  width: 100%;\n  height: calc(100vh - 5.3125rem);\n  max-height: calc(var(--vh)*100 - 10.625rem);\n}\n\nh2 {\n  margin-bottom: 0;\n  word-break: break-all;\n}\n\n.under-image {\n  background-color: var(--breadcrumb-bg-color);\n  color: white;\n  border-bottom-left-radius: 0.3125rem;\n  border-bottom-right-radius: 0.3125rem;\n  text-align: center;\n}\n"],
+  "mappings": "AAAA,CAAA,eACE,WAAA,QADF,QAEE,EAAA,EAAA,EAAA,QAIF,CAAA,OACE,MAAA,KACA,UAAA,SAGF,OAAA,CAAA,SAAA,EAAA,IAAA,wBACE,CANF,OAOI,QAAA,MAIJ,OAAA,CAAA,SAAA,EAAA,IAAA,wBACE,CAAA,eACE,QAAA,MAIJ,CAAA,eACE,QAAA,KACA,sBAAA,OAAA,SAAA,CAAA,OACA,SAAA,MACA,gBAAA,aACA,eAAA,QAIF,CAAA,iBAAA,iBACE,MAAA,KACA,OAAA,KAAA,MAAA,EAAA,WACA,WAAA,KAAA,IAAA,MAAA,EAAA,IAAA,EAAA,WAGF,GACE,cAAA,EACA,WAAA,UAGF,CAAA,YACE,iBAAA,IAAA,uBACA,MAAA,KACA,0BAAA,SACA,2BAAA,SACA,WAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/_components/list-select-modal/list-select-modal.component.scss"],
+  "sourcesContent": [".clickable:hover:not(.disabled) {\n  background-color: var(--list-group-hover-bg-color, var(--primary-color));\n}\n\n.disabled:hover {\n  cursor: not-allowed;\n}\n\n.pill {\n  font-size: .8rem;\n  background-color: var(--card-bg-color);\n  border-radius: 0.375rem;\n  color: var(--badge-text-color);\n\n  &.active {\n    background-color : var(--primary-color);\n  }\n}\n\n.virtual-scroller, virtual-scroller {\n  width: 100%;\n  height: 25rem;\n}\n"],
+  "mappings": "AAAA,CAAA,SAAA,MAAA,KAAA,CAAA,UACE,iBAAA,IAAA,2BAAA,EAAA,IAAA,kBAGF,CAJA,QAIA,OACE,OAAA,YAGF,CAAA,KACE,UAAA,MACA,iBAAA,IAAA,iBAVF,cAWE,QACA,MAAA,IAAA,oBAEA,CANF,IAME,CAAA,OACE,iBAAA,IAAA,iBAIJ,CAAA,iBAAA,iBACE,MAAA,KACA,OAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/manage-email-settings/manage-email-settings.component.scss"],
+  "sourcesContent": [".custom-position {\n  right: 0.9375rem;\n  top: -2.625rem;\n}\n"],
+  "mappings": "AAAA,CAAA,gBACE,MAAA,SACA,IAAA",
+  "names": []
+}

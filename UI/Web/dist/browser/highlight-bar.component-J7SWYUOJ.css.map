@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/book-reader/_components/_annotations/highlight-bar/highlight-bar.component.scss"],
+  "sourcesContent": [".btn-sm {\n  padding: 0.25rem 0.5rem;\n}\n\n.highlight-bar {\n  background: var(--accordion-body-bg-color);\n  border-top-right-radius: 0.3125rem;\n  border-bottom-right-radius: 0.3125rem;\n  display: flex;\n  align-items: center;\n  padding: 0.5rem;\n}\n\n.highlight-bar-toggle {\n  background: var(--accordion-body-bg-color);\n  border-color: transparent;\n  &.open {\n    border-top-right-radius: 0;\n    border-bottom-right-radius: 0;\n  }\n}\n\n.highlight-bar .btn.btn-icon {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n.color-picker-container {\n  display: flex;\n  align-items: center;\n  gap: 0.25rem;\n}\n"],
+  "mappings": "AAAA,CAAA,OAAA,QACE,OAAA,MAGF,CAAA,cACE,WAAA,IAAA,2BACA,wBAAA,SACA,2BAAA,SACA,QAAA,KACA,YAAA,OATF,QAUE,MAGF,CAAA,qBACE,WAAA,IAAA,2BACA,aAAA,YACA,CAHF,oBAGE,CAAA,KACE,wBAAA,EACA,2BAAA,EAIJ,CAlBA,cAkBA,CAAA,GAAA,CAAA,SACE,QAAA,KACA,gBAAA,OACA,YAAA,OAGF,CAAA,uBACE,QAAA,KACA,YAAA,OACA,IAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/import-mappings/import-mappings.component.scss"],
+  "sourcesContent": [".file-input {\n  display: none;\n}\n\n.heading-badge  {\n  color: var(--bs-badge-color);\n}\n\n::ng-deep .file-info {\n  width: 83%;\n  float: left;\n}\n\n::ng-deep .file-buttons {\n  float: right;\n}\n\nfile-upload {\n  background: none;\n  height: auto;\n}\n\n::ng-deep .upload-input {\n  color: var(--input-text-color) !important;\n}\n\n::ng-deep file-upload-list-item {\n  color: var(--input-text-color) !important;\n}\n\n.conflict-group-title {\n  font-size: 1.5rem;\n  font-weight: bold;\n  color: var(--accent-text-color);\n}\n\n.conflict-title {\n  font-size: 1.2rem;\n  color: var(--primary-color);\n}\n\n.reset-color {\n  color: var(--accent-text-color);\n}\n\n.break {\n  height: 0.0625rem;\n  background-color: var(--setting-break-color);\n  margin: 0.625rem 0;\n}\n"],
+  "mappings": "AAAA,CAAA,WACE,QAAA,KAGF,CAAA,cACE,MAAA,IAAA,kBAGF,UAAA,CAAA,UACE,MAAA,IACA,MAAA,KAGF,UAAA,CAAA,aACE,MAAA,MAGF,YACE,WAAA,KACA,OAAA,KAGF,UAAA,CAAA,aACE,MAAA,IAAA,8BAGF,UAAA,sBACE,MAAA,IAAA,8BAGF,CAAA,qBACE,UAAA,OACA,YAAA,IACA,MAAA,IAAA,qBAGF,CAAA,eACE,UAAA,OACA,MAAA,IAAA,iBAGF,CAAA,YACE,MAAA,IAAA,qBAGF,CAAA,MACE,OAAA,SACA,iBAAA,IAAA,uBA/CF,OAgDE,QAAA",
+  "names": []
+}

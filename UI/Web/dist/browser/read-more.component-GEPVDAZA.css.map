@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/read-more/read-more.component.scss"],
+  "sourcesContent": ["@use \"../../../theme/variables\" as theme;\n\n.read-more-cont {\n  font-size: 0.8rem;\n\n  div {\n    word-break: break-word;\n    max-width: 120ch;\n\n    @media (max-width: theme.$grid-breakpoints-sm) {\n      max-width: 50ch;\n    }\n  }\n}\n"],
+  "mappings": "AAEA,CAAA,eACE,UAAA,MAEA,CAHF,eAGE,IACE,WAAA,WACA,UAAA,MAEA,OAAA,UAAA,OAJF,CAHF,eAGE,IAKI,UAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/announcements/_components/version-update-modal/version-update-modal.component.scss"],
+  "sourcesContent": [".update-body {\n  width: 100%;\n  word-wrap: break-word;\n  white-space: pre-wrap;\n\n}\n\n::ng-deep .update-body {\n  img {\n    max-width: 100%;\n  }\n}\n\n\n"],
+  "mappings": "AAAA,CAAA,YACE,MAAA,KACA,UAAA,WACA,YAAA,SAKA,UAAA,CARF,YAQE,IACE,UAAA",
+  "names": []
+}

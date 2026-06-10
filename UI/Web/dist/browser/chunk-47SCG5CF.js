@@ -1,0 +1,2 @@
+import{c as o}from"./chunk-DXK4AWN7.js";import{Fb as r}from"./chunk-66GPU3XZ.js";var m=(()=>{class t{transform(e){return e===""||e===null||e===void 0||e.split("T")[0]==="0001-01-01"?null:o.fromISO(e,{zone:"utc"}).toLocal().toJSDate()}static{this.\u0275fac=function(i){return new(i||t)}}static{this.\u0275pipe=r({name:"utcToLocalDate",type:t,pure:!0})}}return t})();export{m as a};
+//# sourceMappingURL=chunk-47SCG5CF.js.map

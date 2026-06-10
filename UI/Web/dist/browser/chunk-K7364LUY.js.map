@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/pdf-spread-mode.ts"],
+  "sourcesContent": ["export enum PdfSpreadMode {\n  None = 0,\n  Odd = 1,\n  Even = 2\n}\n"],
+  "mappings": "AAAA,IAAYA,GAAZ,SAAYA,EAAa,CACvBA,OAAAA,EAAAA,EAAA,KAAA,CAAA,EAAA,OACAA,EAAAA,EAAA,IAAA,CAAA,EAAA,MACAA,EAAAA,EAAA,KAAA,CAAA,EAAA,OAHUA,CAIZ,GAJYA,GAAa,CAAA,CAAA",
+  "names": ["PdfSpreadMode"]
+}

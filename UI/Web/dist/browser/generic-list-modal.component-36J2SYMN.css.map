@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/statistics/_components/_modals/generic-list-modal/generic-list-modal.component.scss"],
+  "sourcesContent": [".list-group-item.no-click {\n    cursor: not-allowed;\n}\n"],
+  "mappings": "AAAA,CAAA,eAAA,CAAA,SACI,OAAA",
+  "names": []
+}

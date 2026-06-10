@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/manage-library/manage-library.component.scss"],
+  "sourcesContent": ["@use \"../../../theme/variables\" as theme;\n\n.custom-position {\n    right: 0.9375rem;\n    top: -3.75rem;\n}\n\n.member-name {\n    word-break: keep-all;\n    margin: 0;\n}\n\n.list-group-item:nth-child(even) {\n    background-color: var(--elevation-layer1);\n}\n\n.table {\n    @media (max-width: theme.$grid-breakpoints-sm) {\n        overflow-x: auto;\n        width: 100% !important;\n        display: block;\n    }\n    .btn-container {\n        @media (max-width: theme.$grid-breakpoints-lg) {\n            display: flex;\n            flex-direction: row;\n            flex-wrap: wrap;\n            align-items: center;\n            justify-content: center;\n        }\n        .btn {\n            width: 2rem;\n        }\n    }\n}\n"],
+  "mappings": "AAEA,CAAA,gBACI,MAAA,SACA,IAAA,SAGJ,CAAA,YACI,WAAA,SANJ,OAOI,EAGJ,CAAA,eAAA,eACI,iBAAA,IAAA,oBAIA,OAAA,UAAA,OADJ,CAAA,MAEQ,WAAA,KACA,MAAA,eACA,QAAA,OAGA,OAAA,UAAA,OADJ,CANJ,MAMI,CAAA,cAEQ,QAAA,KACA,eAAA,IACA,UAAA,KACA,YAAA,OACA,gBAAA,QAEJ,CAdR,MAcQ,CARJ,cAQI,CAAA,IACI,MAAA",
+  "names": []
+}

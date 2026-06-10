@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/manga-format.pipe.ts"],
+  "sourcesContent": ["import {Pipe, PipeTransform} from '@angular/core';\nimport {MangaFormat} from '../_models/manga-format';\nimport {translate} from \"@jsverse/transloco\";\n\n/**\n * Returns the string name for the format\n */\n@Pipe({\n  name: 'mangaFormat',\n  standalone: true,\n  pure: true\n})\nexport class MangaFormatPipe implements PipeTransform {\n\n  transform(format: MangaFormat): string {\n    switch (format) {\n      case MangaFormat.EPUB:\n        return translate('manga-format-pipe.epub');\n      case MangaFormat.ARCHIVE:\n        return translate('manga-format-pipe.archive');\n      case MangaFormat.IMAGE:\n        return translate('manga-format-pipe.image');\n      case MangaFormat.PDF:\n        return translate('manga-format-pipe.pdf');\n      case MangaFormat.UNKNOWN:\n        return translate('manga-format-pipe.unknown');\n      default:\n        return '';\n    }\n  }\n\n}\n"],
+  "mappings": "yHAYA,IAAaA,GAAe,IAAA,CAAtB,MAAOA,CAAe,CAE1BC,UAAUC,EAAmB,CAC3B,OAAQA,EAAM,CACZ,KAAKC,EAAYC,KACf,OAAOC,EAAU,wBAAwB,EAC3C,KAAKF,EAAYG,QACf,OAAOD,EAAU,2BAA2B,EAC9C,KAAKF,EAAYI,MACf,OAAOF,EAAU,yBAAyB,EAC5C,KAAKF,EAAYK,IACf,OAAOH,EAAU,uBAAuB,EAC1C,KAAKF,EAAYM,QACf,OAAOJ,EAAU,2BAA2B,EAC9C,QACE,MAAO,EACX,CACF,iDAjBWL,EAAe,CAAA,mDAAfA,EAAeU,KAAA,EAAA,CAAA,CAAA,SAAfV,CAAe,GAAA",
+  "names": ["MangaFormatPipe", "transform", "format", "MangaFormat", "EPUB", "translate", "ARCHIVE", "IMAGE", "PDF", "UNKNOWN", "pure"]
+}

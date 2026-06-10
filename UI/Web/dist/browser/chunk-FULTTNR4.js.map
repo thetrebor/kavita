@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/metadata/age-rating.ts"],
+  "sourcesContent": ["export enum AgeRating {\n    /**\n     * This is not a valid state for Series/Chapters, but used for Restricted Profiles\n     */\n    NotApplicable = -1,\n    Unknown = 0,\n    RatingPending = 1,\n    EarlyChildhood = 2,\n    Everyone = 3,\n    G = 4,\n    Everyone10Plus = 5,\n    PG = 6,\n    KidsToAdults = 7,\n    Teen = 8,\n    Mature15Plus = 9,\n    Mature17Plus = 10,\n    Mature = 11,\n    R18Plus = 12,\n    AdultsOnly = 13,\n    X18Plus = 14\n}\n\nexport const AgeRatings = Object.values(AgeRating).filter(a => typeof a === 'number') as AgeRating[];\n"],
+  "mappings": "AAAA,IAAYA,GAAZ,SAAYA,EAAS,CAIjBA,OAAAA,EAAAA,EAAA,cAAA,EAAA,EAAA,gBACAA,EAAAA,EAAA,QAAA,CAAA,EAAA,UACAA,EAAAA,EAAA,cAAA,CAAA,EAAA,gBACAA,EAAAA,EAAA,eAAA,CAAA,EAAA,iBACAA,EAAAA,EAAA,SAAA,CAAA,EAAA,WACAA,EAAAA,EAAA,EAAA,CAAA,EAAA,IACAA,EAAAA,EAAA,eAAA,CAAA,EAAA,iBACAA,EAAAA,EAAA,GAAA,CAAA,EAAA,KACAA,EAAAA,EAAA,aAAA,CAAA,EAAA,eACAA,EAAAA,EAAA,KAAA,CAAA,EAAA,OACAA,EAAAA,EAAA,aAAA,CAAA,EAAA,eACAA,EAAAA,EAAA,aAAA,EAAA,EAAA,eACAA,EAAAA,EAAA,OAAA,EAAA,EAAA,SACAA,EAAAA,EAAA,QAAA,EAAA,EAAA,UACAA,EAAAA,EAAA,WAAA,EAAA,EAAA,aACAA,EAAAA,EAAA,QAAA,EAAA,EAAA,UAnBQA,CAoBZ,GApBYA,GAAS,CAAA,CAAA,EAsBRC,EAAaC,OAAOC,OAAOH,CAAS,EAAEI,OAAOC,GAAK,OAAOA,GAAM,QAAQ",
+  "names": ["AgeRating", "AgeRatings", "Object", "values", "filter", "a"]
+}

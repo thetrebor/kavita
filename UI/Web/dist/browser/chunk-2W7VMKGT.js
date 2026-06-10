@@ -1,0 +1,2 @@
+import{Fb as u}from"./chunk-66GPU3XZ.js";var h=(()=>{class i{transform(t,e=!0,o=1,c=!1){let n=e?1e3:1024;if(Math.abs(t)<n)return t+" B";let B=e?["kB","MB","GB","TB","PB","EB","ZB","YB"]:["KiB","MiB","GiB","TiB","PiB","EiB","ZiB","YiB"],r=-1,a=10**o;do t/=n,++r;while(Math.round(Math.abs(t)*a)/a>=n&&r<B.length-1);let s=t.toFixed(o);return!c&&(s+"").endsWith(".0")?t.toFixed(0)+" "+B[r]:s+" "+B[r]}static{this.\u0275fac=function(e){return new(e||i)}}static{this.\u0275pipe=u({name:"bytes",type:i,pure:!0})}}return i})();export{h as a};
+//# sourceMappingURL=chunk-2W7VMKGT.js.map

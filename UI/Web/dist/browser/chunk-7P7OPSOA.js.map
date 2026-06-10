@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/default-date.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform, inject } from '@angular/core';\nimport {TranslocoService} from \"@jsverse/transloco\";\n\n@Pipe({\n  name: 'defaultDate',\n  pure: true,\n  standalone: true\n})\nexport class DefaultDatePipe implements PipeTransform {\n  private translocoService = inject(TranslocoService);\n\n  transform(value: any, replacementString = 'default-date-pipe.never'): string {\n    if (value === null || value === undefined || value === '' || value === Infinity || Number.isNaN(value) || value === '1/1/01') {\n      return this.translocoService.translate(replacementString);\n    };\n    return value;\n  }\n\n}\n"],
+  "mappings": "yFAQA,IAAaA,GAAe,IAAA,CAAtB,MAAOA,CAAe,CAL5BC,aAAA,CAMU,KAAAC,iBAAmBC,EAAOC,CAAgB,EAElDC,UAAUC,EAAYC,EAAoB,0BAAyB,CACjE,OAAID,GAAU,MAA+BA,IAAU,IAAMA,IAAUE,KAAYC,OAAOC,MAAMJ,CAAK,GAAKA,IAAU,SAC3G,KAAKJ,iBAAiBS,UAAUJ,CAAiB,EAEnDD,CACT,iDARWN,EAAe,CAAA,mDAAfA,EAAeY,KAAA,EAAA,CAAA,CAAA,SAAfZ,CAAe,GAAA",
+  "names": ["DefaultDatePipe", "constructor", "translocoService", "inject", "TranslocoService", "transform", "value", "replacementString", "Infinity", "Number", "isNaN", "translate", "pure"]
+}

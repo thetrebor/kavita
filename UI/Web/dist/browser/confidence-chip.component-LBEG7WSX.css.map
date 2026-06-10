@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/_components/confidence-chip/confidence-chip.component.scss"],
+  "sourcesContent": [".confidence-chip {\n  padding: 0.375rem 0.625rem;\n  min-width: 4rem;\n  border-radius: 0.375rem;\n  background: color-mix(in srgb, var(--chip-color) 8%, transparent);\n  border: 1px solid color-mix(in srgb, var(--chip-color) 20%, transparent);\n}\n\n.chip-pct {\n  font-size: 1.125rem;\n  color: var(--chip-color);\n}\n\n.chip-unit {\n  font-size: 0.6875rem;\n  opacity: 0.6;\n  font-weight: 500;\n}\n\n.chip-label {\n  font-size: 0.59375rem;\n  color: var(--chip-color);\n  opacity: 0.85;\n  letter-spacing: 0.06em;\n}\n"],
+  "mappings": "AAAA,CAAA,gBAAA,QACE,QAAA,QACA,UAAA,KAFF,cAGE,QACA,WAAA,UAAA,GAAA,IAAA,CAAA,IAAA,cAAA,EAAA,CAAA,aACA,OAAA,IAAA,MAAA,UAAA,GAAA,IAAA,CAAA,IAAA,cAAA,GAAA,CAAA,aAGF,CAAA,SACE,UAAA,SACA,MAAA,IAAA,cAGF,CAAA,UACE,UAAA,SACA,QAAA,GACA,YAAA,IAGF,CAAA,WACE,UAAA,UACA,MAAA,IAAA,cACA,QAAA,IACA,eAAA",
+  "names": []
+}

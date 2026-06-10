@@ -1,0 +1,2 @@
+import{b as o}from"./chunk-NOJQQBGT.js";import{Fb as n,ma as e}from"./chunk-66GPU3XZ.js";var m=(()=>{class t{constructor(){this.breakpointService=e(o)}transform(r,i=35,c=!1){return r?!this.breakpointService.isMobileOrBelow()&&!c?r:r.length>i?`${r.slice(0,i).trim()}\u2026`:r:r??""}static{this.\u0275fac=function(i){return new(i||t)}}static{this.\u0275pipe=n({name:"truncate",type:t,pure:!1})}}return t})();export{m as a};
+//# sourceMappingURL=chunk-SAWSS3IJ.js.map

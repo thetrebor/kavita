@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/sidenav/_components/manage-external-sources/manage-external-sources.component.scss"],
+  "sourcesContent": ["ul {\n  margin:0;\n  padding: 0;\n\n  li {\n    padding: 0.5rem 1rem;\n    display: flex;\n    flex-direction: row;\n    justify-content: space-between;\n    align-items: center;\n    border-radius: 0.3125rem;\n    margin: 0.3125rem 0;\n    color: var(--list-group-hover-text-color);\n    background-color: var(--card-bg-color);\n\n    span {\n      cursor: pointer;\n    }\n  }\n}\n"],
+  "mappings": "AAAA,UACE,EADF,QAEE,EAEA,GAAA,GAJF,QAKI,MAAA,KACA,QAAA,KACA,eAAA,IACA,gBAAA,cACA,YAAA,OATJ,cAUI,SAVJ,OAWI,SAAA,EACA,MAAA,IAAA,+BACA,iBAAA,IAAA,iBAEA,GAAA,GAAA,KACE,OAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/cards/_modals/bulk-set-reading-profile-modal/bulk-set-reading-profile-modal.component.scss"],
+  "sourcesContent": [".clickable:hover, .clickable:focus {\n  background-color: var(--list-group-hover-bg-color, var(--primary-color));\n}\n\n.pill {\n  font-size: .8rem;\n  background-color: var(--card-bg-color);\n  border-radius: 0.375rem;\n  color: var(--badge-text-color);\n\n  &.active {\n    background-color : var(--primary-color);\n  }\n}\n"],
+  "mappings": "AAAA,CAAA,SAAA,OAAA,CAAA,SAAA,OACE,iBAAA,IAAA,2BAAA,EAAA,IAAA,kBAGF,CAAA,KACE,UAAA,MACA,iBAAA,IAAA,iBANF,cAOE,QACA,MAAA,IAAA,oBAEA,CANF,IAME,CAAA,OACE,iBAAA,IAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/rating.ts"],
+  "sourcesContent": ["import {ScrobbleProvider} from \"../_services/scrobbling.service\";\n\nexport enum RatingAuthority {\n  User = 0,\n  Critic = 1,\n}\n\nexport interface Rating {\n  averageScore: number;\n  meanScore: number;\n  favoriteCount: number;\n  provider: ScrobbleProvider;\n  providerUrl: string | undefined;\n  authority: RatingAuthority;\n}\n"],
+  "mappings": "AAEA,IAAYA,GAAZ,SAAYA,EAAe,CACzBA,OAAAA,EAAAA,EAAA,KAAA,CAAA,EAAA,OACAA,EAAAA,EAAA,OAAA,CAAA,EAAA,SAFUA,CAGZ,GAHYA,GAAe,CAAA,CAAA",
+  "names": ["RatingAuthority"]
+}

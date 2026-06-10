@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/user-settings/kavitaplus-activity/kavitaplus-activity.component.scss"],
+  "sourcesContent": [".tabs-scroller {\n  overflow-x: auto;\n  -webkit-overflow-scrolling: touch;\n}\n"],
+  "mappings": "AAAA,CAAA,cACE,WAAA,KACA,2BAAA",
+  "names": []
+}

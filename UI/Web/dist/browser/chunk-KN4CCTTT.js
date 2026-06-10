@@ -1,0 +1,2 @@
+import{Fb as m}from"./chunk-66GPU3XZ.js";var f="0001-01-01T00:00:00",g=(()=>{class r{transform(n,t=null,p=!0){let i=navigator.language,o=e=>!!e&&e!==f&&!isNaN(new Date(e).getTime()),a=e=>{let u=new Date(e);return p?u.toLocaleDateString(i,{month:"short",year:"numeric"}):u.toLocaleDateString(i,{year:"numeric"})},c=o(n),s=o(t);return c&&s?`${a(n)} \u2013 ${a(t)}`:c?a(n):s?a(t):""}static{this.\u0275fac=function(t){return new(t||r)}}static{this.\u0275pipe=m({name:"dateYearRange",type:r,pure:!0})}}return r})();export{f as a,g as b};
+//# sourceMappingURL=chunk-KN4CCTTT.js.map

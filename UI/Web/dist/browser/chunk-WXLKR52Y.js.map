@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/pdf-layout-mode.ts"],
+  "sourcesContent": ["export enum PdfLayoutMode {\n  Multiple = 0,\n  Single = 1,\n  Book = 2,\n  InfiniteScroll = 3\n}\n"],
+  "mappings": "AAAA,IAAYA,GAAZ,SAAYA,EAAa,CACvBA,OAAAA,EAAAA,EAAA,SAAA,CAAA,EAAA,WACAA,EAAAA,EAAA,OAAA,CAAA,EAAA,SACAA,EAAAA,EAAA,KAAA,CAAA,EAAA,OACAA,EAAAA,EAAA,eAAA,CAAA,EAAA,iBAJUA,CAKZ,GALYA,GAAa,CAAA,CAAA",
+  "names": ["PdfLayoutMode"]
+}

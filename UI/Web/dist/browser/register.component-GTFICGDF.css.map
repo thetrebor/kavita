@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/registration/_components/register/register.component.scss"],
+  "sourcesContent": [".custom-input {\n    background-color: var(--login-input-background-color);\n    color: var(--login-input-color);\n    border-color: var(--login-input-border-color);\n    font-family: var(--login-input-font-family);\n\n    &.is-invalid {\n        border-color: var(--bs-form-invalid-border-color);\n    }\n\n    &:focus {\n        border-color: var(--login-input-border-color-focus);\n        box-shadow: var(--login-input-box-shadow-focus);\n    }\n\n    &::placeholder {\n        opacity: var(--login-input-placeholder-opacity);\n        color: var(--login-input-placeholder-color);\n        font-family: var(--login-input-font-family);\n      }\n}\n\nlabel {\n    font-family: var(--login-input-font-family);\n    margin-bottom: 0;\n}\n\np {\n    font-family: var(--login-input-font-family);\n}\n\n.btn {\n    width: 100%;\n    font-family: var(--login-input-font-family);\n}"],
+  "mappings": "AAAA,CAAA,aACI,iBAAA,IAAA,gCACA,MAAA,IAAA,qBACA,aAAA,IAAA,4BACA,YAAA,IAAA,2BAEA,CANJ,YAMI,CAAA,WACI,aAAA,IAAA,gCAGJ,CAVJ,YAUI,OACI,aAAA,IAAA,kCACA,WAAA,IAAA,gCAGJ,CAfJ,YAeI,cACI,QAAA,IAAA,mCACA,MAAA,IAAA,iCACA,YAAA,IAAA,2BAIR,MACI,YAAA,IAAA,2BACA,cAAA,EAGJ,EACI,YAAA,IAAA,2BAGJ,CAAA,IACI,MAAA,KACA,YAAA,IAAA",
+  "names": []
+}

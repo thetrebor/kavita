@@ -1,0 +1,2 @@
+import{e as c}from"./chunk-IIJ3SMKA.js";import{ha as e,ma as o,n as r}from"./chunk-66GPU3XZ.js";var m=(()=>{class t{constructor(){this.filterUtilitiesService=o(c)}resolve(l,i){return i.url.includes("?")?this.filterUtilitiesService.decodeFilter(i.url.split("?")[1]):r(null)}static{this.\u0275fac=function(i){return new(i||t)}}static{this.\u0275prov=e({token:t,factory:t.\u0275fac,providedIn:"root"})}}return t})();export{m as a};
+//# sourceMappingURL=chunk-WYK2AHEN.js.map

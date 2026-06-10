@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/manga-format.ts"],
+  "sourcesContent": ["import {FileTypeGroup} from \"./library/file-type-group.enum\";\n\nexport enum MangaFormat {\n    IMAGE = 0,\n    ARCHIVE = 1,\n    UNKNOWN = 2,\n    EPUB = 3,\n    PDF = 4\n}\n\nexport const allMangaFormats= Object.keys(MangaFormat)\n  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)\n  .map(key => parseInt(key, 10)) as MangaFormat[];\n"],
+  "mappings": "AAEA,IAAYA,GAAZ,SAAYA,EAAW,CACnBA,OAAAA,EAAAA,EAAA,MAAA,CAAA,EAAA,QACAA,EAAAA,EAAA,QAAA,CAAA,EAAA,UACAA,EAAAA,EAAA,QAAA,CAAA,EAAA,UACAA,EAAAA,EAAA,KAAA,CAAA,EAAA,OACAA,EAAAA,EAAA,IAAA,CAAA,EAAA,MALQA,CAMZ,GANYA,GAAW,CAAA,CAAA,EAQVC,EAAiBC,OAAOC,KAAKH,CAAW,EAClDI,OAAOC,GAAO,CAACC,MAAMC,OAAOF,CAAG,CAAC,GAAKG,SAASH,EAAK,EAAE,GAAK,CAAC,EAC3DI,IAAIJ,GAAOG,SAASH,EAAK,EAAE,CAAC",
+  "names": ["MangaFormat", "allMangaFormats", "Object", "keys", "filter", "key", "isNaN", "Number", "parseInt", "map"]
+}

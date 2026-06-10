@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/kavita-plus/manage-matched-metadata/manage-matched-metadata.component.scss"],
+  "sourcesContent": [".table {\n  min-height: 3.75rem;\n  width: 100%;\n\n}\n\n.tr {\n  height: 3.75rem;\n}\n"],
+  "mappings": "AAAA,CAAA,MACE,WAAA,QACA,MAAA,KAIF,CAAA,GACE,OAAA",
+  "names": []
+}

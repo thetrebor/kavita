@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/book-reader/_components/_annotations/annotation-card/annotation-card.component.scss"],
+  "sourcesContent": [".annotation-card {\n  max-width: 25rem;\n  width: 25rem;\n\n  .card-body {\n    height: 10rem;\n    overflow: auto;\n  }\n}\n\n.content-quote {\n  color: var(--drawer-text-color);\n  max-height: 20rem;\n  overflow-y: hidden;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n  display: -webkit-box;\n  line-clamp: 4;\n  -webkit-line-clamp: 4;\n  -webkit-box-orient: vertical;\n}\n\n.spoilers {\n  filter: blur(0.1875rem);\n}\n\n:host ::ng-deep quill-view {\n  color: var(--drawer-text-color);\n}\n:host ::ng-deep .ql-editor {\n  padding: 0;\n}\n"],
+  "mappings": "AAAA,CAAA,gBACE,UAAA,MACA,MAAA,MAEA,CAJF,gBAIE,CAAA,UACE,OAAA,MACA,SAAA,KAIJ,CAAA,cACE,MAAA,IAAA,qBACA,WAAA,MACA,WAAA,OACA,YAAA,SACA,UAAA,WACA,QAAA,YACA,WAAA,EACA,mBAAA,EACA,mBAAA,SAGF,CAAA,SACE,OAAA,KAAA,UAGF,MAAA,UAAA,WACE,MAAA,IAAA,qBAEF,MAAA,UAAA,CAAA,UA7BA,QA8BE",
+  "names": []
+}

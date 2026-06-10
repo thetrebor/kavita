@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/layout-mode.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {translate} from \"@jsverse/transloco\";\nimport {LayoutMode} from \"../manga-reader/_models/layout-mode\";\nimport {ScalingOption} from \"../_models/preferences/scaling-option\";\n\n@Pipe({\n  name: 'layoutMode',\n  standalone: true\n})\nexport class LayoutModePipe implements PipeTransform {\n\n  transform(value: LayoutMode): string {\n    const v = parseInt(value + '', 10) as LayoutMode;\n    switch (v) {\n      case LayoutMode.Single: return translate('preferences.single');\n      case LayoutMode.Double: return translate('preferences.double');\n      case LayoutMode.DoubleReversed: return translate('preferences.double-manga');\n      case LayoutMode.DoubleNoCover: return translate('preferences.double-no-cover');\n    }\n  }\n\n}\n"],
+  "mappings": "qJASA,IAAaA,GAAc,IAAA,CAArB,MAAOA,CAAc,CAEzBC,UAAUC,EAAiB,CAEzB,OADUC,SAASD,EAAQ,GAAI,EAAE,EACxB,CACP,KAAKE,EAAWC,OAAQ,OAAOC,EAAU,oBAAoB,EAC7D,KAAKF,EAAWG,OAAQ,OAAOD,EAAU,oBAAoB,EAC7D,KAAKF,EAAWI,eAAgB,OAAOF,EAAU,0BAA0B,EAC3E,KAAKF,EAAWK,cAAe,OAAOH,EAAU,6BAA6B,CAC/E,CACF,iDAVWN,EAAc,CAAA,kDAAdA,EAAcU,KAAA,EAAA,CAAA,CAAA,SAAdV,CAAc,GAAA",
+  "names": ["LayoutModePipe", "transform", "value", "parseInt", "LayoutMode", "Single", "translate", "Double", "DoubleReversed", "DoubleNoCover", "pure"]
+}

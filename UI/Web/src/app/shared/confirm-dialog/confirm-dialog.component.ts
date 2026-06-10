@@ -5,11 +5,11 @@ import {ConfirmConfig} from './_models/confirm-config';
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmTranslatePipe} from "../../_pipes/confirm-translate.pipe";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-confirm-dialog',
-  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, ReactiveFormsModule],
+  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, FormsModule, ReactiveFormsModule],
     templateUrl: './confirm-dialog.component.html',
     styleUrls: ['./confirm-dialog.component.scss']
 })
@@ -21,6 +21,7 @@ export class ConfirmDialogComponent implements OnInit {
   formGroup = new FormGroup({
     'prompt': new FormControl('', []),
   })
+  checkboxValue: boolean = false;
 
   ngOnInit(): void {
     if (this.config) {
@@ -42,6 +43,10 @@ export class ConfirmDialogComponent implements OnInit {
   clickButton(button: ConfirmButton) {
     if (this.config._type === 'prompt') {
       this.modal.close(button.type === 'primary' ? this.formGroup.get('prompt')?.value : '');
+      return;
+    }
+    if (this.config.checkboxLabel) {
+      this.modal.close({confirmed: button.type === 'primary', checkboxValue: this.checkboxValue});
       return;
     }
     this.modal.close(button.type === 'primary');

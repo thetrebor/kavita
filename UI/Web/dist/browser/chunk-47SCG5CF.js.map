@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/utc-to-locale-date.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {DateTime} from \"luxon\";\n\n@Pipe({\n  name: 'utcToLocalDate',\n  standalone: true\n})\n/**\n * This is the same as the UtcToLocalTimePipe but returning a timezone aware DateTime object rather than a string.\n * Use this when the next operation needs a Date object (like the TimeAgoPipe)\n */\nexport class UtcToLocalDatePipe implements PipeTransform {\n\n  transform(utcDate: string | undefined | null): Date | null {\n    if (utcDate === '' || utcDate === null || utcDate === undefined || utcDate.split('T')[0] === '0001-01-01')  {\n      return null;\n    }\n\n    const dateTime = DateTime.fromISO(utcDate, { zone: 'utc' }).toLocal();\n    return dateTime.toJSDate()\n  }\n\n}\n"],
+  "mappings": "iFAWA,IAAaA,GAAkB,IAAA,CAAzB,MAAOA,CAAkB,CAE7BC,UAAUC,EAAkC,CAC1C,OAAIA,IAAY,IAAMA,IAAY,MAAQA,IAAYC,QAAaD,EAAQE,MAAM,GAAG,EAAE,CAAC,IAAM,aACpF,KAGQC,EAASC,QAAQJ,EAAS,CAAEK,KAAM,KAAK,CAAE,EAAEC,QAAO,EACnDC,SAAQ,CAC1B,iDATWT,EAAkB,CAAA,sDAAlBA,EAAkBU,KAAA,EAAA,CAAA,CAAA,SAAlBV,CAAkB,GAAA",
+  "names": ["UtcToLocalDatePipe", "transform", "utcDate", "undefined", "split", "DateTime", "fromISO", "zone", "toLocal", "toJSDate", "pure"]
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/kavita-plus/discord-connect-card/discord-connect-card.component.scss"],
+  "sourcesContent": [":host {\n  display: block;\n}\n\n.discord-card {\n  background:\n    radial-gradient(circle at 90% 50%, color-mix(in srgb, var(--discord-bg-color) 22%, transparent), transparent 55%),\n    linear-gradient(135deg, color-mix(in srgb, var(--discord-bg-color) 12%, var(--elevation-layer1-dark-solid)) 0%, var(--elevation-layer1-dark-solid) 100%);\n  border: 1px solid color-mix(in srgb, var(--discord-bg-color) 25%, var(--hr-color));\n  border-radius: 0.75rem;\n  padding: 1.25rem 1.5rem;\n}\n\n.discord-icon {\n  width: 2.75rem;\n  height: 2.75rem;\n  border-radius: 0.625rem;\n  background: var(--discord-bg-color);\n  color: var(--discord-text-color);\n  font-size: 1.25rem;\n}\n\n.discord-title {\n  font-size: 1rem;\n  font-weight: 700;\n  margin: 0;\n}\n\n.discord-subtitle {\n  font-size: 0.8rem;\n}\n"],
+  "mappings": "AAAA,MACE,QAAA,MAGF,CAAA,aACE,WACE,gBAAA,OAAA,GAAA,IAAA,GAAA,CAAA,UAAA,GAAA,IAAA,CAAA,IAAA,oBAAA,GAAA,CAAA,YAAA,CAAA,YAAA,IAAA,CAAA,gBAAA,MAAA,CAAA,UAAA,GAAA,IAAA,CAAA,IAAA,oBAAA,GAAA,CAAA,IAAA,gCAAA,EAAA,CAAA,IAAA,+BAAA,MAEF,OAAA,IAAA,MAAA,UAAA,GAAA,IAAA,CAAA,IAAA,oBAAA,GAAA,CAAA,IAAA,aARF,cASE,OATF,QAUE,QAAA,OAGF,CAAA,aACE,MAAA,QACA,OAAA,QAfF,cAgBE,QACA,WAAA,IAAA,oBACA,MAAA,IAAA,sBACA,UAAA,QAGF,CAAA,cACE,UAAA,KACA,YAAA,IAxBF,OAyBE,EAGF,CAAA,iBACE,UAAA",
+  "names": []
+}

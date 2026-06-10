@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/registration/_components/confirm-email-change/confirm-email-change.component.scss"],
+  "sourcesContent": [".card-body {\n    padding: 0 0;\n}\n\n.card {\n    background-color: var(--login-card-bg-color);\n}\n\np {\n    font-family: var(--login-input-font-family);\n}"],
+  "mappings": "AAAA,CAAA,UAAA,QACI,EAGJ,CAAA,KACI,iBAAA,IAAA,uBAGJ,EACI,YAAA,IAAA",
+  "names": []
+}

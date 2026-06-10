@@ -124,6 +124,37 @@ export class ConfirmService {
     });
   }
 
+  /**
+   * Confirm with an optional checkbox. Returns both the confirm result and the checkbox state.
+   * @param content The main confirmation message
+   * @param checkboxLabel Label for the checkbox
+   * @param config Optional extra config overrides
+   */
+  public async confirmWithCheckbox(content: string, checkboxLabel: string, config?: ConfirmConfig): Promise<{confirmed: boolean, checkboxValue: boolean}> {
+    return new Promise((resolve, reject) => {
+      if (config === undefined) {
+        config = this.defaultConfirm;
+        config.header = 'confirm.confirm';
+        config.content = content;
+        config.checkboxLabel = checkboxLabel;
+      } else {
+        config.checkboxLabel = checkboxLabel;
+        if (content !== undefined) {
+          config.content = content;
+        }
+      }
+
+      const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
+      modalRef.componentInstance.config = config;
+      modalRef.closed.pipe(take(1)).subscribe((result: any) => {
+        return resolve(result);
+      });
+      modalRef.dismissed.subscribe(() => {
+        return resolve({confirmed: false, checkboxValue: false});
+      });
+    });
+  }
+
   public async prompt(title: string | undefined = undefined, config: ConfirmConfig | undefined = undefined): Promise<string> {
 
     return new Promise((resolve, reject) => {

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/duration.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {translate} from \"@jsverse/transloco\";\n\n@Pipe({\n  name: 'duration'\n})\nexport class DurationPipe implements PipeTransform {\n\n  transform(seconds: number): string {\n    if (seconds < 60) return translate('duration-pipe.seconds', {num: seconds});\n    if (seconds < 3600) return translate('duration-pipe.minutes', {num: Math.floor(seconds / 60)});\n\n    const hours = Math.floor(seconds / 3600);\n    const minutes = Math.floor((seconds % 3600) / 60);\n\n    return minutes > 0 ? translate('duration-pipe.combo', {hour: hours, min: minutes}) : translate('duration-pipe.hours', {num: hours});\n  }\n\n}\n"],
+  "mappings": "iFAMA,IAAaA,GAAY,IAAA,CAAnB,MAAOA,CAAY,CAEvBC,UAAUC,EAAe,CACvB,GAAIA,EAAU,GAAI,OAAOC,EAAU,wBAAyB,CAACC,IAAKF,CAAO,CAAC,EAC1E,GAAIA,EAAU,KAAM,OAAOC,EAAU,wBAAyB,CAACC,IAAKC,KAAKC,MAAMJ,EAAU,EAAE,CAAC,CAAC,EAE7F,IAAMK,EAAQF,KAAKC,MAAMJ,EAAU,IAAI,EACjCM,EAAUH,KAAKC,MAAOJ,EAAU,KAAQ,EAAE,EAEhD,OAAOM,EAAU,EAAIL,EAAU,sBAAuB,CAACM,KAAMF,EAAOG,IAAKF,CAAO,CAAC,EAAIL,EAAU,sBAAuB,CAACC,IAAKG,CAAK,CAAC,CACpI,iDAVWP,EAAY,CAAA,gDAAZA,EAAYW,KAAA,EAAA,CAAA,CAAA,SAAZX,CAAY,GAAA",
+  "names": ["DurationPipe", "transform", "seconds", "translate", "num", "Math", "floor", "hours", "minutes", "hour", "min", "pure"]
+}

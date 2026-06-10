@@ -215,9 +215,12 @@ export class ActionService {
         );
 
       case Action.Delete:
-        return from(this.confirmService.confirm(translate('toasts.confirm-delete-series'))).pipe(
-          filter(confirmed => confirmed),
-          switchMap(() => this.seriesService.delete(series.id)),
+        return from(this.confirmService.confirmWithCheckbox(
+          translate('toasts.confirm-delete-series'),
+          translate('toasts.delete-from-disk')
+        )).pipe(
+          filter(result => result.confirmed),
+          switchMap(result => this.seriesService.delete(series.id, result.checkboxValue)),
           tap(() => this.toastr.success(translate('toasts.series-deleted'))),
           map(() => this.fromAction(action, series, 'remove'))
         );
@@ -933,9 +936,12 @@ export class ActionService {
         );
 
       case Action.Delete:
-        return from(this.confirmService.confirm(translate('toasts.confirm-delete-multiple-series', {count: series.length}))).pipe(
-          filter(confirmed => confirmed),
-          switchMap(() => this.seriesService.deleteMultipleSeries(series.map(s => s.id))),
+        return from(this.confirmService.confirmWithCheckbox(
+          translate('toasts.confirm-delete-multiple-series', {count: series.length}),
+          translate('toasts.delete-from-disk')
+        )).pipe(
+          filter(result => result.confirmed),
+          switchMap(result => this.seriesService.deleteMultipleSeries(series.map(s => s.id), result.checkboxValue)),
           tap(res => {
             if (res) {
               this.toastr.success(translate('toasts.series-deleted'));

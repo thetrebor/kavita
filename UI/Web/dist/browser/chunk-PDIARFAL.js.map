@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/dashboard/stream-type.enum.ts"],
+  "sourcesContent": ["export enum StreamType {\n  OnDeck = 1,\n  RecentlyUpdated = 2,\n  NewlyAdded = 3,\n  SmartFilter = 4,\n  MoreInGenre = 5\n}\n"],
+  "mappings": "AAAA,IAAYA,GAAZ,SAAYA,EAAU,CACpBA,OAAAA,EAAAA,EAAA,OAAA,CAAA,EAAA,SACAA,EAAAA,EAAA,gBAAA,CAAA,EAAA,kBACAA,EAAAA,EAAA,WAAA,CAAA,EAAA,aACAA,EAAAA,EAAA,YAAA,CAAA,EAAA,cACAA,EAAAA,EAAA,YAAA,CAAA,EAAA,cALUA,CAMZ,GANYA,GAAU,CAAA,CAAA",
+  "names": ["StreamType"]
+}

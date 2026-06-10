@@ -16,7 +16,15 @@
       </form>
     </div>
   } @else {
-    <div class="modal-body" [class.book-reader]="config.bookReader" style="overflow-x: auto" [innerHtml]="(config.content | confirmTranslate)! | safeHtml"></div>
+    <div class="modal-body" [class.book-reader]="config.bookReader" style="overflow-x: auto">
+      <div [innerHtml]="(config.content | confirmTranslate)! | safeHtml"></div>
+      @if (config.checkboxLabel) {
+        <div class="mt-3 form-check">
+          <input type="checkbox" class="form-check-input" id="delete-from-disk-checkbox" [(ngModel)]="checkboxValue" [ngModelOptions]="{standalone: true}" />
+          <label class="form-check-label" for="delete-from-disk-checkbox">{{config.checkboxLabel | confirmTranslate}}</label>
+        </div>
+      }
+    </div>
   }
 
   <div class="modal-footer" [class.book-reader]="config.bookReader">

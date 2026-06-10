@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/nav/_components/download-queue-drawer/download-queue-drawer.component.scss"],
+  "sourcesContent": [".download-queue-drawer {\n  height: 100%;\n  overflow-y: auto;\n}\n\n.section-label {\n  font-size: 0.875rem;\n  font-weight: 600;\n  color: var(--text-muted-color);\n  text-decoration: none;\n\n  &:hover {\n    text-decoration: none;\n  }\n}\n\n:host {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n\n  .setting-section-break {\n    margin: 0.5rem 0;\n  }\n\n  .section-break-lg {\n    margin: 1rem 0;\n    border-bottom: 1px solid var(--drawer-section-break-color, var(--bs-border-color));\n  }\n}\n\n.collapse-chevron {\n  font-size: 0.65rem;\n  transition: transform 0.2s ease;\n\n  &.expanded {\n    transform: rotate(90deg);\n  }\n}\n"],
+  "mappings": "AAAA,CAAA,sBACE,OAAA,KACA,WAAA,KAGF,CAAA,cACE,UAAA,QACA,YAAA,IACA,MAAA,IAAA,oBACA,gBAAA,KAEA,CANF,aAME,OACE,gBAAA,KAIJ,MACE,OAAA,KACA,QAAA,KACA,eAAA,OAEA,MAAA,CAAA,sBArBF,OAsBI,MAAA,EAGF,MAAA,CAAA,iBAzBF,OA0BI,KAAA,EACA,cAAA,IAAA,MAAA,IAAA,4BAAA,EAAA,IAAA,oBAIJ,CAAA,iBACE,UAAA,OACA,WAAA,UAAA,IAAA,KAEA,CAJF,gBAIE,CAAA,SACE,UAAA,OAAA",
+  "names": []
+}

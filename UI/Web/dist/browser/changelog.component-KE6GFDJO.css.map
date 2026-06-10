@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/announcements/_components/changelog/changelog.component.scss"],
+  "sourcesContent": [".update-details {\n  border-radius: 0.5rem;\n}\n"],
+  "mappings": "AAAA,CAAA,eAAA,cACE",
+  "names": []
+}

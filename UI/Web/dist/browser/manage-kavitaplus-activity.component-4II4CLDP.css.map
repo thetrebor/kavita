@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/kavita-plus/manage-kavitaplus-activity/manage-kavitaplus-activity.component.scss"],
+  "sourcesContent": [":host {\n  --filter-chip-active-bg: var(--btn-primary-bg-color);\n  --filter-chip-active-color: var(--btn-primary-text-color);\n  display: block;\n}\n\n.stat-header {\n  display: flex;\n  align-items: center;\n  gap: 0.375rem;\n  font-size: 0.65rem;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  color: var(--text-muted-color);\n  margin-bottom: 0.375rem;\n}\n\n.stat-value {\n  font-size: 1.5rem;\n  font-weight: 700;\n  line-height: 1.2;\n}\n\n.stat-subtitle {\n  font-size: 0.75rem;\n  color: var(--text-muted-color);\n  margin-top: 0.125rem;\n}\n\n.btn.active-filter {\n  background: var(--filter-chip-active-bg);\n  color: var(--filter-chip-active-color);\n  border-color: transparent;\n}\n\n@media (max-width: 575.98px) {\n  .stats-strip {\n    flex-wrap: wrap;\n\n    .stats-card { flex-basis: calc(50% - 0.75rem); }\n  }\n}\n\n@media (max-width: 991.98px) {\n  .form-select { width: 100% !important; }\n}\n"],
+  "mappings": "AAAA,MACE,yBAAA,IAAA,wBACA,4BAAA,IAAA,0BACA,QAAA,MAGF,CAAA,YACE,QAAA,KACA,YAAA,OACA,IAAA,QACA,UAAA,OACA,YAAA,IACA,eAAA,MACA,eAAA,UACA,MAAA,IAAA,oBACA,cAAA,QAGF,CAAA,WACE,UAAA,OACA,YAAA,IACA,YAAA,IAGF,CAAA,cACE,UAAA,OACA,MAAA,IAAA,oBACA,WAAA,QAGF,CAAA,GAAA,CAAA,cACE,WAAA,IAAA,yBACA,MAAA,IAAA,4BACA,aAAA,YAGF,OAAA,UAAA,UACE,CAAA,YACE,UAAA,KAEA,CAHF,YAGE,CAAA,WAAc,WAAA,KAAA,IAAA,EAAA,SAIlB,OAAA,UAAA,UACE,CAAA,YAAe,MAAA",
+  "names": []
+}

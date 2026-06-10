@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_single-module/spoiler/spoiler.component.scss"],
+  "sourcesContent": [".spoiler {\n    background-color: var(--review-spoiler-bg-color);\n    color: var(--review-spoiler-text-color);\n    cursor: pointer;\n}\n\n"],
+  "mappings": "AAAA,CAAA,QACI,iBAAA,IAAA,2BACA,MAAA,IAAA,6BACA,OAAA",
+  "names": []
+}

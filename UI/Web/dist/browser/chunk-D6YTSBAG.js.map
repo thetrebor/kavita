@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/scaling-option.ts"],
+  "sourcesContent": ["/**\n * How the image should scale to the screen size\n */\nexport enum ScalingOption {\n    /**\n     * Fit the image into the height of screen\n     */\n    FitToHeight = 0,\n    /**\n     * Fit the image into the width of screen\n     */\n    FitToWidth = 1,\n    /**\n     * Apply no logic and render the image as is\n     */\n    Original = 2,\n    /**\n     * Ask the reader to attempt to choose the best ScalingOption for the user\n     */\n    Automatic = 3\n}\n"],
+  "mappings": "AAGA,IAAYA,GAAZ,SAAYA,EAAa,CAIrBA,OAAAA,EAAAA,EAAA,YAAA,CAAA,EAAA,cAIAA,EAAAA,EAAA,WAAA,CAAA,EAAA,aAIAA,EAAAA,EAAA,SAAA,CAAA,EAAA,WAIAA,EAAAA,EAAA,UAAA,CAAA,EAAA,YAhBQA,CAiBZ,GAjBYA,GAAa,CAAA,CAAA",
+  "names": ["ScalingOption"]
+}

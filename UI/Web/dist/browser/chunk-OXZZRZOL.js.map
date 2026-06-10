@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/modal/modal-result.ts"],
+  "sourcesContent": ["export interface ModalResult<T = void> {\n  success: boolean;\n  data?: T;\n  coverImageUpdated?: boolean;\n  isDeleted?: boolean;\n}\n\nexport function modalSaved<T>(data?: T, coverImageUpdated = false): ModalResult<T> {\n  return { success: true, data, coverImageUpdated, isDeleted: false };\n}\n\nexport function modalDeleted<T>(data?: T): ModalResult<T> {\n  return { success: true, data, coverImageUpdated: false, isDeleted: true };\n}\n\nexport function modalCancelled<T>(): ModalResult<T> {\n  return { success: false };\n}\n"],
+  "mappings": "AAOM,SAAUA,EAAcC,EAAUC,EAAoB,GAAK,CAC/D,MAAO,CAAEC,QAAS,GAAMF,KAAAA,EAAMC,kBAAAA,EAAmBE,UAAW,EAAK,CACnE,CAEM,SAAUC,EAAgBJ,EAAQ,CACtC,MAAO,CAAEE,QAAS,GAAMF,KAAAA,EAAMC,kBAAmB,GAAOE,UAAW,EAAI,CACzE",
+  "names": ["modalSaved", "data", "coverImageUpdated", "success", "isDeleted", "modalDeleted"]
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/cards/cover-image-chooser/cover-image-chooser.component.scss"],
+  "sourcesContent": ["$image-height: 14.5569rem;\n$image-width: 10rem;\n\n.card-img-top {\n    width: $image-width;\n    height: $image-height;\n    max-height: $image-height;\n}\n\n\n.selected {\n    outline: 0.3125rem solid var(--primary-color);\n    outline-width: medium;\n    outline-offset: -0.0625rem;\n}\n\n.chooser {\n    display: grid;\n    grid-template-columns: repeat(auto-fill, 10rem);\n    grid-gap: 0.5rem;\n    justify-content: space-around;\n}\n\n.cover-title {\n  font-size: 0.75rem;\n  text-align: center;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  max-width: 160px;\n  margin: 0.25rem 0 0;\n}\n\nngx-file-drop ::ng-deep > div {\n    // styling for the outer drop box\n    width: 100%;\n    border: 0.125rem solid var(--primary-color);\n    border-radius: 0.3125rem;\n    height: 6.25rem;\n    margin: auto;\n\n    > div {\n      // styling for the inner box (template)\n      width: 100%;\n      display: inline-block;\n\n    }\n  }\n"],
+  "mappings": "AAGA,CAAA,aACI,MAHU,MAIV,OALW,WAMX,WANW,WAUf,CAAA,SACI,QAAA,SAAA,MAAA,IAAA,iBACA,cAAA,OACA,eAAA,UAGJ,CAAA,QACI,QAAA,KACA,sBAAA,OAAA,SAAA,CAAA,OACA,SAAA,MACA,gBAAA,aAGJ,CAAA,YACE,UAAA,OACA,WAAA,OACA,SAAA,OACA,cAAA,SACA,YAAA,OACA,UAAA,MA1BF,OA2BE,OAAA,EAAA,EAGF,cAAA,SAAA,CAAA,IAEI,MAAA,KACA,OAAA,QAAA,MAAA,IAAA,iBAjCJ,cAkCI,SACA,OAAA,QAnCJ,OAoCI,KAEA,cAAA,SAAA,CAAA,GAAA,CAAA,IAEE,MAAA,KACA,QAAA",
+  "names": []
+}

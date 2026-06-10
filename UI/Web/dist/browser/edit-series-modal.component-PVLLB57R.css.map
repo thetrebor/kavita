@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/cards/_modals/edit-series-modal/edit-series-modal.component.scss"],
+  "sourcesContent": [".lock-active {\n    > .input-group-text {\n        background-color: var(--primary-color);\n        color: white;\n    }\n}\n"],
+  "mappings": "AACI,CAAA,WAAA,CAAA,CAAA,iBACI,iBAAA,IAAA,iBACA,MAAA",
+  "names": []
+}

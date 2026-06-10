@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/book-reader/_components/text-bookmark-item/text-bookmark-item.component.scss"],
+  "sourcesContent": [".card:hover {\n  background-color: var(--elevation-layer7)\n}\n.ellipsis {\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.content {\n  color: var(--drawer-text-color)\n}\n"],
+  "mappings": "AAAA,CAAA,IAAA,OACE,iBAAA,IAAA,oBAEF,CAAA,SACE,SAAA,OACA,cAAA,SAGF,CAAA,QACE,MAAA,IAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/reader-mode.ts"],
+  "sourcesContent": ["/**\n * The pagination method used by the reader\n */\nexport enum ReaderMode {\n    /**\n     * Manga default left/right to page\n     */\n    LeftRight = 0,\n    /**\n     * Manga up and down to page\n     */\n    UpDown = 1,\n    /**\n     * Webtoon reading (scroll) with optional areas to tap\n     */\n    Webtoon = 2\n}"],
+  "mappings": "AAGA,IAAYA,GAAZ,SAAYA,EAAU,CAIlBA,OAAAA,EAAAA,EAAA,UAAA,CAAA,EAAA,YAIAA,EAAAA,EAAA,OAAA,CAAA,EAAA,SAIAA,EAAAA,EAAA,QAAA,CAAA,EAAA,UAZQA,CAaZ,GAbYA,GAAU,CAAA,CAAA",
+  "names": ["ReaderMode"]
+}

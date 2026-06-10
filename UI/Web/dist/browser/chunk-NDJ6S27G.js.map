@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/site-theme.ts"],
+  "sourcesContent": ["/**\n * Where does the theme come from\n */\n export enum ThemeProvider {\n    System = 1,\n    Custom = 2,\n  }\n\n  /**\n   * Theme for the whole instance\n   */\n  export interface SiteTheme {\n    id: number;\n    name: string;\n    normalizedName: string;\n    filePath: string;\n    isDefault: boolean;\n    provider: ThemeProvider;\n    /**\n     * The actual class the root is defined against. It is generated at the backend.\n     */\n    selector: string;\n    description: string;\n    previewUrls: Array<string>;\n    author: string;\n\n  }\n"],
+  "mappings": "AAGC,IAAYA,GAAZ,SAAYA,EAAa,CACtBA,OAAAA,EAAAA,EAAA,OAAA,CAAA,EAAA,SACAA,EAAAA,EAAA,OAAA,CAAA,EAAA,SAFSA,CAGX,GAHWA,GAAa,CAAA,CAAA",
+  "names": ["ThemeProvider"]
+}

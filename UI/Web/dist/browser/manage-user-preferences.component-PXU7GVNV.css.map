@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/user-settings/manga-user-preferences/manage-user-preferences.component.scss"],
+  "sourcesContent": ["\n.color-box-container {\n  display: flex;\n  align-items: center;\n  margin: 0.625rem 0;\n}\n\n.color-box {\n  width: 1.25rem;\n  height: 1.25rem;\n  border: 1px solid #000;\n  margin-right: 0.625rem;\n}\n\n.hex-code {\n  font-size: 1rem;\n  color: var(--primary-color);\n}"],
+  "mappings": "AACA,CAAA,oBACE,QAAA,KACA,YAAA,OAFF,OAGE,QAAA,EAGF,CAAA,UACE,MAAA,QACA,OAAA,QACA,OAAA,IAAA,MAAA,KACA,aAAA,QAGF,CAAA,SACE,UAAA,KACA,MAAA,IAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/_modals/directory-picker/directory-picker.component.scss"],
+  "sourcesContent": ["\n$breadcrumb-divider: quote(\">\");\n\n.breadcrumb-item + .breadcrumb-item::before {\n    content: $breadcrumb-divider;\n}\n\n.scrollable {\n    overflow-y: auto;\n    max-height: 25rem;\n}\n\n.btn-outline-secondary {\n    border: 1px solid #ced4da;\n}\n\n.disabled {\n    color: lightgrey !important;\n    cursor: not-allowed !important;\n    background-color: var(--error-color);\n}\n"],
+  "mappings": "AAGA,CAAA,eAAA,CAAA,CAAA,eAAA,QACI,QAHiB,IAMrB,CAAA,WACI,WAAA,KACA,WAAA,MAGJ,CAAA,sBACI,OAAA,IAAA,MAAA,QAGJ,CAAA,SACI,MAAA,kBACA,OAAA,sBACA,iBAAA,IAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component.scss"],
+  "sourcesContent": [".hide-if-empty:empty {\n    display: none !important;\n}\n\n.btn-icon {\n  position: relative;\n}\n\n.icon-position {\n  position: absolute;\n  top: -0.125rem;\n  right: -0.125rem;\n  font-size: 0.8em;\n  color: var(--primary-color);\n}\n\n@keyframes spin {\n  from {\n    transform: rotate(0deg);\n  }\n  to {\n    transform: rotate(360deg);\n  }\n}\n\n.icon-position.active {\n  animation: spin 3.3s linear infinite;\n}\n\n.icon-container::after {\n  content: '';\n  position: absolute;\n  left: 0.625rem;\n  bottom: -0.25rem;\n  width: 1.4375rem;\n  height: 0.125rem;\n  background-color: var(--primary-color);\n  transition: width 0.3s ease, left 0.3s ease;\n}\n"],
+  "mappings": "AAAA,CAAA,aAAA,OACI,QAAA,eAGJ,CAAA,SACE,SAAA,SAGF,CAAA,cACE,SAAA,SACA,IAAA,SACA,MAAA,SACA,UAAA,KACA,MAAA,IAAA,iBAGF,WAAA,KACE,GACE,UAAA,OAAA,GAEF,GACE,UAAA,OAAA,SAIJ,CAjBA,aAiBA,CAAA,OACE,UAAA,KAAA,KAAA,OAAA,SAGF,CAAA,cAAA,OACE,QAAA,GACA,SAAA,SACA,KAAA,QACA,OAAA,QACA,MAAA,UACA,OAAA,QACA,iBAAA,IAAA,iBACA,WAAA,MAAA,IAAA,IAAA,CAAA,KAAA,IAAA",
+  "names": []
+}

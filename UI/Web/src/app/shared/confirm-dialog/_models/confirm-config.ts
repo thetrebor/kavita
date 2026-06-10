@@ -13,4 +13,8 @@ export class ConfirmConfig {
    * Enables book theme css classes to style the popup properly
    */
   bookReader?: boolean = false;
+  /**
+   * Optional label for a checkbox shown in the dialog. When set, the modal returns {confirmed, checkboxValue} instead of boolean.
+   */
+  checkboxLabel?: string = '';
 }

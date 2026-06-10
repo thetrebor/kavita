@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/user-settings/_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component.scss"],
+  "sourcesContent": [".selected-row {\n  background-color: var(--primary-color-scrollbar)\n}\n"],
+  "mappings": "AAAA,CAAA,aACE,iBAAA,IAAA",
+  "names": []
+}

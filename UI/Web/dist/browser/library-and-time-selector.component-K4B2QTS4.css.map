@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/statistics/_components/library-and-time-selector/library-and-time-selector.component.scss"],
+  "sourcesContent": [".lib-selector {\n  color: var(--primary-color);\n  cursor: pointer;\n}\n"],
+  "mappings": "AAAA,CAAA,aACE,MAAA,IAAA,iBACA,OAAA",
+  "names": []
+}

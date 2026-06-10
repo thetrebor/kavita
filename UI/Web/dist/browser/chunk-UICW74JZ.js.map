@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_types/text-response.ts"],
+  "sourcesContent": ["/**\n * Use when httpClient is expected to return just a string/variable and not json\n */\nexport const TextResonse = {responseType: 'text' as 'json'};"],
+  "mappings": "AAGO,IAAMA,EAAc,CAACC,aAAc,MAAgB",
+  "names": ["TextResonse", "responseType"]
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/pdf-theme.ts"],
+  "sourcesContent": ["export enum PdfTheme{\n  Dark = 0,\n  Light = 1\n}\n"],
+  "mappings": "AAAA,IAAYA,GAAZ,SAAYA,EAAQ,CAClBA,OAAAA,EAAAA,EAAA,KAAA,CAAA,EAAA,OACAA,EAAAA,EAAA,MAAA,CAAA,EAAA,QAFUA,CAGZ,GAHYA,GAAQ,CAAA,CAAA",
+  "names": ["PdfTheme"]
+}

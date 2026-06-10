@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -441,7 +442,7 @@ public class SeriesService(
     }
 
 
-    public async Task<bool> DeleteMultipleSeries(IList<int> seriesIds, CancellationToken ct = default)
+    public async Task<bool> DeleteMultipleSeries(IList<int> seriesIds, CancellationToken ct = default, bool deleteFromDisk = false)
     {
         try
         {
@@ -452,6 +453,28 @@ public class SeriesService(
             foreach (var mapping in chapterMappings)
             {
                 allChapterIds.AddRange(mapping.Value);
+            }
+
+            // If deleteFromDisk is enabled, delete the physical files before removing DB records
+            if (deleteFromDisk && allChapterIds.Count != 0)
+            {
+                var files = await unitOfWork.ChapterRepository.GetFilesForChaptersAsync(allChapterIds, ct);
+                foreach (var file in files)
+                {
+                    if (string.IsNullOrEmpty(file.FilePath)) continue;
+                    try
+                    {
+                        if (File.Exists(file.FilePath))
+                        {
+                            logger.LogDebug("Deleting file from disk: {FilePath}", file.FilePath);
+                            File.Delete(file.FilePath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Could not delete file from disk: {FilePath}", file.FilePath);
+                    }
+                }
             }
 
             // NOTE: This isn't getting all the people and whatnot currently due to the lack of includes

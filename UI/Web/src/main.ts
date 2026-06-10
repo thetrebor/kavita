@@ -15,7 +15,7 @@ import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/ht
 import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
-import {catchError, firstValueFrom, of, switchMap, tap} from "rxjs";
+import {catchError, defaultIfEmpty, firstValueFrom, of, switchMap, tap} from "rxjs";
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
@@ -117,6 +117,10 @@ function loadUserLocale(transloco: TranslocoService, accountService: AccountServ
   const user = accountService.currentUser();
   const locale = user?.preferences?.locale || localStorage.getItem(AccountService.localeKey) || 'en';
 
+  // setActiveLang internally triggers a load, which populates the cache.
+  // Then load() returns the cached translations (never empty).
+  // Reversing this order breaks rendering because Transloco expects
+  // the active lang to be set before translations can be applied to templates.
   transloco.setActiveLang(locale);
   return transloco.load(locale);
 }

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component.scss"],
+  "sourcesContent": ["ngx-file-drop ::ng-deep > div {\n  // styling for the outer drop box\n  width: 100%;\n  border: 0.125rem solid var(--primary-color);\n  border-radius: 0.3125rem;\n  height: 6.25rem;\n  margin: auto;\n\n  > div {\n    // styling for the inner box (template)\n    width: 100%;\n    display: inline-block;\n\n  }\n}\n"],
+  "mappings": "AAAA,cAAA,SAAA,CAAA,IAEE,MAAA,KACA,OAAA,QAAA,MAAA,IAAA,iBAHF,cAIE,SACA,OAAA,QALF,OAME,KAEA,cAAA,SAAA,CAAA,GAAA,CAAA,IAEE,MAAA,KACA,QAAA",
+  "names": []
+}

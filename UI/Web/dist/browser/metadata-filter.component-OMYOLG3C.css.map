@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/metadata-filter/metadata-filter.component.scss"],
+  "sourcesContent": ["/* Works for Chrome, Safari, Edge, Opera */\ninput::-webkit-outer-spin-button,\ninput::-webkit-inner-spin-button {\n  -webkit-appearance: none;\n  margin: 0;\n}\n\n/* Works for Firefox */\ninput[type=\"number\"] {\n  -moz-appearance: textfield;\n}\n\n.filter-animate-wrapper {\n  display: grid;\n  grid-template-rows: 1fr;\n}\n\n.filter-enter {\n  animation: filterIn 500ms ease-out;\n}\n\n.filter-leave {\n  animation: filterOut 500ms ease-in;\n}\n\n.filter-animate-inner {\n  overflow: hidden;\n}\n\n@keyframes filterIn {\n  from {\n    grid-template-rows: 0fr;\n    opacity: 0;\n  }\n  to {\n    grid-template-rows: 1fr;\n    opacity: 1;\n  }\n}\n\n@keyframes filterOut {\n  from {\n    grid-template-rows: 1fr;\n    opacity: 1;\n  }\n  to {\n    grid-template-rows: 0fr;\n    opacity: 0;\n  }\n}\n"],
+  "mappings": "AACA,KAAA,4BAAA,KAAA,4BAEE,mBAAA,KAHF,OAIE,EAIF,KAAA,CAAA,aACE,gBAAA,UAGF,CAAA,uBACE,QAAA,KACA,mBAAA,IAGF,CAAA,aACE,UAAA,SAAA,IAAA,SAGF,CAAA,aACE,UAAA,UAAA,IAAA,QAGF,CAAA,qBACE,SAAA,OAGF,WAXE,SAYA,GACE,mBAAA,IACA,QAAA,EAEF,GACE,mBAAA,IACA,QAAA,GAIJ,WAlBE,UAmBA,GACE,mBAAA,IACA,QAAA,EAEF,GACE,mBAAA,IACA,QAAA",
+  "names": []
+}

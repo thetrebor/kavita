@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/person-badge/person-badge.component.scss"],
+  "sourcesContent": [":host {\n  --person-badge-size: 6rem;\n}\n\n.tagbadge {\n    background-color: var(--tagbadge-bg-color);\n    transition: all .3s ease-out;\n    margin: 0.1875rem 0.625rem 0.1875rem 0;\n    border-radius: 0.375rem;\n    font-size: .8rem;\n    display: inline-block;\n    cursor: pointer;\n    word-break: break-word;\n\n    i {\n        max-height: calc((var(--person-badge-size) / 2));\n        height: calc((var(--person-badge-size) / 2));\n        width: calc((var(--person-badge-size) / 2));\n        font-size: calc((var(--person-badge-size) / 2));\n        font-weight: bold;\n        cursor: pointer;\n    }\n\n    .image-container {\n        background: var(--card-bg-color);\n        max-height: var(--person-badge-size);\n        height: var(--person-badge-size);\n        width: var(--person-badge-size);\n        border-radius: 50%;\n        overflow: hidden;\n    }\n}\n"],
+  "mappings": "AAAA,MACE,qBAAA,KAGF,CAAA,SACI,iBAAA,IAAA,qBACA,WAAA,IAAA,IAAA,SANJ,OAOI,SAAA,QAAA,SAAA,EAPJ,cAQI,QACA,UAAA,MACA,QAAA,aACA,OAAA,QACA,WAAA,WAEA,CAVJ,SAUI,EACI,WAAA,KAAA,IAAA,qBAAA,EAAA,GACA,OAAA,KAAA,IAAA,qBAAA,EAAA,GACA,MAAA,KAAA,IAAA,qBAAA,EAAA,GACA,UAAA,KAAA,IAAA,qBAAA,EAAA,GACA,YAAA,IACA,OAAA,QAGJ,CAnBJ,SAmBI,CAAA,gBACI,WAAA,IAAA,iBACA,WAAA,IAAA,qBACA,OAAA,IAAA,qBACA,MAAA,IAAA,qBA3BR,cA4BQ,IACA,SAAA",
+  "names": []
+}

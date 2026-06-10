@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/book-reader/_components/table-of-contents/table-of-contents.component.scss"],
+  "sourcesContent": [".table-of-contents li {\n    cursor: pointer;\n\n    &.active {\n        font-weight: bold;\n      color: var(--primary-color);\n    }\n}\n\n.chapter-title {\n    padding-inline-start: 1rem;\n}\n"],
+  "mappings": "AAAA,CAAA,kBAAA,GACI,OAAA,QAEA,CAHJ,kBAGI,EAAA,CAAA,OACI,YAAA,IACF,MAAA,IAAA,iBAIN,CAAA,cACI,qBAAA",
+  "names": []
+}

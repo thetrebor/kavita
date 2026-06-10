@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/_tag-card-common.scss"],
+  "sourcesContent": [".tag-card {\n  background-color: var(--bs-card-color, #2c2c2c);\n  padding: 1rem;\n  border-radius: 0.75rem;\n  box-shadow: 0 0.125rem 0.3125rem rgba(0,0,0,0.2);\n  transition: transform 0.2s ease, background 0.3s ease;\n  cursor: pointer;\n\n  &.not-selectable:hover {\n    cursor: not-allowed;\n    background-color: var(--bs-card-color, #2c2c2c) !important;\n  }\n}\n\n.tag-card:hover {\n  background-color: var(--card-hover-bg-color);\n  //transform: translateY(-3px); // Cool effect but has a weird background issue. ROBBIE: Fix this\n  & .tag-name, & .tag-meta {\n    color: var(--card-hover-text-color)\n  }\n}\n\n.tag-name {\n  font-size: 1.1rem;\n  font-weight: 600;\n  margin-bottom: 0.5rem;\n  max-height: 8rem;\n  height: 8rem;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.tag-meta {\n  font-size: 0.85rem;\n  display: flex;\n  justify-content: space-between;\n  color: var(--text-muted-color, #bbb);\n}\n"],
+  "mappings": "AAAA,CAAA,SACE,iBAAA,IAAA,eAAA,EAAA,SADF,QAEE,KAFF,cAGE,OACA,WAAA,EAAA,QAAA,SAAA,MACA,WAAA,UAAA,IAAA,IAAA,CAAA,WAAA,IAAA,KACA,OAAA,QAEA,CARF,QAQE,CAAA,cAAA,OACE,OAAA,YACA,iBAAA,IAAA,eAAA,EAAA,mBAIJ,CAdA,QAcA,OACE,iBAAA,IAAA,uBAEA,CAjBF,QAiBE,OAAA,CAAA,SAAA,CAjBF,QAiBE,OAAA,CAAA,SACE,MAAA,IAAA,yBAIJ,CALE,SAMA,UAAA,OACA,YAAA,IACA,cAAA,MACA,WAAA,KACA,OAAA,KACA,SAAA,OACA,cAAA,SAGF,CAfE,SAgBA,UAAA,OACA,QAAA,KACA,gBAAA,cACA,MAAA,IAAA,kBAAA,EAAA",
+  "names": []
+}

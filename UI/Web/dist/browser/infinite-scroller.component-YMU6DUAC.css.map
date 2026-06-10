@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/manga-reader/_components/infinite-scroller/infinite-scroller.component.scss"],
+  "sourcesContent": ["// DEBUG Only\n.overlay {\n    background-color: rgba(0,0,0,0.5);\n}\n.active {\n    border: 0.125rem solid red;\n}\n\n.full-opacity {\n    opacity: 0;\n}\n\nimg, .full-width {\n    max-width: 100% !important;\n    //height: auto; // This can cause (rarely) a small line between panels\n}\n\n// This is to force hardware acceleration to help address https://github.com/Kareadita/Kavita/issues/1848\n*:not(html) {\n    -webkit-transform: translate3d(0, 0, 0);\n    -moz-transform: translate3d(0, 0, 0);\n    transform: translate3d(0, 0, 0);\n}\n\n@keyframes move-up-down {\n    0%, 100% {\n      transform: translateY(0);\n    }\n    50% {\n      transform: translateY(-0.625rem);\n    }\n}\n\n.bookmark-effect {\n    animation: infinite-scroll-bookmark 1s cubic-bezier(0.165, 0.84, 0.44, 1);\n}\n\n@keyframes infinite-scroll-bookmark {\n    0%, 100% {\n        filter: opacity(1);\n    }\n    50% {\n        filter: opacity(0.25);\n    }\n}\n"],
+  "mappings": "AACA,CAAA,QACI,iBAAA,UAEJ,CAAA,OACI,OAAA,QAAA,MAAA,IAGJ,CAAA,aACI,QAAA,EAGJ,IAAA,CAAA,WACI,UAAA,eAKJ,CAAA,KAAA,MACI,kBAAA,YAAA,CAAA,CAAA,CAAA,CAAA,GACA,eAAA,YAAA,CAAA,CAAA,CAAA,CAAA,GACA,UAAA,WAAA,GAGJ,WAAA,aACI,MACE,UAAA,WAAA,GAEF,IACE,UAAA,WAAA,WAIN,CAAA,gBACI,UAAA,yBAAA,GAAA,aAAA,IAAA,CAAA,GAAA,CAAA,GAAA,CAAA,GAGJ,WAHI,yBAIA,MACI,OAAA,QAAA,GAEJ,IACI,OAAA,QAAA",
+  "names": []
+}

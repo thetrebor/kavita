@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/sidenav/_components/customize-sidenav-streams/customize-sidenav-streams.component.scss"],
+  "sourcesContent": ["::ng-deep .drag-handle {\n  margin-top: 70% !important;\n}\n\napp-sidenav-stream-list-item {\n  flex-grow: 1;\n}\n\n.filter-list {\n  margin: 0;\n  padding:0;\n\n  .filter {\n    padding: 0.5rem 1rem;\n    display: flex;\n    flex-direction: row;\n    justify-content: space-between;\n    align-items: center;\n    border-radius: 0.3125rem;\n    margin: 0.3125rem 0;\n    color: var(--list-group-hover-text-color);\n    background-color: var(--list-group-hover-bg-color);\n  }\n}\n"],
+  "mappings": "AAAA,UAAA,CAAA,YACE,WAAA,cAGF,6BACE,UAAA,EAGF,CAAA,YARA,OASE,EATF,QAUE,EAEA,CAJF,YAIE,CAAA,OAZF,QAaI,MAAA,KACA,QAAA,KACA,eAAA,IACA,gBAAA,cACA,YAAA,OAjBJ,cAkBI,SAlBJ,OAmBI,SAAA,EACA,MAAA,IAAA,+BACA,iBAAA,IAAA",
+  "names": []
+}

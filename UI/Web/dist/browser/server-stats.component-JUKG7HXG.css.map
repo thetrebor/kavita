@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/statistics/_components/server-stats/server-stats.component.scss"],
+  "sourcesContent": [".grid {\n    display: grid;\n    grid-template-columns: repeat(auto-fill, 17.5rem);\n    grid-gap: 0.5rem;\n    justify-content: space-evenly;\n    width: 100%;\n    overflow-y: auto;\n    overflow-x: hidden;\n    align-items: start;\n}\n\n"],
+  "mappings": "AAAA,CAAA,KACI,QAAA,KACA,sBAAA,OAAA,SAAA,CAAA,SACA,SAAA,MACA,gBAAA,aACA,MAAA,KACA,WAAA,KACA,WAAA,OACA,YAAA",
+  "names": []
+}

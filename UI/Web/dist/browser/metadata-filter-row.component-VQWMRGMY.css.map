@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/metadata-filter/_components/metadata-filter-row/metadata-filter-row.component.scss"],
+  "sourcesContent": ["::ng-deep .select2-selection__rendered {\n  padding-top: 0.25rem !important;\n}\n\n\n::ng-deep .ngb-dp-content, ::ng-deep .ngb-dp-header{\n  background: var(--bs-body-bg);\n  color: var(--body-text-color);\n}\n\n::ng-deep .ngb-dp-header, ::ng-deep .ngb-dp-weekdays {\n  background-color: var(--bs-body-bg) !important;\n}\n\n::ng-deep .ngb-dp-day .btn-light, ::ng-deep .ngb-dp-weekday {\n  background: var(--bs-body-bg);\n  color: var(--body-text-color);\n}\n\n::ng-deep [ngbDatepickerDayView]:hover:not(.bg-primary), [ngbDatepickerDayView].active:not(.bg-primary) {\n  background: var(--primary-color-dark-shade) !important;\n  outline: 1px solid var(--primary-color-dark-shade) !important;\n}\n"],
+  "mappings": "AAAA,UAAA,CAAA,4BACE,YAAA,iBAIF,UAAA,CAAA,eAAA,UAAA,CAAA,cACE,WAAA,IAAA,cACA,MAAA,IAAA,mBAGF,UAAA,CALA,cAKA,UAAA,CAAA,gBACE,iBAAA,IAAA,wBAGF,UAAA,CAAA,WAAA,CAAA,UAAA,UAAA,CAAA,eACE,WAAA,IAAA,cACA,MAAA,IAAA,mBAGF,UAAA,CAAA,qBAAA,MAAA,KAAA,CAAA,YAAA,CAAA,qBAAA,CAAA,MAAA,KAAA,CAAA,YACE,WAAA,IAAA,sCACA,QAAA,IAAA,MAAA,IAAA",
+  "names": []
+}

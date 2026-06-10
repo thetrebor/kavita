@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/manage-settings/manage-settings.component.scss"],
+  "sourcesContent": [".invalid-feedback {\n    display: inherit;\n}\n.custom-position {\n  right: 0.3125rem;\n  top: -2.625rem;\n}\n"],
+  "mappings": "AAAA,CAAA,iBACI,QAAA,QAEJ,CAAA,gBACE,MAAA,SACA,IAAA",
+  "names": []
+}

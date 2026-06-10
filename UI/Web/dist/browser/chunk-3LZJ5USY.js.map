@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_models/preferences/page-split-option.ts"],
+  "sourcesContent": ["export enum PageSplitOption {\n    /**\n     * Renders the left side of the image then the right side\n     */\n    SplitLeftToRight = 0,\n    /**\n     * Renders the right side of the image then the left side\n     */\n    SplitRightToLeft = 1,\n    /**\n     * Don't split and show the image in original size\n     */\n    NoSplit = 2,\n    /**\n     * Don't split and scale the image to fit screen space\n     */\n    FitSplit = 3\n}\n"],
+  "mappings": "AAAA,IAAYA,GAAZ,SAAYA,EAAe,CAIvBA,OAAAA,EAAAA,EAAA,iBAAA,CAAA,EAAA,mBAIAA,EAAAA,EAAA,iBAAA,CAAA,EAAA,mBAIAA,EAAAA,EAAA,QAAA,CAAA,EAAA,UAIAA,EAAAA,EAAA,SAAA,CAAA,EAAA,WAhBQA,CAiBZ,GAjBYA,GAAe,CAAA,CAAA",
+  "names": ["PageSplitOption"]
+}

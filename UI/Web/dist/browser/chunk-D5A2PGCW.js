@@ -1,0 +1,2 @@
+import{a as t}from"./chunk-HB6ONMTZ.js";import{f as r}from"./chunk-KJX5IEQE.js";import{Fb as s}from"./chunk-66GPU3XZ.js";import"./chunk-J2SLNJRR.js";var m=(()=>{class e{transform(i){switch(parseInt(i+"",10)){case t.Dark:return r("preferences.pdf-dark");case t.Light:return r("preferences.pdf-light")}}static{this.\u0275fac=function(p){return new(p||e)}}static{this.\u0275pipe=s({name:"pdfTheme",type:e,pure:!0})}}return e})();export{m as PdfThemePipe};
+//# sourceMappingURL=chunk-D5A2PGCW.js.map

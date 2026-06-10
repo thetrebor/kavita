@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/book-reader/_components/book-line-overlay/book-line-overlay.component.scss"],
+  "sourcesContent": [".overlay {\n  background-color: var(--br-actionbar-bg-color);\n  color: var(--bs-body-bg);\n  padding: 0.3125rem;\n  border-radius: 0.25rem;\n  z-index: 9999;\n  width: 100vw;\n}\n"],
+  "mappings": "AAAA,CAAA,QACE,iBAAA,IAAA,yBACA,MAAA,IAAA,cAFF,QAGE,SAHF,cAIE,OACA,QAAA,KACA,MAAA",
+  "names": []
+}

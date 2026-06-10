@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/manage-tasks-settings/manage-tasks-settings.component.scss"],
+  "sourcesContent": ["td {\n    font-size: .9rem;\n}"],
+  "mappings": "AAAA,GACI,UAAA",
+  "names": []
+}

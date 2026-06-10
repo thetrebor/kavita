@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/book-reader/_components/_annotations/epub-highlight/epub-highlight.component.scss"],
+  "sourcesContent": ["\n.icon-spacer {\n  font-size: 0.85rem;\n}\n\n.epub-highlight {\n  position: relative;\n  display: inline;\n  transition: all 0.2s ease-in-out;\n}\n"],
+  "mappings": "AACA,CAAA,YACE,UAAA,OAGF,CAAA,eACE,SAAA,SACA,QAAA,OACA,WAAA,IAAA,IAAA",
+  "names": []
+}

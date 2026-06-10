@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/image/image.component.scss"],
+  "sourcesContent": ["img {\n    width: 100%;\n    transition: opacity 1s;\n}\n\n.fade-in {\n  opacity: 0;\n  transition: opacity 0.3s ease-in-out;\n}\n\n.fade-in.loaded {\n  opacity: 1;\n}\n"],
+  "mappings": "AAAA,IACI,MAAA,KACA,WAAA,QAAA,GAGJ,CAAA,QACE,QAAA,EACA,WAAA,QAAA,IAAA,YAGF,CALA,OAKA,CAAA,OACE,QAAA",
+  "names": []
+}

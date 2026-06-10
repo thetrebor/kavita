@@ -1,0 +1,2 @@
+import{a as t}from"./chunk-K7364LUY.js";import{f as r}from"./chunk-KJX5IEQE.js";import{Fb as o}from"./chunk-66GPU3XZ.js";import"./chunk-J2SLNJRR.js";var f=(()=>{class e{transform(p){switch(parseInt(p+"",10)){case t.None:return r("preferences.pdf-none");case t.Odd:return r("preferences.pdf-odd");case t.Even:return r("preferences.pdf-even")}}static{this.\u0275fac=function(n){return new(n||e)}}static{this.\u0275pipe=o({name:"pdfSpreadMode",type:e,pure:!0})}}return e})();export{f as PdfSpreadModePipe};
+//# sourceMappingURL=chunk-6N4XGEKC.js.map

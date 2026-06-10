@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/reading-mode.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {ReaderMode} from \"../_models/preferences/reader-mode\";\nimport {translate} from \"@jsverse/transloco\";\nimport {ScalingOption} from \"../_models/preferences/scaling-option\";\n\n@Pipe({\n  name: 'readerMode',\n  standalone: true\n})\nexport class ReaderModePipe implements PipeTransform {\n\n  transform(value: ReaderMode): string {\n    const v = parseInt(value + '', 10) as ReaderMode;\n    switch (v) {\n      case ReaderMode.UpDown: return translate('preferences.up-to-down');\n      case ReaderMode.Webtoon: return translate('preferences.webtoon');\n      case ReaderMode.LeftRight: return translate('preferences.left-to-right');\n    }\n  }\n\n}\n"],
+  "mappings": "qJASA,IAAaA,GAAc,IAAA,CAArB,MAAOA,CAAc,CAEzBC,UAAUC,EAAiB,CAEzB,OADUC,SAASD,EAAQ,GAAI,EAAE,EACxB,CACP,KAAKE,EAAWC,OAAQ,OAAOC,EAAU,wBAAwB,EACjE,KAAKF,EAAWG,QAAS,OAAOD,EAAU,qBAAqB,EAC/D,KAAKF,EAAWI,UAAW,OAAOF,EAAU,2BAA2B,CACzE,CACF,iDATWN,EAAc,CAAA,kDAAdA,EAAcS,KAAA,EAAA,CAAA,CAAA,SAAdT,CAAc,GAAA",
+  "names": ["ReaderModePipe", "transform", "value", "parseInt", "ReaderMode", "UpDown", "translate", "Webtoon", "LeftRight", "pure"]
+}

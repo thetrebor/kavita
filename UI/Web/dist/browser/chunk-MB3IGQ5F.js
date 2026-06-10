@@ -1,0 +1,2 @@
+import{a as n}from"./chunk-YNZQWKVR.js";import{g as p}from"./chunk-KSNB7M3W.js";import{I as i,ma as o,n as e}from"./chunk-66GPU3XZ.js";var y=(t,s)=>{let m=o(n),a=o(p),r=t.parent?.paramMap.get("libraryId")||t.paramMap.get("libraryId");return!r||r==="0"?(console.error("Library ID not found in route params or 0"),e(a.parseUrl("/home"))):m.getLibrary(parseInt(r,10)).pipe(i(()=>e(a.parseUrl("/home"))))};export{y as a};
+//# sourceMappingURL=chunk-MB3IGQ5F.js.map

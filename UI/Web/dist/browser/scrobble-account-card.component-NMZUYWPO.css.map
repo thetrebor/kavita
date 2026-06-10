@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/user-settings/scrobble-account-card/scrobble-account-card.component.scss"],
+  "sourcesContent": [":host {\n  --provider-card-border-color: #353635;\n}\n\n.provider-card {\n  width: 100%;\n  height: 4.0625rem;\n  background: var(--elevation-layer2);\n  border-left-width: 0.1875rem !important;\n  border-color: var(--provider-card-border-color) !important;\n}\n\n.provider-logo {\n  width: 2.75rem;\n  height: 2.75rem;\n}\n\n.status-dot {\n  width: 0.5rem;\n  height: 0.5rem;\n  border-radius: 50%;\n  flex-shrink: 0;\n\n  &--connected    { background: var(--success-color); }\n  &--expired      { background: var(--error-color); }\n  &--disconnected { background: var(--text-muted-color); }\n}\n\n.warning {\n  color: var(--warning-color);\n}\n"],
+  "mappings": "AAAA,MACE,8BAAA,QAGF,CAAA,cACE,MAAA,KACA,OAAA,UACA,WAAA,IAAA,oBACA,kBAAA,mBACA,aAAA,IAAA,wCAGF,CAAA,cACE,MAAA,QACA,OAAA,QAGF,CAAA,WACE,MAAA,MACA,OAAA,MAnBF,cAoBE,IACA,YAAA,EAEA,CAAA,sBAAkB,WAAA,IAAA,iBAClB,CAAA,oBAAkB,WAAA,IAAA,eAClB,CAAA,yBAAkB,WAAA,IAAA,oBAGpB,CAAA,QACE,MAAA,IAAA",
+  "names": []
+}

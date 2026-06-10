@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/nav/_components/download-queue-widget/download-queue-widget.component.scss"],
+  "sourcesContent": [".dl-count-pill {\n  font-size:0.55rem;\n  transform:translate(-70%, 0) !important;\n}\n\n.pause-overlay {\n  position: absolute;\n  bottom: 0;\n  right: -2px;\n  font-size: 0.6rem;\n}\n"],
+  "mappings": "AAAA,CAAA,cACE,UAAA,OACA,UAAA,UAAA,gBAGF,CAAA,cACE,SAAA,SACA,OAAA,EACA,MAAA,KACA,UAAA",
+  "names": []
+}

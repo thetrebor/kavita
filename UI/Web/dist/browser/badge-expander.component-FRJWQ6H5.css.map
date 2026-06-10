@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/badge-expander/badge-expander.component.scss"],
+  "sourcesContent": [".content {\n    width: 100%;\n}\n\n.collapsed {\n    height: 2.1875rem;\n    overflow: hidden;\n}\n\n::ng-deep .badge-expander .content {\n  a,\n  span {\n    font-size: 0.8rem;\n  }\n}\n"],
+  "mappings": "AAAA,CAAA,QACI,MAAA,KAGJ,CAAA,UACI,OAAA,UACA,SAAA,OAIF,UAAA,CAAA,eAAA,CAVF,QAUE,EAAA,UAAA,CAAA,eAAA,CAVF,QAUE,KAEE,UAAA",
+  "names": []
+}

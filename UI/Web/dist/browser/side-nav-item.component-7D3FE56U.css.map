@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/sidenav/_components/side-nav-item/side-nav-item.component.scss"],
+  "sourcesContent": ["@use '../../../../theme/variables' as theme;\n\n::ng-deep .side-nav app-side-nav-item:first-child {\n    .active-highlight {\n        border-top-left-radius: 0.1875rem;\n    }\n}\n\n::ng-deep .side-nav app-side-nav-item:first-child {\n    .side-nav-item {\n        border-top-left-radius: 0.1875rem;\n    }\n}\n\n@media (max-width: theme.$grid-breakpoints-lg) {\n    ::ng-deep .side-nav app-side-nav-item:first-child {\n        .side-nav-item {\n            border-top-left-radius: 0;\n        }\n    }\n\n    ::ng-deep .side-nav app-side-nav-item:last-child {\n        .side-nav-item {\n            border-bottom-left-radius: 0;\n        }\n    }\n}\n\n@media (max-width: theme.$grid-breakpoints-lg) {\n    .side-nav-item {\n\n        .side-nav-text {\n            width: 100%;\n        }\n\n        span:last-child {\n            flex-grow: 0;\n        }\n    }\n}\n\n.drag-handle {\n  cursor: grab;\n}\n"],
+  "mappings": "AAGI,UAAA,CAAA,SAAA,iBAAA,aAAA,CAAA,iBACI,uBAAA,SAKJ,UAAA,CANA,SAMA,iBAAA,aAAA,CAAA,cACI,uBAAA,SAIR,OAAA,UAAA,OAEQ,UAAA,CAbJ,SAaI,iBAAA,aAAA,CAPJ,cAQQ,uBAAA,EAKJ,UAAA,CAnBJ,SAmBI,iBAAA,YAAA,CAbJ,cAcQ,0BAAA,GAKZ,OAAA,UAAA,OAGQ,CAtBJ,cAsBI,CAAA,cACI,MAAA,KAGJ,CA1BJ,cA0BI,IAAA,YACI,UAAA,GAKZ,CAAA,YACE,OAAA",
+  "names": []
+}

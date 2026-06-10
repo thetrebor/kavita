@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/kavita-plus/manage-scrobble-errors/manage-scrobble-errors.component.scss"],
+  "sourcesContent": [".primary-icon, button i.fa {\n    color: var(--primary-color);\n}\n"],
+  "mappings": "AAAA,CAAA,aAAA,OAAA,CAAA,CAAA,GACI,MAAA,IAAA",
+  "names": []
+}

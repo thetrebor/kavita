@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/book-reader/_components/_drawers/view-toc-drawer/view-toc-drawer.component.scss"],
+  "sourcesContent": ["// You must add this on a component based drawer\n:host {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n\n.drawer-text i {\n  color: var(--drawer-text-color);\n  font-size: 1rem;\n}\n\n.drawer-text:hover i {\n  color: var(--drawer-text-color)\n}\n"],
+  "mappings": "AACA,MACE,OAAA,KACA,QAAA,KACA,eAAA,OAGF,CAAA,YAAA,EACE,MAAA,IAAA,qBACA,UAAA,KAGF,CALA,WAKA,OAAA,EACE,MAAA,IAAA",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/drawer/drawer.component.scss"],
+  "sourcesContent": [".offcanvas {\n  color: var(--drawer-text-color);\n  background-color: var(--drawer-bg-color);\n}\n\n.hide-if-empty:empty {\n  display: none !important;\n}"],
+  "mappings": "AAAA,CAAA,UACE,MAAA,IAAA,qBACA,iBAAA,IAAA,mBAGF,CAAA,aAAA,OACE,QAAA",
+  "names": []
+}

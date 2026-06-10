@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/_components/scrobble-provider-tag-badge/scrobble-provider-tag-badge.component.scss"],
+  "sourcesContent": [".source-badge {\n  height: 1.375rem;\n  padding: 0 0.5625rem 0 0.3125rem;\n  background: color-mix(in srgb, var(--badge-color) 12%, transparent);\n  border: 1px solid color-mix(in srgb, var(--badge-color) 33%, transparent);\n  color: var(--badge-color);\n  font-size: 0.6875rem;\n  font-weight: 600;\n  white-space: nowrap;\n}\n\n.id-pill {\n  height: 1.25rem;\n  padding: 0 0.4375rem 0 0.25rem;\n  background: rgba(255, 255, 255, 0.04);\n  border: 1px solid rgba(255, 255, 255, 0.08);\n  color: var(--text-muted-color);\n  font-size: 0.65625rem;\n  white-space: nowrap;\n}\n"],
+  "mappings": "AAAA,CAAA,aACE,OAAA,SADF,QAEE,EAAA,SAAA,EAAA,SACA,WAAA,UAAA,GAAA,IAAA,CAAA,IAAA,eAAA,GAAA,CAAA,aACA,OAAA,IAAA,MAAA,UAAA,GAAA,IAAA,CAAA,IAAA,eAAA,GAAA,CAAA,aACA,MAAA,IAAA,eACA,UAAA,SACA,YAAA,IACA,YAAA,OAGF,CAAA,QACE,OAAA,QAZF,QAaE,EAAA,SAAA,EAAA,OACA,WAAA,UACA,OAAA,IAAA,MAAA,KAAA,GAAA,CAAA,GAAA,CAAA,GAAA,CAAA,KACA,MAAA,IAAA,oBACA,UAAA,UACA,YAAA",
+  "names": []
+}

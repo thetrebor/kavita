@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/_components/media-format-pill/media-format-pill.component.scss"],
+  "sourcesContent": [".format-pill {\n  padding: 0.125rem 0.5rem;\n  background: color-mix(in srgb, var(--pill-color) 12%, transparent);\n  color: var(--pill-color);\n  border: 1px solid color-mix(in srgb, var(--pill-color) 27%, transparent);\n  font-size: 0.6875rem;\n  font-weight: 500;\n  line-height: 1.4;\n  white-space: nowrap;\n}\n"],
+  "mappings": "AAAA,CAAA,YAAA,QACE,QAAA,MACA,WAAA,UAAA,GAAA,IAAA,CAAA,IAAA,cAAA,GAAA,CAAA,aACA,MAAA,IAAA,cACA,OAAA,IAAA,MAAA,UAAA,GAAA,IAAA,CAAA,IAAA,cAAA,GAAA,CAAA,aACA,UAAA,SACA,YAAA,IACA,YAAA,IACA,YAAA",
+  "names": []
+}

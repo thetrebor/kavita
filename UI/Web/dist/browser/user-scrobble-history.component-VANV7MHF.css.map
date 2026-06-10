@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_single-module/user-scrobble-history/user-scrobble-history.component.scss"],
+  "sourcesContent": [".icon {\n    color: var(--primary-color);\n}\n\n.error {\n  color: var(--error-color);\n}\n\n.custom-position {\n  right: 0.9375rem;\n  top: -2.625rem;\n}\n"],
+  "mappings": "AAAA,CAAA,KACI,MAAA,IAAA,iBAGJ,CAAA,MACE,MAAA,IAAA,eAGF,CAAA,gBACE,MAAA,SACA,IAAA",
+  "names": []
+}

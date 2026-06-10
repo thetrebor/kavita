@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin/kavita-plus/kavita-plus-connect-providers/kavita-plus-connect-providers.component.scss"],
+  "sourcesContent": [".page-desc {\n  font-size: 0.92rem;\n}\n\n.footer {\n  border-top: 1px solid var(--hr-color);\n}\n\n.footer-hint {\n  font-size: 0.78rem;\n}\n\n.icon-xs {\n  font-size: 0.7rem;\n}\n"],
+  "mappings": "AAAA,CAAA,UACE,UAAA,OAGF,CAAA,OACE,WAAA,IAAA,MAAA,IAAA,YAGF,CAAA,YACE,UAAA,OAGF,CAAA,QACE,UAAA",
+  "names": []
+}

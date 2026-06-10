@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/settings/_components/setting-multi-check-box/setting-multi-check-box.component.scss"],
+  "sourcesContent": [".list-group-item {\n  border: none;\n}\n\n.text-muted {\n  font-size: 0.875rem;\n}\n\n"],
+  "mappings": "AAAA,CAAA,gBACE,OAAA,KAGF,CAAA,WACE,UAAA",
+  "names": []
+}

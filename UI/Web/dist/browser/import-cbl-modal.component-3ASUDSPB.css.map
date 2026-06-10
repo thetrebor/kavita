@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/user-settings/_modals/import-cbl-modal/import-cbl-modal.component.scss"],
+  "sourcesContent": [".tier-badge {\n  font-size: 0.75rem;\n  font-weight: normal;\n  cursor: default;\n}\n\n:host ::ng-deep .skipped-row {\n  color: var(--bs-secondary-color) !important;\n}\n\n:host ::ng-deep .matched-row {\n  background-color: rgba(var(--bs-success-rgb), 0.05);\n}\n\n.table-wrapper {\n  max-height: 60vh;\n  overflow-y: auto;\n}\n"],
+  "mappings": "AAAA,CAAA,WACE,UAAA,OACA,YAAA,IACA,OAAA,QAGF,MAAA,UAAA,CAAA,YACE,MAAA,IAAA,gCAGF,MAAA,UAAA,CAAA,YACE,iBAAA,KAAA,IAAA,iBAAA,CAAA,KAGF,CAAA,cACE,WAAA,KACA,WAAA",
+  "names": []
+}

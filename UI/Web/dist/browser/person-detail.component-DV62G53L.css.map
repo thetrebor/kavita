@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/person-detail/person-detail.component.scss"],
+  "sourcesContent": [".main-container {\n  margin-top: 0.625rem;\n  padding: 0 0 0 0.625rem;\n\n  .person-badge {\n    background: var(--card-bg-color);\n    max-height: 12.5rem;\n    height: 12.5rem;\n    width: 12.5rem;\n    border-radius: 50%;\n    overflow: hidden;\n\n    i {\n      max-height: 8rem;\n      height: 8rem;\n      font-size: 8rem;\n    }\n  }\n}\n"],
+  "mappings": "AAAA,CAAA,eACE,WAAA,QADF,QAEE,EAAA,EAAA,EAAA,QAEA,CAJF,eAIE,CAAA,aACE,WAAA,IAAA,iBACA,WAAA,QACA,OAAA,QACA,MAAA,QARJ,cASI,IACA,SAAA,OAEA,CAZJ,eAYI,CARF,aAQE,EACE,WAAA,KACA,OAAA,KACA,UAAA",
+  "names": []
+}

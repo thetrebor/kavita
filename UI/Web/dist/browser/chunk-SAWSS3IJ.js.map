@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/truncate.pipe.ts"],
+  "sourcesContent": ["import {inject, Pipe, PipeTransform} from '@angular/core';\nimport {BreakpointService} from '../_services/breakpoint.service';\n\n@Pipe({ name: 'truncate', standalone: true, pure: false })\nexport class TruncatePipe implements PipeTransform {\n  private readonly breakpointService = inject(BreakpointService);\n\n  transform(value: string | null | undefined, length = 35, always: boolean = false): string {\n    if (!value) return value ?? '';\n    if (!this.breakpointService.isMobileOrBelow() && !always) return value;\n    return value.length > length ? `${value.slice(0, length).trim()}…` : value;\n  }\n}\n"],
+  "mappings": "yFAIA,IAAaA,GAAY,IAAA,CAAnB,MAAOA,CAAY,CADzBC,aAAA,CAEmB,KAAAC,kBAAoBC,EAAOC,CAAiB,EAE7DC,UAAUC,EAAkCC,EAAS,GAAIC,EAAkB,GAAK,CAC9E,OAAKF,EACD,CAAC,KAAKJ,kBAAkBO,gBAAe,GAAM,CAACD,EAAeF,EAC1DA,EAAMC,OAASA,EAAS,GAAGD,EAAMI,MAAM,EAAGH,CAAM,EAAEI,KAAI,CAAE,SAAML,EAFlDA,GAAS,EAG9B,iDAPWN,EAAY,CAAA,gDAAZA,EAAYY,KAAA,EAAA,CAAA,CAAA,SAAZZ,CAAY,GAAA",
+  "names": ["TruncatePipe", "constructor", "breakpointService", "inject", "BreakpointService", "transform", "value", "length", "always", "isMobileOrBelow", "slice", "trim", "pure"]
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_single-module/label-card/label-card.component.scss"],
+  "sourcesContent": [".label-card {\n  background: var(--label-card-bg);\n  border: 1px solid var(--label-card-border);\n  border-radius: 5px;\n  padding: 10px 12px;\n  display: flex;\n  flex-direction: column;\n  gap: 3px;\n}\n\n.label-card-icon {\n  font-size: 0.65rem;\n  color: var(--label-card-icon-color);\n  opacity: 0.8;\n  margin-bottom: 2px;\n  display: flex;\n  align-items: center;\n}\n\n.label-card-label {\n  font-size: 0.68rem;\n  color: var(--label-card-label-color);\n  line-height: 1;\n}\n\n.label-card-value {\n  font-size: 0.82rem;\n  font-weight: 500;\n  line-height: 1.3;\n\n  &:not(a) {\n    color: var(--label-card-value-color);\n  }\n}\n"],
+  "mappings": "AAAA,CAAA,WACE,WAAA,IAAA,iBACA,OAAA,IAAA,MAAA,IAAA,qBAFF,cAGE,IAHF,QAIE,KAAA,KACA,QAAA,KACA,eAAA,OACA,IAAA,IAGF,CAAA,gBACE,UAAA,OACA,MAAA,IAAA,yBACA,QAAA,GACA,cAAA,IACA,QAAA,KACA,YAAA,OAGF,CAAA,iBACE,UAAA,OACA,MAAA,IAAA,0BACA,YAAA,EAGF,CAAA,iBACE,UAAA,OACA,YAAA,IACA,YAAA,IAEA,CALF,gBAKE,KAAA,GACE,MAAA,IAAA",
+  "names": []
+}

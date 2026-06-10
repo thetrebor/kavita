@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/settings/_components/setting-switch/setting-switch.component.scss"],
+  "sourcesContent": [".text-muted {\n  font-size: 0.875rem;\n}\n\n\n"],
+  "mappings": "AAAA,CAAA,WACE,UAAA",
+  "names": []
+}

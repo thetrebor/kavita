@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_pipes/pdf-scroll-mode.pipe.ts"],
+  "sourcesContent": ["import { Pipe, PipeTransform } from '@angular/core';\nimport {translate} from \"@jsverse/transloco\";\nimport {PdfScrollMode} from \"../_models/preferences/pdf-scroll-mode\";\n\n@Pipe({\n  name: 'pdfScrollMode',\n  standalone: true\n})\nexport class PdfScrollModePipe implements PipeTransform {\n\n  transform(value: PdfScrollMode): string {\n    const v = parseInt(value + '', 10) as PdfScrollMode;\n    switch (v) {\n      case PdfScrollMode.Wrapped: return translate('preferences.pdf-multiple');\n      case PdfScrollMode.Page: return translate('preferences.pdf-page');\n      case PdfScrollMode.Horizontal: return translate('preferences.pdf-horizontal');\n      case PdfScrollMode.Vertical: return translate('preferences.pdf-vertical');\n    }\n  }\n\n}\n"],
+  "mappings": "qJAQA,IAAaA,GAAiB,IAAA,CAAxB,MAAOA,CAAiB,CAE5BC,UAAUC,EAAoB,CAE5B,OADUC,SAASD,EAAQ,GAAI,EAAE,EACxB,CACP,KAAKE,EAAcC,QAAS,OAAOC,EAAU,0BAA0B,EACvE,KAAKF,EAAcG,KAAM,OAAOD,EAAU,sBAAsB,EAChE,KAAKF,EAAcI,WAAY,OAAOF,EAAU,4BAA4B,EAC5E,KAAKF,EAAcK,SAAU,OAAOH,EAAU,0BAA0B,CAC1E,CACF,iDAVWN,EAAiB,CAAA,qDAAjBA,EAAiBU,KAAA,EAAA,CAAA,CAAA,SAAjBV,CAAiB,GAAA",
+  "names": ["PdfScrollModePipe", "transform", "value", "parseInt", "PdfScrollMode", "Wrapped", "translate", "Page", "Horizontal", "Vertical", "pure"]
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/_single-module/kavitaplus-timeline/kavitaplus-timeline.component.scss"],
+  "sourcesContent": ["\n.timeline-group {\n  position: relative;\n\n  &::before {\n    content: '';\n    position: absolute;\n    left: calc(1rem - 1px);\n    top: 0;\n    bottom: 0;\n    width: 2px;\n    background: var(--hr-color);\n    z-index: 0;\n  }\n}\n\n.spine-node {\n  width: 2rem;\n  z-index: 1;\n}\n\n.day-dot {\n  width: 0.5rem;\n  height: 0.5rem;\n  border-radius: 50%;\n  background: var(--hr-color);\n}\n\n.spine-icon {\n  width: 1.75rem;\n  height: 1.75rem;\n  border-radius: 50%;\n  font-size: 0.8rem;\n}\n\n.day-label {\n  font-size: 0.7rem;\n  font-weight: 600;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  color: var(--body-text-color);\n}\n\n.count {\n  font-size: 0.9rem;\n}\n\n.divider {\n  flex: 1 1 0%;\n  height: 0.0625rem;\n  background: var(--hr-color);\n}\n"],
+  "mappings": "AACA,CAAA,eACE,SAAA,SAEA,CAHF,cAGE,QACE,QAAA,GACA,SAAA,SACA,KAAA,KAAA,KAAA,EAAA,KACA,IAAA,EACA,OAAA,EACA,MAAA,IACA,WAAA,IAAA,YACA,QAAA,EAIJ,CAAA,WACE,MAAA,KACA,QAAA,EAGF,CAAA,QACE,MAAA,MACA,OAAA,MAtBF,cAuBE,IACA,WAAA,IAAA,YAGF,CAAA,WACE,MAAA,QACA,OAAA,QA7BF,cA8BE,IACA,UAAA,MAGF,CAAA,UACE,UAAA,MACA,YAAA,IACA,eAAA,MACA,eAAA,UACA,MAAA,IAAA,mBAGF,CAAA,MACE,UAAA,MAGF,CAAA,QACE,KAAA,EAAA,EAAA,GACA,OAAA,SACA,WAAA,IAAA",
+  "names": []
+}
