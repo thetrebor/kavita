@@ -2,9 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaplusTimelineComponent} from "../../../_single-module/kavitaplus-timeline/kavitaplus-timeline.component";
-import {
-  KavitaPlusAuditEntryComponent
-} from "../kavitaplus-audit-entry/kavita-plus-audit-entry.component";
+import {KavitaPlusAuditEntryComponent} from "../kavitaplus-audit-entry/kavita-plus-audit-entry.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {AuditStatusTitlePipe} from "../../../_pipes/audit-status-title.pipe";
 import {AuditSubjectTitlePipe} from "../../../_pipes/audit-subject-title.pipe";
@@ -19,6 +17,9 @@ import {Pagination} from "../../../_models/pagination";
 import {KavitaPlusAuditCategory} from "../../../_models/kavitaplus/kavita-plus-audit-category.enum";
 import {KavitaPlusAuditFilter} from "../../../_models/kavitaplus/kavita-plus-audit-filter";
 import {SearchInputComponent} from "../../../shared/_components/search-input/search-input.component";
+import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
+import {ScrobblingService} from "../../../_services/scrobbling.service";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-manage-kavitaplus-activity',
@@ -30,6 +31,8 @@ import {SearchInputComponent} from "../../../shared/_components/search-input/sea
     AuditStatusTitlePipe,
     AuditSubjectTitlePipe,
     SearchInputComponent,
+    TimeDifferencePipe,
+    UtcToLocalTimePipe,
   ],
   templateUrl: './manage-kavitaplus-activity.component.html',
   styleUrl: './manage-kavitaplus-activity.component.scss',
@@ -39,6 +42,7 @@ export class ManageKavitaplusActivityComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly memberService = inject(MemberService);
+  private readonly scrobblingService = inject(ScrobblingService);
   private readonly PAGE_SIZE = 50;
 
   stats = signal<KavitaPlusAuditStats | null>(null);
@@ -57,6 +61,8 @@ export class ManageKavitaplusActivityComponent implements OnInit {
   currentPage = signal(0);
   pagination = signal<Pagination | null>(null);
 
+  nextScrobble = signal<string | null>(null);
+
   matchedPercent = computed(() => {
     const s = this.stats();
     if (!s || s.totalEligibleSeriesCount === 0) return 0;
@@ -71,6 +77,10 @@ export class ManageKavitaplusActivityComponent implements OnInit {
   ngOnInit() {
     this.loadStats();
     this.loadEntries();
+
+    this.scrobblingService.getNextScrobble().subscribe(res => {
+      this.nextScrobble.set(res)
+    });
 
     this.memberService.getMembers(false).subscribe(members => {
       this.members.set(members);

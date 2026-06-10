@@ -1510,7 +1510,8 @@
         "filter-timeframe-24h": "Last 24 Hours",
         "filter-timeframe-7d": "Last 7 Days",
         "filter-timeframe-30d": "Last 30 Days",
-        "system": "System"
+        "system": "System",
+        "next-scrobble": "Next Scrobble: {{date}}"
     },
 
     "kavitaplus-diff": {

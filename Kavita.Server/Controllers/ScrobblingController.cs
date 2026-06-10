@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TaskScheduler = Kavita.Services.TaskScheduler;
 
 namespace Kavita.Server.Controllers;
 
@@ -375,5 +376,16 @@ public class ScrobblingController(
 
         // Locate the Scrobble event or replay the event
         return Ok(await scrobblingService.RetryScrobbleAsync(UserId, dto, HttpContext.RequestAborted));
+    }
+
+    /// <summary>
+    /// Returns when Scrobbling upload will next execute
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("next-scrobble-time")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public ActionResult<DateTime?> GetNextScrobbleTime()
+    {
+        return Ok(TaskScheduler.GetNextRun(TaskSchedulerConstants.ProcessScrobblingEventsId));
     }
 }
