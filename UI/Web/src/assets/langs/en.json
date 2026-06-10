@@ -1452,7 +1452,7 @@
         "kavitaplus-audit-alt": "Kavita+ Activity"
     },
 
-    "kavitaplus-audit": {
+    "kavitaplus-tooltip": {
         "panel-title": "Kavita+: Audit Log",
         "matched": "Matched",
         "unmatched": "Unmatched",

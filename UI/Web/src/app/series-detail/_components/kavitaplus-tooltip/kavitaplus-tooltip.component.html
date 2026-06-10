@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; prefix: 'kavitaplus-audit'">
+<ng-container *transloco="let t; prefix: 'kavitaplus-tooltip'">
   <div class="kplus-panel d-flex flex-column p-3" [class.pt-1]="!activeOffcanvas">
 
     <!-- Header (tooltip mode only) -->
@@ -24,24 +24,18 @@
         @if (info.isMatched) {
 
           @if (info.mangaBakaId) {
-            <a class="d-inline-flex align-items-center" href="https://mangabaka.org/{{info.mangaBakaId}}" target="_blank" rel="noopener noreferrer">
-              <app-scrobble-provider-image [provider]="ScrobbleProvider.MangaBaka" [size]="32" /> {{ScrobbleProvider.MangaBaka | scrobbleProviderName}}
-            </a>
+            <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="info.mangaBakaId" />
           } @else if (info.hardcoverId) {
-            <a class="d-inline-flex align-items-center" href="https://hardcover.app/id/series/{{info.hardcoverId}}" target="_blank" rel="noopener noreferrer">
-              <app-scrobble-provider-image [provider]="ScrobbleProvider.Hardcover" [size]="32" /> {{ScrobbleProvider.Hardcover | scrobbleProviderName}}
-            </a>
+            <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="info.hardcoverId" />
           } @else if (info.cbrId) {
             <app-scrobble-provider-image [provider]="ScrobbleProvider.Cbr" [size]="32" /> {{ScrobbleProvider.Cbr | scrobbleProviderName}}
           } @else if (info.aniListId) {
-            <a class="d-inline-flex align-items-center" href="https://anilist.co/manga/{{info.aniListId}}" target="_blank" rel="noopener noreferrer">
-              <app-scrobble-provider-image [provider]="ScrobbleProvider.AniList" [size]="32" /> {{ScrobbleProvider.AniList | scrobbleProviderName}}
-            </a>
+            <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="info.aniListId" />
           }
 
 
           @if (info.lastRefreshedUtc != NULL_DATE) {
-            <span>{{t('refreshed')}} {{info.lastRefreshedUtc | utcToLocalDate | timeAgo}}</span>
+            <span>{{t('refreshed')}} {{info.lastRefreshedUtc | utcToLocalDate | timeDifference}}</span>
             <span class="dot-separator mx-1"></span>
             <span>{{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime:'shortDate'}}</span>
           }
@@ -90,7 +84,7 @@
               }
 
             </div>
-            <span class="kplus-event-time flex-shrink-0 text-muted text-nowrap">{{event.createdUtc | utcToLocalDate | timeAgo}}</span>
+            <span class="kplus-event-time flex-shrink-0 text-muted text-nowrap">{{event.createdUtc | utcToLocalDate | timeDifference}}</span>
           </div>
         } @empty {
           <div class="text-center text-muted py-3 small">{{t('no-events')}}</div>

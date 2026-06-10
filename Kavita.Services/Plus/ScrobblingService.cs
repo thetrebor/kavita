@@ -89,8 +89,7 @@ public class ScrobbleSyncContext
     public RateGate GetRateGate(ScrobbleEvent evt) => GetRateGate(evt.AppUserId, evt.ScrobbleProvider);
 
     /// <summary>
-    /// Minimum spacing between ANY two K+ requests, regardless of provider/scope. Stops a sync that
-    /// fans out across many providers/users (each with its own ready-to-fire gate) from bursting the K+ proxy.
+    /// Minimum spacing between ANY two K+ requests, regardless of provider/scope
     /// </summary>
     public static readonly TimeSpan GlobalRequestFloor = TimeSpan.FromMilliseconds(250);
 
@@ -151,13 +150,12 @@ public class ScrobbleSyncContext
     {
         private DateTime _nextAllowedUtc = DateTime.MinValue;
         private int _rateLeft;
-        private bool _seeded;
 
         /// <summary>
         /// True once the initial budget has been fetched from K+. Lets server-scoped gates shared
         /// between users avoid duplicate lookups.
         /// </summary>
-        public bool IsSeeded => _seeded;
+        public bool IsSeeded { get; private set; }
 
         /// <summary>
         /// Whether there is any budget left to attempt a request
@@ -179,7 +177,7 @@ public class ScrobbleSyncContext
         public void Seed(int rateLeft)
         {
             _rateLeft = rateLeft;
-            _seeded = true;
+            IsSeeded = true;
         }
 
         /// <summary>
@@ -212,8 +210,6 @@ public class ScrobblingService : IScrobblingService
     public const string MalWeblinkWebsite = ScrobblingHelper.MalWeblinkWebsite;
     public const string MalStaffWebsite = ScrobblingHelper.MalStaffWebsite;
     public const string MalCharacterWebsite = ScrobblingHelper.MalCharacterWebsite;
-    public const string GoogleBooksWeblinkWebsite = ScrobblingHelper.GoogleBooksWeblinkWebsite;
-    public const string MangaDexWeblinkWebsite = ScrobblingHelper.MangaDexWeblinkWebsite;
     public const string AniListStaffWebsite = ScrobblingHelper.AniListStaffWebsite;
     public const string AniListCharacterWebsite = ScrobblingHelper.AniListCharacterWebsite;
     public const string HardcoverStaffWebsite = ScrobblingHelper.HardcoverStaffWebsite;
@@ -289,7 +285,6 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     /// <param name="ct"></param>
     /// <remarks>This service can validate without license check as the task which calls will be guarded</remarks>
-    /// <returns></returns>
     public async Task CheckExternalAccessTokens(CancellationToken ct = default)
     {
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
@@ -414,7 +409,8 @@ public class ScrobblingService : IScrobblingService
         };
     }
 
-    private List<ScrobbleProvider> GetProvidersForScrobbleEvent(List<ScrobbleProvider>? scrobbleProviders, ScrobbleEventType eventType, ScrobbleUpdateContext ctx)
+    private List<ScrobbleProvider> GetProvidersForScrobbleEvent(List<ScrobbleProvider>? scrobbleProviders,
+        ScrobbleEventType eventType, ScrobbleUpdateContext ctx)
     {
         return GetProvidersForScrobbleEvent(scrobbleProviders, eventType, ctx.User, ctx.Series);
     }
